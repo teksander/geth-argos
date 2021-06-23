@@ -5,7 +5,7 @@ experimentFolder = os.environ["EXPERIMENTFOLDER"]
 sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder)
 import time
-
+import rpyc
 #####################################################
 
 # Some parameters
@@ -26,15 +26,20 @@ estimate = 0
 totalWhite = 0
 totalBlack = 0
 
-global votetimer, updatetimer
+global votetimer, updatetimer, startflag
+startflag = True
 updatetimer = time.time()
 votetimer = time.time()
 
-def init():
-    global ticketPrice, rw, gs, myKey, w3, robotID
-
+def initw3():
+    global  w3, myKey, robotID, ticketPrice
     #####################################################
     ## TEMPORARY SOLUTION: Read ID from File and delete
+    # #####################################################
+    # ## ERROR METHOD: import w3 multiple times; 
+    # ## Ask ilpincy about argos interpreter/subinterpreters
+    # from console import init_web3, registerSC
+    # w3 = init_web3(ip)
     IDfile = open("ids.txt", "r")
     IDs = IDfile.readlines()
     IDfile.close()
@@ -60,14 +65,7 @@ def init():
 
     print(robotID, ip)
 
-    # #####################################################
-    # ## ERROR METHOD: import w3 multiple times; 
-    # ## Ask ilpincy about argos interpreter/subinterpreters
-    # from console import init_web3, registerSC
-    # w3 = init_web3(ip)
-
     ## CURRENT SOLUTION: connect to a w3 wrapper hosted via rpyc
-    import rpyc
     conn = rpyc.connect("localhost", 4000)
     w3 = conn.root
 
@@ -75,20 +73,26 @@ def init():
     print(w3.getBalance(robotID-1))
     print(w3.getKey(robotID-1))
     print(w3.isMining(robotID-1))
-
     w3.minerStart(robotID-1)
     w3.transact(robotID-1, 'registerRobot')
     ticketPrice = w3.call(robotID-1, 'getTicketPrice')
     print(ticketPrice)
     myKey = w3.getKey(robotID-1)
 
+def init():
+    global rw, gs
+
     rw=RandomWalk(robot_speed)
     gs=GroundSensor()
 
 def controlstep():
-    global  votetimer, updatetimer
+    global  votetimer, updatetimer, startflag
     global  rw, gs, w3, myKey, robotID
     
+    if startflag:
+        initw3()
+        startflag = False
+
     rw.walking()
     gs.sensing()
     Estimate()
@@ -99,8 +103,8 @@ def controlstep():
         try:
             vote = int(estimate*1e7)
             ticketPriceWei = w3.toWei(robotID-1, ticketPrice)
-            votehash = w3.transact2(robotID-1, 'sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
-            print(votehash)
+            w3.transact2(robotID-1, 'sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
+            # print(votehash)
         except ValueError:
             print("Vote Failed. No Balance: ", w3.getBalance(robotID-1))
         except:

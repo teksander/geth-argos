@@ -4,7 +4,7 @@
 source experiment_config.sh
 
 # EXPERIMENT PARAMETERS
-NUMROBOTS=10
+NUMROBOTS=20
 REPETITIONS=1
 VISUALIZATION=visualization # visualization or none
 ARENASIZEDIM="1.0"
@@ -83,9 +83,6 @@ gnome-terminal --tab -- python3 controllers/web3wrapper.py
 # Global blockchain (comment out for local sync)
 ./addPeers-all.sh
 
-
-
-
 # # Start experiment
-# argos3 -c $ARGOSOUTFILE
+# argos3 -c $ARGOSFILE
 # bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS

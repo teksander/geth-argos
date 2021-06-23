@@ -6,8 +6,8 @@ export EXPERIMENTFOLDER="$MAINFOLDER/FloorEstimation"
 
 BLOCKCHAINPATH="$HOME/eth_data_para/data"
 CONTAINERNAMEBASE="ethereum_eth."
-ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation.argosx"
-ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation.argos"
+ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
+ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
 
 GENESISFILE="${DOCKERFOLDER}/geth/files/genesis_poa.json"
 SCTEMPLATE="${DOCKERFOLDER}/geth/shared/experiment_volker.sol" # <- this is the smart contract you want to use
