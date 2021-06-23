@@ -5,7 +5,7 @@ source experiment_config.sh
 
 
 # EXPERIMENT PARAMETERS
-NUMROBOTS=30
+NUMROBOTS=10
 REPETITIONS=1
 VISUALIZATION=visualization # visualization or none
 ARENASIZEDIM="1.0"
@@ -19,7 +19,7 @@ sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|ARGOSFOLDER|$ARGOSFOLDER|g"\
   $ARGOSTEMPLATE > $ARGOSFILE
   
-Generate the genesis block; first: read in compiled smart contract
+# Generate the genesis block; first: read in compiled smart contract
 # BINDATA=`cat ${DOCKERFOLDER}/geth/shared/contract_files/Estimation.bin-runtime`
 echo "Compiling the Smart Contract"
 echo "+-----------------------------------------------------------+"

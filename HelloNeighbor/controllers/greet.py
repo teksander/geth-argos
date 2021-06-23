@@ -10,47 +10,6 @@ import time
 import rpyc
 
 #####################################################
-## TEMPORARY SOLUTION: Read ID from File and delete
-IDfile = open("ids.txt", "r")
-IDs = IDfile.readlines()
-IDfile.close()
-IDfile = open("ids.txt", "w")
-robotID = int(IDs[0].strip())
-del IDs[0]
-if IDs:
-    for ID in IDs:
-        IDfile.write(ID)
-else:
-    for i in range(1, robotID+1):
-        IDfile.write('%s\n' % i)
-IDfile.close()
-
-## Desired way to get ID (implement in py wrapper) 
-# robotId = robot.get_id()
-
-namePrefix = 'ethereum_eth.'+str(robotID)
-containersFile = open('identifiers.txt', 'r')
-for line in containersFile.readlines():
-    if line.__contains__(namePrefix):
-        ip = line.split()[-1]
-
-print(robotID, ip)
-
-# #####################################################
-# ## ERROR METHOD: import w3 multiple times; 
-# from console import init_web3, registerSC
-# w3 = init_web3(ip)
-
-## CURRENT SOLUTION: connect to a w3 wrapper hosted via rpyc
-conn = rpyc.connect("localhost", 4000)
-w3 = conn.root
-
-# Do stuff over rpyc
-print(w3.getBalance(robotID-1))
-print(w3.getKey(robotID-1))
-print(w3.isMining(robotID-1))
-
-#####################################################
 
 # Some parameters
 isbyz = False
@@ -73,7 +32,48 @@ greeted = False
 actual_greets = 0
 
 def init():
-    global key, sc, ticketPrice, balance, rw, gs
+    global key, sc, ticketPrice, balance, rw, gs, w3, robotID
+    #####################################################
+    ## TEMPORARY SOLUTION: Read ID from File and delete
+    IDfile = open("ids.txt", "r")
+    IDs = IDfile.readlines()
+    IDfile.close()
+    IDfile = open("ids.txt", "w")
+    robotID = int(IDs[0].strip())
+    del IDs[0]
+    if IDs:
+        for ID in IDs:
+            IDfile.write(ID)
+    else:
+        for i in range(1, robotID+1):
+            IDfile.write('%s\n' % i)
+    IDfile.close()
+
+    ## Desired way to get ID (implement in py wrapper) 
+    # robotId = robot.get_id()
+
+    namePrefix = 'ethereum_eth.'+str(robotID)
+    containersFile = open('identifiers.txt', 'r')
+    for line in containersFile.readlines():
+        if line.__contains__(namePrefix):
+            ip = line.split()[-1]
+
+    print(robotID, ip)
+
+    # #####################################################
+    # ## ERROR METHOD: import w3 multiple times; 
+    # from console import init_web3, registerSC
+    # w3 = init_web3(ip)
+
+    ## CURRENT SOLUTION: connect to a w3 wrapper hosted via rpyc
+    conn = rpyc.connect("localhost", 4000)
+    w3 = conn.root
+
+    # Do stuff over rpyc
+    print(w3.getBalance(robotID-1))
+    print(w3.getKey(robotID-1))
+    print(w3.isMining(robotID-1))
+
 
     w3.minerStart(robotID-1)
     w3.transact(robotID-1, 'setGreeting')
@@ -83,11 +83,11 @@ def init():
     gs=GroundSensor()
     # robot.epuck_range_and_bearing.set_data([0,0,0,0])
 
-#####################################################
+    #####################################################
 
 def controlstep():
     global  greetTimer, greeted, actual_greets
-    global  rw, gs
+    global  rw, gs, w3
 
     robot.epuck_leds.set_all_colors("black")
 
@@ -304,6 +304,5 @@ def reset():
     robot.logprint("reset")
 
 def destroy():
-    w3.minerStop(robotID-1)
     robot.logprint("destroy")
 

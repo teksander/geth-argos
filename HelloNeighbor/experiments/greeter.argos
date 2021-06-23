@@ -37,7 +37,7 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <!-- <arena size="1, 1, 1" center="0,0,0.5">
+  <arena size="1, 1, 1" center="0,0,0.5">
  <floor id="f" source="image" path="/home/eksander/Desktop/argos-geth-python/HelloNeighbor/experiments/1.png" />
     <box id="wall_north" size="1.1,0.1,0.1" movable="false">
       <body position="0,0.5,0" orientation="0,0,0" />
@@ -55,7 +55,7 @@
     <distribute>
       <position method="uniform" min="-0.4,-0.4,0" max="0.4,0.4,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="30" max_trials="100"> 
+      <entity quantity="10" max_trials="100"> 
         <e-puck id="fb" 
                   rab_range = "1">
           <controller config="python" />
@@ -63,8 +63,9 @@
       </entity> 
     </distribute> 
 
-  </arena> -->
-
+  </arena>
+  
+<!-- 
   <arena size="1.9, 1.9, 1" center="0,0,0.5">
  <floor id="f" source="image" path="/home/eksander/Desktop/argos-geth-python/HelloNeighbor/experiments/1.png" />
     <box id="wall_north" size="2,0.1,0.1" movable="false">
@@ -81,9 +82,9 @@
     </box>
 
     <distribute>
-      <position method="uniform" min="-0.4,-0.4,0" max="0.4,0.4,0" /> 
+      <position method="uniform" min="-0.95,-0.95,0" max="0.95,0.95,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="30" max_trials="100"> 
+      <entity quantity="10" max_trials="100"> 
         <e-puck id="fb" 
                   rab_range = "1">
           <controller config="python" />
@@ -92,7 +93,7 @@
     </distribute> 
 
   </arena>
-
+ -->
   <!-- ******************* -->
   <!-- * Physics engines * -->
   <!-- ******************* -->

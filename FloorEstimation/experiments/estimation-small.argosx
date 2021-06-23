@@ -5,7 +5,7 @@
   <!-- * General configuration * -->
   <!-- ************************* -->
   <framework>
-    <experiment threads="0" length="0" ticks_per_second="10" random_seed="5" />
+    <experiment length="0" ticks_per_second="10" random_seed="5" />
   </framework>
 
   <!-- *************** -->
@@ -29,7 +29,7 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="EXPERIMENTFOLDER/controllers/greet.py" />
+      <params script="EXPERIMENTFOLDER/controllers/estimate.py" />
     </python_controller>
 
   </controllers>
@@ -37,23 +37,23 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="1, 1, 1" center="0,0,0.5">
- <floor id="f" source="image" path="EXPERIMENTFOLDER/experiments/1.png" />
-    <box id="wall_north" size="1.1,0.1,0.1" movable="false">
-      <body position="0,0.5,0" orientation="0,0,0" />
+  <arena size="1.55, 1.55, 1" center="0,0,0.5">
+ <floor id="f" source="image" path="/home/eksander/Desktop/argos-geth-python/FloorEstimation/experiments/22.png" />
+    <box id="wall_north" size="1.55,0.1,0.1" movable="false">
+      <body position="0,0.8,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="1.1,0.1,0.1" movable="false">
-      <body position="0,-0.5,0" orientation="0,0,0" />
+    <box id="wall_south" size="1.55,0.1,0.1" movable="false">
+      <body position="0,-0.8,0" orientation="0,0,0" />
     </box>
-    <box id="wall_east" size="0.1,1,0.1" movable="false">
-      <body position="0.5,0,0" orientation="0,0,0" />
+    <box id="wall_east" size="0.1,1.55,0.1" movable="false">
+      <body position="0.8,0,0" orientation="0,0,0" />
     </box>
-    <box id="wall_west" size="0.1,1,0.1" movable="false">
-      <body position="-0.5,0,0" orientation="0,0,0" />
+    <box id="wall_west" size="0.1,1.55,0.1" movable="false">
+      <body position="-0.8,0,0" orientation="0,0,0" />
     </box>
 
     <distribute>
-      <position method="uniform" min="-0.4,-0.4,0" max="0.4,0.4,0" /> 
+      <position method="uniform" min="-0.55,-0.55,0" max="0.55,0.55,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
       <entity quantity="NUMROBOTS" max_trials="100"> 
         <e-puck id="fb" 
@@ -63,34 +63,6 @@
       </entity> 
     </distribute> 
 
-  </arena>
-<!-- 
-  <arena size="1.9, 1.9, 1" center="0,0,0.5">
- <floor id="f" source="image" path="EXPERIMENTFOLDER/experiments/1.png" />
-    <box id="wall_north" size="2,0.1,0.1" movable="false">
-      <body position="0,0.95,0" orientation="0,0,0" />
-    </box>
-    <box id="wall_south" size="2,0.1,0.1" movable="false">
-      <body position="0,-0.95,0" orientation="0,0,0" />
-    </box>
-    <box id="wall_east" size="0.1,1.9,0.1" movable="false">
-      <body position="0.95,0,0" orientation="0,0,0" />
-    </box>
-    <box id="wall_west" size="0.1,1.9,0.1" movable="false">
-      <body position="-0.95,0,0" orientation="0,0,0" />
-    </box>
-
-    <distribute>
-      <position method="uniform" min="-0.95,-0.95,0" max="0.95,0.95,0" /> 
-      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="NUMROBOTS" max_trials="100"> 
-        <e-puck id="fb" 
-                  rab_range = "1">
-          <controller config="python" />
-        </e-puck>
-      </entity> 
-    </distribute> 
- -->
   </arena>
 
   <!-- ******************* -->
