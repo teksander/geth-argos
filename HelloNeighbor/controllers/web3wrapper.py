@@ -86,43 +86,43 @@ class W3_Wrapper_Service(rpyc.Service):
     #     print(self._conn)
 
     def exposed_getKey(self, myID):
-        return w3if.getKey(myID)
+        return w3if.getKey(myID-1)
 
     def exposed_getBalance(self, myID):
-        return w3if.getBalance(myID)
+        return w3if.getBalance(myID-1)
 
     def exposed_blockNumber(self, myID):
-        return w3if.blockNumber(myID)
+        return w3if.blockNumber(myID-1)
 
     def exposed_minerStart(self, myID):
-        return w3if.minerStart(myID)
+        return w3if.minerStart(myID-1)
 
     def exposed_minerStop(self, myID):
-        return w3if.minerStop(myID)
+        return w3if.minerStop(myID-1)
 
     def exposed_isMining(self, myID):
-        return w3if.isMining(myID)
+        return w3if.isMining(myID-1)
 
     def exposed_addPeer(self, myID, enode):
-        return w3if.addPeer(myID, enode)
+        return w3if.addPeer(myID-1, enode)
 
     def exposed_removePeer(self, myID, enode):
-        return w3if.removePeer(myID, enode)
+        return w3if.removePeer(myID-1, enode)
 
     def exposed_transact(self, myID, function):
-        return scif.transact(myID, function)
+        return scif.transact(myID-1, function)
 
     def exposed_transact1(self, myID, function, arg1):
-        return scif.transact1(myID, function, arg1)
+        return scif.transact1(myID-1, function, arg1)
 
     def exposed_transact2(self, myID, function, arg1, arg2):
-        return scif.transact2(myID, function, arg1, arg2)
+        return scif.transact2(myID-1, function, arg1, arg2)
 
     def exposed_call(self, myID, function):
-        return scif.call(myID, function)
+        return scif.call(myID-1, function)
 
     def exposed_blockFilter(self, myID):
-        return ftif.blockFilter(myID)
+        return ftif.blockFilter(myID-1)
 
 # Start the RPYC server
 server = ThreadedServer(W3_Wrapper_Service, port = 4000)

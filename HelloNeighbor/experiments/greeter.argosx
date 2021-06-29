@@ -19,7 +19,7 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-        <epuck_range_and_bearing implementation="medium" />
+        <epuck_range_and_bearing implementation="medium" range="0.1" />
       </actuators>
       <sensors>
         <epuck_proximity implementation="default" show_rays="true" />
@@ -90,9 +90,9 @@
         </e-puck>
       </entity> 
     </distribute> 
- -->
-  </arena>
 
+  </arena>
+ -->
   <!-- ******************* -->
   <!-- * Physics engines * -->
   <!-- ******************* -->

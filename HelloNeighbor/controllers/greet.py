@@ -7,12 +7,13 @@ sys.path.insert(1, experimentFolder)
 import json
 import time
 import rpyc
+import copy
 
 #####################################################
 
 # Some parameters
 isbyz = False
-robot_speed = 20
+robot_speed = 15
 
 
 # Some estimation variables
@@ -27,15 +28,13 @@ greetTimer = time.time()
 
 global number_robot_sensed, greeted, actual_greets
 number_robot_sensed = 0
-greeted = False
+greeted = set()
 actual_greets = 0
 
 def init():
-    global key, sc, ticketPrice, balance, rw, gs, w3, robotID
+    global key, sc, ticketPrice, balance, rw, gs, erb, w3, robotID
     # ## Desired way to get ID (implement in py wrapper) 
-    robotId = robot.id
-
-    print("my id is", int(robotId.get_id()[2:]))
+    robotID = int(robot.id.get_id()[2:])+1
 
     namePrefix = 'ethereum_eth.'+str(robotID)
     containersFile = open('identifiers.txt', 'r')
@@ -45,78 +44,82 @@ def init():
 
     # print(robotID, ip)
 
-    #####################################################
-    ## ERROR METHOD: import w3 multiple times; 
-    from console import init_web3, registerSC
-    w3 = init_web3(ip)
+    # #####################################################
+    # ## ERROR METHOD: import w3 multiple times; 
+    # from console import init_web3, registerSC
+    # w3 = init_web3(ip)
 
     ## CURRENT SOLUTION: connect to a w3 wrapper hosted via rpyc
     conn = rpyc.connect("localhost", 4000)
     w3 = conn.root
 
     # Do stuff over rpyc
-    print(w3.getBalance(robotID-1))
-    print(w3.getKey(robotID-1))
-    print(w3.isMining(robotID-1))
+    print(w3.getBalance(robotID))
+    print(w3.getKey(robotID))
+    print(w3.isMining(robotID))
 
+    w3.minerStart(robotID)
+    w3.transact(robotID, 'setGreeting')
+    w3.call(robotID, 'greetingCount')
 
-    w3.minerStart(robotID-1)
-    w3.transact(robotID-1, 'setGreeting')
-    w3.call(robotID-1, 'greetingCount')
-    
+    #####################################################
+
     rw=RandomWalk(robot_speed)
     gs=GroundSensor()
-    robot.epuck_range_and_bearing.set_data([7,1,2,3])
+    erb=ERANDB()
 
     #####################################################
 
 def controlstep():
     global  greetTimer, greeted, actual_greets
-    global  rw, gs, w3
-
-    robot.epuck_leds.set_all_colors("black")
+    global  rw, gs, erb, w3
 
     rw.walking()
     gs.sensing()
+    erb.listening()
 
-    Estimate()
+    peers = Buffer()
 
-    process_rab()
-    print(number_robot_sensed)
+    if peers: 
+        robot.epuck_leds.set_all_colors("red")
+    else:
+        robot.epuck_leds.set_all_colors("black")
 
-    if any(rw.getIr()) and not greeted:
-        greeted = True
-        # print("Hello from robot", robotID)
-        Greet() 
-    if not any(rw.getIr()):
-        greeted = False
+    for peer in peers:
+        if peer not in greeted:
+            Greet(peer)  
+            greeted.add(peer)
 
-    # print('test')
-    newBlocks = w3.blockFilter(robotID-1)
+    temp = copy.copy(greeted)
+    for peer in temp:
+        if peer not in peers:
+            greeted.remove(peer)
+
+    newBlocks = w3.blockFilter(robotID)
     if newBlocks:
         # greetTimer = time.time()
-        bn = w3.blockNumber(robotID-1)
-        bal = w3.getBalance(robotID-1)
-        greets = w3.call(robotID-1, 'greetingCount')
-        if robotID ==1:
+        bn = w3.blockNumber(robotID)
+        bal = w3.getBalance(robotID)
+        greets = w3.call(robotID, 'greetingCount')
+        if robotID == 1:
             print('ID; #Block; Balance; #Greets; #MyGreets')
             print(robotID, bn, bal, greets, actual_greets)
 
-def Greet():
+def Greet(neighbor):
     global actual_greets
     try:
-        w3.transact(robotID-1, 'greet')
+        w3.transact(robotID, 'greet')
         robot.epuck_leds.set_all_colors("red")
         actual_greets += 1
+        print("Hello Neighbor", neighbor)
     except ValueError:
         print("Greet Failed. No Balance: ", getBalance())
     except:
         print("Greet Failed. Unknown") 
 
-def process_rab():
-    global number_robot_sensed 
-    for reading_i in robot.epuck_range_and_bearing.get_readings():
-        print(reading_i)
+def Buffer():
+    return erb.getNew()
+
 
 def Estimate():
     """ Control routine to update the local estimate of the robot """
@@ -135,6 +138,47 @@ def Estimate():
     else:
         estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
 
+class ERANDB(object):
+    """ Set up erandb transmitter on a background thread
+    The __listen() method will be started and it will run in the background
+    until the application exits.
+    """
+    def __init__(self, dist = 200, tFreq = 0):
+        """ Constructor
+        :type dist: int
+        :param dist: E-randb communication range (0=1meter; 255=0m)
+        :type freq: int
+        :param freq: E-randb transmit frequency (tip: 0 = no transmission; 4 = 4 per second)
+        """
+
+         # This robot ID
+        self.id = robotID
+        self.newIds = set()
+        self.tData = self.id
+        self.setData()
+
+    def listening(self):
+        """ This method runs in the background until program is closed """
+
+        # /* Get a new peer ID */
+        for reading in robot.epuck_range_and_bearing.get_readings():
+            newId=reading[0]
+
+            if newId != self.id: 
+                self.newIds.add(newId)
+
+    def setData(self, tData = None):
+
+        if tData:
+            self.tData = int(tData)
+
+        robot.epuck_range_and_bearing.set_data([self.tData,0,0,0])
+
+    def getNew(self):
+
+        temp = self.newIds
+        self.newIds = set()
+        return temp
 
 class GroundSensor(object):
     """ Set up a ground-sensor data acquisition loop on a background thread
@@ -243,7 +287,7 @@ class RandomWalk(object):
                 
         # Find Wheel Speed for Obstacle Avoidance
         for i, reading in enumerate(self.ir):
-            if(reading > 0.2 ):
+            if(reading != 0 ):
                 left  = self.MAX_SPEED/2 + self.weights_left[i] * reading
                 right = self.MAX_SPEED/2 + self.weights_right[i] * reading
                 # robot.epuck_leds.set_all_colors("red")                
