@@ -13,44 +13,36 @@
 
 #include <argos3/core/control_interface/ci_controller.h>
 
-#include "py_actusensor_wrapper_generic.h"
-#include "py_actusensor_wrapper_footbot.h"
 #include "py_actusensor_wrapper_epuck.h"
+#include "py_actusensor_wrapper_footbot.h"
+#include "py_actusensor_wrapper_generic.h"
 
 #include <argos3/core/utility/logging/argos_log.h>
 #include <argos3/core/utility/math/general.h>
 
-#include <string>
-// #include <stdin>
 #include <iostream>
+#include <string>
 
-namespace argos
-{
+namespace argos {
 
-// class CPyController2 : public CCI_Controller { 
-
-// public:
-
-//   CPyController2();
-// };
-
-class ActusensorsWrapper
-{
+class ActusensorsWrapper {
   public:
     ActusensorsWrapper();
     ~ActusensorsWrapper(){};
 
-    static void Logprint(const std::string str_message);
+    static void Logprint(const std::string& str_message);
 
-    //Sensors
-    void CreateSensor(const std::string str_name, CCI_Sensor *pc_sensor, TConfigurationNode &t_node);
+    void SetId(const std::string id);
 
-    //Actuators
-    void CreateActu(const std::string str_name, CCI_Actuator *pc_actu, TConfigurationNode &t_node);
+    // Sensors
+    void CreateSensor(const std::string str_name, CCI_Sensor* pc_sensor,
+                      TConfigurationNode& t_node);
+
+    // Actuators
+    void CreateActu(const std::string str_name, CCI_Actuator* pc_actu, TConfigurationNode& t_node);
 
     // Wrapper for the CColor class.
-    class CColorWrapper
-    {
+    class CColorWrapper {
       public:
         argos::CColor m_cColor;
         // Create a color by providing its name.
@@ -67,10 +59,12 @@ class ActusensorsWrapper
 
     // Generic actusensors
     CWheelsWrapper m_cWheelsWrapper;
-    COmnidirectionalCameraWrapper m_cOmnidirectionalCameraWrapper; 
+    CIdWrapper m_cIdWrapper;
+
+    COmnidirectionalCameraWrapper m_cOmnidirectionalCameraWrapper;
     CLedsActuatorWrapper m_cLedsWrapper;
     CRangeAndBearingWrapper m_cRangeAndBearingWrapper;
-    
+
     // Footbot Actusensors
     CGripperWrapper m_cGripperWrapper;
     CFootBotProximitySensorWrapper m_cProximitySensorWrapper;
@@ -86,38 +80,36 @@ class ActusensorsWrapper
     CEPuckGroundSensorWrapper m_cEPuckGroundSensorWrapper;
     CEPuckRangeAndBearingWrapper m_cEPuckRangeAndBearingWrapper;
     CEPuckLedsActuatorWrapper m_cEPuckLedsWrapper;
-    
 
     /****************************************/
     /****************************************/
 
     // Define functions to access the elements the argos::CByteArray class.
     // Original source: https://mail.python.org/pipermail/cplusplus-sig/2003-June/004024.html
-    static void CByteArraySetItem(argos::CByteArray &c_vec, const UInt32 un_index, const UInt8 un_value);
+    static void CByteArraySetItem(argos::CByteArray& c_vec, const UInt32 un_index,
+                                  const UInt8 un_value);
 
-    static UInt8 CByteArrayGetItem(const argos::CByteArray &c_vec, const UInt32 un_index);
-
-    static std::string returnID();
+    static UInt8 CByteArrayGetItem(const argos::CByteArray& c_vec, const UInt32 un_index);
 
     // Define getter for the EPuck ground sensor readings.
-    static Real EPuckGroundReadingsGetItem(const argos::CCI_EPuckGroundSensor::SReadings &c_readings, const UInt32 un_index);
+    static Real
+    EPuckGroundReadingsGetItem(const argos::CCI_EPuckGroundSensor::SReadings& c_readings,
+                               const UInt32 un_index);
+
     /****************************************/
     /****************************************/
 
     // Used to convert vectors to python lists.
     // Original source: http://www.boost.org/doc/libs/1_62_0/libs/python/pyste/doc/wrappers.html
-    template <class T>
-    static boost::python::list ToPythonList(std::vector<T> c_vec)
-    {
+    template <class T> static boost::python::list ToPythonList(std::vector<T> c_vec) {
         typename std::vector<T>::iterator iter;
         boost::python::list list;
-        for (iter = c_vec.begin(); iter != c_vec.end(); ++iter)
-        {
+        for (iter = c_vec.begin(); iter != c_vec.end(); ++iter) {
             list.append(*iter);
         }
         return list;
     }
 };
-}
+} // namespace argos
 
 #endif

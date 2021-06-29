@@ -5,7 +5,7 @@ experimentFolder = os.environ["EXPERIMENTFOLDER"]
 sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder)
 import time
-import rpyc
+# import rpyc
 #####################################################
 
 # Some parameters
@@ -32,117 +32,105 @@ updatetimer = time.time()
 votetimer = time.time()
 
 def initw3():
-    global  w3, myKey, robotID, ticketPrice
-    #####################################################
-    ## TEMPORARY SOLUTION: Read ID from File and delete
-    # #####################################################
-    # ## ERROR METHOD: import w3 multiple times; 
-    # ## Ask ilpincy about argos interpreter/subinterpreters
-    # from console import init_web3, registerSC
-    # w3 = init_web3(ip)
-    IDfile = open("ids.txt", "r")
-    IDs = IDfile.readlines()
-    IDfile.close()
-    IDfile = open("ids.txt", "w")
-    robotID = int(IDs[0].strip())
-    del IDs[0]
-    if IDs:
-        for ID in IDs:
-            IDfile.write(ID)
-    else:
-        for i in range(1, robotID+1):
-            IDfile.write('%s\n' % i)
-    IDfile.close()
+    global  w3, myKey, robotId, ticketPrice
 
-    ## Desired way to get ID (implement in py wrapper) 
-    # robotId = robot.get_id()
+    robotId = int(robot.id.get_id()[2:])+1
 
-    namePrefix = 'ethereum_eth.'+str(robotID)
-    containersFile = open('identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            ip = line.split()[-1]
+    print("my id is", robotId)
 
-    print(robotID, ip)
+    # namePrefix = 'ethereum_eth.'+str(robotID)
+    # containersFile = open('identifiers.txt', 'r')
+    # for line in containersFile.readlines():
+    #     if line.__contains__(namePrefix):
+    #         ip = line.split()[-1]
 
-    ## CURRENT SOLUTION: connect to a w3 wrapper hosted via rpyc
-    conn = rpyc.connect("localhost", 4000)
-    w3 = conn.root
 
-    # Do stuff over rpyc
-    print(w3.getBalance(robotID-1))
-    print(w3.getKey(robotID-1))
-    print(w3.isMining(robotID-1))
-    w3.minerStart(robotID-1)
-    w3.transact(robotID-1, 'registerRobot')
-    ticketPrice = w3.call(robotID-1, 'getTicketPrice')
-    print(ticketPrice)
-    myKey = w3.getKey(robotID-1)
+    # ## Connect to a w3 wrapper hosted via rpyc
+    # conn = rpyc.connect("localhost", 4000)
+    # w3 = conn.root
+
+    # # Do stuff over rpyc
+    # print(w3.getBalance(robotID-1))
+    # print(w3.getKey(robotID-1))
+    # print(w3.isMining(robotID-1))
+    # w3.minerStart(robotID-1)
+    # w3.transact(robotID-1, 'registerRobot')
+    # ticketPrice = 40
+    # myKey = w3.getKey(robotID-1)
 
 def init():
-    global rw, gs
+    global rw, gs, erb
+
+    initw3()
 
     rw=RandomWalk(robot_speed)
     gs=GroundSensor()
+    erb=ERANDB()
 
 def controlstep():
     global  votetimer, updatetimer, startflag
     global  rw, gs, w3, myKey, robotID
     
-    if startflag:
-        initw3()
-        startflag = False
+
 
     rw.walking()
     gs.sensing()
+    erb.listening()
+
+    Buffer()
     Estimate()
 
 
-    if time.time()-votetimer > 30:
-        votetimer = time.time()
-        try:
-            vote = int(estimate*1e7)
-            ticketPriceWei = w3.toWei(robotID-1, ticketPrice)
-            w3.transact2(robotID-1, 'sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
-            # print(votehash)
-        except ValueError:
-            print("Vote Failed. No Balance: ", w3.getBalance(robotID-1))
-        except:
-            print("Vote Failed. Unknown") 
+    # if time.time()-votetimer > 30:
+    #     votetimer = time.time()
+    #     try:
+    #         vote = int(estimate*1e7)
+    #         ticketPriceWei = w3.toWei(robotID-1, ticketPrice)
+    #         w3.transact2(robotID-1, 'sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
+    #         # print(votehash)
+    #     except ValueError:
+    #         print("Vote Failed. No Balance: ", w3.getBalance(robotID-1))
+    #     except:
+    #         print("Vote Failed. Unknown") 
 
-        if robotID == 1:
-        # print("Voted Successfully. Estimate: ", round(estimate,2))
-            nrobs = w3.call(robotID-1, 'robotCount')
-            mean = w3.call(robotID-1, 'getMean')*1e-7
-            bn = w3.blockNumber(robotID-1)
-            bal = w3.getBalance(robotID-1)
-            votecount = w3.call(robotID-1,'getVoteCount') 
-            voteOkcount = w3.call(robotID-1,'getVoteOkCount') 
-            print('#Rob; Mean; #Block; Balance #Votes, #OkVotes')
-            print(nrobs, mean, bn, bal, votecount,voteOkcount)
+    #     if robotID == 1:
+    #     # print("Voted Successfully. Estimate: ", round(estimate,2))
+    #         nrobs = w3.call(robotID-1, 'robotCount')
+    #         mean = w3.call(robotID-1, 'getMean')*1e-7
+    #         bn = w3.blockNumber(robotID-1)
+    #         bal = w3.getBalance(robotID-1)
+    #         votecount = w3.call(robotID-1,'getVoteCount') 
+    #         voteOkcount = w3.call(robotID-1,'getVoteOkCount') 
+    #         print('#Rob; Mean; #Block; Balance #Votes, #OkVotes')
+    #         print(nrobs, mean, bn, bal, votecount,voteOkcount)
 
-    if time.time()-updatetimer > 15:
-        updatetimer = time.time()
+    # if time.time()-updatetimer > 15:
+    #     updatetimer = time.time()
 
-        consensus = w3.call(robotID-1, 'isConverged')
-        newRound = w3.call(robotID-1, 'isNewRound')
-        ubi = w3.call(robotID-1, 'askForUBI')
-        payout = w3.call(robotID-1, 'askForPayout')
+    #     consensus = w3.call(robotID-1, 'isConverged')
+    #     newRound = w3.call(robotID-1, 'isNewRound')
+    #     ubi = w3.call(robotID-1, 'askForUBI')
+    #     payout = w3.call(robotID-1, 'askForPayout')
         
-        w3.transact1(robotID-1, 'updateMean', {"gas":gasLimit})
+    #     w3.transact1(robotID-1, 'updateMean', {"gas":gasLimit})
 
-        if ubi != 0:
-            w3.transact1(robotID-1, 'askForUBI', {"gas":gasLimit})
-            # print("Asked for UBI") 
+    #     if ubi != 0:
+    #         w3.transact1(robotID-1, 'askForUBI', {"gas":gasLimit})
+    #         # print("Asked for UBI") 
 
-        if payout != 0:
-            w3.transact1(robotID-1, 'askForPayout', {"gas":gasLimit})
-            # print("Asked for Payout") 
+    #     if payout != 0:
+    #         w3.transact1(robotID-1, 'askForPayout', {"gas":gasLimit})
+    #         # print("Asked for Payout") 
 
-        if consensus:
-            print('CONSENSUS IS REACHED')
-            robot.epuck_leds.set_all_colors("red")
+    #     if consensus:
+    #         print('CONSENSUS IS REACHED')
+            # robot.epuck_leds.set_all_colors("red")
 
+
+def Buffer():
+    peers = erb.getNew()
+    if peers:
+        print(peers)
 
 def Estimate():
     """ Control routine to update the local estimate of the robot """
@@ -215,6 +203,52 @@ class GroundSensor(object):
         """ This method returns the instant ground value """
 
         return self.groundValues;
+
+
+
+class ERANDB(object):
+    """ Set up erandb transmitter on a background thread
+    The __listen() method will be started and it will run in the background
+    until the application exits.
+    """
+    def __init__(self, dist = 200, tFreq = 0):
+        """ Constructor
+        :type dist: int
+        :param dist: E-randb communication range (0=1meter; 255=0m)
+        :type freq: int
+        :param freq: E-randb transmit frequency (tip: 0 = no transmission; 4 = 4 per second)
+        """
+
+         # This robot ID
+        self.id = robotId
+        self.newIds = set()
+        self.tData = self.id
+        self.setData()
+
+    def listening(self):
+        """ This method runs in the background until program is closed """
+
+        # /* Get a new peer ID */
+        for reading in robot.epuck_range_and_bearing.get_readings():
+            newId=reading[0]
+
+            if newId != self.id: 
+                self.newIds.add(newId)
+
+
+
+    def setData(self, tData = None):
+
+        if tData:
+            self.tData = int(tData)
+
+        robot.epuck_range_and_bearing.set_data([self.tData,0,0,0])
+
+    def getNew(self):
+
+        temp = self.newIds
+        self.newIds = set()
+        return temp
 
 
 class RandomWalk(object):

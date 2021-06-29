@@ -6,7 +6,6 @@ sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder)
 import json
 import time
-import time
 import rpyc
 
 #####################################################
@@ -33,24 +32,10 @@ actual_greets = 0
 
 def init():
     global key, sc, ticketPrice, balance, rw, gs, w3, robotID
-    #####################################################
-    ## TEMPORARY SOLUTION: Read ID from File and delete
-    IDfile = open("ids.txt", "r")
-    IDs = IDfile.readlines()
-    IDfile.close()
-    IDfile = open("ids.txt", "w")
-    robotID = int(IDs[0].strip())
-    del IDs[0]
-    if IDs:
-        for ID in IDs:
-            IDfile.write(ID)
-    else:
-        for i in range(1, robotID+1):
-            IDfile.write('%s\n' % i)
-    IDfile.close()
+    # ## Desired way to get ID (implement in py wrapper) 
+    robotId = robot.id
 
-    ## Desired way to get ID (implement in py wrapper) 
-    # robotId = robot.get_id()
+    print("my id is", int(robotId.get_id()[2:]))
 
     namePrefix = 'ethereum_eth.'+str(robotID)
     containersFile = open('identifiers.txt', 'r')
@@ -58,12 +43,12 @@ def init():
         if line.__contains__(namePrefix):
             ip = line.split()[-1]
 
-    print(robotID, ip)
+    # print(robotID, ip)
 
-    # #####################################################
-    # ## ERROR METHOD: import w3 multiple times; 
-    # from console import init_web3, registerSC
-    # w3 = init_web3(ip)
+    #####################################################
+    ## ERROR METHOD: import w3 multiple times; 
+    from console import init_web3, registerSC
+    w3 = init_web3(ip)
 
     ## CURRENT SOLUTION: connect to a w3 wrapper hosted via rpyc
     conn = rpyc.connect("localhost", 4000)
@@ -81,7 +66,7 @@ def init():
     
     rw=RandomWalk(robot_speed)
     gs=GroundSensor()
-    # robot.epuck_range_and_bearing.set_data([0,0,0,0])
+    robot.epuck_range_and_bearing.set_data([7,1,2,3])
 
     #####################################################
 
@@ -97,7 +82,7 @@ def controlstep():
     Estimate()
 
     process_rab()
-    # print(number_robot_sensed)
+    print(number_robot_sensed)
 
     if any(rw.getIr()) and not greeted:
         greeted = True
@@ -131,9 +116,7 @@ def Greet():
 def process_rab():
     global number_robot_sensed 
     for reading_i in robot.epuck_range_and_bearing.get_readings():
-        print(reading_i.data[1])
-        if int(reading_i.data[1]) == 1:
-            number_robot_sensed += 1
+        print(reading_i)
 
 def Estimate():
     """ Control routine to update the local estimate of the robot """

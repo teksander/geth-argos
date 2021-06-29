@@ -26,6 +26,8 @@ CMakeFiles/py_controller_interface.dir/py_controller.cpp.o: ../py_controller.cpp
 CMakeFiles/py_controller_interface.dir/py_controller.cpp.o: ../py_controller.h
 CMakeFiles/py_controller_interface.dir/py_controller.cpp.o: ../py_wrapper.h
 
+CMakeFiles/py_controller_interface.dir/py_controller_interface_autogen/mocs_compilation.cpp.o: py_controller_interface_autogen/mocs_compilation.cpp
+
 CMakeFiles/py_controller_interface.dir/py_wrapper.cpp.o: ../py_actusensor_wrapper_epuck.h
 CMakeFiles/py_controller_interface.dir/py_wrapper.cpp.o: ../py_actusensor_wrapper_footbot.h
 CMakeFiles/py_controller_interface.dir/py_wrapper.cpp.o: ../py_actusensor_wrapper_generic.h

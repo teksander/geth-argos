@@ -1,4 +1,4 @@
-# Install script for directory: /home/eksander/Desktop/argos-geth-python/argos-python
+# Install script for directory: /home/eksander/geth-argos/argos-python
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/eksander/Desktop/argos-geth-python/argos-python/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/eksander/geth-argos/argos-python/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
