@@ -52,6 +52,6 @@ elif [[ $# -eq 1 ]]; then
     elif [[ $1 == "python" ]]; then
 	tmux kill-session -t docker_containers >/dev/null 2>&1
 	tmux_ALL
-	tmux send-keys -t docker_containers "python3 -i /root/python_files/console_robot.py HelloNeighbor.abi" Enter
+	tmux send-keys -t docker_containers "python3 -i /root/python_scripts/console_robot.py HelloNeighbor.abi" Enter
     fi
 fi
