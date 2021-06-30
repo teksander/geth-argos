@@ -7,7 +7,7 @@ sys.path.insert(1, experimentFolder)
 import time
 import rpyc
 import copy
-import aux
+from aux import TCP_server
 
 #####################################################
 
@@ -38,8 +38,8 @@ updatetimer = time.time()
 votetimer = time.time()
 
 
-
-#### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST? OR IS THAT DUMB...
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
+#### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST?
 def identifersExtract(robotID, query = 'IP'):
     namePrefix = 'ethereum_eth.'+str(robotID)
     containersFile = open('identifiers.txt', 'r')
@@ -57,6 +57,8 @@ def enodesExtract(robotID, query = 'IP'):
         if line.__contains__(namePrefix):
                 temp = line.split()[-1]
                 return temp[1:-1]
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
+
 
 def initw3():
     global  w3, myKey, robotID, ticketPrice
@@ -76,9 +78,10 @@ def initw3():
     w3.transact(robotID, 'registerRobot')
     ticketPrice = 40
     myKey = w3.getKey(robotID)
+   
 
 def init():
-    global rw, gs, erb
+    global rw, gs, erb, tcp
 
     initw3()
 
@@ -86,6 +89,10 @@ def init():
     rw=RandomWalk(robot_speed)
     gs=GroundSensor()
     erb=ERANDB()
+
+    # # Right way to get enodes
+    # myEnode = enodesExtract(robotID, query = 'ENODE')
+    # tcp = TCP_server(myEnode, 'localhost' , 40421, True)
 
 def controlstep():
     global  votetimer, updatetimer, startflag
