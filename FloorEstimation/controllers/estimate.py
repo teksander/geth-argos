@@ -106,7 +106,8 @@ def controlstep():
     Buffer()
 
     gethPeers = w3.getPeers(robotID)
-        
+    if gethPeers:
+        print(gethPeers[0]['enode'])
 
     # if time.time()-votetimer > 30:
     #     votetimer = time.time()

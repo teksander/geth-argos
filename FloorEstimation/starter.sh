@@ -85,6 +85,7 @@ gnome-terminal --tab -- python3 controllers/web3wrapper.py
 # # Global blockchain (comment out for local sync)
 # ./addPeers-all.sh
 
-# Start experiment
-argos3 -c $ARGOSFILE
-# bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
+# sleep 10
+# # Start experiment
+# argos3 -c $ARGOSFILE
+# # bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
