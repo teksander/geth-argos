@@ -1,4 +1,4 @@
-# geth-argos=======================================
+============ geth-argos ===============
 ==                                   ==
 == ARGoS Blockchain Python Interface ==
 ==                                   ==
