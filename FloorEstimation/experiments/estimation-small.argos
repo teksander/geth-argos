@@ -19,12 +19,12 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-        <epuck_range_and_bearing implementation="medium" range = "0.1" />
+        <epuck_range_and_bearing implementation="medium" range="0.15"/>
       </actuators>
       <sensors>
-        <epuck_proximity implementation="default" show_rays="true" />
+        <epuck_proximity implementation="default"  />
         <epuck_ground implementation="rot_z_only" />
-        <epuck_range_and_bearing implementation="medium" medium="rab" />
+        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
       </sensors>
       <!-- No required configuration -->
       

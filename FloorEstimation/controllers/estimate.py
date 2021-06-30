@@ -7,6 +7,7 @@ sys.path.insert(1, experimentFolder)
 import time
 import rpyc
 import copy
+import aux
 
 #####################################################
 
