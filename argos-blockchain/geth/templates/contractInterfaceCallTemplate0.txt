@@ -1,1 +1,0 @@
-var cC = web3.eth.contract(ABI);var c = cC.at("ADDRESS");console.log(c.FUNC.call({value: VALUE, from: eth.coinbase, gas: '0x17D7840', gasPrice: '1'}));

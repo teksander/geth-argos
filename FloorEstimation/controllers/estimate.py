@@ -5,7 +5,9 @@ experimentFolder = os.environ["EXPERIMENTFOLDER"]
 sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder)
 import time
-# import rpyc
+import rpyc
+import copy
+
 #####################################################
 
 # Some parameters
@@ -26,43 +28,60 @@ estimate = 0
 totalWhite = 0
 totalBlack = 0
 
+global peered
+peered = set()
+
 global votetimer, updatetimer, startflag
 startflag = True
 updatetimer = time.time()
 votetimer = time.time()
 
+
+
+#### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST? OR IS THAT DUMB...
+def identifersExtract(robotID, query = 'IP'):
+    namePrefix = 'ethereum_eth.'+str(robotID)
+    containersFile = open('identifiers.txt', 'r')
+    for line in containersFile.readlines():
+        if line.__contains__(namePrefix):
+            if query == 'IP':
+                return line.split()[-1]
+            if query == 'ENODE':
+                return line.split()[1]
+
+def enodesExtract(robotID, query = 'IP'):
+    namePrefix = str(robotID)
+    enodesFile = open('enodes.txt', 'r')
+    for line in enodesFile.readlines():
+        if line.__contains__(namePrefix):
+                temp = line.split()[-1]
+                return temp[1:-1]
+
 def initw3():
-    global  w3, myKey, robotId, ticketPrice
+    global  w3, myKey, robotID, ticketPrice
 
-    robotId = int(robot.id.get_id()[2:])+1
+    # Get ID from argos
+    robotID = int(robot.id.get_id()[2:])+1
 
-    print("my id is", robotId)
+    # Connect to the RPYC which hosts web3.py
+    conn = rpyc.connect("localhost", 4000)
+    w3 = conn.root
 
-    # namePrefix = 'ethereum_eth.'+str(robotID)
-    # containersFile = open('identifiers.txt', 'r')
-    # for line in containersFile.readlines():
-    #     if line.__contains__(namePrefix):
-    #         ip = line.split()[-1]
-
-
-    # ## Connect to a w3 wrapper hosted via rpyc
-    # conn = rpyc.connect("localhost", 4000)
-    # w3 = conn.root
-
-    # # Do stuff over rpyc
-    # print(w3.getBalance(robotID-1))
-    # print(w3.getKey(robotID-1))
-    # print(w3.isMining(robotID-1))
-    # w3.minerStart(robotID-1)
-    # w3.transact(robotID-1, 'registerRobot')
-    # ticketPrice = 40
-    # myKey = w3.getKey(robotID-1)
+    # Do stuff over RPYC
+    print(w3.getBalance(robotID))
+    print(w3.getKey(robotID))
+    print(w3.isMining(robotID))
+    
+    w3.transact(robotID, 'registerRobot')
+    ticketPrice = 40
+    myKey = w3.getKey(robotID)
 
 def init():
     global rw, gs, erb
 
     initw3()
 
+    w3.minerStart(robotID)
     rw=RandomWalk(robot_speed)
     gs=GroundSensor()
     erb=ERANDB()
@@ -71,15 +90,15 @@ def controlstep():
     global  votetimer, updatetimer, startflag
     global  rw, gs, w3, myKey, robotID
     
-
-
     rw.walking()
     gs.sensing()
     erb.listening()
 
-    Buffer()
     Estimate()
+    Buffer()
 
+    gethPeers = w3.getPeers(robotID)
+        
 
     # if time.time()-votetimer > 30:
     #     votetimer = time.time()
@@ -128,9 +147,28 @@ def controlstep():
 
 
 def Buffer():
+
     peers = erb.getNew()
-    if peers:
-        print(peers)
+
+    if peers: 
+        robot.epuck_leds.set_all_colors("red")
+    else:
+        robot.epuck_leds.set_all_colors("black")
+
+    for peer in peers:
+        if peer not in peered:
+            enode = enodesExtract(peer, query = 'ENODE')
+            w3.addPeer(robotID, enode)
+            peered.add(peer)
+            print('Added peer', peer)
+
+    temp = copy.copy(peered)
+    for peer in temp:
+        if peer not in peers:
+            enode = enodesExtract(peer, query = 'ENODE')
+            w3.removePeer(robotID, enode)
+            peered.remove(peer)
+            print('Removed peer', peer)
 
 def Estimate():
     """ Control routine to update the local estimate of the robot """
@@ -205,7 +243,6 @@ class GroundSensor(object):
         return self.groundValues;
 
 
-
 class ERANDB(object):
     """ Set up erandb transmitter on a background thread
     The __listen() method will be started and it will run in the background
@@ -220,7 +257,7 @@ class ERANDB(object):
         """
 
          # This robot ID
-        self.id = robotId
+        self.id = robotID
         self.newIds = set()
         self.tData = self.id
         self.setData()
@@ -234,8 +271,6 @@ class ERANDB(object):
 
             if newId != self.id: 
                 self.newIds.add(newId)
-
-
 
     def setData(self, tData = None):
 

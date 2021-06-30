@@ -40,6 +40,7 @@ contract Estimation {
       bool isRegistered;
       uint payout;
       uint lastUBI;
+      uint myVoteCounter;
     }
    
   mapping(address => robotInfo) public robot;
@@ -84,7 +85,7 @@ contract Estimation {
   function registerRobot() public {
 
     publicLength = blocksUBI.length;  
-    mean = 5000000;
+    //mean = 5000000;
     ticketPrice = 40;
 
     if (!robot[msg.sender].isRegistered) {
@@ -96,9 +97,7 @@ contract Estimation {
   }  
 
   function askForUBI() public returns (uint) {
-    if (!robot[msg.sender].isRegistered) {
-       return 0;
-    }
+    require(robot[msg.sender].isRegistered, "Robot must register first");
 
     uint16[10] memory myBlocksUBI = [0,2,4,8,16,32,64,128,256,512];
 
@@ -107,7 +106,7 @@ contract Estimation {
     uint myValueUBI = 20;
 
     for (uint i = 0; i < myBlocksUBI.length; i++) {
-      if (block.number-startBlock < myBlocksUBI[i]) {
+      if (block.number < myBlocksUBI[i]) {
  payoutUBI = (i - robot[msg.sender].lastUBI) * myValueUBI;
  robot[msg.sender].lastUBI = i;
  break;
@@ -116,15 +115,19 @@ contract Estimation {
 
     // Transfer the UBI
     if (payoutUBI > 0) {
-payable(msg.sender).transfer(payoutUBI * 1 ether);
+      payable(msg.sender).transfer(payoutUBI * 1 ether);
     }
     return payoutUBI;
   }
 
+
+
   function askForPayout() public returns (uint) {
-    if (!robot[msg.sender].isRegistered) {
-       return 0;
-    }
+    require(robot[msg.sender].isRegistered, "Robot must register first");
+
+    // if (!robot[msg.sender].isRegistered) {
+    //    return 0;
+    // }
 
     // Update the payout due
     uint payout = robot[msg.sender].payout;
@@ -137,36 +140,52 @@ payable(msg.sender).transfer(payoutUBI * 1 ether);
  
   function sendVote(int estimate) public payable {
 
-  uint myTicketPrice = 40;  
+  // uint myTicketPrice = 39;  
 
-    if (!robot[msg.sender].isRegistered || msg.value < myTicketPrice * 1 ether) {
-       revert();
-    }
+  //require(robot[msg.sender].isRegistered, "Robot must register first");
+
+  require(msg.value >= 39 ether, "Robot must pay the ticket price");
+
+  // uint myTicketPrice = 40;  
+  //   if (!robot[msg.sender].isRegistered || msg.value < myTicketPrice * 1 ether) {
+  //      revert();
+  //   }
    
+  //  if (msg.value > myTicketPrice * 1 ether) {
+       
     voteCount += 1;
 
-    round[roundCount].push(voteInfo(msg.sender, estimate));
+      round[roundCount].push(voteInfo(msg.sender, estimate));
    
-    if (round[roundCount].length == robotCount) {
-      roundCount += 1;
-      newRound = true;
+      if (round[roundCount].length == robotCount && robotCount > 4) {
+        roundCount += 1;
+        newRound = true;
     }
+
+    robot[msg.sender].myVoteCounter += 1;
+  //}
+    
   }
    
   function updateMean() public {  
-    if (!robot[msg.sender].isRegistered || lastUpdate >= roundCount) {
-       revert();
-    }
+
+    require(robot[msg.sender].isRegistered, "Robot must register first");
+
+    require(lastUpdate < roundCount, "Mean has been updated already");
+
+    // if (!robot[msg.sender].isRegistered || lastUpdate >= roundCount) {
+    //    revert();
+    // }
 
     int oldMean = mean;  
     uint r = lastUpdate;
-    int myThreshold = 2000000;
+    int myThreshold = 1000000;
 
     // Check for OK Votes
     for (uint i = 0; i < round[r].length ; i++) {
 
       int256 delta = round[r][i].vote - mean;
- 
+
       if (r == 0 || abs(delta) < myThreshold) {
         voteOkCount += 1;
 
@@ -182,7 +201,7 @@ payable(msg.sender).transfer(payoutUBI * 1 ether);
 
     // Compute payouts
     for (uint b = 0; b < robotsToPay.length; b++) {
-    robot[robotsToPay[b]].payout += ticketPrice * (round[r].length / robotsToPay.length);
+    robot[robotsToPay[b]].payout += ticketPrice * round[r].length / robotsToPay.length;
     }
 
     // Determine consensus
