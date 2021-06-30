@@ -1,7 +1,11 @@
 ============ geth-argos ===============
+
 ==                                   ==
+
 == ARGoS Blockchain Python Interface ==
+
 ==                                   ==
+
 =======================================
 
 AUTHOR: 
