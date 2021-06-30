@@ -32,42 +32,26 @@ tmux_ALL() {
 	fi
 
 	# Open the terminal and configure it 
-	gnome-terminal --geometry="$geom" -- tmux new-session docker exec -it "${ALL_CTS[0]}" /bin/bash ';' \
+	gnome-terminal --geometry="$geom" -- tmux new -s docker_containers docker exec -it "${ALL_CTS[0]}" /bin/bash ';' \
 	    "${split_list[@]}" \
 	    set-option -w synchronize-panes ';' \
 		select-layout tiled ';' 
 }
 
-if [[ $# -eq 0 ]]; then 
+if [[ $# -eq 0 ]]; then
+    tmux kill-session -t docker_containers >/dev/null 2>&1
+    tmux_ALL
+
+elif [[ $# -eq 1 ]]; then 
+
+    if [[ $1 == "geth" ]]; then
+	tmux kill-session -t docker_containers >/dev/null 2>&1
+ 	tmux_ALL
+	tmux send-keys -t docker_containers "bash geth_attach.sh" Enter
+	
+    elif [[ $1 == "python" ]]; then
+	tmux kill-session -t docker_containers >/dev/null 2>&1
 	tmux_ALL
+	tmux send-keys -t docker_containers "python3 -i /root/python_scripts/console_robot.py HelloNeighbor.abi" Enter
+    fi
 fi
-# elif [[ $# -eq 1 ]]; then 
-
-# 	if [[ $1 == "geth" ]]; then 
-# 		tmux_ALL
-# 		# Rename to GETH and setup Geth
-# 		tmux kill-session -t GETH >/dev/null 2>&1
-# 		tmux rename-session GETH
-# 		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth"
-
-# 	elif [[ $1 == "mainloop" ]]; then 
-# 		tmux_ALL
-# 		# Rename to MAINLOOP and setup mainloop
-# 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
-# 		tmux rename-session MAINLOOP
-# 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --nowalk"
-
-# 	else 
-# 		tmux_ALL
-# 		# Rename to GETH and setup Geth
-# 		tmux kill-session -t GETH >/dev/null 2>&1
-# 		tmux rename-session GETH
-# 		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth"
-		
-# 		tmux_ALL
-# 		# Rename to MAINLOOP and setup mainloop
-# 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
-# 		tmux rename-session MAINLOOP
-# 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --nowalk"
-# 	fi
-# fi

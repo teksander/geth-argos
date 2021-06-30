@@ -12,6 +12,7 @@ services:
     environment:
      - SLOT={{.Task.Slot}}
     volumes:
+      - ./geth/python_scripts/:/root/python_scripts/:rw
       - ./geth/files/password:/root/files/password:ro
       - ./geth/deployed_contract/:/root/deployed_contract/:ro
       - ./geth/shared:/root/shared/:ro

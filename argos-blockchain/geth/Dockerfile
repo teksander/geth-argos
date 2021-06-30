@@ -1,28 +1,22 @@
 # Build Geth in a stock Go builder container
-FROM golang:1.13-alpine as builder
+FROM ethereum/client-go:v1.10.2
+
 MAINTAINER Volker Strobel <volker.strobel87@gmail.com>			
 
-RUN apk add --no-cache make gcc musl-dev linux-headers git
-
-ADD ./custom-geth /go-ethereum
-RUN cd /go-ethereum && make geth
-
-# Pull Geth into a second stage deploy alpine container
-FROM alpine:latest
-
 RUN apk add --no-cache ca-certificates
-COPY --from=builder /go-ethereum/build/bin/geth /usr/local/bin/
 
 EXPOSE 8545 8546 8547 30303 30303/udp
 
 USER root
 WORKDIR /root/
 
-RUN apk add --no-cache --update git bash nodejs nodejs-npm perl python3 build-base
-RUN  npm config set unsafe-perm true && npm install -g npm@next && npm config set unsafe-perm false
+RUN apk add --no-cache --update git bash nodejs npm perl python3 python3-dev py3-pip build-base 
+RUN npm config set unsafe-perm true && npm install -g npm@next && npm config set unsafe-perm false
 RUN cd /root &&\
-    npm install solc@0.7.0 --unsafe &&\
-    npm install web3@1.3.0 --unsafe
+    npm install solc@0.8.5 &&\
+    npm install web3@1.3.4
+RUN pip3 install --upgrade pip
+RUN pip3 install web3 rpyc
 
 COPY ./scripts /root/
 COPY ./files/password /root/files/password
