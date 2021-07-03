@@ -1,40 +1,9 @@
 #!/usr/bin/env python3
-# This is the main control loop running in each argos robot
+# This is the main control loop running in each robot
 
 # /* Logging Levels for Console and File */
 #######################################################################
-loglevel = 30
-logtofile = False 
-
-# /* Experiment Parameters */
-#######################################################################
-tcpPort = 40421 
-erbDist = 185
-erbtFreq = 10
-gsFreq = 20
-rwSpeed = 500
-pcID = '100'
-
-estimateRate = 1
-voteRate = 45 
-bufferRate = 0.25
-eventRate = 1
-globalPeers = 0
-ageLimit = 2
-
-# /* Global Variables */
-#######################################################################
-global startFlag, isbyz
-startFlag = False
-isbyz = False
-
-global gasLimit, gasprice, gas
-gasLimit = 0x9000000
-gasprice = 0x900000
-gas = 0x90000
-
-global txList
-txList = []
+loglevel = 10
 
 # /* Import Packages */
 #######################################################################
@@ -48,7 +17,21 @@ import time
 import rpyc
 import copy
 import logging
-from aux import Logger, Peer
+# from aux import TCP_server
+
+#####################################################
+
+# Some parameters
+isbyz = False
+robot_speed = 10
+
+# Some required transaction appendices
+global gasLimit
+global gasprice
+global gas
+gasLimit = 0x9000000
+gasprice = 0x900000
+gas = 0x90000
 
 # Some experiment variables
 global estimate, totalWhite, totalBlack
@@ -85,9 +68,9 @@ def enodesExtract(robotID, query = 'IP'):
                 return temp[1:-1]
 #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-# Move this script to console and import it like in the robots
-def init_web3():
-    global ticketPrice
+
+def init_w3():
+    global  myKey, robotID, ticketPrice
 
     # Get ID from argos
     robotID = int(robot.id.get_id()[2:])+1
@@ -102,98 +85,37 @@ def init_web3():
     print(w3.isMining())
     
     ticketPrice = 40
+    myKey = w3.getKey()
     return w3
 
-#### #### #### #### #### #### #### #### #### #### #### #### #### 
-
 def init():
-    global me, w3, rw, gs, erb, tcp, mainlogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog
+    global w3, rw, gs, rb, tcp, mainlogger
 
-    robotID = str(int(robot.id.get_id()[2:])+1)
+    w3 = init_w3()
+    rw = RandomWalk(robot_speed)
+    gs = GroundSensor()
+    rb = ERANDB()
 
-    logFile = experimentFolder+'/logs/robot'+robotID+'.log'
+    w3.minerStart()
+    w3.transact('registerRobot')
+
+    logFile = experimentFolder+'/logs/robot'+str(robotID)+'.log'
     logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
-
-    # /* Initialize Logging Files and Console Logging*/
-    #######################################################################
-
-    # Experiment data logs (recorded to file)
-    header = ['ESTIMATE','W','B','S1','S2','S3']
-    estimatelog = Logger('logs/estimate.csv', header, 10, ID = robotID)
-    header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-    bufferlog = Logger('logs/buffer.csv', header, 2, ID = robotID)
-    header = ['VOTE']
-    votelog = Logger('logs/vote.csv', header, ID = robotID)
-    header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
-    blocklog = Logger('logs/block.csv', header, ID = robotID)
-    header = ['BLOCK', 'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
-    sclog = Logger('logs/sc.csv', header, ID = robotID)
-    header = ['#BLOCKS']
-    synclog = Logger('logs/sync.csv', header, ID = robotID)
-    header = ['CHAINDATASIZE', '%CPU']
-    extralog = Logger('logs/extra.csv', header, 5, ID = robotID)
-    header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
-    txlog = Logger('logs/tx.csv', header, ID = robotID)
-
-    # List of logmodules --> iterate .start() to start all; remove from list to ignore
-    logmodules = [bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog]
-
-    # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
     mainlogger = logging.getLogger('main')
-
-    # List of logmodules --> specify submodule loglevel if desired
     logging.getLogger('main').setLevel(loglevel)
 
-    # /* Initialize Sub-modules */
-    #######################################################################
-    # /* Init web3.py */
-    mainlogger.info('Initialising Python Geth Console...')
-    w3 = init_web3()
 
-    # /* Init an instance of peer for this Pi-Puck */
-    me = Peer(robotID, w3.getEnode(), w3.getKey())
+    # # Right way to get enodes
+    # myEnode = enodesExtract(robotID, query = 'ENODE')
+    # tcp = TCP_server(myEnode, 'localhost' , 40421, True)
 
-    # /* Init an instance of peer for the monitor PC */
-    pc = Peer(pcID)
-
-    # # /* Init an instance of the buffer for peers  */
-    # mainlogger.info('Initialising peer buffer...')
-    # pb = PeerBuffer(ageLimit)
-
-    # # /* Init TCP server, __hosting process and request function */
-    # mainlogger.info('Initialising TCP server...')
-    # tcp = TCP_server(me.enode, me.ip, tcpPort)
-
-    # /* Init E-RANDB __listening process and transmit function
-    mainlogger.info('Initialising RandB board...')
-    erb = ERANDB(erbDist, erbtFreq)
-
-    # /* Init Ground-Sensors, __mapping process and vote function */
-    mainlogger.info('Initialising ground-sensors...')
-    gs = GroundSensor(gsFreq)
-
-    # /* Init Random-Walk, __walking process */
-    mainlogger.info('Initialising random-walk...')
-    rw = RandomWalk(rwSpeed)
-
-    # # /* Init LEDs */
-    # rgb = RGBLEDs()
-
-    # List of submodules --> iterate .start() to start all
-    submodules = [erb, gs, rw]
-    
 def controlstep():
-    global  votetimer, updatetimer, consensus, startFlag
-
-    if not startFlag:
-        votelog.start()
-        w3.minerStart()
-        w3.transact('registerRobot')
-        startFlag = True
+    global  votetimer, updatetimer, consensus
+    global  rw, gs, w3, myKey, robotID
 
     rw.walking()
     gs.sensing()
-    erb.listening()
+    rb.listening()
 
     Estimate()
     Buffer()
@@ -203,8 +125,7 @@ def controlstep():
         try:
             vote = int(estimate*1e7)
             ticketPriceWei = w3.toWei(ticketPrice)
-            w3.transact2('sendVote', vote, {"from":me.key, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
-            votelog.log([vote])
+            w3.transact2('sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
         except ValueError:
             # mainlogger.info("Vote Failed. No Balance: %s", w3.getBalance())
             pass
@@ -258,7 +179,7 @@ def controlstep():
 
 def Buffer():
 
-    peers = erb.getNew()
+    peers = rb.getNew()
 
     if peers: 
         robot.epuck_leds.set_all_colors("red")
@@ -301,7 +222,7 @@ def reset():
     robot.logprint("reset")
 
 def destroy():
-	robot.logprint("destroy")
+    robot.logprint("destroy")
 
 
 class GroundSensor(object):
@@ -367,9 +288,10 @@ class ERANDB(object):
         """
 
          # This robot ID
-        self.id = str(int(robot.id.get_id()[2:])+1)
+        self.id = robotID
         self.newIds = set()
-        self.setData(self.id)
+        self.tData = self.id
+        self.setData()
 
     def listening(self):
         """ This method runs in the background until program is closed """
@@ -382,8 +304,10 @@ class ERANDB(object):
                 self.newIds.add(newId)
 
     def setData(self, tData = None):
+
         if tData:
             self.tData = int(tData)
+
         robot.epuck_range_and_bearing.set_data([self.tData,0,0,0])
 
     def getNew(self):
@@ -404,7 +328,7 @@ class RandomWalk(object):
         :type range: int
         :param enode: Random-Walk speed (tip: 500)
         """
-        self.MAX_SPEED = MAX_SPEED/50                          
+        self.MAX_SPEED = MAX_SPEED                          
         self.__stop = 1
         self.__walk = True
      

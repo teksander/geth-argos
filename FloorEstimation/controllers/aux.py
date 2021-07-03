@@ -314,15 +314,18 @@ class PeerBuffer(object):
 class Logger(object):
     """ Logging Class to Record Data to a File
     """
-    def __init__(self, logfile, header, rate = 0):
+    def __init__(self, logfile, header, rate = 0, ID = None):
 
-        self.file = open(logfile, 'w+')
+        self.file = open(logfile, 'w+', buffering = 1)
         self.rate = rate
         self.tStamp = 0
         self.tStart = 0
         pHeader = ' '.join([str(x) for x in header])
         self.file.write('{} {} {}\n'.format('ID', 'TIME', pHeader))
-        self.id = open("/boot/pi-puck_id", "r").read().strip()
+        if ID:
+            self.id = ID
+        else:
+            self.id = open("/boot/pi-puck_id", "r").read().strip()
 
     def log(self, data):
         """ Method to log row of data

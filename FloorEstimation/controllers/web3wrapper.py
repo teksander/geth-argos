@@ -45,6 +45,9 @@ class Web3_Wrapper(object):
     def getPeers(self):
         return self.w3.geth.admin.peers()
 
+    def getEnode(self):
+        return self.w3.geth.admin.nodeInfo().enode
+
     def toWei(self, value):
         return self.w3.toWei(value ,"ether")
 
@@ -101,6 +104,9 @@ class Web3_Wrapper_Service(rpyc.Service):
 
     def exposed_getPeers(self):
         return self.w3if.getPeers()
+
+    def exposed_getEnode(self):
+        return self.w3if.getEnode()
 
     def exposed_toWei(self, value):
         return self.w3if.toWei(value)

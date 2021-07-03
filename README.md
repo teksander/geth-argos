@@ -25,4 +25,6 @@ To-do-list:
 - Create "reset-geth.sh" which does not reinialize docker but rather reset geth folder and process in every container (if faster/more efficient)
 - Improve "stop_network.sh" since docker stop and docker rm is not working properly
 [DONE] open geth console with ./tmux-all for all docker containers
-- Link robot ID to availiable IP in docker ()
+- Link robot ID to docker IP (preferably 172.27.1.xxx where xxx is robotId)
+- Create logging files consistent with real robots
+- Figure out how to handle globals better. Have robot availiable in submodules ?
