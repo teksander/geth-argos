@@ -79,8 +79,8 @@ paste ids.txt temp3.txt > enodes.txt
 rm temp1.txt temp2.txt temp3.txt ids.txt 
 
 wait
-# Start w3
-gnome-terminal --tab -- python3 controllers/web3wrapper.py
+# Start w3 servers
+gnome-terminal --tab -- python3 -i controllers/web3wrapper.py
 
 # # Global blockchain (comment out for local sync)
 # ./addPeers-all.sh

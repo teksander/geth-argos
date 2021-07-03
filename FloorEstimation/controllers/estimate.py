@@ -16,8 +16,8 @@ sys.path.insert(1, experimentFolder)
 import time
 import rpyc
 import copy
-# from aux import TCP_server
 import logging
+# from aux import TCP_server
 
 #####################################################
 
@@ -70,37 +70,37 @@ def enodesExtract(robotID, query = 'IP'):
 #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
 
-def initw3():
+def init_w3():
     global  w3, myKey, robotID, ticketPrice
 
     # Get ID from argos
     robotID = int(robot.id.get_id()[2:])+1
 
-    # Connect to the RPYC which hosts web3.py
-    conn = rpyc.connect("localhost", 4000)
+    # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
+    conn = rpyc.connect("localhost", 4000+int(robotID))
     w3 = conn.root
 
     # Do stuff over RPYC
-    print(w3.getBalance(robotID))
-    print(w3.getKey(robotID))
-    print(w3.isMining(robotID))
+    print(w3.getBalance())
+    print(w3.getKey())
+    print(w3.isMining())
     
-    w3.transact(robotID, 'registerRobot')
+    w3.transact('registerRobot')
     ticketPrice = 40
-    myKey = w3.getKey(robotID)
-   
+    myKey = w3.getKey()
+    return w3
 
 def init():
     global rw, gs, erb, tcp, mainlogger
 
-    initw3()
+    init_w3()
 
     logFile = experimentFolder+'/logs/robot'+str(robotID)+'.log'
     logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
     mainlogger = logging.getLogger('main')
     logging.getLogger('main').setLevel(loglevel)
 
-    w3.minerStart(robotID)
+    w3.minerStart()
     rw=RandomWalk(robot_speed)
     gs=GroundSensor()
     erb=ERANDB()
@@ -124,10 +124,10 @@ def controlstep():
         votetimer = time.time()
         try:
             vote = int(estimate*1e7)
-            ticketPriceWei = w3.toWei(robotID, ticketPrice)
-            w3.transact2(robotID, 'sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
+            ticketPriceWei = w3.toWei(ticketPrice)
+            w3.transact2('sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
         except ValueError:
-            mainlogger.info("Vote Failed. No Balance: %s", w3.getBalance(robotID))
+            mainlogger.info("Vote Failed. No Balance: %s", w3.getBalance())
         except:
             mainlogger.info("Vote Failed. Unknown") 
 
@@ -135,35 +135,36 @@ def controlstep():
         updatetimer = time.time()
 
         try:
-            consensus = w3.call(robotID, 'isConverged')
-            newRound = w3.call(robotID, 'isNewRound')
-            ubi = w3.call(robotID, 'askForUBI')
-            payout = w3.call(robotID, 'askForPayout')
+            consensus = w3.call('isConverged')
+            newRound = w3.call('isNewRound')
+            ubi = w3.call('askForUBI')
+            payout = w3.call('askForPayout')
+
         except Exception as e:
             print(e)
         else:
             if newRound:
-                w3.transact1(robotID, 'updateMean', {"gas":gasLimit})
+                w3.transact1('updateMean', {"gas":gasLimit})
 
             if ubi:
-                w3.transact1(robotID, 'askForUBI', {"gas":gasLimit})
+                w3.transact1('askForUBI', {"gas":gasLimit})
 
             if payout:
-                w3.transact1(robotID, 'askForPayout', {"gas":gasLimit})
+                w3.transact1('askForPayout', {"gas":gasLimit})
 
             if consensus:
                 print('CONSENSUS IS REACHED')
                 robot.epuck_leds.set_all_colors("red")
 
-    newBlocks = w3.blockFilter(robotID)
+    newBlocks = w3.blockFilter()
     if newBlocks:
-        nrobs = w3.call(robotID, 'robotCount')
-        mean = w3.call(robotID, 'getMean')*1e-7
-        bn = w3.blockNumber(robotID)
-        bal = w3.getBalance(robotID)
-        votecount = w3.call(robotID,'getVoteCount') 
-        voteOkcount = w3.call(robotID,'getVoteOkCount') 
-        nPeers = gethPeers = len(w3.getPeers(robotID))
+        nrobs = w3.call('robotCount')
+        mean = w3.call('getMean')*1e-7
+        bn = w3.blockNumber()
+        bal = w3.getBalance()
+        votecount = w3.call('getVoteCount') 
+        voteOkcount = w3.call('getVoteOkCount') 
+        nPeers = gethPeers = len(w3.getPeers())
         mainlogger.info('%s %s %s %s %s %s %s', nrobs, mean, bn, bal, votecount, voteOkcount, nPeers)
 
         if robotID == 1:
@@ -182,7 +183,7 @@ def Buffer():
     for peer in peers:
         if peer not in peered:
             enode = enodesExtract(peer, query = 'ENODE')
-            w3.addPeer(robotID, enode)
+            w3.addPeer(enode)
             peered.add(peer)
             mainlogger.info('Added peer: %s', peer)
 
@@ -190,7 +191,7 @@ def Buffer():
     for peer in temp:
         if peer not in peers:
             enode = enodesExtract(peer, query = 'ENODE')
-            w3.removePeer(robotID, enode)
+            w3.removePeer(enode)
             peered.remove(peer)
             mainlogger.info('Removed peer: %s', peer)
 
