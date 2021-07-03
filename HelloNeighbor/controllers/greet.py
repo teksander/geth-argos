@@ -1,3 +1,10 @@
+
+# /* Logging Levels for Console and File */
+#######################################################################
+loglevel = 10
+
+# /* Import Packages */
+#######################################################################
 import random, math
 import sys
 import os
@@ -8,6 +15,7 @@ import json
 import time
 import rpyc
 import copy
+import logging
 
 # #####################################################
 # ## ERROR METHOD: import w3 multiple times; 
@@ -15,6 +23,27 @@ import copy
 # w3 = init_web3(ip)
 
 #####################################################
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
+#### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST?
+def identifersExtract(robotID, query = 'IP'):
+    namePrefix = 'ethereum_eth.'+str(robotID)
+    containersFile = open('identifiers.txt', 'r')
+    for line in containersFile.readlines():
+        if line.__contains__(namePrefix):
+            if query == 'IP':
+                return line.split()[-1]
+            if query == 'ENODE':
+                return line.split()[1]
+
+def enodesExtract(robotID, query = 'IP'):
+    namePrefix = str(robotID)
+    enodesFile = open('enodes.txt', 'r')
+    for line in enodesFile.readlines():
+        if line.__contains__(namePrefix):
+                temp = line.split()[-1]
+                return temp[1:-1]
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
 
 # Some parameters
 isbyz = False
@@ -27,55 +56,56 @@ estimate = 0
 totalWhite = 0
 totalBlack = 0
 
-# Some timers
-global greetTimer
-greetTimer = time.time()
+global peered
+peered = set()
 
-global number_robot_sensed, greeted, actual_greets
-number_robot_sensed = 0
+global greeted, actual_greets
 greeted = set()
 actual_greets = 0
 
-def init():
-    global key, sc, ticketPrice, balance, rw, gs, erb, w3, robotID
-    # ## Desired way to get ID (implement in py wrapper) 
+
+def init_w3():
+    global robotID
+
+    # Get ID from argos
     robotID = int(robot.id.get_id()[2:])+1
 
-    # Connect to a w3 wrapper hosted via rpyc
+    # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
     conn = rpyc.connect("localhost", 4000+int(robotID))
     w3 = conn.root
 
-    # Do stuff over rpyc
+    # Do stuff over RPYC
     print(w3.getBalance())
     print(w3.getKey())
     print(w3.isMining())
+    
+    return w3
+
+def init():
+    global w3, rw, gs, rb, tcp, mainlogger
+
+    w3 = init_w3()
+    rw = RandomWalk(robot_speed)
+    gs = GroundSensor()
+    rb = ERANDB()
 
     w3.minerStart()
     w3.transact('setGreeting')
     w3.call('greetingCount')
 
-    #####################################################
-
-    rw=RandomWalk(robot_speed)
-    gs=GroundSensor()
-    erb=ERANDB()
-
-    #####################################################
+    logFile = experimentFolder+'/logs/robot'+str(robotID)+'.log'
+    logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
+    mainlogger = logging.getLogger('main')
+    logging.getLogger('main').setLevel(loglevel)
 
 def controlstep():
-    global  greetTimer, greeted, actual_greets
-    global  rw, gs, erb, w3
+    global greeted, actual_greets
 
     rw.walking()
     gs.sensing()
-    erb.listening()
+    rb.listening()
 
     peers = Buffer()
-
-    if peers: 
-        robot.epuck_leds.set_all_colors("red")
-    else:
-        robot.epuck_leds.set_all_colors("black")
 
     for peer in peers:
         if peer not in greeted:
@@ -89,10 +119,10 @@ def controlstep():
 
     newBlocks = w3.blockFilter()
     if newBlocks:
-        # greetTimer = time.time()
         bn = w3.blockNumber()
         bal = w3.getBalance()
         greets = w3.call('greetingCount')
+
         if robotID == 1:
             print('ID; #Block; Balance; #Greets; #MyGreets')
             print(robotID, bn, bal, greets, actual_greets)
@@ -110,8 +140,30 @@ def Greet(neighbor):
         print("Greet Failed. Unknown") 
 
 def Buffer():
-    return erb.getNew()
 
+    peers = rb.getNew()
+
+    if peers: 
+        robot.epuck_leds.set_all_colors("red")
+    else:
+        robot.epuck_leds.set_all_colors("black")
+
+    for peer in peers:
+        if peer not in peered:
+            enode = enodesExtract(peer, query = 'ENODE')
+            w3.addPeer(enode)
+            peered.add(peer)
+            mainlogger.info('Added peer: %s', peer)
+
+    temp = copy.copy(peered)
+    for peer in temp:
+        if peer not in peers:
+            enode = enodesExtract(peer, query = 'ENODE')
+            w3.removePeer(enode)
+            peered.remove(peer)
+            mainlogger.info('Removed peer: %s', peer)
+
+    return peers
 
 def Estimate():
     """ Control routine to update the local estimate of the robot """

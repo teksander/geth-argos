@@ -65,11 +65,18 @@ sort -o temp1.txt temp1.txt
 # Create an list of IDs (temporary solution)
 seq 1 $NUMROBOTS > ids.txt
 
+# Collect all enodes to a list
+bash exec-all.sh "cat my_enode.enode" > temp3.txt 
+
 # Get IPs
 ./exec-all.sh "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
-paste ids.txt temp1.txt temp2.txt > identifiers.txt
-rm temp1.txt temp2.txt
 
+# Collect everything in a single file
+paste ids.txt temp1.txt temp2.txt > identifiers.txt
+paste ids.txt temp3.txt > enodes.txt
+rm temp1.txt temp2.txt temp3.txt ids.txt 
+
+wait
 # Start w3
 gnome-terminal --tab -- python3 -i controllers/web3wrapper.py
 

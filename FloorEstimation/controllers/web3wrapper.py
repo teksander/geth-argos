@@ -50,17 +50,16 @@ class Web3_Wrapper(object):
 
     ############ SC WRAPPER #####################
     def transact2(self, func, arg1, arg2):
-        return getattr(self.sc.functions, func)(arg1).transact(ast.literal_eval(arg2))
+        getattr(self.sc.functions, func)(arg1).transact(ast.literal_eval(arg2))
 
     def transact1(self, func, arg1):
-        return getattr(self.sc.functions, func)().transact(ast.literal_eval(arg1))
+        getattr(self.sc.functions, func)().transact(ast.literal_eval(arg1))
 
     def transact(self, func):
-        return getattr(self.sc.functions, func)().transact()
+        getattr(self.sc.functions, func)().transact()
 
     def call(self, func):
         return getattr(self.sc.functions, func)().call()
-
 
     ############ FILTER WRAPPER #####################
     def blockFilter(self): 

@@ -24,4 +24,5 @@ To-do-list:
 - Get ENODES from TCP not file
 - Create "reset-geth.sh" which does not reinialize docker but rather reset geth folder and process in every container (if faster/more efficient)
 - Improve "stop_network.sh" since docker stop and docker rm is not working properly
-- open geth console with ./tmux-all for all docker containers
+[DONE] open geth console with ./tmux-all for all docker containers
+- Link robot ID to availiable IP in docker ()

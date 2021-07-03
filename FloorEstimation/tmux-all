@@ -60,8 +60,8 @@ tmux_ALL_logs() {
 		select-layout tiled ';' 
 }
 if [[ $# -eq 0 ]]; then 
-	tmux kill-session -t CTS >/dev/null 2>&1
-	tmux_ALL "CTS"
+	tmux kill-session -t BASH >/dev/null 2>&1
+	tmux_ALL "BASH"
 fi
 
 if [[ $# -eq 1 ]]; then 

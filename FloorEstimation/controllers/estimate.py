@@ -42,11 +42,10 @@ totalBlack = 0
 global peered
 peered = set()
 
-global votetimer, updatetimer, startflag
-startflag = True
+global votetimer, updatetimer, consensus
 updatetimer = time.time()
 votetimer = time.time()
-
+consensus = False
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### 
 #### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST?
@@ -71,7 +70,7 @@ def enodesExtract(robotID, query = 'IP'):
 
 
 def init_w3():
-    global  w3, myKey, robotID, ticketPrice
+    global  myKey, robotID, ticketPrice
 
     # Get ID from argos
     robotID = int(robot.id.get_id()[2:])+1
@@ -85,37 +84,38 @@ def init_w3():
     print(w3.getKey())
     print(w3.isMining())
     
-    w3.transact('registerRobot')
     ticketPrice = 40
     myKey = w3.getKey()
     return w3
 
 def init():
-    global rw, gs, erb, tcp, mainlogger
+    global w3, rw, gs, rb, tcp, mainlogger
 
-    init_w3()
+    w3 = init_w3()
+    rw = RandomWalk(robot_speed)
+    gs = GroundSensor()
+    rb = ERANDB()
+
+    w3.minerStart()
+    w3.transact('registerRobot')
 
     logFile = experimentFolder+'/logs/robot'+str(robotID)+'.log'
     logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
     mainlogger = logging.getLogger('main')
     logging.getLogger('main').setLevel(loglevel)
 
-    w3.minerStart()
-    rw=RandomWalk(robot_speed)
-    gs=GroundSensor()
-    erb=ERANDB()
 
     # # Right way to get enodes
     # myEnode = enodesExtract(robotID, query = 'ENODE')
     # tcp = TCP_server(myEnode, 'localhost' , 40421, True)
 
 def controlstep():
-    global  votetimer, updatetimer, startflag
+    global  votetimer, updatetimer, consensus
     global  rw, gs, w3, myKey, robotID
-    
+
     rw.walking()
     gs.sensing()
-    erb.listening()
+    rb.listening()
 
     Estimate()
     Buffer()
@@ -127,7 +127,8 @@ def controlstep():
             ticketPriceWei = w3.toWei(ticketPrice)
             w3.transact2('sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
         except ValueError:
-            mainlogger.info("Vote Failed. No Balance: %s", w3.getBalance())
+            # mainlogger.info("Vote Failed. No Balance: %s", w3.getBalance())
+            pass
         except:
             mainlogger.info("Vote Failed. Unknown") 
 
@@ -141,7 +142,8 @@ def controlstep():
             payout = w3.call('askForPayout')
 
         except Exception as e:
-            print(e)
+            pass
+
         else:
             if newRound:
                 w3.transact1('updateMean', {"gas":gasLimit})
@@ -152,28 +154,32 @@ def controlstep():
             if payout:
                 w3.transact1('askForPayout', {"gas":gasLimit})
 
-            if consensus:
-                print('CONSENSUS IS REACHED')
-                robot.epuck_leds.set_all_colors("red")
 
     newBlocks = w3.blockFilter()
     if newBlocks:
-        nrobs = w3.call('robotCount')
-        mean = w3.call('getMean')*1e-7
-        bn = w3.blockNumber()
-        bal = w3.getBalance()
-        votecount = w3.call('getVoteCount') 
-        voteOkcount = w3.call('getVoteOkCount') 
-        nPeers = gethPeers = len(w3.getPeers())
-        mainlogger.info('%s %s %s %s %s %s %s', nrobs, mean, bn, bal, votecount, voteOkcount, nPeers)
+        try:
+            nrobs = w3.call('robotCount')
+            mean = w3.call('getMean')*1e-7
+            bn = w3.blockNumber()
+            bal = w3.getBalance()
+            votecount = w3.call('getVoteCount') 
+            voteOkcount = w3.call('getVoteOkCount') 
+            nPeers = gethPeers = len(w3.getPeers())
+            mainlogger.info('%s %s %s %s %s %s %s', nrobs, mean, bn, bal, votecount, voteOkcount, nPeers)
 
-        if robotID == 1:
-            print('#Rob; Mean; #Block; Balance #Votes, #OkVotes, #Peers')
-            print(nrobs, mean, bn, bal, votecount, voteOkcount, nPeers)
+            if robotID == 1:
+                print('#Rob; Mean; #Block; Balance #Votes, #OkVotes, #Peers')
+                print(nrobs, mean, bn, bal, votecount, voteOkcount, nPeers)
+        except:
+            pass
+
+    if consensus:
+        print('CONSENSUS IS REACHED')
+        robot.epuck_leds.set_all_colors("red")
 
 def Buffer():
 
-    peers = erb.getNew()
+    peers = rb.getNew()
 
     if peers: 
         robot.epuck_leds.set_all_colors("red")
