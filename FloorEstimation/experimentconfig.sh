@@ -12,7 +12,6 @@ SCTEMPLATE="${EXPERIMENTFOLDER}/scs/experiment_volker.sol" # <- this is the smar
 CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
 CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/Estimation.abi"
 
-# SCOUTFILE="${DOCKERFOLDER}/geth/shared/Estimation.sol"
 
 # EXPERIMENT FILES AND PARAMETERS
 

@@ -8,7 +8,11 @@ import json
 import time
 import rpyc
 import copy
-import multiprocessing
+
+# #####################################################
+# ## ERROR METHOD: import w3 multiple times; 
+# from console import init_web3, registerSC
+# w3 = init_web3(ip)
 
 #####################################################
 
@@ -37,31 +41,18 @@ def init():
     # ## Desired way to get ID (implement in py wrapper) 
     robotID = int(robot.id.get_id()[2:])+1
 
-    namePrefix = 'ethereum_eth.'+str(robotID)
-    containersFile = open('identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            ip = line.split()[-1]
-
-    # print(robotID, ip)
-
-    # #####################################################
-    # ## ERROR METHOD: import w3 multiple times; 
-    # from console import init_web3, registerSC
-    # w3 = init_web3(ip)
-
-    ## CURRENT SOLUTION: connect to a w3 wrapper hosted via rpyc
-    conn = rpyc.connect("localhost", 4000)
+    # Connect to a w3 wrapper hosted via rpyc
+    conn = rpyc.connect("localhost", 4000+int(robotID))
     w3 = conn.root
 
     # Do stuff over rpyc
-    print(w3.getBalance(robotID))
-    print(w3.getKey(robotID))
-    print(w3.isMining(robotID))
+    print(w3.getBalance())
+    print(w3.getKey())
+    print(w3.isMining())
 
-    w3.minerStart(robotID)
-    w3.transact(robotID, 'setGreeting')
-    w3.call(robotID, 'greetingCount')
+    w3.minerStart()
+    w3.transact('setGreeting')
+    w3.call('greetingCount')
 
     #####################################################
 
@@ -96,12 +87,12 @@ def controlstep():
         if peer not in peers:
             greeted.remove(peer)
 
-    newBlocks = w3.blockFilter(robotID)
+    newBlocks = w3.blockFilter()
     if newBlocks:
         # greetTimer = time.time()
-        bn = w3.blockNumber(robotID)
-        bal = w3.getBalance(robotID)
-        greets = w3.call(robotID, 'greetingCount')
+        bn = w3.blockNumber()
+        bal = w3.getBalance()
+        greets = w3.call('greetingCount')
         if robotID == 1:
             print('ID; #Block; Balance; #Greets; #MyGreets')
             print(robotID, bn, bal, greets, actual_greets)
@@ -109,7 +100,7 @@ def controlstep():
 def Greet(neighbor):
     global actual_greets
     try:
-        w3.transact(robotID, 'greet')
+        w3.transact('greet')
         robot.epuck_leds.set_all_colors("red")
         actual_greets += 1
         print("Hello Neighbor", neighbor)

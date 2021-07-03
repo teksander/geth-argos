@@ -33,6 +33,10 @@ for w3 in w3List:
 
 identifiers.close()
 
+
+
+
+
 class web3Interface(object):
 
     def getKey(self, __id):

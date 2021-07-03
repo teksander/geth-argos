@@ -1,15 +1,7 @@
 # Iterate over experimental settings and start experiments
  #!/bin/sh
 
-source experiment_config.sh
-
-
-# EXPERIMENT PARAMETERS
-NUMROBOTS=10
-REPETITIONS=1
-VISUALIZATION=visualization # visualization or none
-ARENASIZEDIM="1.0"
-CELLDIMENSION="0.1"
+source experimentconfig.sh
 
 echo "Updating the ARGoS XML file"
 echo "+-----------------------------------------------------------+"
@@ -79,12 +71,10 @@ paste ids.txt temp1.txt temp2.txt > identifiers.txt
 rm temp1.txt temp2.txt
 
 # Start w3
-gnome-terminal --tab -- python3 controllers/web3wrapper.py
+gnome-terminal --tab -- python3 -i controllers/web3wrapper.py
 
 # Global blockchain (comment out for local sync)
-./addPeers-all.sh
-
-
+# ./addPeers-all.sh
 
 
 # # Start experiment
