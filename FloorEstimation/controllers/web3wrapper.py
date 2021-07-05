@@ -46,6 +46,8 @@ class Web3_Wrapper(object):
         return self.w3.geth.admin.peers()
 
     def getEnode(self):
+        # This enode is incorrect since the IP is localhost.
+        # When web3wrapper is moved into docker, it should fix the enode by reading "hostname -i"
         return self.w3.geth.admin.nodeInfo().enode
 
     def toWei(self, value):
@@ -53,7 +55,7 @@ class Web3_Wrapper(object):
 
     ############ SC WRAPPER #####################
     def transact2(self, func, arg1, arg2):
-        getattr(self.sc.functions, func)(arg1).transact(ast.literal_eval(arg2))
+        return getattr(self.sc.functions, func)(arg1).transact(ast.literal_eval(arg2))
 
     def transact1(self, func, arg1):
         getattr(self.sc.functions, func)().transact(ast.literal_eval(arg1))
