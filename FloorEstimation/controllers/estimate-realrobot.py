@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
 # This is the main control loop running in each argos robot
+ 
+
+ 
+ 
+ 
+ 
 
 # /* Logging Levels for Console and File */
 #######################################################################
-loglevel = 30
+loglevel = 10
 logtofile = False 
 
 # /* Experiment Parameters */
 #######################################################################
 tcpPort = 5000 
-erbDist = 185
+erbDist = 175
 erbtFreq = 10
 gsFreq = 20
 rwSpeed = 500
@@ -48,7 +54,7 @@ import time
 import rpyc
 import copy
 import logging
-from aux import Logger, Peer, PeerBuffer, TCP_server
+from aux import *
 
 # Some experiment variables
 global estimate, totalWhite, totalBlack
@@ -64,54 +70,13 @@ updatetimer = time.time()
 votetimer = time.time()
 consensus = False
 
-#### #### #### #### #### #### #### #### #### #### #### #### #### 
-#### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST?
-def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.'+str(robotID)
-    containersFile = open('identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            if query == 'IP':
-                return line.split()[-1]
-            if query == 'ENODE':
-                return line.split()[1]
-
-def enodesExtract(robotID, query = 'IP'):
-    namePrefix = str(robotID)
-    enodesFile = open('enodes.txt', 'r')
-    for line in enodesFile.readlines():
-        if line.__contains__(namePrefix):
-                temp = line.split()[-1]
-                return temp[1:-1]
-#### #### #### #### #### #### #### #### #### #### #### #### #### 
-
-# Move this script to console and import it like in the robots
-def init_web3():
-    global ticketPrice
-
-    # Get ID from argos
-    robotID = int(robot.id.get_id()[2:])+1
-
-    # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
-    conn = rpyc.connect("localhost", 4000+int(robotID))
-    w3 = conn.root
-
-    # Do stuff over RPYC
-    print(w3.getBalance())
-    print(w3.getKey())
-    print(w3.isMining())
-    
-    ticketPrice = 40
-    return w3
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### 
 
 def init():
     global me, w3, rw, gs, erb, tcp, mainlogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog
 
     robotID = str(int(robot.id.get_id()[2:])+1)
 
-    logFile = experimentFolder+'/logs/robot'+robotID+'.log'
+    logFile = experimentFolder+'/logs/'+robotID+'/monitor.log'
     logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 
     # /* Initialize Logging Files and Console Logging*/
@@ -119,21 +84,21 @@ def init():
 
     # Experiment data logs (recorded to file)
     header = ['ESTIMATE','W','B','S1','S2','S3']
-    estimatelog = Logger('logs/estimate.csv', header, 10, ID = robotID)
+    estimatelog = Logger('logs/'+robotID+'/estimate.csv', header, 10, ID = robotID)
     header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-    bufferlog = Logger('logs/buffer.csv', header, 2, ID = robotID)
+    bufferlog = Logger('logs/'+robotID+'/buffer.csv', header, 2, ID = robotID)
     header = ['VOTE']
-    votelog = Logger('logs/vote.csv', header, ID = robotID)
+    votelog = Logger('logs/'+robotID+'/vote.csv', header, ID = robotID)
     header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
-    blocklog = Logger('logs/block.csv', header, ID = robotID)
+    blocklog = Logger('logs/'+robotID+'/block.csv', header, ID = robotID)
     header = ['BLOCK', 'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
-    sclog = Logger('logs/sc.csv', header, ID = robotID)
+    sclog = Logger('logs/'+robotID+'/sc.csv', header, ID = robotID)
     header = ['#BLOCKS']
-    synclog = Logger('logs/sync.csv', header, ID = robotID)
+    synclog = Logger('logs/'+robotID+'/sync.csv', header, ID = robotID)
     header = ['CHAINDATASIZE', '%CPU']
-    extralog = Logger('logs/extra.csv', header, 5, ID = robotID)
+    extralog = Logger('logs/'+robotID+'/extra.csv', header, 5, ID = robotID)
     header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
-    txlog = Logger('logs/tx.csv', header, ID = robotID)
+    txlog = Logger('logs/'+robotID+'/tx.csv', header, ID = robotID)
 
     # List of logmodules --> iterate .start() to start all; remove from list to ignore
     logmodules = [bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog]
@@ -201,9 +166,9 @@ def controlstep():
         startFlag = True
 
     # Perform step on submodules
-    rw.walking()
-    gs.sensing()
-    erb.listening()
+    rw.step()
+    gs.step()
+    erb.step()
 
     # Execute main-modules
     Estimate()
@@ -232,21 +197,6 @@ def Estimate():
 
 def Buffer(rate = bufferRate, ageLimit = ageLimit):
     """ Control routine for robot-to-robot dynamic peering """
-    
-    # if not startFlag:
-    #     mainlogger.info('Stopped Buffering')
-    #     break
-
-    # tic = TicToc(rate, 'Buffer')
-            
-    if globalPeers:
-        globalBuffer()
-    else:
-        # localBuffer()
-        simplifiedBuffer()
-
-
-    # tic.toc()
 
     def simplifiedBuffer():
         peers = erb.getNew()
@@ -274,60 +224,62 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
                 peered.remove(peer)
                 mainlogger.info('Removed peer: %s', peer)
 
-    # def globalBuffer():
-    #     peerFile = open('pi-pucks.txt', 'r') 
-    #     tcp.unlock()
+    def globalBuffer():
+        tcp.unlock()
+        with open('pi-pucks.txt', 'r') as peerFile:
+            for newId in peerFile:
+                newId = newId.strip()
+                pb.addPeer(newId)
 
-    #     for newId in peerFile:
-    #         newId = newId.strip()
-    #         pb.addPeer(newId)
-
-    #     for peer in pb.buffer: 
-    #         try:
-    #             peer.enode = tcp.request(newPeer.ip, tcp.port)
-    #             w3.geth.admin.addPeer(peer.enode)
-    #             bufferlogger.debug('Peered to %s', peer.id)
-    #         except:
-    #             bufferlogger.debug('Failed to peer to %s', peer.id)
-
-    #     peerFile.close()
+        for peer in pb.buffer: 
+            if int(me.id) > int(peer.id):
+                try:
+                    peer.enode = tcp.request(newPeer.ip, tcp.port)
+                    w3.geth.admin.addPeer(peer.enode)
+                    bufferlogger.debug('Peered to %s', peer.id)
+                except:
+                    bufferlogger.debug('Failed to peer to %s', peer.id)
 
     def localBuffer():
-        pb.aging()
-        gethEnodes = w3.getEnodes()
+        pb.step()
+        gethEnodes = getEnodes()
         gethIds = getIds(gethEnodes)
 
-        # If there are peers in buffer; perform buffering tasks for each peer
+        # Perform buffering tasks for each peer currently in buffer
         for peer in pb.buffer:
             if peer.isDead:
                 tcp.unallow(peer.id)
-                pb.removePeer(peer.id)
-                bufferlogger.debug('Killed peer %s @ age %.2f', peer.id, peer.age)
+                bufferlogger.debug('Unallowed peer %s @ age %.2f', peer.id, peer.age)
+
                 if peer.id in gethIds:
-                    if peer.enode:
-                        enode = peer.enode
-                    else:
-                        enode = getEnodeById(peer.id, gethEnodes)
-                    w3.provider.make_request("admin_removePeer",[enode])
+                    if not peer.enode:
+                        peer.enode = getEnodeById(peer.id, gethEnodes)
+                    w3.provider.make_request("admin_removePeer",[peer.enode])
                     gethIds.remove(peer.id)
                     bufferlogger.debug('Removed peer %s @ age %.2f', peer.id, peer.age)
+
+                else:
+                    pb.removePeer(peer.id)
+                    bufferlogger.debug('Killed peer %s @ age %.2f', peer.id, peer.age)
+
                 continue
 
-            elif int(me.id) > int(peer.id):
-                # IWf the enode is unknown: Query enode and add to Geth. If fail, continue
-                if not peer.enode and peer.timeout<=0:
+            # elif int(me.id) > int(peer.id) and peer.timeout<=0:
+            elif peer.timeout<=0:
+                if not peer.enode: 
                     try:
                         peer.enode = tcp.request(peer.ip, tcp.port)
-                        bufferlogger.debug('Requested enode')            
+                        bufferlogger.debug('Requested peer enode %s @ age %.2f', peer.id, peer.age)          
                     except:
                         peer.trials += 1
                         if peer.trials == 5: 
                             peer.setTimeout()
-                            bufferlogger.warning('Timing out peer %s', peer.id)
+                            bufferlogger.warning('Timed-out peer  %s @ age %.2f', peer.id, peer.age)
                         continue
-
+                else:
                     if peer.id not in gethIds:
-                        w3.geth.admin.addPeer(peer.enode)  
+                        w3.geth.admin.addPeer(peer.enode)
+                        peer.setTimeout(3)  
                         bufferlogger.debug('Added peer %s @ age %.2f', peer.id, peer.age)
 
         # # Turn on LEDs accordingly
@@ -364,6 +316,12 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
             # extralog.log([chainSize,cpuPercent])
             bufferlog.log([len(gethIds), len(erbIds), len(tcp.allowed), ';'.join(erbIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
 
+    if globalPeers:
+        globalBuffer()
+    else:
+        # localBuffer()
+        simplifiedBuffer()
+
 def Event(rate = eventRate):
     """ Control routine to perform tasks triggered by an event """
     # sc.events.your_event_name.createFilter(fromBlock=block, toBlock=block, argument_filters={"arg1": "value"}, topics=[])
@@ -390,8 +348,6 @@ def Event(rate = eventRate):
             # rgb.flashGreen()
 
             return voteHash
-            # if voteReceipt.status == 0:
-            #   print(voteReceipt)
 
         except ValueError as e:
             votelog.log(['Value Error'])
@@ -438,15 +394,12 @@ def Event(rate = eventRate):
         if consensus == 1:
             robot.epuck_leds.set_all_colors("red")
             # rgb.setLED(rgb.all, [rgb.green]*3)
-            rgb.freeze()
-        elif rgb.frozen:
-            rgb.unfreeze()
+        #     rgb.freeze()
+        # elif rgb.frozen:
+        #     rgb.unfreeze()
 
     if not startFlag:
         mainlogger.info('Stopped Events')
-        break
-
-    tic = TicToc(rate, 'Event')
 
     newBlocks = w3.blockFilter()
     if newBlocks:
@@ -507,7 +460,12 @@ def Event(rate = eventRate):
                         votelogger.debug('Vote not yet included on block')
 
 
+def reset():
+    pass
 
+
+def destroy():
+    print('Killed')
 
 # /* Some useful functions */
 #######################################################################
@@ -564,7 +522,7 @@ class GroundSensor(object):
         self.count = 0
 
 
-    def sensing(self):
+    def step(self):
         """ This method runs in the background until program is closed 
         """  
 
@@ -615,7 +573,7 @@ class ERANDB(object):
         self.newIds = set()
         self.setData(self.id)
 
-    def listening(self):
+    def step(self):
         """ This method runs in the background until program is closed """
 
         # /* Get a new peer ID */
@@ -663,7 +621,7 @@ class RandomWalk(object):
         self.weights_left  = 50*[-10, -10, -5, 0, 0, 5, 10, 10]
         self.weights_right = 50*[-1 * x for x in self.weights_left]
 
-    def walking(self):
+    def step(self):
         """ This method runs in the background until program is closed """
         # robot.epuck_leds.set_all_colors("black")
         
@@ -803,3 +761,48 @@ class RGBLEDs(object):
     def stop(self):
         self.unfreeze()
         self.setLED([0x00,0x01,0x02], [0x00,0x00,0x00])
+
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
+
+# Move this script to console and import it like in the robots
+def init_web3():
+    global ticketPrice
+
+    # Get ID from argos
+    robotID = int(robot.id.get_id()[2:])+1
+
+    # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
+    conn = rpyc.connect("localhost", 4000+int(robotID))
+    w3 = conn.root
+
+    # Do stuff over RPYC
+    print(w3.getBalance())
+    print(w3.getKey())
+    print(w3.isMining())
+    
+    ticketPrice = 40
+    return w3
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
+
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
+#### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST?
+def identifersExtract(robotID, query = 'IP'):
+    namePrefix = 'ethereum_eth.'+str(robotID)
+    containersFile = open('identifiers.txt', 'r')
+    for line in containersFile.readlines():
+        if line.__contains__(namePrefix):
+            if query == 'IP':
+                return line.split()[-1]
+            if query == 'ENODE':
+                return line.split()[1]
+
+def enodesExtract(robotID, query = 'IP'):
+    namePrefix = str(robotID)
+    enodesFile = open('enodes.txt', 'r')
+    for line in enodesFile.readlines():
+        if line.__contains__(namePrefix):
+                temp = line.split()[-1]
+                return temp[1:-1]

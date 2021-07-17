@@ -3,21 +3,52 @@
 
 # /* Logging Levels for Console and File */
 #######################################################################
-loglevel = 10
+loglevel = 30
+logtofile = False 
+
+# /* Experiment Parameters */
+#######################################################################
+tcpPort = 5000 
+erbDist = 175
+erbtFreq = 10
+gsFreq = 20
+rwSpeed = 500
+pcID = '100'
+
+estimateRate = 1
+voteRate = 45 
+bufferRate = 0.25
+eventRate = 1
+globalPeers = 0
+ageLimit = 2
+
+# /* Global Variables */
+#######################################################################
+global startFlag, isbyz
+startFlag = False
+isbyz = False
+
+global gasLimit, gasprice, gas
+gasLimit = 0x9000000
+gasprice = 0x900000
+gas = 0x90000
+
+global txList
+txList = []
 
 # /* Import Packages */
 #######################################################################
 import random, math
 import sys
 import os
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
+experimentFolder = os.environ["EXPERIMENTFOLDER"] # Cheap solution - instead add folders as parameters in xml
 sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder)
 import time
 import rpyc
 import copy
 import logging
-# from aux import TCP_server
+from aux import *
 
 #####################################################
 
@@ -25,13 +56,6 @@ import logging
 isbyz = False
 robot_speed = 10
 
-# Some required transaction appendices
-global gasLimit
-global gasprice
-global gas
-gasLimit = 0x9000000
-gasprice = 0x900000
-gas = 0x90000
 
 # Some experiment variables
 global estimate, totalWhite, totalBlack
@@ -47,52 +71,12 @@ updatetimer = time.time()
 votetimer = time.time()
 consensus = False
 
-#### #### #### #### #### #### #### #### #### #### #### #### #### 
-#### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST?
-def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.'+str(robotID)
-    containersFile = open('identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            if query == 'IP':
-                return line.split()[-1]
-            if query == 'ENODE':
-                return line.split()[1]
-
-def enodesExtract(robotID, query = 'IP'):
-    namePrefix = str(robotID)
-    enodesFile = open('enodes.txt', 'r')
-    for line in enodesFile.readlines():
-        if line.__contains__(namePrefix):
-                temp = line.split()[-1]
-                return temp[1:-1]
-#### #### #### #### #### #### #### #### #### #### #### #### #### 
-
-
-def init_w3():
-    global  myKey, robotID, ticketPrice
-
-    # Get ID from argos
-    robotID = int(robot.id.get_id()[2:])+1
-
-    # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
-    conn = rpyc.connect("localhost", 4000+int(robotID))
-    w3 = conn.root
-
-    # Do stuff over RPYC
-    print(w3.getBalance())
-    print(w3.getKey())
-    print(w3.isMining())
-    
-    ticketPrice = 40
-    myKey = w3.getKey()
-    return w3
 
 def init():
     global w3, rw, gs, rb, tcp, mainlogger
 
     w3 = init_w3()
-    rw = RandomWalk(robot_speed)
+    rw = RandomWalk(rwSpeed)
     gs = GroundSensor()
     rb = ERANDB()
 
@@ -126,6 +110,7 @@ def controlstep():
             vote = int(estimate*1e7)
             ticketPriceWei = w3.toWei(ticketPrice)
             w3.transact2('sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
+            mainlogger.info('Voted')
         except ValueError:
             # mainlogger.info("Vote Failed. No Balance: %s", w3.getBalance())
             pass
@@ -147,12 +132,15 @@ def controlstep():
         else:
             if newRound:
                 w3.transact1('updateMean', {"gas":gasLimit})
+                mainlogger.info('updated mean')
 
             if ubi:
                 w3.transact1('askForUBI', {"gas":gasLimit})
+                mainlogger.info('Asked For UBI')
 
             if payout:
                 w3.transact1('askForPayout', {"gas":gasLimit})
+                mainlogger.info('Asked For payout')
 
 
     newBlocks = w3.blockFilter()
@@ -433,13 +421,43 @@ class RandomWalk(object):
 
 
 
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
+#### ALL CHEAP CHEAPSI SOLUTIONS; USE TCP VIA LOCALHOST?
+def identifersExtract(robotID, query = 'IP'):
+    namePrefix = 'ethereum_eth.'+str(robotID)
+    containersFile = open('identifiers.txt', 'r')
+    for line in containersFile.readlines():
+        if line.__contains__(namePrefix):
+            if query == 'IP':
+                return line.split()[-1]
+            if query == 'ENODE':
+                return line.split()[1]
 
-# robot.epuck_range_and_bearing.set_data([1,0,0,0])
-# robot.epuck_leds.set_all_colors("red")
+def enodesExtract(robotID, query = 'IP'):
+    namePrefix = str(robotID)
+    enodesFile = open('enodes.txt', 'r')
+    for line in enodesFile.readlines():
+        if line.__contains__(namePrefix):
+                temp = line.split()[-1]
+                return temp[1:-1]
+#### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-# def process_rab():
-#     global number_robot_sensed 
-#     number_robot_sensed = 0
-#     for reading_i in robot.epuck_range_and_bearing.get_readings():
-#         if reading_i.data[1] == 1:
-#             number_robot_sensed += 1
+
+def init_w3():
+    global  myKey, robotID, ticketPrice
+
+    # Get ID from argos
+    robotID = int(robot.id.get_id()[2:])+1
+
+    # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
+    conn = rpyc.connect("localhost", 4000+int(robotID))
+    w3 = conn.root
+
+    # Do stuff over RPYC
+    print(w3.getBalance())
+    print(w3.getKey())
+    print(w3.isMining())
+    
+    ticketPrice = 40
+    myKey = w3.getKey()
+    return w3

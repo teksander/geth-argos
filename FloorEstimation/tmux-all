@@ -42,7 +42,7 @@ tmux_ALL_logs() {
 	# Create an sequence of split window action for each container ID
 	split_list=()
 	for ID in $(seq 2 $NUM_ROB); do
-	    split_list+=( split-pane tail -f "${EXPERIMENTFOLDER}"/logs/robot"${ID}".log ';' select-layout even-vertical ';' )
+	    split_list+=( split-pane tail -f "${EXPERIMENTFOLDER}"/logs/"${ID}"/monitor.log ';' select-layout even-vertical ';' )
 	done
 
 	# Define the terminal geometry (larger if there are many robots)

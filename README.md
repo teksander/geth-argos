@@ -26,5 +26,10 @@ To-do-list:
 - Improve "stop_network.sh" since docker stop and docker rm is not working properly
 [DONE] open geth console with ./tmux-all for all docker containers
 - Link robot ID to docker IP (preferably 172.27.1.xxx where xxx is robotId)
-- Create logging files consistent with real robots
+- Create data recording files consistent with real robots
+- Understand why the logging package messes up... They say its fixed in 3.8, so maybe exploit that in simulation although the robots have 3.6
+
+Improvements to argos-python:
+- Implement the positioning sensor
 - Figure out how to handle globals better. Have robot availiable in submodules ?
+- Add a new xlm parameter similar to <params script> called <params folder> which is the folder where the controllers are located. In boost-python add this folder to path in order to be able to import submodules

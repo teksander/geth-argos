@@ -29,7 +29,8 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="/home/eksander/geth-argos/FloorEstimation/controllers/estimate.py" />
+      <!-- <params script="/home/eksander/geth-argos/FloorEstimation/controllers/estimate.py" /> -->
+      <params script="/home/eksander/geth-argos/FloorEstimation/controllers/estimate-realrobot.py" />
     </python_controller>
 
   </controllers>
