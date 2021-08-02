@@ -4,6 +4,7 @@ services:
     image: mygeth:latest
     deploy:
       #replicas: 20
+    # restart: always
       resources:
         limits:
           cpus: '1.0'
@@ -19,4 +20,11 @@ services:
       - ./geth/templates/:/root/templates/:ro
       - ./geth/files/genesis_poa.json:/root/files/genesis_poa.json:ro	
       - ./geth/files/keystores:/root/.ethereum/devchain/keystores:rw
-    command: '--datadir=~/.ethereum/devchain --keystore=~/.ethereum/devchain/keystores/KEYSTORE/ --lightkdf --ws --ws.addr "0.0.0.0" --ws.port 8545 --ws.api "db,personal,eth,net,web3,admin,miner" --nodiscover --verbosity 2 --syncmode full --rpcapi "db,personal,eth,net,web3,admin" --allow-insecure-unlock --rpccorsdomain="*" --networkid=456719 --rpc --rpcaddr="0.0.0.0" -miner.gasprice 1'
+    command: --datadir=~/.ethereum/devchain --keystore=~/.ethereum/devchain/keystores/KEYSTORE/ --syncmode "full" --port 30311 --ws --ws.addr "0.0.0.0" --ws.port 8545 --ws.api "personal,eth,net,web3,txpool,miner,admin" --networkid 1515 --allow-insecure-unlock --lightkdf --verbosity 8 --vmdebug --nodiscover --miner.gasprice "0x1" --miner.gastarget "0x1" --miner.gaslimit "0x9000000000" --nat=extip:IPADDRESS
+
+
+     #--lightkdf --ws --ws.addr "0.0.0.0" --ws.port 8545 --ws.api "db,personal,eth,net,web3,admin,miner" --nodiscover --verbosity 8 --syncmode full --rpcapi "db,personal,eth,net,web3,admin" --allow-insecure-unlock --rpccorsdomain="*" --networkid=456719 --rpc --rpcaddr="0.0.0.0" -miner.gasprice 1'
+
+    #geth --datadir ${MAIN_DIR} \
+
+#--nat=extip:"${SUBNET}.${ID}" 

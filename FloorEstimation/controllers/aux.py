@@ -87,7 +87,7 @@ class TCP_server(object):
                 # set the timeout
                 __socket.settimeout(5)
                 # queue one request
-                __socket.listen(1)    
+                __socket.listen(10)    
                 # establish a connection
                 __clientsocket,addr = __socket.accept()   
                 logger.debug("TCP request from %s" % str(addr))
@@ -107,7 +107,7 @@ class TCP_server(object):
             except socket.timeout:
                 pass
 
-            time.sleep(0.5)
+            time.sleep(0.01)
 
             if self.__stop:
                 __socket.close()
@@ -304,14 +304,15 @@ class PeerBuffer(object):
 class Logger(object):
     """ Logging Class to Record Data to a File
     """
-    def __init__(self, logfile, header, rate = 0, ID = None):
+    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None):
 
-        self.file = open(logfile, 'w+', buffering = 1)
+        self.file = open(logfile, 'w+', buffering = buffering)
         self.rate = rate
         self.tStamp = 0
         self.tStart = 0
         pHeader = ' '.join([str(x) for x in header])
         self.file.write('{} {} {}\n'.format('ID', 'TIME', pHeader))
+        
         if ID:
             self.id = ID
         else:

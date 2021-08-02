@@ -19,17 +19,17 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-        <epuck_range_and_bearing implementation="medium" range="0.1" />
+        <epuck_range_and_bearing implementation="medium" range="0.2" show_rays="true" />
       </actuators>
       <sensors>
-        <epuck_proximity implementation="default" show_rays="true" />
+        <epuck_proximity implementation="default"  />
         <epuck_ground implementation="rot_z_only" />
         <epuck_range_and_bearing implementation="medium" medium="rab" />
       </sensors>
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="EXPERIMENTFOLDER/controllers/estimate.py" />
+      <params script="EXPERIMENTFOLDER/controllers/mainloop.py" />
     </python_controller>
 
   </controllers>
@@ -89,6 +89,8 @@
     <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
     <!-- ************************************************************************ -->
     <qt-opengl>
+      <user_functions library="ARGOSFOLDER/build/loop_functions/libid_loop_functions"
+                      label="id_qtuser_functions" />
       <camera>
         <placement idx="0" position="-0.00569879,0.01,4.86243" look_at="-0.00569879,0.01,3.86243" lens_focal_length="20" />
         <placement idx="1" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />

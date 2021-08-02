@@ -15,13 +15,19 @@ CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/Estimation.abi"
 
 # EXPERIMENT FILES AND PARAMETERS
 
+
+ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-ludicrious.argosx"
+ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-ludicrious.argos"
+NUMROBOTS=50
+
+
 # ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
 # ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
-# NUMROBOTS=20
+# NUMROBOTS=30
 
-ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-small.argosx"
-ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-small.argos"
-NUMROBOTS=10
+# ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-small.argosx"
+# ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-small.argos"
+# NUMROBOTS=10
 
 
 REPETITIONS=1
