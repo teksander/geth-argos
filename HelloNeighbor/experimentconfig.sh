@@ -1,5 +1,5 @@
 
-export MAINFOLDER="$HOME/geth-argos"
+export MAINFOLDER="$HOME/alex-stuff/geth-argos"
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/HelloNeighbor"

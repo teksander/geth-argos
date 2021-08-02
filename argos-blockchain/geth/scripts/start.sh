@@ -2,9 +2,9 @@
 set -e
 sleep 12
 geth --datadir=~/.ethereum/devchain init "/root/files/genesis_poa.json"
-BOOTSTRAP_IP=`cat /root/shared/my_enode.enode | tr -d '"'`
-GETH_OPTS=${@/XXX/$BOOTSTRAP_IP}
+ip=`hostname -i`
 GETH_OPTS=${GETH_OPTS/KEYSTORE/$SLOT}
+GETH_OPTS=${GETH_OPTS/ADDRESS/$ip}
 echo "$GETH_OPTS"
 geth $GETH_OPTS&
 sleep 13

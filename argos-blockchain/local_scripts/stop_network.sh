@@ -1,5 +1,7 @@
+docker service rm ethereum_eth
+sleep 3
 docker stack rm ethereum
-sleep 1
+sleep 3
 
 if docker ps | grep -q "Up"
 then
