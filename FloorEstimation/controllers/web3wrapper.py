@@ -27,6 +27,12 @@ class Web3_Wrapper(object):
     def blockNumber(self):
         return self.w3.eth.blockNumber
 
+    def getTransaction(self, txHash):
+        return self.w3.eth.getTransaction(txHash)
+
+    def getTransactionReceipt(self, txHash):
+        return self.w3.eth.getTransactionReceipt(txHash)
+
     def isMining(self):
         return self.w3.eth.mining
 
@@ -71,6 +77,12 @@ class Web3_Wrapper(object):
 
     def call(self, func):
         return getattr(self.sc.functions, func)().call()
+
+    def call1(self, func, arg1):
+        return getattr(self.sc.functions, func)().call(ast.literal_eval(arg1))
+
+    def call2(self, func, arg1, arg2):
+        return getattr(self.sc.functions, func)(arg1).call(ast.literal_eval(arg2))
 
     ############ FILTER WRAPPER #####################
     def blockFilter(self): 
@@ -131,11 +143,23 @@ class Web3_Wrapper_Service(rpyc.Service):
     def exposed_call(self, function):
         return self.w3if.call(function)
 
+    def exposed_call1(self, function, arg1):
+        return self.w3if.call1(function, str(arg1))
+
+    def exposed_call2(self, function, arg1, arg2):
+        return self.w3if.call2(function, arg1, str(arg2))
+
     def exposed_blockFilter(self):
         return self.w3if.blockFilter()
 
     def exposed_getBlock(self, blockHex):
         return self.w3if.getBlock(blockHex)
+
+    def exposed_getTransaction(self, txHash):
+        return self.w3if.getTransaction(txHash)
+
+    def exposed_getTransactionReceipt(self, txHash):
+        return self.w3if.getTransactionReceipt(txHash)
 
     def exposed_getTxPoolStatus(self):
         return self.w3if.getTxPoolStatus()

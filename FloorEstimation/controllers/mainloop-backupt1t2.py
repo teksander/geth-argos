@@ -22,7 +22,7 @@ rwSpeed = 350
 pcID = '100'
 
 estimateRate = 1
-bufferRate = 0.25 # reality is 0.25
+bufferRate = 0.5 # reality is 0.25
 eventRate = 1
 globalPeers = 0
 ageLimit = 2
@@ -58,12 +58,8 @@ from erandb import ERANDB
 from randomwalk import RandomWalk
 from groundsensor import GroundSensor
 from rgbleds import RGBLEDs
-from hexbytes import HexBytes
-import ast
+from _thread import start_new_thread
 import threading
-
-import sched
-s = sched.scheduler()
 
 # Some experiment variables
 global estimate, totalWhite, totalBlack
@@ -81,7 +77,6 @@ consensus = False
 
 global estTimer, buffTimer, eventTimer
 estTimer = buffTimer = eventTimer = time.time()
-
 
 def init():
     global me, w3, rw, gs, erb, tcp, rgb, mainlogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, submodules, logmodules 
@@ -167,7 +162,6 @@ def init():
     # List of submodules --> iterate .start() to start all
     submodules = [w3, tcp, erb, gs, rw]
 
-
 def START(modules = submodules, logs = logmodules):
     global startFlag, startTime
     startTime = time.time()
@@ -188,11 +182,14 @@ def START(modules = submodules, logs = logmodules):
             mainlogger.critical('Error Starting Module: %s', module)
 
 def controlstep():
-    global startFlag, startTime, estTimer, buffTimer, eventTimer
-
+    global startFlag, startTime, estTimer, buffTimer, eventTimer, prevTime, t1, t2
 
     if not startFlag:
         # START()
+
+        t1 = None
+        t2 = None
+        prevTime = time.time()
 
         startTime = time.time()
         mainlogger.info('Starting Experiment')
@@ -204,7 +201,6 @@ def controlstep():
                 mainlogger.critical('Error Starting Log: %s', log)
 
         startFlag = True 
-        print(mainmodules)
         for module in submodules:
             try:
                 module.start()
@@ -212,6 +208,16 @@ def controlstep():
                 mainlogger.critical('Error Starting Module: %s', module)
 
     else:
+
+        stepTimer = time.time()
+
+        if time.time()-buffTimer > bufferRate:
+            if t1 == None or t1.is_alive() == 0:
+               t1 = threading.Thread(target=Buffer)
+               t1.start()
+            else:
+                print("Buffer Thread is already running")
+            buffTimer = time.time()
 
         # Perform step on submodules
         for module in [rw, gs, erb]:
@@ -222,23 +228,24 @@ def controlstep():
             Estimate()
             estTimer = time.time()
 
-        # if time.time()-buffTimer > bufferRate:
-        #     Buffer()
-        #     buffTimer = time.time()
+
+
+        # if time.time()-eventTimer > eventRate:
+        #     if t2 == None or t2.is_alive() == 0:
+        #        t2 = threading.Thread(target=Event)
+        #        t2.start()
+        #     else:
+        #         print("Thread is already running")
+        #     eventTimer = time.time()
 
         # if time.time()-eventTimer > eventRate:
         #     Event()
         #     eventTimer = time.time()
 
-
-# /* Define Main-modules */
-#######################################################################
-# The 4 Main-modules: 
-# "Estimate"  (Rate 1Hz)  queries groundsensor and generates a robot estimate (opinion)
-# "Buffer"    (Rate 1Hz) queries RandB to get neighbor identities and add/remove on Geth
-# "Event"  (Every block) when a new block is detected make blockchain queries/sends/log block data 
-
-
+        if me.id == str(1):
+            print((time.time()-prevTime))
+            print(threading.active_count())
+            prevTime = time.time()
 
 def Estimate(rate = estimateRate):
     """ Control routine to update the local estimate of the robot """
@@ -264,67 +271,61 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
     global peered
 
     def simplifiedBuffer():
+
+        peers = erb.getNew()
+        # start_new_thread(getEnodes, ())
+        # gethPeers = set()
+        gethPeers = getEnodes()
+        nGethPeers = len(gethPeers)
+
+        # for enode in gethPeers:
+        #     mainlogger.info('Current enode: %s Total length: %s', enode, nPeers)
+
+         # Turn on LEDs accordingly
+        if nGethPeers == 0:
+            rgb.setLED(rgb.all, 3* ['black'])
+        elif nGethPeers == 1:
+            rgb.setLED(rgb.all, ['red', 'black', 'black'])
+        elif nGethPeers == 2:
+            rgb.setLED(rgb.all, ['red', 'black', 'red'])
+        elif nGethPeers > 2:
+            rgb.setLED(rgb.all, 3*['red'])
+
+        for peer in peers:
+
+            if peer not in peered:
+                enode = tcp.request('localhost', tcpPort+int(peer)) 
+                # mainlogger.info('got enode: %s', enode)
+                w3.addPeer(enode)
+                # start_new_thread(w3.addPeer, (enode,))
+                peered.add(peer)
+
+                mainlogger.info('Added peer: %s, enode: %s', peer, enode)
+
+        temp = copy.copy(peered)
+
+        for peer in temp:
+
+            if peer not in peers:
+                enode = tcp.request('localhost', tcpPort+int(peer))
+
+                # start_new_thread(w3.removePeer, (enode,))
+                w3.removePeer(enode) # Enode IP needs to be fixed
+                peered.remove(peer)
+                mainlogger.info('Removed peer: %s', peer)
+
+        if not peered:
+            for enode in gethPeers:
+                w3.removePeer(enode)
+
+
+    if globalPeers:
         pass
-        # peers = erb.getNew()
-        # gethPeers = getEnodes()
-        # nGethPeers = len(gethPeers)
-        # if me.id == '1':
-        #     print('Current peers:', peers)
-
-        # # for enode in gethPeers:
-        # #     mainlogger.info('Current enode: %s Total length: %s', enode, nPeers)
-
-        #  # Turn on LEDs accordingly
-        # if nGethPeers == 0:
-        #     rgb.setLED(rgb.all, 3* ['black'])
-        # elif nGethPeers == 1:
-        #     rgb.setLED(rgb.all, ['red', 'black', 'black'])
-        # elif nGethPeers == 2:
-        #     rgb.setLED(rgb.all, ['red', 'black', 'red'])
-        # elif nGethPeers > 2:
-        #     rgb.setLED(rgb.all, 3*['red'])
-
-        # for peer in peers:
-        #     if peer not in peered:
-        #         # enode = tcp.request('localhost', tcpPort+int(peer)) 
-        #         # mainlogger.info('got enode: %s', enode)
-        #         # w3.addPeer(enode)
-        #         peered.add(peer)
-
-        #         # mainlogger.info('Added peer: %s, enode: %s', peer, enode)
-
-        # temp = copy.copy(peered)
-        # for peer in temp:
-        #     if peer not in peers:
-        #         # enode = tcp.request('localhost', tcpPort+int(peer))
-        #         # w3.removePeer(enode) # Enode IP needs to be fixed
-        #         peered.remove(peer)
-
-        #         mainlogger.info('Removed peer: %s', peer)
-
-        # if not peered:
-        #     for enode in gethPeers:
-        #         w3.removePeer(enode)
-    print('rate is', rate)
-    tic = TicToc(rate, 'Buffer')
-    while True: 
-        
-        # if not startFlag:
-        #     gethEnodes = getEnodes()
-        #     for enode in gethEnodes:
-        #         w3.provider.make_request("admin_removePeer",[enode])
-        #     mainlogger.info('Stopped Buffering')
-        #     break
-
-        testtime = time.time()
-
-        tic.tic()
+        # globalBuffer()
+    else:
+        # localBuffer()
         simplifiedBuffer()
-        tic.toc()
-
-        if me.id == '1':
-            print(time.time()-testtime)
-
+        # forcedBuffer()
 
 def Event(rate = eventRate):
     """ Control routine to perform tasks triggered by an event """
@@ -384,34 +385,34 @@ def Event(rate = eventRate):
                     txQueue])
 
     
-    def scHandle():
-        """ Interact with SC when new blocks are synchronized """
-        global ubi, payout, newRound, balance
+    # def scHandle():
+    #     """ Interact with SC when new blocks are synchronized """
+    #     global ubi, payout, newRound, balance
 
-        # 2) Log relevant smart contract details
-        blockNr = w3.blockNumber()
-        balance = w3.getBalance()
-        ubi = w3.call('askForUBI')
-        payout = w3.call('askForPayout')
-        robotCount = w3.call('robotCount')
-        mean = w3.call('getMean')
-        voteCount = w3.call('getVoteCount') 
-        voteOkCount = w3.call('getVoteOkCount') 
-        myVoteCounter = None
-        myVoteOkCounter = None
-        newRound = w3.call('isNewRound')
-        consensus = w3.call('isConverged')
+    #     # 2) Log relevant smart contract details
+    #     blockNr = w3.blockNumber()
+    #     balance = w3.getBalance()
+    #     ubi = w3.call('askForUBI')
+    #     payout = w3.call('askForPayout')
+    #     robotCount = w3.call('robotCount')
+    #     mean = w3.call('getMean')
+    #     voteCount = w3.call('getVoteCount') 
+    #     voteOkCount = w3.call('getVoteOkCount') 
+    #     myVoteCounter = None
+    #     myVoteOkCounter = None
+    #     newRound = w3.call('isNewRound')
+    #     consensus = w3.call('isConverged')
 
-        sclog.log([blockNr, balance, ubi, payout, robotCount, mean, voteCount, voteOkCount, myVoteCounter,myVoteOkCounter, newRound, consensus])
+    #     sclog.log([blockNr, balance, ubi, payout, robotCount, mean, voteCount, voteOkCount, myVoteCounter,myVoteOkCounter, newRound, consensus])
 
-        # rgb.flashWhite(0.2)
+    #     # rgb.flashWhite(0.2)
 
-        if consensus == 1:
-            rgb.setLED(rgb.all, [rgb.green]*3)
-            rgb.freeze()
-        #     rgb.freeze()
-        # elif rgb.frozen:
-        #     rgb.unfreeze()
+    #     if consensus == 1:
+    #         rgb.setLED(rgb.all, [rgb.green]*3)
+    #         rgb.freeze()
+    #     #     rgb.freeze()
+    #     # elif rgb.frozen:
+    #     #     rgb.unfreeze()
 
     if not startFlag:
         mainlogger.info('Stopped Events')
@@ -422,57 +423,57 @@ def Event(rate = eventRate):
         for blockHex in newBlocks:
             blockHandle()
 
-        if not amRegistered:
-            amRegistered = sc.functions.robot(me.key).call()[0]
-            if amRegistered:
-                eventlogger.debug('Registered on-chain')
+        # if not amRegistered:
+        #     amRegistered = sc.functions.robot(me.key).call()[0]
+        #     if amRegistered:
+        #         eventlogger.debug('Registered on-chain')
 
-        if amRegistered:
+        # if amRegistered:
 
-            try:
-                scHandle()
-            except Exception as e:
-                eventlogger.warning(e)
-            else:
-                if ubi != 0:
-                    ubiHash = sc.functions.askForUBI().transact({'gas':gasLimit})
-                    eventlogger.debug('Asked for UBI: %s', ubi)
-                    txList.append(ubiHash)
+        #     try:
+        #         scHandle()
+        #     except Exception as e:
+        #         eventlogger.warning(e)
+        #     else:
+        #         if ubi != 0:
+        #             ubiHash = sc.functions.askForUBI().transact({'gas':gasLimit})
+        #             eventlogger.debug('Asked for UBI: %s', ubi)
+        #             txList.append(ubiHash)
 
-                if payout != 0:
-                    payHash = sc.functions.askForPayout().transact({'gas':gasLimit})
-                    eventlogger.debug('Asked for payout: %s', payout)
-                    txList.append(payHash)
+        #         if payout != 0:
+        #             payHash = sc.functions.askForPayout().transact({'gas':gasLimit})
+        #             eventlogger.debug('Asked for payout: %s', payout)
+        #             txList.append(payHash)
 
-                if newRound:
-                    try:
-                        updateHash = sc.functions.updateMean().transact({'gas':gasLimit})
-                        txList.append(updateHash)
-                        eventlogger.debug('Updated mean')
-                    except Exception as e:
-                        eventlogger.debug(str(e))
+        #         if newRound:
+        #             try:
+        #                 updateHash = sc.functions.updateMean().transact({'gas':gasLimit})
+        #                 txList.append(updateHash)
+        #                 eventlogger.debug('Updated mean')
+        #             except Exception as e:
+        #                 eventlogger.debug(str(e))
 
-                if balance > 40.5 and voteHash == None:
-                    voteHash = vote()
-                    voteHashes.append(voteHash)
+        #         if balance > 40.5 and voteHash == None:
+        #             voteHash = vote()
+        #             voteHashes.append(voteHash)
 
-                if voteHash:
-                    try:
-                        tx = w3.eth.getTransaction(voteHash)
-                        txIndex = tx['transactionIndex']
-                        txBlock = tx['blockNumber']
-                        txNonce = tx['nonce']
-                    except:
-                        votelogger.warning('Vote disappered wtf. Voting again.')
-                        voteHash = None
+        #         if voteHash:
+        #             try:
+        #                 tx = w3.eth.getTransaction(voteHash)
+        #                 txIndex = tx['transactionIndex']
+        #                 txBlock = tx['blockNumber']
+        #                 txNonce = tx['nonce']
+        #             except:
+        #                 votelogger.warning('Vote disappered wtf. Voting again.')
+        #                 voteHash = None
 
-                    try:
-                        txRecpt = w3.eth.getTransactionReceipt(voteHash)
-                        votelogger.debug('Vote included in block!')
-                        # print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
-                        voteHash = None
-                    except:
-                        votelogger.debug('Vote not yet included on block')
+        #             try:
+        #                 txRecpt = w3.eth.getTransactionReceipt(voteHash)
+        #                 votelogger.debug('Vote included in block!')
+        #                 # print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
+        #                 voteHash = None
+        #             except:
+        #                 votelogger.debug('Vote not yet included on block')
 
 
 def reset():
@@ -480,18 +481,11 @@ def reset():
 
 
 def destroy():
-    global startFlag
     w3.stop()
-    startFlag = False
     print('Killed')
     # STOP()
 
-# /* Initialize background daemon threads for the Main-Modules*/
-#######################################################################
-bufferTh = threading.Thread(target=Buffer, args=())
-bufferTh.daemon = True         
-bufferTh.start()
-mainmodules = [bufferTh]
+
 
 def STOP(modules = submodules, logs = logmodules):
     mainlogger.info('Stopping Experiment')

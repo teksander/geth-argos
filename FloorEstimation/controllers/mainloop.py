@@ -79,7 +79,7 @@ global estTimer, buffTimer, eventTimer
 estTimer = buffTimer = eventTimer = time.time()
 
 def init():
-    global me, w3, rw, gs, erb, tcp, rgb, mainlogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, submodules, logmodules 
+    global me, w3, rw, gs, erb, tcp, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, submodules, logmodules 
 
     robotID = str(int(robot.id.get_id()[2:])+1)
 
@@ -98,7 +98,7 @@ def init():
     votelog = Logger('logs/'+robotID+'/vote.csv', header, ID = robotID)
     header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
     blocklog = Logger('logs/'+robotID+'/block.csv', header, ID = robotID)
-    header = ['BLOCK', 'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
+    header = ['BLOCK','HASH',  'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
     sclog = Logger('logs/'+robotID+'/sc.csv', header, ID = robotID)
     header = ['#BLOCKS']
     synclog = Logger('logs/'+robotID+'/sync.csv', header, ID = robotID)
@@ -121,8 +121,8 @@ def init():
     logging.getLogger('main').setLevel(10)
     logging.getLogger('estimate').setLevel(50)
     logging.getLogger('buffer').setLevel(50)
-    logging.getLogger('events').setLevel(50)
-    logging.getLogger('voting').setLevel(50)
+    logging.getLogger('events').setLevel(10)
+    logging.getLogger('voting').setLevel(10)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -182,14 +182,12 @@ def START(modules = submodules, logs = logmodules):
             mainlogger.critical('Error Starting Module: %s', module)
 
 def controlstep():
-    global startFlag, startTime, estTimer, buffTimer, eventTimer, prevTime, t1, t2
+    global startFlag, startTime, estTimer, buffTimer, eventTimer, stepTimer, bufferTh, eventTh
 
     if not startFlag:
         # START()
 
-        t1 = None
-        t2 = None
-        prevTime = time.time()
+        stepTimer = time.time()
 
         startTime = time.time()
         mainlogger.info('Starting Experiment')
@@ -201,17 +199,16 @@ def controlstep():
                 mainlogger.critical('Error Starting Log: %s', log)
 
         startFlag = True 
-        for module in submodules:
+        for module in submodules+mainmodules:
             try:
                 module.start()
             except:
                 mainlogger.critical('Error Starting Module: %s', module)
 
+        w3.transact1('registerRobot', {'gas':gasLimit})
+
+
     else:
-
-        stepTimer = time.time()
-
-
         # Perform step on submodules
         for module in [rw, gs, erb]:
             module.step()
@@ -222,30 +219,25 @@ def controlstep():
             estTimer = time.time()
 
         if time.time()-buffTimer > bufferRate:
-            if t1 == None or t1.is_alive() == 0:
-               t1 = threading.Thread(target=Buffer)
-               t1.start()
-            else:
-                pass
-                # print("Thread is already running")
+            # Buffer()
+            if not bufferTh.is_alive():
+                bufferTh = threading.Thread(target=Buffer)
+                bufferTh.start()
+
             buffTimer = time.time()
 
         if time.time()-eventTimer > eventRate:
-            if t2 == None or t2.is_alive() == 0:
-               t2 = threading.Thread(target=Event)
-               t2.start()
+            if not eventTh.is_alive():
+               eventTh = threading.Thread(target=Event)
+               eventTh.start()
             else:
-                print("Thread is already running")
+                pass
+                # print("Thread is already running")
             eventTimer = time.time()
 
-        # if time.time()-eventTimer > eventRate:
-        #     Event()
-        #     eventTimer = time.time()
-
-        if me.id == str(1):
-            print((time.time()-prevTime))
-            print(threading.active_count())
-            prevTime = time.time()
+        # if me.id == str(1):
+        #     print(round(time.time()-stepTimer, 2), threading.active_count())
+        #     stepTimer = time.time()
 
 def Estimate(rate = estimateRate):
     """ Control routine to update the local estimate of the robot """
@@ -337,6 +329,7 @@ def Event(rate = eventRate):
     voteHashes = []
     voteHash = None
     ticketPrice = 40
+    ticketPriceWei = w3.toWei(ticketPrice)
     amRegistered = False
 
     def vote():
@@ -344,7 +337,7 @@ def Event(rate = eventRate):
         myVoteCounter += 1
         try:
             vote = int(estimate*1e7)
-            w3.transact2('sendVote', vote, {"from":myKey, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
+            w3.transact2('sendVote', vote, {"from":me.key, "value":ticketPriceWei, "gas":gasLimit, "gasPrice":gasprice})
             txList.append(voteHash)
 
             votelog.log([vote])
@@ -384,104 +377,123 @@ def Event(rate = eventRate):
                     txPending, 
                     txQueue])
 
-    
-    # def scHandle():
-    #     """ Interact with SC when new blocks are synchronized """
-    #     global ubi, payout, newRound, balance
+    def scHandle():
+        """ Interact with SC when new blocks are synchronized """
+        global ubi, payout, newRound, balance
 
-    #     # 2) Log relevant smart contract details
-    #     blockNr = w3.blockNumber()
-    #     balance = w3.getBalance()
-    #     ubi = w3.call('askForUBI')
-    #     payout = w3.call('askForPayout')
-    #     robotCount = w3.call('robotCount')
-    #     mean = w3.call('getMean')
-    #     voteCount = w3.call('getVoteCount') 
-    #     voteOkCount = w3.call('getVoteOkCount') 
-    #     myVoteCounter = None
-    #     myVoteOkCounter = None
-    #     newRound = w3.call('isNewRound')
-    #     consensus = w3.call('isConverged')
+        # 2) Log relevant smart contract details
+        blockNr = w3.blockNumber()
+        balance = w3.getBalance()
+        ubi = w3.call('askForUBI')
+        payout = w3.call('askForPayout')
+        robotCount = w3.call('robotCount')
+        mean = w3.call('getMean')
+        voteCount = w3.call('getVoteCount') 
+        voteOkCount = w3.call('getVoteOkCount') 
+        myVoteCounter = None
+        myVoteOkCounter = None
+        newRound = w3.call('isNewRound')
+        consensus = w3.call('isConverged')
 
-    #     sclog.log([blockNr, balance, ubi, payout, robotCount, mean, voteCount, voteOkCount, myVoteCounter,myVoteOkCounter, newRound, consensus])
+        sclog.log([blockNr, balance, ubi, payout, robotCount, mean, voteCount, voteOkCount, myVoteCounter,myVoteOkCounter, newRound, consensus])
 
-    #     # rgb.flashWhite(0.2)
+        # rgb.flashWhite(0.2)
 
-    #     if consensus == 1:
-    #         rgb.setLED(rgb.all, [rgb.green]*3)
-    #         rgb.freeze()
-    #     #     rgb.freeze()
-    #     # elif rgb.frozen:
-    #     #     rgb.unfreeze()
+        if consensus == 1:
+            rgb.setLED(rgb.all, [rgb.green]*3)
+            rgb.freeze()
+        #     rgb.freeze()
+        # elif rgb.frozen:
+        #     rgb.unfreeze()
 
     if not startFlag:
         mainlogger.info('Stopped Events')
-
+    
+    # eventlogger.warning('Error Starting Module:')
     newBlocks = w3.blockFilter()
     if newBlocks:
         synclog.log([len(newBlocks)])
         for blockHex in newBlocks:
             blockHandle()
 
-        # if not amRegistered:
-        #     amRegistered = sc.functions.robot(me.key).call()[0]
-        #     if amRegistered:
-        #         eventlogger.debug('Registered on-chain')
+        if not amRegistered:
+            amRegistered = w3.call2('robot',me.key, {})[0]
+            print(amRegistered)
+            eventlogger.debug(amRegistered)
+            if amRegistered:
+                eventlogger.debug('Registered on-chain')
 
-        # if amRegistered:
+        if amRegistered:
 
-        #     try:
-        #         scHandle()
-        #     except Exception as e:
-        #         eventlogger.warning(e)
-        #     else:
-        #         if ubi != 0:
-        #             ubiHash = sc.functions.askForUBI().transact({'gas':gasLimit})
-        #             eventlogger.debug('Asked for UBI: %s', ubi)
-        #             txList.append(ubiHash)
+            try:
+                scHandle()
+            except Exception as e:
+                eventlogger.warning(e)
+            else:
+                if ubi != 0:
+                    ubiHash = w3.transact1('askForUBI', {'gas':gasLimit})
+                    eventlogger.debug('Asked for UBI: %s', ubi)
+                    txList.append(ubiHash)
 
-        #         if payout != 0:
-        #             payHash = sc.functions.askForPayout().transact({'gas':gasLimit})
-        #             eventlogger.debug('Asked for payout: %s', payout)
-        #             txList.append(payHash)
+                if payout != 0:
+                    payHash = w3.transact1('askForPayout', {'gas':gasLimit})
+                    eventlogger.debug('Asked for payout: %s', payout)
+                    txList.append(payHash)
 
-        #         if newRound:
-        #             try:
-        #                 updateHash = sc.functions.updateMean().transact({'gas':gasLimit})
-        #                 txList.append(updateHash)
-        #                 eventlogger.debug('Updated mean')
-        #             except Exception as e:
-        #                 eventlogger.debug(str(e))
+                if newRound:
+                    try:
+                        updateHash = w3.transact1('updateMean', {'gas':gasLimit})
+                        txList.append(updateHash)
+                        eventlogger.debug('Updated mean')
+                    except Exception as e:
+                        eventlogger.debug(str(e))
 
-        #         if balance > 40.5 and voteHash == None:
-        #             voteHash = vote()
-        #             voteHashes.append(voteHash)
+                if balance > 40.5 and voteHash == None:
+                    voteHash = vote()
+                    voteHashes.append(voteHash)
 
-        #         if voteHash:
-        #             try:
-        #                 tx = w3.eth.getTransaction(voteHash)
-        #                 txIndex = tx['transactionIndex']
-        #                 txBlock = tx['blockNumber']
-        #                 txNonce = tx['nonce']
-        #             except:
-        #                 votelogger.warning('Vote disappered wtf. Voting again.')
-        #                 voteHash = None
+                if voteHash:
+                    try:
+                        tx = w3.getTransaction(voteHash)
+                        txIndex = tx['transactionIndex']
+                        txBlock = tx['blockNumber']
+                        txNonce = tx['nonce']
+                    except:
+                        votelogger.warning('Vote disappered wtf. Voting again.')
+                        voteHash = None
 
-        #             try:
-        #                 txRecpt = w3.eth.getTransactionReceipt(voteHash)
-        #                 votelogger.debug('Vote included in block!')
-        #                 # print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
-        #                 voteHash = None
-        #             except:
-        #                 votelogger.debug('Vote not yet included on block')
+                    try:
+                        txRecpt = w3.getTransactionReceipt(voteHash)
+                        votelogger.debug('Vote included in block!')
+                        # print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
+                        voteHash = None
+                    except:
+                        votelogger.debug('Vote not yet included on block')
 
+# /* Initialize background daemon threads for the Main-Modules*/
+#######################################################################
+
+estimateTh = threading.Thread(target=Estimate, args=())
+# estimateTh.daemon = True   
+
+bufferTh = threading.Thread(target=Buffer, args=())
+# bufferTh.daemon = True                         
+
+eventTh = threading.Thread(target=Event, args=())
+# eventTh.daemon = True                        
+
+# Ignore mainmodules by removing from list:
+mainmodules = [estimateTh, bufferTh, eventTh]
 
 def reset():
     pass
 
 
 def destroy():
-    w3.stop()
+    if startFlag:
+        w3.stop()
+        eventTh.join()
+        bufferTh.join()
     print('Killed')
     # STOP()
 
