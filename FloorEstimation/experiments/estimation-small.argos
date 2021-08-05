@@ -29,12 +29,7 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-<<<<<<< HEAD
       <params script="/home/volker/alex-stuff/geth-argos/FloorEstimation/controllers/estimate.py" />
-=======
-      <!-- <params script="/home/eksander/geth-argos/FloorEstimation/controllers/estimate.py" /> -->
-      <params script="/home/eksander/geth-argos/FloorEstimation/controllers/mainloop.py" />
->>>>>>> 72ff8d34d4f5a402e01d7a94faeac707040a68da
     </python_controller>
 
   </controllers>
@@ -60,7 +55,7 @@
     <distribute>
       <position method="uniform" min="-0.55,-0.55,0" max="0.55,0.55,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="1" max_trials="100"> 
+      <entity quantity="10" max_trials="100"> 
         <e-puck id="fb" 
                   rab_range = "1">
           <controller config="python" />

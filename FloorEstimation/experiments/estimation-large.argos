@@ -19,25 +19,17 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-<<<<<<< HEAD
-        <epuck_range_and_bearing implementation="medium" range="0.1" />
-=======
         <epuck_range_and_bearing implementation="medium" range="0.2" show_rays="true" />
->>>>>>> 72ff8d34d4f5a402e01d7a94faeac707040a68da
       </actuators>
       <sensors>
         <epuck_proximity implementation="default"  />
         <epuck_ground implementation="rot_z_only" />
-        <epuck_range_and_bearing implementation="medium" medium="rab" />
+        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
       </sensors>
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-<<<<<<< HEAD
-      <params script="/home/volker/alex-stuff/geth-argos/FloorEstimation/controllers/estimate.py" />
-=======
-      <params script="/home/eksander/geth-argos/FloorEstimation/controllers/mainloop.py" />
->>>>>>> 72ff8d34d4f5a402e01d7a94faeac707040a68da
+      <params script="/home/volker/alex-stuff/geth-argos/FloorEstimation/controllers/mainloop.py" />
     </python_controller>
 
   </controllers>
@@ -46,11 +38,7 @@
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="1.9, 1.9, 1" center="0,0,0.5">
-<<<<<<< HEAD
- <floor id="f" source="image" path="/home/volker/alex-stuff/geth-argos/FloorEstimation/experiments/38.png" />
-=======
- <floor id="f" source="image" path="/home/eksander/geth-argos/FloorEstimation/experiments/38.png" />
->>>>>>> 72ff8d34d4f5a402e01d7a94faeac707040a68da
+ <floor id="f" source="image" path="/home/volker/alex-stuff/FloorEstimation/experiments/38.png" />
     <box id="wall_north" size="2,0.1,0.1" movable="false">
       <body position="0,0.95,0" orientation="0,0,0" />
     </box>
