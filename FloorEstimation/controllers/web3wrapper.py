@@ -30,10 +30,10 @@ class Web3_Wrapper(object):
     def isMining(self):
         return self.w3.eth.mining
 
-    def minerStart(self):
+    def start(self):
         self.w3.geth.miner.start()
 
-    def minerStop(self):
+    def stop(self):
         self.w3.geth.miner.stop()
 
     def addPeer(self, __en):
@@ -52,6 +52,12 @@ class Web3_Wrapper(object):
 
     def toWei(self, value):
         return self.w3.toWei(value ,"ether")
+
+    def getBlock(self, blockHex):
+        return toDict(self.w3.eth.getBlock(blockHex))
+
+    def getTxPoolStatus(self):
+        return self.w3.geth.txpool.status()
 
     ############ SC WRAPPER #####################
     def transact2(self, func, arg1, arg2):
@@ -89,11 +95,11 @@ class Web3_Wrapper_Service(rpyc.Service):
     def exposed_blockNumber(self):
         return self.w3if.blockNumber()
 
-    def exposed_minerStart(self):
-        return self.w3if.minerStart()
+    def exposed_start(self):
+        return self.w3if.start()
 
-    def exposed_minerStop(self):
-        return self.w3if.minerStop()
+    def exposed_stop(self):
+        return self.w3if.stop()
 
     def exposed_isMining(self):
         return self.w3if.isMining()
@@ -128,7 +134,11 @@ class Web3_Wrapper_Service(rpyc.Service):
     def exposed_blockFilter(self):
         return self.w3if.blockFilter()
 
+    def exposed_getBlock(self, blockHex):
+        return self.w3if.getBlock(blockHex)
 
+    def exposed_getTxPoolStatus(self):
+        return self.w3if.getTxPoolStatus()
 
 # Start the RPYC servers
 # When the server is moved to docker, this for cycle is executed just once per container
@@ -147,3 +157,14 @@ for row in identifiers.readlines():
     t.start()
     serverList.append(t)
 
+def toDict(dictToParse):
+    # convert any 'AttributeDict' type found to 'dict'
+    parsedDict = dict(dictToParse)
+    for key, val in parsedDict.items():
+        # check for nested dict structures to iterate through
+        if  'dict' in str(type(val)).lower():
+            parsedDict[key] = toDict(val)
+        # convert 'HexBytes' type to 'str'
+        elif 'HexBytes' in str(type(val)):
+            parsedDict[key] = val.hex()
+    return parsedDict

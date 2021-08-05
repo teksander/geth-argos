@@ -17,7 +17,7 @@ source global_config_blockchain.sh
 cd ${DOCKERBASE}
 docker stack rm ethereum >/dev/null 2>&1
 
-rm -f ${DOCKERBASE}/geth/shared/my_enode.enode
+rm -f ${DOCKERBASE}/geth/my_enode.enode
 sleep 5
 docker stack deploy -c ./docker-compose.yml ethereum
 

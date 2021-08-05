@@ -31,5 +31,3 @@ To-do-list:
 
 Improvements to argos-python:
 - Implement the positioning sensor
-- Figure out how to handle globals better. Have robot availiable in submodules ?
-- Add a new xlm parameter similar to <params script> called <params folder> which is the folder where the controllers are located. In boost-python add this folder to path in order to be able to import submodules

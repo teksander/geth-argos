@@ -42,7 +42,7 @@ tmux_ALL_logs() {
 	# Create an sequence of split window action for each container ID
 	split_list=()
 	for ID in $(seq 2 $NUM_ROB); do
-	    split_list+=( split-pane tail -f "${EXPERIMENTFOLDER}"/logs/"${ID}"/monitor.log ';' select-layout even-vertical ';' )
+	    split_list+=( split-pane tail -f "${EXPERIMENTFOLDER}"/logs/"${ID}"/"$2" ';' select-layout even-vertical ';' )
 	done
 
 	# Define the terminal geometry (larger if there are many robots)
@@ -54,27 +54,62 @@ tmux_ALL_logs() {
 	fi
 
 	# Open the terminal and configure it 
-	gnome-terminal --geometry="$geom" -- tmux new -s $1 tail -f "${EXPERIMENTFOLDER}"/logs/robot1.log  ';' \
+	gnome-terminal --geometry="$geom" -- tmux new -s $1 tail -f "${EXPERIMENTFOLDER}"/logs/"1"/"$2"  ';' \
 	    "${split_list[@]}" \
 	    set-option -w synchronize-panes ';' \
 		select-layout tiled ';' 
 }
+
+tmux_ALL_geth_logs() {
+	# Create an sequence of split window action for each container ID
+	split_list=()
+	for ID in $(seq 2 $NUM_ROB); do
+	    split_list+=( split-pane docker logs --tail 2000 --follow $(docker ps -q -f name="ethereum_eth.${ID}\.") ';' select-layout even-vertical ';' )
+	done
+
+	# Define the terminal geometry (larger if there are many robots)
+	geom="default"
+	if [ $NUM_ROB -gt 8 ]; then
+		geomX=$(( $NUM_ROB*8 ))
+		geomY=$(( $NUM_ROB*5 ))
+		geom="${geomX}x${geomY}"
+	fi
+
+	# Open the terminal and configure it 
+	gnome-terminal --geometry="$geom" -- tmux new -s $1 docker logs --tail 2000 --follow $(docker ps -q -f name="ethereum_eth.1\.")  ';' \
+	    "${split_list[@]}" \
+	    set-option -w synchronize-panes ';' \
+		select-layout tiled ';' 
+}
+
+
+
 if [[ $# -eq 0 ]]; then 
 	tmux kill-session -t BASH >/dev/null 2>&1
 	tmux_ALL "BASH"
 fi
 
-if [[ $# -eq 1 ]]; then 
+
+if [[ $# -ge 1 ]]; then 
 	if [[ $1 == "logs" ]]; then
 		tmux kill-session -t LOGS >/dev/null 2>&1
-		tmux_ALL_logs "LOGS"
-	fi
+		tmux_ALL_logs "LOGS" monitor.log
 
-	if [[ $1 == "geth" ]]; then
+		if [[ $# -eq 2 ]]; then
+			if [[ $2 == "geth" ]]; then
+				tmux kill-session -t LOGS-GETH >/dev/null 2>&1
+				tmux_ALL_geth_logs "LOGS-GETH"
+			else
+				tmux kill-session -t LOGS >/dev/null 2>&1
+				tmux_ALL_logs "LOGS" $2
+			fi
+		fi
+
+	elif [[ $1 == "geth" ]]; then
 	tmux kill-session -t GETH >/dev/null 2>&1
  	tmux_ALL "GETH"
 	tmux send-keys -t GETH "bash geth_attach.sh" Enter
-	
+
     elif [[ $1 == "python" ]]; then
 	tmux kill-session -t PYTHON >/dev/null 2>&1
 	tmux_ALL "PYTHON"
