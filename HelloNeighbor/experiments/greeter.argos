@@ -14,7 +14,7 @@
   <controllers>
 
    
-    <python_controller id="python" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
+    <python_controller id="python" library="/home/volker/alex-stuff/geth-argos/argos-python/build/libpy_controller_interface.so">
       <!-- Normal actuator/sensor configuration follows -->
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
@@ -29,7 +29,7 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="/home/eksander/geth-argos/HelloNeighbor/controllers/greet.py" />
+      <params script="/home/volker/alex-stuff/geth-argos/HelloNeighbor/controllers/greet.py" />
     </python_controller>
 
   </controllers>
@@ -38,7 +38,7 @@
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="1, 1, 1" center="0,0,0.5">
- <floor id="f" source="image" path="/home/eksander/geth-argos/HelloNeighbor/experiments/1.png" />
+ <floor id="f" source="image" path="/home/volker/alex-stuff/geth-argos/HelloNeighbor/experiments/1.png" />
     <box id="wall_north" size="1.1,0.1,0.1" movable="false">
       <body position="0,0.5,0" orientation="0,0,0" />
     </box>
@@ -66,7 +66,7 @@
   </arena>
 <!-- 
   <arena size="1.9, 1.9, 1" center="0,0,0.5">
- <floor id="f" source="image" path="/home/eksander/geth-argos/HelloNeighbor/experiments/1.png" />
+ <floor id="f" source="image" path="/home/volker/alex-stuff/geth-argos/HelloNeighbor/experiments/1.png" />
     <box id="wall_north" size="2,0.1,0.1" movable="false">
       <body position="0,0.95,0" orientation="0,0,0" />
     </box>

@@ -7,7 +7,7 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
 N=$1
-SLEEPTIME=30
+SLEEPTIME=15
 
 source global_config_blockchain.sh
 # source ${ARGOSFOLDER}/global_config.sh
