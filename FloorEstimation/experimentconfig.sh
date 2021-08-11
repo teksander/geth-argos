@@ -21,15 +21,21 @@ NUMROBOTS=8
 
 #ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-medium.argosx"
 #ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-medium.argos"
-#NUMROBOTS=20
+#NUMROBOTS=16
 
 #ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
 #ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
-#NUMROBOTS=30
+#NUMROBOTS=24
 
+
+ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
+ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
+NUMROBOTS=60
 
 REPETITIONS=1
 VISUALIZATION=visualization # visualization or none
-#ARENASIZEDIM="1.0"
-#CELLDIMENSION="0.1"
+
+ARENADIM="2.7"
+ARENADIMH="1.35"
+CELLDIMENSION="0.1"
 
