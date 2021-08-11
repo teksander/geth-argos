@@ -9,6 +9,8 @@ echo "+-----------------------------------------------------------+"
 sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
     -e "s|ARGOSFOLDER|$ARGOSFOLDER|g"\
+    -e "s|ARENADIMH|$ARENADIMH|g"\
+    -e "s|ARENADIM|$ARENADIM|g"\
   $ARGOSTEMPLATE > $ARGOSFILE
   
 # Generate the genesis block; first: read in compiled smart contract

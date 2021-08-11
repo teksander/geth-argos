@@ -21,17 +21,21 @@ CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/Estimation.abi"
 # NUMROBOTS=50
 
 
-ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
-ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
-NUMROBOTS=30
+# ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
+# ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
+# NUMROBOTS=30
 
 # ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-small.argosx"
 # ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-small.argos"
 # NUMROBOTS=10
 
+ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
+ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
+NUMROBOTS=60
 
 REPETITIONS=1
 VISUALIZATION=visualization # visualization or none
-ARENASIZEDIM="1.0"
+ARENADIM="2.7"
+ARENADIMH="1.35"
 CELLDIMENSION="0.1"
 
