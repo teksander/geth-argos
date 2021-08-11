@@ -17,7 +17,7 @@
   <controllers>
 
    
-    <python_controller id="python" library="/home/volker/alex-stuff/geth-argos/argos-python/build/libpy_controller_interface.so">
+    <python_controller id="python" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
       <!-- Normal actuator/sensor configuration follows -->
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
@@ -32,20 +32,20 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="/home/volker/alex-stuff/geth-argos/FloorEstimation/controllers/mainloop.py" />
+      <params script="/home/eksander/geth-argos/FloorEstimation/controllers/mainloop.py" />
     </python_controller>
   </controllers>
 
-  <loop_functions library="/home/volker/alex-stuff/geth-argos/argos-python/build/libpy_loop_function_interface.so"
+  <loop_functions library="/home/eksander/geth-argos/argos-python/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
-    <params script="/home/volker/alex-stuff/geth-argos/FloorEstimation/loop_functions/floor_estimation_loop.py"/>
+    <params script="/home/eksander/geth-argos/FloorEstimation/loop_functions/floor_estimation_loop.py"/>
   </loop_functions>
 
     <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="1.100, 1.100, 1" center="0,0,0.5">
- <floor id="f" source="image" path="/home/volker/alex-stuff/geth-argos/FloorEstimation/experiments/22.png" />
+ <floor id="f" source="image" path="/home/eksander/geth-argos/FloorEstimation/experiments/22.png" />
     <box id="wall_north" size="1.100,0.01,0.100" movable="false">
       <body position="0,0.55,0" orientation="0,0,0" />
     </box>
@@ -97,8 +97,13 @@
     <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
     <!-- ************************************************************************ -->
   <qt-opengl>
+<<<<<<< HEAD
+      <!-- <user_functions library="/home/eksander/geth-argos/argos-python/build/loop_functions/libid_loop_functions" -->
+      <!--                 label="id_qtuser_functions" /> -->
+=======
       <user_functions library="/home/volker/alex-stuff/geth-argos/argos-python/build/loop_functions/libid_loop_functions"
                       label="id_qtuser_functions" />
+>>>>>>> 7bb457ef6db3d0219fb53a67ef07e1291ad06f9d
     <camera>
       <placements>
         <placement index="0" position="0,0,1.5" up="1,0,0" look_at="0,0,0" lens_focal_length="20" />
