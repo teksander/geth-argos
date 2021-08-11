@@ -15,27 +15,21 @@ CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/Estimation.abi"
 
 # EXPERIMENT FILES AND PARAMETERS
 
+ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-small.argosx"
+ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-small.argos"
+NUMROBOTS=8
 
-# ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-ludicrious.argosx"
-# ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-ludicrious.argos"
-# NUMROBOTS=50
+#ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-medium.argosx"
+#ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-medium.argos"
+#NUMROBOTS=20
 
-
-ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
-ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
-NUMROBOTS=30
-
-# ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-small.argosx"
-# ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-small.argos"
-# NUMROBOTS=10
-
-#ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-small.argosx"
-#ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-small.argos"
-#NUMROBOTS=10
+#ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
+#ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
+#NUMROBOTS=30
 
 
 REPETITIONS=1
 VISUALIZATION=visualization # visualization or none
-ARENASIZEDIM="1.0"
-CELLDIMENSION="0.1"
+#ARENASIZEDIM="1.0"
+#CELLDIMENSION="0.1"
 

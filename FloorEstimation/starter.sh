@@ -7,9 +7,11 @@ echo "Updating the ARGoS XML file"
 echo "+-----------------------------------------------------------+"
 
 sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
+    -e "s|NUMBYZANTINE|$NUMBYZANTINE|g"\
     -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
     -e "s|ARGOSFOLDER|$ARGOSFOLDER|g"\
   $ARGOSTEMPLATE > $ARGOSFILE
+
   
 # Generate the genesis block; first: read in compiled smart contract
 echo "Compiling the Smart Contract"

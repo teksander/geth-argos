@@ -18,7 +18,7 @@ class ERANDB(object):
 
          # This robot ID
         self.robot = robot
-        self.id = str(int(robot.id.get_id()[2:])+1)
+        self.id = str(int(robot.variables.get_id()[2:])+1)
         self.newIds = set()
         self.setData(self.id)
 

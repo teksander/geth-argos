@@ -2,11 +2,6 @@
 # This is the main control loop running in each argos robot
  
 
- 
- 
- 
- 
-
 # /* Logging Levels for Console and File */
 #######################################################################
 loglevel = 10
@@ -22,7 +17,7 @@ rwSpeed = 350
 pcID = '100'
 
 estimateRate = 1
-bufferRate = 0.25 # reality is 0.25
+bufferRate = 0.1 # reality is 0.25
 eventRate = 1
 globalPeers = 0
 ageLimit = 2
@@ -78,11 +73,15 @@ consensus = False
 global estTimer, buffTimer, eventTimer
 estTimer = buffTimer = eventTimer = time.time()
 
+global mainlogger
+
 def init():
     global me, w3, rw, gs, erb, tcp, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, submodules, logmodules 
 
-    robotID = str(int(robot.id.get_id()[2:])+1)
+    robotID = str(int(robot.variables.get_id()[2:])+1)
 
+    robot.variables.set_consensus(False) 
+    
     logFile = experimentFolder+'/logs/'+robotID+'/monitor.log'
     logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 
@@ -184,6 +183,7 @@ def START(modules = submodules, logs = logmodules):
 def controlstep():
     global startFlag, startTime, estTimer, buffTimer, eventTimer, stepTimer, bufferTh, eventTh
 
+            
     if not startFlag:
         # START()
 
@@ -245,14 +245,18 @@ def Estimate(rate = estimateRate):
     # Set counters for grid colors
     newValues = gs.getNew()
     # print([newValue for newValue in newValues])
-
+    
+    byzantine_style = robot.variables.get_byzantine_style()
+    
     for value in newValues:
         if value != 0:
             totalWhite += 1
         else:
             totalBlack += 1
-    if isbyz:
+    if byzantine_style == 1:
         estimate = 0
+    elif byzantine_style == 2:
+        estimate = 1        
     else:
         estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
     estimatelog.log([round(estimate,3),totalWhite,totalBlack,newValues[0],newValues[1],newValues[2]]) 
@@ -284,7 +288,6 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
             rgb.setLED(rgb.all, 3*['red'])
 
         for peer in peers:
-
             if peer not in peered:
                 enode = tcp.request('localhost', tcpPort+int(peer)) 
                 # mainlogger.info('got enode: %s', enode)
@@ -361,8 +364,8 @@ def Event(rate = eventRate):
 
         # 1) Log relevant block details 
         block = w3.getBlock(blockHex)
-        txPending = str(eval(w3.getTxPoolStatus()['pending']))
-        txQueue = str(eval(w3.getTxPoolStatus()['queued']))
+        #txPending = str(eval(w3.getTxPoolStatus()['pending']))
+        #txQueue = str(eval(w3.getTxPoolStatus()['queued']))
 
         blocklog.log([time.time()-block['timestamp'], 
                     block['timestamp'], 
@@ -374,8 +377,9 @@ def Event(rate = eventRate):
                     block['size'], 
                     len(block['transactions']), 
                     len(block['uncles']), 
-                    txPending, 
-                    txQueue])
+         #           txPending, 
+         #           txQueue
+        ])
 
     def scHandle():
         """ Interact with SC when new blocks are synchronized """
@@ -402,6 +406,8 @@ def Event(rate = eventRate):
         if consensus == 1:
             rgb.setLED(rgb.all, [rgb.green]*3)
             rgb.freeze()
+            robot.variables.set_consensus(True)
+
         #     rgb.freeze()
         # elif rgb.frozen:
         #     rgb.unfreeze()
@@ -520,7 +526,7 @@ def STOP(modules = submodules, logs = logmodules):
         except:
             mainlogger.warning('Error Closing Logfile')
             
-    if isByz:
+    if isbyz:
         pass
         mainlogger.info('This Robot was BYZANTINE')
 
@@ -587,16 +593,16 @@ def init_web3():
     global ticketPrice
 
     # Get ID from argos
-    robotID = int(robot.id.get_id()[2:])+1
+    robotID = int(robot.variables.get_id()[2:])+1
 
     # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
     conn = rpyc.connect("localhost", 4000+int(robotID), config = {"allow_all_attrs" : True})
     w3 = conn.root
 
     # Do stuff over RPYC
-    print(w3.getBalance())
-    print(w3.getKey())
-    print(w3.isMining())
+    #print(w3.getBalance())
+    #print(w3.getKey())
+    #print(w3.isMining())
     
     ticketPrice = 40
     return w3

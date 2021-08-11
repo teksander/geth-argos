@@ -5,6 +5,7 @@ geth --datadir=~/.ethereum/devchain init "/root/files/genesis_poa.json"
 ip=`hostname -i`
 GETH_OPTS=${@/KEYSTORE/$SLOT}
 GETH_OPTS=${GETH_OPTS/IPADDRESS/$ip}
+echo "Printing GETH_OPTS"
 echo "$GETH_OPTS"
 geth $GETH_OPTS&
 sleep 13

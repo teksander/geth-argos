@@ -5,7 +5,10 @@
   <!-- * General configuration * -->
   <!-- ************************* -->
   <framework>
-    <experiment length="0" ticks_per_second="10" random_seed="5" />
+    <experiment length="0"
+      ticks_per_second="10"
+      real_time="true"
+      random_seed="5" />
   </framework>
 
   <!-- *************** -->
@@ -24,7 +27,7 @@
       <sensors>
         <epuck_proximity implementation="default"  />
         <epuck_ground implementation="rot_z_only" />
-        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
+        <epuck_range_and_bearing implementation="medium" medium="rab" />
       </sensors>
       <!-- No required configuration -->
       
@@ -37,25 +40,25 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="1.9, 1.9, 1" center="0,0,0.5">
- <floor id="f" source="image" path="/home/volker/alex-stuff/FloorEstimation/experiments/38.png" />
-    <box id="wall_north" size="2,0.1,0.1" movable="false">
-      <body position="0,0.95,0" orientation="0,0,0" />
+  <arena size="2.45, 2.45, 1" center="0,0,0.5">
+ <floor id="f" source="image" path="/home/volker/alex-stuff/geth-argos/FloorEstimation/experiments/38.png" />
+    <box id="wall_north" size="2.5,0.1,0.1" movable="false">
+      <body position="0,1.225,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="2,0.1,0.1" movable="false">
-      <body position="0,-0.95,0" orientation="0,0,0" />
+    <box id="wall_south" size="2.5,0.1,0.1" movable="false">
+      <body position="0,-1.225,0" orientation="0,0,0" />
     </box>
-    <box id="wall_east" size="0.1,1.9,0.1" movable="false">
-      <body position="0.95,0,0" orientation="0,0,0" />
+    <box id="wall_east" size="0.1,2.5,0.1" movable="false">
+      <body position="1.225,0,0" orientation="0,0,0" />
     </box>
-    <box id="wall_west" size="0.1,1.9,0.1" movable="false">
-      <body position="-0.95,0,0" orientation="0,0,0" />
+    <box id="wall_west" size="0.1,2.5,0.1" movable="false">
+      <body position="-1.225,0,0" orientation="0,0,0" />
     </box>
 
     <distribute>
       <position method="uniform" min="-0.8,-0.8,0" max="0.8,0.8,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="30" max_trials="100"> 
+      <entity quantity="20" max_trials="100"> 
         <e-puck id="fb" 
                   rab_range = "1">
           <controller config="python" />
@@ -89,7 +92,7 @@
     <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
     <!-- ************************************************************************ -->
     <qt-opengl>
-      <user_functions library="/home/eksander/geth-argos/argos-python/build/loop_functions/libid_loop_functions"
+      <user_functions library="/home/volker/alex-stuff/geth-argos/argos-python/build/loop_functions/libid_loop_functions"
                       label="id_qtuser_functions" />
       <camera>
         <placement idx="0" position="-0.00569879,0.01,4.86243" look_at="-0.00569879,0.01,3.86243" lens_focal_length="20" />
