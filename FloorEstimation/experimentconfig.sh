@@ -28,9 +28,9 @@ NUMROBOTS=8
 #NUMROBOTS=24
 
 
-ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
-ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
-NUMROBOTS=60
+#ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
+#ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
+#NUMROBOTS=60
 
 REPETITIONS=1
 VISUALIZATION=visualization # visualization or none
