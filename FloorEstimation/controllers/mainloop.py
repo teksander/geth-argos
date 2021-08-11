@@ -76,7 +76,7 @@ estTimer = buffTimer = eventTimer = time.time()
 global mainlogger
 
 def init():
-    global me, w3, rw, gs, erb, tcp, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, submodules, logmodules 
+    global me, w3, rw, gs, erb, tcp, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, simlog, submodules, logmodules 
 
     robotID = str(int(robot.variables.get_id()[2:])+1)
 
@@ -106,8 +106,11 @@ def init():
     header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
     txlog = Logger('logs/'+robotID+'/tx.csv', header, ID = robotID)
 
+    header = ['FPS']
+    simlog = Logger('logs/'+robotID+'/sim.csv', header, ID = robotID)
+
     # List of logmodules --> iterate .start() to start all; remove from list to ignore
-    logmodules = [bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog]
+    logmodules = [bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, simlog]
 
     # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
     mainlogger = logging.getLogger('main')
@@ -235,9 +238,8 @@ def controlstep():
                 # print("Thread is already running")
             eventTimer = time.time()
 
-        # if me.id == str(1):
-        #     print(round(time.time()-stepTimer, 2), threading.active_count())
-        #     stepTimer = time.time()
+        simlog.log([round(time.time()-stepTimer, 2)])
+        stepTimer = time.time()
 
 def Estimate(rate = estimateRate):
     """ Control routine to update the local estimate of the robot """
@@ -313,6 +315,13 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
             for enode in gethPeers:
                 w3.removePeer(enode)
 
+        if bufferlog.isReady():
+            # Low frequency logging of chaindata size and cpu usage
+            if me.id == '1':
+                chainSize = getRAMPercent()
+                cpuPercent = getCPUPercent()
+                extralog.log([chainSize,cpuPercent])
+            bufferlog.log([nGethPeers, len(peers), len(tcp.allowed)])
 
     if globalPeers:
         pass
@@ -321,6 +330,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
         # localBuffer()
         simplifiedBuffer()
         # forcedBuffer()
+
 
 def Event(rate = eventRate):
     """ Control routine to perform tasks triggered by an event """
@@ -424,7 +434,7 @@ def Event(rate = eventRate):
 
         if not amRegistered:
             amRegistered = w3.call2('robot',me.key, {})[0]
-            print(amRegistered)
+            # print(amRegistered)
             eventlogger.debug(amRegistered)
             if amRegistered:
                 eventlogger.debug('Registered on-chain')

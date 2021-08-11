@@ -6,6 +6,7 @@ import socket
 import subprocess
 import os
 import logging
+import psutil
 
 # The logs that go to console
 # logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -353,7 +354,10 @@ def readEnode(enode, output = 'id'):
         return ip_.split('.')[-1] 
 
 def getCPUPercent():
-    return str(round(float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline()),2))
+    return psutil.cpu_percent()
+
+def getRAMPercent():
+    return psutil.virtual_memory().percent
 
 def getFolderSize(folder):
     # Return the size of a folder

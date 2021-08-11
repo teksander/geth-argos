@@ -28,14 +28,15 @@ NUMROBOTS=8
 #NUMROBOTS=24
 
 
-#ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
-#ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
-#NUMROBOTS=60
+ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
+ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
+NUMROBOTS=45
 
+
+DENSITY=8.31
+ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
+ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
 REPETITIONS=1
 VISUALIZATION=visualization # visualization or none
-
-ARENADIM="2.7"
-ARENADIMH="1.35"
 CELLDIMENSION="0.1"
 
