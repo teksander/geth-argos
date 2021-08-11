@@ -97,8 +97,8 @@
     <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
     <!-- ************************************************************************ -->
   <qt-opengl>
-      <!-- <user_functions library="ARGOSFOLDER/build/loop_functions/libid_loop_functions" -->
-      <!--                 label="id_qtuser_functions" /> -->
+      <user_functions library="ARGOSFOLDER/build/loop_functions/libid_loop_functions"
+                      label="id_qtuser_functions" />
     <camera>
       <placements>
         <placement index="0" position="0,0,1.5" up="1,0,0" look_at="0,0,0" lens_focal_length="20" />
