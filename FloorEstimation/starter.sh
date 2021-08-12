@@ -3,6 +3,8 @@
 
 source experimentconfig.sh
 
+echo "MAINFOLDER IS $MAINFOLDER"
+
 echo "Updating the ARGoS XML file"
 echo "+-----------------------------------------------------------+"
 
@@ -68,11 +70,8 @@ bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
 docker ps --format '{{.Names}} {{.ID}}' > temp1.txt
 sort -o temp1.txt temp1.txt
 
-# Create an list of IDs (temporary solution)
+# Create a list of IDs (temporary solution)
 seq 1 $NUMROBOTS > ids.txt
-
-# # Collect all enodes to a list (temporary solution)
-# bash exec-all.sh "cat my_enode.enode" > temp3.txt 
 
 # Get IPs
 ./exec-all.sh "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
@@ -85,30 +84,3 @@ rm temp1.txt temp2.txt ids.txt
 wait
 # Start w3 servers
 gnome-terminal --tab -- python3 -i controllers/web3wrapper.py
-
-# # Global blockchain (comment out for local sync)
-# ./addPeers-all.sh
-
-# sleep 10
-# # Start experiment
-# argos3 -c $ARGOSFILE
-# # bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
-
-
-# # Get containers
-# docker ps --format '{{.Names}} {{.ID}}' > temp1.txt
-# sort -o temp1.txt temp1.txt
-
-# # Create an list of IDs (temporary solution)
-# seq 1 $NUMROBOTS > ids.txt
-
-# # Collect all enodes to a list
-# bash exec-all.sh "cat my_enode.enode" > temp3.txt 
-
-# # Get IPs
-# ./exec-all.sh "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
-
-# # Collect everything in a single file
-# paste ids.txt temp1.txt temp2.txt > identifiers.txt
-# paste ids.txt temp3.txt > enodes.txt
-# rm temp1.txt temp2.txt temp3.txt ids.txt 

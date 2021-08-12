@@ -4,19 +4,19 @@
 # - The Pi-puck IDs are listed in pi-pucks.txt
 source experimentconfig.sh
 
-if [ "$#" -eq 1 ]; then
+# if [ "$#" -eq 1 ]; then
 
-	if [ -d "$EXPERIMENTFOLDER/results/data/$1" ]; then
-		# Take action if $DIR exists. #
-		echo "Rewrite folder $EXPERIMENTFOLDER/results/data/$1? [Y/N]"
-		read CONF
-	if [ $CONF = "Y" -o $CONF = "y" ]; then
-		rm -rfv $EXPERIMENTFOLDER/results/data/$1
-	else
-		exit 1
-	fi
-	fi
-fi	
+# 	if [ -d "$EXPERIMENTFOLDER/results/data/$1" ]; then
+# 		# Take action if $DIR exists. #
+# 		echo "Rewrite folder $EXPERIMENTFOLDER/results/data/$1? [Y/N]"
+# 		read CONF
+# 	if [ $CONF = "Y" -o $CONF = "y" ]; then
+# 		rm -rfv $EXPERIMENTFOLDER/results/data/$1
+# 	else
+# 		exit 1
+# 	fi
+# 	fi
+# fi	
 cp -r $EXPERIMENTFOLDER/logs/ $EXPERIMENTFOLDER/results/data/$1
 
 

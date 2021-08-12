@@ -1,10 +1,10 @@
 EXPERIMENT="G9"
 
 config_file="loop_function_params.py"
-num_byzantine=0
+num_byzantine=4
 byzantine_swarm_style=1
 
-repetitions=2
+repetitions=10
 
 
 for rep in $(seq 1 ${repetitions});
@@ -24,11 +24,11 @@ do
 
 	# Run experiment
 	
-	sleep 20
+	sleep 15
 	argos3 -z -c $ARGOSFILE
 
 	# Collect logged data
-	bash collect-logs "rep_$rep"
+	bash collect-logs "16rob_2byz_rep_$rep"
 
 done
 

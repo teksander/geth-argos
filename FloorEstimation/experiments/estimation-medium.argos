@@ -37,67 +37,68 @@
   </controllers>
 
   <loop_functions library="/home/volker/alex-stuff/geth-argos/argos-python/build/libpy_loop_function_interface.so"
-    label="py_loop_function">
+                  label="py_loop_function">
     <params script="/home/volker/alex-stuff/geth-argos/FloorEstimation/loop_functions/floor_estimation_loop.py"/>
   </loop_functions>
-  
-  <!-- *********************** -->
+
+    <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="1.55, 1.55, 1" center="0,0,0.5">
-   <floor id="f" source="image" path="/home/volker/alex-stuff/geth-argos/FloorEstimation/experiments/38.png" />
-   <box id="wall_north" size="1.55,0.001,0.1" movable="false">
-    <body position="0,0.775,0" orientation="0,0,0" />
-  </box>
-  <box id="wall_south" size="1.55,0.001,0.1" movable="false">
-    <body position="0,-0.775,0" orientation="0,0,0" />
-  </box>
-  <box id="wall_east" size="0.001,1.55,0.1" movable="false">
-    <body position="0.775,0,0" orientation="0,0,0" />
-  </box>
-  <box id="wall_west" size="0.001,1.55,0.1" movable="false">
-    <body position="-0.775,0,0" orientation="0,0,0" />
-  </box>
+ <floor id="f" source="image" path="/home/volker/alex-stuff/geth-argos/FloorEstimation/experiments/31.png" />
+    <box id="wall_north" size="1.55,0.01,0.1" movable="false">
+      <body position="0,0.775,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_south" size="1.55,0.01,0.1" movable="false">
+      <body position="0,-0.775,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_east" size="0.01,1.55,0.1" movable="false">
+      <body position="0.775,0,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_west" size="0.01,1.55,0.1" movable="false">
+      <body position="-0.775,0,0" orientation="0,0,0" />
+    </box>
 
-  <distribute>
-    <position method="uniform" min="-0.8,-0.8,0" max="0.8,0.8,0" /> 
-    <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-    <entity quantity="20" max_trials="100"> 
-      <e-puck id="fb" 
-        rab_range = "1">
-        <controller config="python" />
-      </e-puck>
-    </entity> 
-  </distribute> 
+    <distribute>
+      <position method="uniform" min="-0.75,-0.75,0" max="0.75,0.75,0" /> 
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
+      <entity quantity="16" max_trials="100"> 
+        <e-puck id="fb" 
+                  rab_range = "1">
+          <controller config="python" />
+        </e-puck>
+      </entity> 
+    </distribute> 
 
-</arena>
+  </arena>
 
-<!-- ******************* -->
-<!-- * Physics engines * -->
-<!-- ******************* -->
-<physics_engines>
-  <dynamics2d id="dyn2d" />
-</physics_engines>
 
-<!-- ********* -->
-<!-- * Media * -->
-<!-- ********* -->
-<media>
-  <range_and_bearing id="rab" index="grid" grid_size="1,1,1" />
-  <led id="leds" />
-</media>
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+  </physics_engines>
 
-<!-- ****************** -->
-<!-- * Visualization * -->
-<!-- ****************** -->
-<visualization>
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <range_and_bearing id="rab" index="grid" grid_size="1,1,1" />
+    <led id="leds" />
+  </media>
 
-  <!-- ************************************************************************ -->
-  <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
-  <!-- ************************************************************************ -->
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+
+    <!-- ************************************************************************ -->
+    <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
+    <!-- ************************************************************************ -->
   <qt-opengl>
-    <!-- <user_functions library="/home/volker/alex-stuff/geth-argos/argos-python/build/loop_functions/libid_loop_functions" -->
-    <!--                 label="id_qtuser_functions" /> -->
+      <!-- <user_functions library="/home/volker/alex-stuff/geth-argos/argos-python/build/loop_functions/libid_loop_functions" -->
+      <!--                 label="id_qtuser_functions" /> -->
     <camera>
       <placements>
         <placement index="0" position="0,0,1.5" up="1,0,0" look_at="0,0,0" lens_focal_length="20" />
@@ -105,6 +106,7 @@
     </camera>
   </qt-opengl>
 
-</visualization>
+
+  </visualization>
 
 </argos-configuration>
