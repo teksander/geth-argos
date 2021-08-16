@@ -3,6 +3,8 @@
 #######################################################################
 loglevel = 10
 
+tcpPort = 5000 
+
 # /* Import Packages */
 #######################################################################
 import random, math
@@ -16,6 +18,7 @@ import time
 import rpyc
 import copy
 import logging
+from aux import *
 
 # #####################################################
 # ## ERROR METHOD: import w3 multiple times; 
@@ -65,13 +68,9 @@ actual_greets = 0
 
 
 def init_w3():
-    global robotID
-
-    # Get ID from argos
-    robotID = int(robot.id.get_id()[2:])+1
 
     # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
-    conn = rpyc.connect("localhost", 4000+int(robotID))
+    conn = rpyc.connect("localhost", 4000+int(robotID), config = {"allow_all_attrs" : True})
     w3 = conn.root
 
     # Do stuff over RPYC
@@ -82,14 +81,25 @@ def init_w3():
     return w3
 
 def init():
-    global w3, rw, gs, rb, tcp, mainlogger
+    global w3, rw, gs, rb, tcp, tcp, mainlogger, robotID
+
+    # Get ID from argos
+    robotID = int(robot.variables.get_id()[2:])+1    
 
     w3 = init_w3()
     rw = RandomWalk(robot_speed)
     gs = GroundSensor()
     rb = ERANDB()
 
-    w3.minerStart()
+    # /* Init an instance of peer for this Pi-Puck */
+    me = Peer(str(robotID), w3.getEnode(), w3.getKey())
+
+    #mainlogger.info('Initialising TCP server...')
+    tcp = TCP_server(me.enode, 'localhost', tcpPort+int(me.id), unlocked = True)    
+
+    tcp.start()
+
+    w3.start()
     w3.transact('setGreeting')
     w3.call('greetingCount')
 
@@ -150,7 +160,8 @@ def Buffer():
 
     for peer in peers:
         if peer not in peered:
-            enode = enodesExtract(peer, query = 'ENODE')
+            enode = tcp.request('localhost', tcpPort+int(peer))                 
+            #enode = enodesExtract(peer, query = 'ENODE')
             w3.addPeer(enode)
             peered.add(peer)
             mainlogger.info('Added peer: %s', peer)
@@ -158,7 +169,8 @@ def Buffer():
     temp = copy.copy(peered)
     for peer in temp:
         if peer not in peers:
-            enode = enodesExtract(peer, query = 'ENODE')
+            enode = tcp.request('localhost', tcpPort+int(peer)) 
+            #enode = enodesExtract(peer, query = 'ENODE')
             w3.removePeer(enode)
             peered.remove(peer)
             mainlogger.info('Removed peer: %s', peer)

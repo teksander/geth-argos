@@ -27,13 +27,19 @@ class Web3_Wrapper(object):
     def blockNumber(self):
         return self.w3.eth.blockNumber
 
+    def getTransaction(self, txHash):
+        return self.w3.eth.getTransaction(txHash)
+
+    def getTransactionReceipt(self, txHash):
+        return self.w3.eth.getTransactionReceipt(txHash)
+
     def isMining(self):
         return self.w3.eth.mining
 
-    def minerStart(self):
+    def start(self):
         self.w3.geth.miner.start()
 
-    def minerStop(self):
+    def stop(self):
         self.w3.geth.miner.stop()
 
     def addPeer(self, __en):
@@ -45,22 +51,38 @@ class Web3_Wrapper(object):
     def getPeers(self):
         return self.w3.geth.admin.peers()
 
+    def getEnode(self):
+        # This enode is incorrect since the IP is localhost.
+        # When web3wrapper is moved into docker, it should fix the enode by reading "hostname -i"
+        return self.w3.geth.admin.nodeInfo().enode
+
     def toWei(self, value):
         return self.w3.toWei(value ,"ether")
+
+    def getBlock(self, blockHex):
+        return toDict(self.w3.eth.getBlock(blockHex))
+
+    def getTxPoolStatus(self):
+        return self.w3.geth.txpool.status()
 
     ############ SC WRAPPER #####################
     def transact2(self, func, arg1, arg2):
         return getattr(self.sc.functions, func)(arg1).transact(ast.literal_eval(arg2))
 
     def transact1(self, func, arg1):
-        return getattr(self.sc.functions, func)().transact(ast.literal_eval(arg1))
+        getattr(self.sc.functions, func)().transact(ast.literal_eval(arg1))
 
     def transact(self, func):
-        return getattr(self.sc.functions, func)().transact()
+        getattr(self.sc.functions, func)().transact()
 
     def call(self, func):
         return getattr(self.sc.functions, func)().call()
 
+    def call1(self, func, arg1):
+        return getattr(self.sc.functions, func)().call(ast.literal_eval(arg1))
+
+    def call2(self, func, arg1, arg2):
+        return getattr(self.sc.functions, func)(arg1).call(ast.literal_eval(arg2))
 
     ############ FILTER WRAPPER #####################
     def blockFilter(self): 
@@ -85,11 +107,11 @@ class Web3_Wrapper_Service(rpyc.Service):
     def exposed_blockNumber(self):
         return self.w3if.blockNumber()
 
-    def exposed_minerStart(self):
-        return self.w3if.minerStart()
+    def exposed_start(self):
+        return self.w3if.start()
 
-    def exposed_minerStop(self):
-        return self.w3if.minerStop()
+    def exposed_stop(self):
+        return self.w3if.stop()
 
     def exposed_isMining(self):
         return self.w3if.isMining()
@@ -102,6 +124,9 @@ class Web3_Wrapper_Service(rpyc.Service):
 
     def exposed_getPeers(self):
         return self.w3if.getPeers()
+
+    def exposed_getEnode(self):
+        return self.w3if.getEnode()
 
     def exposed_toWei(self, value):
         return self.w3if.toWei(value)
@@ -118,10 +143,26 @@ class Web3_Wrapper_Service(rpyc.Service):
     def exposed_call(self, function):
         return self.w3if.call(function)
 
+    def exposed_call1(self, function, arg1):
+        return self.w3if.call1(function, str(arg1))
+
+    def exposed_call2(self, function, arg1, arg2):
+        return self.w3if.call2(function, arg1, str(arg2))
+
     def exposed_blockFilter(self):
         return self.w3if.blockFilter()
 
+    def exposed_getBlock(self, blockHex):
+        return self.w3if.getBlock(blockHex)
 
+    def exposed_getTransaction(self, txHash):
+        return self.w3if.getTransaction(txHash)
+
+    def exposed_getTransactionReceipt(self, txHash):
+        return self.w3if.getTransactionReceipt(txHash)
+
+    def exposed_getTxPoolStatus(self):
+        return self.w3if.getTxPoolStatus()
 
 # Start the RPYC servers
 # When the server is moved to docker, this for cycle is executed just once per container
@@ -140,3 +181,14 @@ for row in identifiers.readlines():
     t.start()
     serverList.append(t)
 
+def toDict(dictToParse):
+    # convert any 'AttributeDict' type found to 'dict'
+    parsedDict = dict(dictToParse)
+    for key, val in parsedDict.items():
+        # check for nested dict structures to iterate through
+        if  'dict' in str(type(val)).lower():
+            parsedDict[key] = toDict(val)
+        # convert 'HexBytes' type to 'str'
+        elif 'HexBytes' in str(type(val)):
+            parsedDict[key] = val.hex()
+    return parsedDict

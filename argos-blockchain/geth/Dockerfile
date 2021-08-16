@@ -5,7 +5,7 @@ MAINTAINER Volker Strobel <volker.strobel87@gmail.com>
 
 RUN apk add --no-cache ca-certificates
 
-EXPOSE 8545 8546 8547 30303 30303/udp
+EXPOSE 4000 8545 8546 8547 30303 30303/udp
 
 USER root
 WORKDIR /root/

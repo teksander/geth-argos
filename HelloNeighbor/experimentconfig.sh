@@ -17,8 +17,8 @@ CONTRACTABI="${DOCKERFOLDER}/geth/deployed_contract/HelloNeighbor.abi"
 ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/greeter.argosx"
 ARGOSFILE="$EXPERIMENTFOLDER/experiments/greeter.argos"
 
-NUMROBOTS=10
+NUMROBOTS=100
 REPETITIONS=1
 VISUALIZATION=visualization # visualization or none
-ARENASIZE="1.0"
+ARENASIZE="3.0"
 
