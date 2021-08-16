@@ -21,7 +21,11 @@ bufferRate = 1 # reality is 0.25
 eventRate = 2
 globalPeers = 0
 ageLimit = 2
+<<<<<<< HEAD
 peerSecurityRate = 2
+=======
+peerSecurityRate = 3
+>>>>>>> 71c7877b914d8b4fb1ac48f65c26fe0e8a98cbb3
 
 # /* Global Variables */
 #######################################################################
@@ -328,7 +332,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
                 ramPercent = getRAMPercent()
                 cpuPercent = getCPUPercent()
                 extralog.log([ramPercent,cpuPercent])
-
+                #bufferlog.log([nGethPeers, len(peers), len(tcp.allowed)])
 
     if globalPeers:
         pass
