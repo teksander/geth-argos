@@ -20,7 +20,7 @@ import psutil
 logger = logging.getLogger(__name__)
 
 class TicToc(object):
-    """ Pendulum Class to Synchronize Output Timess
+    """ Pendulum Class to Synchronize Output Times
     """
     def __init__(self, delay, name = None):
         """ Constructor
