@@ -6,6 +6,7 @@ byzantine_swarm_style=1
 
 repetitions=10
 
+SLEEPTIME=10
 
 for rep in $(seq 1 ${repetitions});
 do
@@ -24,8 +25,8 @@ do
 
 	# Run experiment
 	
-	sleep 15
-	argos3 -z -c $ARGOSFILE
+	sleep $SLEEPTIME
+	argos3 -c $ARGOSFILE
 
 	# Collect logged data
 	bash collect-logs "16rob_2byz_rep_$rep"

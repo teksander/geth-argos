@@ -101,7 +101,7 @@ def init():
     sclog = Logger('logs/'+robotID+'/sc.csv', header, ID = robotID)
     header = ['#BLOCKS']
     synclog = Logger('logs/'+robotID+'/sync.csv', header, ID = robotID)
-    header = ['CHAINDATASIZE', '%CPU']
+    header = ['%RAM', '%CPU']
     extralog = Logger('logs/'+robotID+'/extra.csv', header, 5, ID = robotID)
     header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
     txlog = Logger('logs/'+robotID+'/tx.csv', header, ID = robotID)
@@ -318,9 +318,9 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
         if bufferlog.isReady():
             # Low frequency logging of chaindata size and cpu usage
             if me.id == '1':
-                chainSize = getRAMPercent()
+                ramPercent = getRAMPercent()
                 cpuPercent = getCPUPercent()
-                extralog.log([chainSize,cpuPercent])
+                extralog.log([ramPercent,cpuPercent])
             bufferlog.log([nGethPeers, len(peers), len(tcp.allowed)])
 
     if globalPeers:
