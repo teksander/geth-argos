@@ -1,18 +1,31 @@
 import time
 import sys
 import os
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder)
 from console import *
 import rpyc
 from rpyc.utils.server import ThreadedServer
 from threading import Thread
 import ast
+import socket
+
+
+def toDict(dictToParse):
+    # convert any 'AttributeDict' type found to 'dict'
+    parsedDict = dict(dictToParse)
+    for key, val in parsedDict.items():
+        # check for nested dict structures to iterate through
+        if  'dict' in str(type(val)).lower():
+            parsedDict[key] = toDict(val)
+        # convert 'HexBytes' type to 'str'
+        elif 'HexBytes' in str(type(val)):
+            parsedDict[key] = val.hex()
+    return parsedDict
 
 
 class Web3_Wrapper(object):
 
     def __init__(self, wsAddr):
+        
         self.w3 = init_web3(wsAddr)
         self.sc = registerSC(self.w3)
         self.bf = self.w3.eth.filter('latest')
@@ -167,28 +180,9 @@ class Web3_Wrapper_Service(rpyc.Service):
 # Start the RPYC servers
 # When the server is moved to docker, this for cycle is executed just once per container
 
-identifiers = open('identifiers.txt', 'r')
-serverList = []
-for row in identifiers.readlines():
+if __name__ == '__main__':
 
-    robotID = row.split()[0]
-    wsAddr = row.split()[-1]
-    print(robotID, wsAddr)
+    wsAddr = 'localhost'
 
-    server = ThreadedServer(Web3_Wrapper_Service(wsAddr), port = 4000+int(robotID))
-    t = Thread(target = server.start)
-    t.daemon = True
-    t.start()
-    serverList.append(t)
-
-def toDict(dictToParse):
-    # convert any 'AttributeDict' type found to 'dict'
-    parsedDict = dict(dictToParse)
-    for key, val in parsedDict.items():
-        # check for nested dict structures to iterate through
-        if  'dict' in str(type(val)).lower():
-            parsedDict[key] = toDict(val)
-        # convert 'HexBytes' type to 'str'
-        elif 'HexBytes' in str(type(val)):
-            parsedDict[key] = val.hex()
-    return parsedDict
+    server = ThreadedServer(Web3_Wrapper_Service(wsAddr), port = 4000)
+    server.start()

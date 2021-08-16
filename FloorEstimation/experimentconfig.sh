@@ -20,9 +20,9 @@ CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/Estimation.abi"
 #ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-small.argos"
 #NUMROBOTS=8
 
-ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-medium.argosx"
-ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-medium.argos"
-NUMROBOTS=16
+#ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-medium.argosx"
+#ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-medium.argos"
+#NUMROBOTS=16
 
 #ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
 #ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
@@ -30,9 +30,9 @@ NUMROBOTS=16
 
 
 # USE THIS ONE FOR AUTOMATIC ARENA SIZE:
-# ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
-# ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
-# NUMROBOTS=10
+ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
+ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
+NUMROBOTS=60
 
 
 DENSITY=8.31

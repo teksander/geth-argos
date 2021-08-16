@@ -83,4 +83,4 @@ rm temp1.txt temp2.txt ids.txt
 
 wait
 # Start w3 servers
-gnome-terminal --tab -- python3 -i controllers/web3wrapper.py
+#gnome-terminal --tab -- python3 -i controllers/web3wrapper.py

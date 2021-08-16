@@ -6,7 +6,9 @@ services:
       resources:
         limits:
           cpus: '1.0'
-          memory: 1400M 
+          memory: 1400M
+    ports:
+     - "4000"
     entrypoint: /root/start.sh
     environment:
      - SLOT={{.Task.Slot}}

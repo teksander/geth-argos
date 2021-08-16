@@ -8,7 +8,6 @@ import json
 import time
 import logging
 import os
-dockerFolder = os.environ["DOCKERFOLDER"]
 
 logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
 logger = logging.getLogger(__name__)
@@ -38,11 +37,10 @@ def init_web3(__ip = None):
 def registerSC(w3):
     sc = None
 
-    abiPath = dockerFolder+'/geth/deployed_contract/Estimation.abi'
-    # abiPath = '/home/eksander/Desktop/HelloNeighbor/argos-blockchain'+'/geth/deployed_contract/HelloNeighbor.abi'
+    abiPath = '/root/deployed_contract/Estimation.abi'
     abi = json.loads(open(abiPath).read())
-    addressPath = dockerFolder+'/geth/deployed_contract/contractAddress.txt'
-    address = '0x'+open(addressPath).read().rstrip()
+    addressPath = '/root/deployed_contract/contractAddress.txt'
+    address = '0x' + open(addressPath).read().rstrip()
 
     sc = w3.eth.contract(abi=abi, address=address)
     return sc
