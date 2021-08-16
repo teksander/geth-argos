@@ -32,12 +32,7 @@ CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/Estimation.abi"
 # USE THIS ONE FOR AUTOMATIC ARENA SIZE:
 ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-max.argosx"
 ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-max.argos"
-<<<<<<< HEAD
-NUMROBOTS=10
-
-=======
-NUMROBOTS=60
->>>>>>> 71c7877b914d8b4fb1ac48f65c26fe0e8a98cbb3
+NUMROBOTS=120
 
 
 DENSITY=8.31

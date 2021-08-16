@@ -17,15 +17,11 @@ rwSpeed = 350
 pcID = '100'
 
 estimateRate = 1
-bufferRate = 1 # reality is 0.25
-eventRate = 2
+bufferRate = 0.5 # reality is 0.25
+eventRate = 1
 globalPeers = 0
 ageLimit = 2
-<<<<<<< HEAD
-peerSecurityRate = 2
-=======
-peerSecurityRate = 3
->>>>>>> 71c7877b914d8b4fb1ac48f65c26fe0e8a98cbb3
+peerSecurityRate = 1
 
 # /* Global Variables */
 #######################################################################
