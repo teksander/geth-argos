@@ -17,11 +17,10 @@ rwSpeed = 350
 pcID = '100'
 
 estimateRate = 1
-bufferRate = 1 # reality is 0.25
-eventRate = 2
+bufferRate = 0.1 # reality is 0.25
+eventRate = 1
 globalPeers = 0
 ageLimit = 2
-peerSecurityRate = 2
 
 # /* Global Variables */
 #######################################################################
@@ -50,8 +49,7 @@ import rpyc
 import copy
 import logging
 
-from erandb import ERANDB
-from aux import *
+from erandb import ERANDBfrom aux import *
 from randomwalk import RandomWalk
 from groundsensor import GroundSensor
 from rgbleds import RGBLEDs
@@ -72,8 +70,8 @@ submodules = []
 logmodules = []
 consensus = False
 
-global estTimer, buffTimer, eventTimer, peerSecurityTimer
-estTimer = buffTimer = eventTimer = peerSecurityTimer = time.time()
+global estTimer, buffTimer, eventTimer
+estTimer = buffTimer = eventTimer = time.time()
 
 global mainlogger
 
@@ -103,7 +101,7 @@ def init():
     sclog = Logger('logs/'+robotID+'/sc.csv', header, ID = robotID)
     header = ['#BLOCKS']
     synclog = Logger('logs/'+robotID+'/sync.csv', header, ID = robotID)
-    header = ['%RAM', '%CPU']
+    header = ['CHAINDATASIZE', '%CPU']
     extralog = Logger('logs/'+robotID+'/extra.csv', header, 5, ID = robotID)
     header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
     txlog = Logger('logs/'+robotID+'/tx.csv', header, ID = robotID)
@@ -237,6 +235,7 @@ def controlstep():
                eventTh.start()
             else:
                 pass
+                # print("Thread is already running")
             eventTimer = time.time()
 
         simlog.log([round(time.time()-stepTimer, 2)])
@@ -274,6 +273,21 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
         peers = erb.getNew()
         # start_new_thread(getEnodes, ())
         # gethPeers = set()
+        gethPeers = getEnodes()
+        nGethPeers = len(gethPeers)
+
+        # for enode in gethPeers:
+        #     mainlogger.info('Current enode: %s Total length: %s', enode, nPeers)
+
+         # Turn on LEDs accordingly
+        if nGethPeers == 0:
+            rgb.setLED(rgb.all, 3* ['black'])
+        elif nGethPeers == 1:
+            rgb.setLED(rgb.all, ['red', 'black', 'black'])
+        elif nGethPeers == 2:
+            rgb.setLED(rgb.all, ['red', 'black', 'red'])
+        elif nGethPeers > 2:
+            rgb.setLED(rgb.all, 3*['red'])
 
         for peer in peers:
             if peer not in peered:
@@ -297,38 +311,17 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
                 peered.remove(peer)
                 mainlogger.info('Removed peer: %s', peer)
 
-
-        # The following part is a security check:
-        # it determines if there are peers in geth that are
-        # not supposed to be there based on the information in the variable peered
-
-        if time.time() - peerSecurityTimer > peerSecurityRate:
-
-            gethPeers = getEnodes()
-            nGethPeers = len(gethPeers)
-
-            if not peered:
-                for enode in gethPeers:
-                    w3.removePeer(enode)
-
-             # Turn on LEDs according to geth Peers
-            if nGethPeers == 0:
-                rgb.setLED(rgb.all, 3* ['black'])
-            elif nGethPeers == 1:
-                rgb.setLED(rgb.all, ['red', 'black', 'black'])
-            elif nGethPeers == 2:
-                rgb.setLED(rgb.all, ['red', 'black', 'red'])
-            elif nGethPeers > 2:
-                rgb.setLED(rgb.all, 3*['red'])
-
+        if not peered:
+            for enode in gethPeers:
+                w3.removePeer(enode)
 
         if bufferlog.isReady():
             # Low frequency logging of chaindata size and cpu usage
             if me.id == '1':
-                ramPercent = getRAMPercent()
+                chainSize = getRAMPercent()
                 cpuPercent = getCPUPercent()
-                extralog.log([ramPercent,cpuPercent])
-
+                extralog.log([chainSize,cpuPercent])
+            bufferlog.log([nGethPeers, len(peers), len(tcp.allowed)])
 
     if globalPeers:
         pass
@@ -348,7 +341,8 @@ def Event(rate = eventRate):
     myOkVoteCounter = 0
     voteHashes = []
     voteHash = None
-
+    ticketPrice = 40
+    ticketPriceWei = w3.toWei(ticketPrice)
     amRegistered = False
 
     def vote():
@@ -606,20 +600,21 @@ def getEnodes():
 
 # Move this script to console and import it like in the robots
 def init_web3():
-    global ticketPrice, ticketPriceWei
+    global ticketPrice
 
     # Get ID from argos
     robotID = int(robot.variables.get_id()[2:])+1
 
-    # Connect to the RPYC which hosts web3.py (port 4xxx where xxx is robot ID)
-    dockerIP = identifersExtract(robotID, 'IP')
-    
-    #conn = rpyc.connect("localhost", 4000+int(robotID), config = {"allow_all_attrs" : True})
-    conn = rpyc.connect(dockerIP, 4000, config = {"allow_all_attrs" : True})
+    # Connect to the RPYC which hosts web3.py (port 400xx where xx is robot ID)
+    conn = rpyc.connect("localhost", 4000+int(robotID), config = {"allow_all_attrs" : True})
     w3 = conn.root
 
+    # Do stuff over RPYC
+    #print(w3.getBalance())
+    #print(w3.getKey())
+    #print(w3.isMining())
+    
     ticketPrice = 40
-    ticketPriceWei = w3.toWei(ticketPrice)
     return w3
 
 
@@ -634,7 +629,7 @@ def enodesExtract(robotID, query = 'ENODE'):
                 return temp[1:-1]
 
 def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.' + str(robotID) + '.'
+    namePrefix = 'ethereum_eth.'+str(robotID)
     containersFile = open('identifiers.txt', 'r')
     for line in containersFile.readlines():
         if line.__contains__(namePrefix):
