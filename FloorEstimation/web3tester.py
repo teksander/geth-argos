@@ -11,7 +11,7 @@ def identifersExtract(robotID, query = 'IP'):
                 return line.split()[1]
 
 
-robot1IP = identifersExtract(10)
+robot1IP = identifersExtract(1)
 print(robot1IP)
 conn = rpyc.connect(robot1IP, 4000, config = {"allow_all_attrs" : True})
 w3 = conn.root

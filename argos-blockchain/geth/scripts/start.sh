@@ -20,7 +20,7 @@ bash /root/exec_template.sh "/root/templates/unlockAccount.txt"
 sleep 1
 
 echo "Starting web3 wrapper"
-python3 /root/python_scripts/web3wrapper_docker.py &
+python3 /root/python_scripts/web3wrapper_docker.py
 echo "Finished: Starting web3 wrapper"
 
 tail -f /dev/null
