@@ -5,8 +5,9 @@ num_byzantine=2
 byzantine_swarm_style=1
 repetitions=10
 SLEEPTIME=20
+robots=8
 
-for rep in $(seq 1 ${repetitions});
+for rep in $(seq 2 ${repetitions});
 do
 
 
@@ -27,7 +28,8 @@ do
 	argos3 -z -c $ARGOSFILE
 
 	# Collect logged data
-	bash collect-logs "8rob_2byz_rep_$rep"
+	bash collect-logs "Experiment_${EXPERIMENT}/${robots}rob-${num_byzantine}byz-$rep"
+	echo "Experiment_${EXPERIMENT}/${robots}rob-${num_byzantine}byz-$rep"
 
 done
 
