@@ -69,10 +69,10 @@ def create_df(experiment, datafile):
         rep = rep_folder.split('/')[-1]
         
         for rob_file in glob.glob('{}/*/{}.csv'.format(rep_folder, datafile)):
-            print(rob_file)
+            #print(rob_file)
             rob = rob_file.split('/')[-2]
             
-            print(rep)
+            #print(rep)
             df = pd.read_csv(rob_file, delimiter=" ")
             df['NREP'] = int(rep.split('-')[-1])
             df['NBYZ'] = int(rep.split('-')[-2][:-3])
