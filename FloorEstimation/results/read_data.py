@@ -14,8 +14,8 @@ import glob
 
 global tstart
 
-#datadir = '/home/volker/geth-argos/FloorEstimation/results/data'
-datadir = '/home/volker/geth-pi-pucks/results/data'
+datadir = '/home/volker/geth-argos/FloorEstimation/results/data'
+#datadir = '/home/volker/geth-pi-pucks/results/data'
 
 
 def create_df_old(experiment, datafile):

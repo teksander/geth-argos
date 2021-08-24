@@ -1,12 +1,13 @@
 EXPERIMENT="G9"
 
 config_file="loop_function_params.py"
-num_byzantine=2
+num_byzantine=4
 byzantine_swarm_style=1
 repetitions=10
 SLEEPTIME=20
+robots=16
 
-for rep in $(seq 1 ${repetitions});
+for rep in $(seq 2 ${repetitions});
 do
 
 
@@ -27,7 +28,8 @@ do
 	argos3 -z -c $ARGOSFILE
 
 	# Collect logged data
-	bash collect-logs "8rob_2byz_$rep"
+	bash collect-logs "Experiment_${EXPERIMENT}/${robots}rob-${num_byzantine}byz-$rep"
+	echo "Experiment_${EXPERIMENT}/${robots}rob-${num_byzantine}byz-$rep"
 
 done
 

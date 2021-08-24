@@ -4,10 +4,9 @@
   <!-- ************************* -->
   <!-- * General configuration * -->
   <!-- ************************* -->
-	<framework>
-		<system threads="0" />
+  <framework>
     <experiment length="0"
-      ticks_per_second="10"
+      ticks_per_second="1"
       real_time="true"
       random_seed="5" />
   </framework>
@@ -33,7 +32,8 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="/home/volker/geth-argos/FloorEstimation/controllers/mainloop.py" />
+      <params script="/home/volker/geth-argos/FloorEstimation/controllers/mainloop.py"
+      timeRate="1" />
     </python_controller>
   </controllers>
 
@@ -47,16 +47,16 @@
   <!-- *********************** -->
   <arena size="1.55, 1.55, 1" center="0,0,0.5">
  <floor id="f" source="image" path="/home/volker/geth-argos/FloorEstimation/experiments/31.png" />
-    <box id="wall_north" size="1.55,0.01,0.1" movable="false">
+    <box id="wall_north" size="1.55,0.03,0.1" movable="false">
       <body position="0,0.775,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="1.55,0.01,0.1" movable="false">
+    <box id="wall_south" size="1.55,0.03,0.1" movable="false">
       <body position="0,-0.775,0" orientation="0,0,0" />
     </box>
-    <box id="wall_east" size="0.01,1.55,0.1" movable="false">
+    <box id="wall_east" size="0.03,1.55,0.1" movable="false">
       <body position="0.775,0,0" orientation="0,0,0" />
     </box>
-    <box id="wall_west" size="0.01,1.55,0.1" movable="false">
+    <box id="wall_west" size="0.03,1.55,0.1" movable="false">
       <body position="-0.775,0,0" orientation="0,0,0" />
     </box>
 
