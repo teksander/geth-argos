@@ -49,6 +49,7 @@ import time
 import rpyc
 import copy
 import logging
+import shutil
 
 from erandb import ERANDB
 from aux import *
@@ -83,15 +84,18 @@ def init():
     robotID = str(int(robot.variables.get_id()[2:])+1)
 
     robot.variables.set_consensus(False) 
+
+    base_log_folder = 'logs/'
     
-    logFile = experimentFolder+'/logs/'+robotID+'/monitor.log'
-    logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
+    monitor_file = experimentFolder + '/' + base_log_folder + '/' + robotID + '/' + 'monitor.log'
+    os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
+    logging.basicConfig(filename=monitor_file, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
 
     # Experiment data logs (recorded to file)
-    base_log_folder = 'logs/'
+
     log_folder = base_log_folder + robotID + '/'
 
     header = ['ESTIMATE','W','B','S1','S2','S3']
