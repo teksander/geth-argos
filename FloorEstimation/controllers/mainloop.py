@@ -49,6 +49,7 @@ import time
 import rpyc
 import copy
 import logging
+import shutil
 
 from erandb import ERANDB
 from aux import *
@@ -83,33 +84,64 @@ def init():
     robotID = str(int(robot.variables.get_id()[2:])+1)
 
     robot.variables.set_consensus(False) 
+
+    base_log_folder = 'logs/'
     
-    logFile = experimentFolder+'/logs/'+robotID+'/monitor.log'
-    logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
+    monitor_file = experimentFolder + '/' + base_log_folder + '/' + robotID + '/' + 'monitor.log'
+    os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
+    logging.basicConfig(filename=monitor_file, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
 
     # Experiment data logs (recorded to file)
+
+    log_folder = base_log_folder + robotID + '/'
+
     header = ['ESTIMATE','W','B','S1','S2','S3']
-    estimatelog = Logger('logs/'+robotID+'/estimate.csv', header, ID = robotID)
+    log_filename = log_folder + 'estimate.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+    estimatelog = Logger(log_filename, header, ID = robotID)
+    
     header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-    bufferlog = Logger('logs/'+robotID+'/buffer.csv', header, 2, ID = robotID)
+    log_filename = log_folder + 'buffer.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+    bufferlog = Logger(log_filename, header, 2, ID = robotID)
+    
     header = ['VOTE']
-    votelog = Logger('logs/'+robotID+'/vote.csv', header, ID = robotID)
+    log_filename = log_folder + 'vote.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+    votelog = Logger(log_filename, header, ID = robotID)
+    
     header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
-    blocklog = Logger('logs/'+robotID+'/block.csv', header, ID = robotID)
-    header = ['BLOCK','HASH',  'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
-    sclog = Logger('logs/'+robotID+'/sc.csv', header, ID = robotID)
+    log_filename = log_folder + 'block.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)    
+    blocklog = Logger(log_filename, header, ID = robotID)
+    
+    header = ['BLOCK', 'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
+    log_filename = log_folder + 'sc.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)        
+    sclog = Logger(log_filename, header, ID = robotID)
+    
     header = ['#BLOCKS']
-    synclog = Logger('logs/'+robotID+'/sync.csv', header, ID = robotID)
+    log_filename = log_folder + 'sync.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)    
+    synclog = Logger(log_filename, header, ID = robotID)
+    
     header = ['%RAM', '%CPU']
-    extralog = Logger('logs/'+robotID+'/extra.csv', header, 5, ID = robotID)
+    log_filename = log_folder + 'extra.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)   
+    extralog = Logger(log_filename, header, 5, ID = robotID)
+    
     header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
-    txlog = Logger('logs/'+robotID+'/tx.csv', header, ID = robotID)
+    log_filename = log_folder + 'tx.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)       
+    txlog = Logger(log_filename, header, ID = robotID)
 
     header = ['FPS']
-    simlog = Logger('logs/'+robotID+'/sim.csv', header, ID = robotID)
+    log_filename = log_folder + 'sim.csv'
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)       
+    simlog = Logger(log_filename, header, ID = robotID)
 
     # List of logmodules --> iterate .start() to start all; remove from list to ignore
     logmodules = [bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, simlog]

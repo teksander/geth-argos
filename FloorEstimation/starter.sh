@@ -11,6 +11,7 @@ echo "+-----------------------------------------------------------+"
 sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|NUMBYZANTINE|$NUMBYZANTINE|g"\
     -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
+    -e "s|FLOORFILE|$FLOORFILE|g"\
     -e "s|ARGOSFOLDER|$ARGOSFOLDER|g"\
     -e "s|ARENADIMH|$ARENADIMH|g"\
     -e "s|ARENADIM|$ARENADIM|g"\
