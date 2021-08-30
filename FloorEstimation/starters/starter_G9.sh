@@ -1,13 +1,13 @@
 EXPERIMENT="G9"
 
 config_file="loop_function_params.py"
-num_byzantine=2
+num_byzantine=6
 byzantine_swarm_style=1
 repetitions=10
 SLEEPTIME=20
-robots=8
+robots=24
 
-for rep in $(seq 2 ${repetitions});
+for rep in $(seq 1 ${repetitions});
 do
 
 
