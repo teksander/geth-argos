@@ -1,15 +1,3 @@
-<<<<<<< HEAD:FloorEstimation/starters/starter_G9.sh
-EXPERIMENT="G9"
-
-config_file="loop_function_params.py"
-num_byzantine=6
-byzantine_swarm_style=1
-repetitions=10
-SLEEPTIME=20
-robots=24
-
-=======
->>>>>>> 7b3b6c92e1b5203d3965bf8df45d44f36b7a4b6c:FloorEstimation/run_experiment.sh
 for rep in $(seq 1 ${repetitions});
 do
 
