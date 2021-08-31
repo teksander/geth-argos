@@ -1,10 +1,10 @@
-source experimentconfigconfig.sh
+source experimentconfig.sh
 
 EXPERIMENT="G9"
 
 export NUMROBOTS=16
 export robots=16
-export num_byzantine=4
+export num_byzantines=4
 export byzantine_swarm_style=1
 export FLOORFILE=31.png
 export ARENADIM=1.55
