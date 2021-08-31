@@ -14,10 +14,8 @@ import glob
 
 global tstart
 
-#datadir = '/home/volker/geth-argos/FloorEstimation/results/data'
-datadir = '/home/volker/geth-argos/FloorEstimation/results/data/backups'
 #datadir = '/home/volker/geth-pi-pucks/results/data'
-
+datadir = '/home/eksander/geth-argos/FloorEstimation/results/data'
 
 def create_df_old(experiment, datafile):
 
@@ -70,7 +68,7 @@ def create_df(experiment, datafile):
         rep = rep_folder.split('/')[-1]
         
         for rob_file in glob.glob('{}/*/{}.csv'.format(rep_folder, datafile)):
-            #print(rob_file)
+
             rob = rob_file.split('/')[-2]
             
             #print(rep)

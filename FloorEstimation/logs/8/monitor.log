@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO main 24] Initialising Python Geth Console...
 [INFO main 30] Initialising peer buffer...
 [INFO main 30] Initialising TCP server...
@@ -8,6 +9,21 @@
 [DEBUG events 6060] 0x0000000000000000000000000000000000000000
 [DEBUG events 6061] Registered on-chain
 [WARNING events 8088] execution reverted: Robot must register first
+=======
+[INFO main 26] Initialising Python Geth Console...
+[INFO main 32] Initialising peer buffer...
+[INFO main 32] Initialising TCP server...
+[INFO main 32] Initialising RandB board...
+[INFO main 32] Initialising ground-sensors...
+[INFO main 33] Initialising random-walk...
+[INFO main 4970] Starting Experiment
+[INFO main 7002] Added peer: 3, enode: enode://cb6ef100ffa12fca6c0651dce5537c88be53f8a17f6fa69b895a82b20f5e196d56cd32c619abf29dbe94be271a61b964ea492bc3bbab6b6c124d69e11f8f41d7@10.0.1.5:30303?discport=0
+[INFO main 7013] Added peer: 4, enode: enode://d51aa01553b2e23c35f0f69dedfbbd2934f67894f9b9f046103d14930f49bc58e32cd423e5f54a9ba831a0c9677ed9da0c6c28c1239cea4aa03085be655c1c47@10.0.1.6:30303?discport=0
+[INFO main 8045] Added peer: 6, enode: enode://4f5f859718b5e9c41d69ebf2c0d1ddd2b8e6c794d34c8a338c44c226409792d0af425e98708dce0c82085952dc76b8abc3f8de64062c403eb96bc11ac34c20b3@10.0.1.8:30303?discport=0
+[DEBUG events 12051] 0x0000000000000000000000000000000000000000
+[DEBUG events 12058] Registered on-chain
+[WARNING events 16038] execution reverted: Robot must register first
+>>>>>>> 829e7c448e43ed266b8f9cd39335281e63581804
 
 ========= Remote Traceback (1) =========
 Traceback (most recent call last):
@@ -37,6 +53,7 @@ Traceback (most recent call last):
     raise ContractLogicError(response['error']['message'])
 web3.exceptions.ContractLogicError: execution reverted: Robot must register first
 
+<<<<<<< HEAD
 [INFO main 47093] Added peer: 5, enode: enode://4d714a1df2246283dd74be73390b96c8e0d24ffb93af15600d7f4f1ec3895c64e84bc6c6c86e794b5abd5eb23fc742851d9ad04a18e20df78fc389440cebc1f6@10.0.1.6:30303?discport=0
 [INFO main 52043] Removed peer: 5
 [INFO main 54065] Added peer: 2, enode: enode://c8e177da078109ec0666718dd66bcd119ee0e872f3a4907679c0a0706b568328736052f7f4397dc0f8f43dd38b5b93238cb28830bc3d1661b87044af976dc2b1@10.0.1.10:30303?discport=0
@@ -637,3 +654,14 @@ ValueError: {'code': -32000, 'message': 'insufficient funds for gas * price + va
 [INFO main 6828751] Removed peer: 3
 [INFO main 6835794] Added peer: 1, enode: enode://d5dc52c5b3c158ef2a6784cd946b5818036ccc83ead00bab87558b350c5b0a5134bd0de0eb13b6c8ab330a9ad26818f4942955158f3ef9b55ee665bc27167f13@10.0.1.3:30303?discport=0
 [INFO main 6840777] Removed peer: 1
+=======
+[INFO main 17051] Removed peer: 6
+[INFO main 22047] Added peer: 6, enode: enode://4f5f859718b5e9c41d69ebf2c0d1ddd2b8e6c794d34c8a338c44c226409792d0af425e98708dce0c82085952dc76b8abc3f8de64062c403eb96bc11ac34c20b3@10.0.1.8:30303?discport=0
+[INFO main 22058] Removed peer: 4
+[DEBUG events 29044] 0x26CbcaC5281B6E159bc3e6C7400AF25fA46F246B
+[INFO main 29051] Added peer: 1, enode: enode://6bb18517035c4ad2668fbcb450a1dd84af49270dc8c395208e4fe979bc97a90338cae69cce9e3502e4c116a258c1a2a6d56ff61915269bb7fd079b56440556a3@10.0.1.3:30303?discport=0
+[DEBUG events 29053] Registered on-chain
+[INFO main 30046] Added peer: 2, enode: enode://dad2cb74f9b1c591cdc92fec9a8c0835eb06e2ce882ff4451d22a2853719ddc76f6bc30d66e48c2af901b944c41f04b451bb7ea21c86c9c974249c09f705eb69@10.0.1.4:30303?discport=0
+[INFO main 32033] Removed peer: 3
+[DEBUG events 37082] Asked for UBI: 40
+>>>>>>> 829e7c448e43ed266b8f9cd39335281e63581804

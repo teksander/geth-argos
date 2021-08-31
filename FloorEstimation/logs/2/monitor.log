@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO main 25] Initialising Python Geth Console...
 [INFO main 31] Initialising peer buffer...
 [INFO main 31] Initialising TCP server...
@@ -8,6 +9,21 @@
 [DEBUG events 6482] 0x0000000000000000000000000000000000000000
 [DEBUG events 6483] Registered on-chain
 [WARNING events 8514] execution reverted: Robot must register first
+=======
+[INFO main 26] Initialising Python Geth Console...
+[INFO main 32] Initialising peer buffer...
+[INFO main 32] Initialising TCP server...
+[INFO main 32] Initialising RandB board...
+[INFO main 32] Initialising ground-sensors...
+[INFO main 32] Initialising random-walk...
+[INFO main 5350] Starting Experiment
+[INFO main 8497] Added peer: 5, enode: enode://20602804a9d04256a808da435526817cd62fa68bcfcd4ca0798c496c06f3165dfe1b659316328cdaa3f10b10be8aecf69d8663d093b4c9dcd9e380f8064ec560@10.0.1.7:30303?discport=0
+[INFO main 13485] Added peer: 1, enode: enode://6bb18517035c4ad2668fbcb450a1dd84af49270dc8c395208e4fe979bc97a90338cae69cce9e3502e4c116a258c1a2a6d56ff61915269bb7fd079b56440556a3@10.0.1.3:30303?discport=0
+[DEBUG events 15494] 0x0000000000000000000000000000000000000000
+[DEBUG events 15494] Registered on-chain
+[INFO main 15495] Added peer: 6, enode: enode://4f5f859718b5e9c41d69ebf2c0d1ddd2b8e6c794d34c8a338c44c226409792d0af425e98708dce0c82085952dc76b8abc3f8de64062c403eb96bc11ac34c20b3@10.0.1.8:30303?discport=0
+[WARNING events 17487] execution reverted: Robot must register first
+>>>>>>> 829e7c448e43ed266b8f9cd39335281e63581804
 
 ========= Remote Traceback (1) =========
 Traceback (most recent call last):
@@ -37,6 +53,7 @@ Traceback (most recent call last):
     raise ContractLogicError(response['error']['message'])
 web3.exceptions.ContractLogicError: execution reverted: Robot must register first
 
+<<<<<<< HEAD
 [INFO main 52501] Added peer: 8, enode: enode://f5f75370d675649ba95f4e6bc6703c1e62aa2be7250fc09bde309b196276518ab145fc4a7808d9194e9d5f5f165e8b98482b542c7c30bbac7b2a91b2e89fb47d@10.0.1.9:30303?discport=0
 [INFO main 57523] Removed peer: 8
 [INFO main 109552] Added peer: 6, enode: enode://f77f5af27d8167275b9d913bf622fb9e3997119786ac8c642b35b24cb071d8eab3f88d3bfdf73274f051a379dcf6bda3f7ec67144e31c6fd930c7827a5aa65de@10.0.1.7:30303?discport=0
@@ -557,3 +574,12 @@ web3.exceptions.ContractLogicError: execution reverted: Robot must register firs
 [INFO main 6844213] Added peer: 3, enode: enode://5583983836aeb06caa70fe4aba26ccecee05257701f9f7cf3f40e4d57418f56b86b2834d5fafa01a4d291d5f12b71726c99f9a27223d3463fe09c46e04da7f5f@10.0.1.11:30303?discport=0
 [INFO main 6846234] Removed peer: 1
 [INFO main 6849497] Removed peer: 3
+=======
+[INFO main 20490] Removed peer: 1
+[INFO main 20518] Removed peer: 5
+[DEBUG events 23503] 0xA4b1B07974bF67f04EC51bEcABF4aD62106B1Dd0
+[DEBUG events 23504] Registered on-chain
+[INFO main 29490] Added peer: 8, enode: enode://15a055abaa2dc70996901114bbf5cf0bfb131aacc74bad6e9a929a248509cfeba97577f7b5292e42a18ea918abb19d8adbf4166420e15047926d3fbc125bf6e6@10.0.1.10:30303?discport=0
+[INFO main 30488] Added peer: 5, enode: enode://20602804a9d04256a808da435526817cd62fa68bcfcd4ca0798c496c06f3165dfe1b659316328cdaa3f10b10be8aecf69d8663d093b4c9dcd9e380f8064ec560@10.0.1.7:30303?discport=0
+[DEBUG events 37460] Asked for UBI: 40
+>>>>>>> 829e7c448e43ed266b8f9cd39335281e63581804

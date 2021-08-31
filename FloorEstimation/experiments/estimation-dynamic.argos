@@ -18,7 +18,7 @@
   <controllers>
 
    
-    <python_controller id="python" library="/home/volker/geth-argos/argos-python/build/libpy_controller_interface.so">
+    <python_controller id="python" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
       <!-- Normal actuator/sensor configuration follows -->
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
@@ -34,40 +34,40 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="/home/volker/geth-argos/FloorEstimation/controllers/mainloop.py"
+      <params script="/home/eksander/geth-argos/FloorEstimation/controllers/mainloop.py"
       timeRate="1" />
     </python_controller>
 
   </controllers>
 
-    <loop_functions library="/home/volker/geth-argos/argos-python/build/libpy_loop_function_interface.so"
+    <loop_functions library="/home/eksander/geth-argos/argos-python/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
-    <params script="/home/volker/geth-argos/FloorEstimation/loop_functions/floor_estimation_loop.py"/>
+    <params script="/home/eksander/geth-argos/FloorEstimation/loop_functions/floor_estimation_loop.py"/>
   </loop_functions>
 
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="1.10, 1.10, 1" center="0,0,0.5">
- <floor id="f" source="image" path="/home/volker/geth-argos/FloorEstimation/experiments/22.png" />
-    <box id="wall_north" size="1.10,0.03,0.1" movable="false">
-      <body position="0,0.55,0" orientation="0,0,0" />
+  <arena size=", , 1" center="0,0,0.5">
+ <floor id="f" source="image" path="/home/eksander/geth-argos/FloorEstimation/experiments/" />
+    <box id="wall_north" size=",0.03,0.1" movable="false">
+      <body position="0,,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="1.10,0.03,0.1" movable="false">
-      <body position="0,-0.55,0" orientation="0,0,0" />
+    <box id="wall_south" size=",0.03,0.1" movable="false">
+      <body position="0,-,0" orientation="0,0,0" />
     </box>
-    <box id="wall_east" size="0.03,1.10,0.1" movable="false">
-      <body position="0.55,0,0" orientation="0,0,0" />
+    <box id="wall_east" size="0.03,,0.1" movable="false">
+      <body position=",0,0" orientation="0,0,0" />
     </box>
-    <box id="wall_west" size="0.03,1.10,0.1" movable="false">
-      <body position="-0.55,0,0" orientation="0,0,0" />
+    <box id="wall_west" size="0.03,,0.1" movable="false">
+      <body position="-,0,0" orientation="0,0,0" />
     </box>
 
     <distribute>
-      <position method="uniform" min="-0.55,-0.55,0" max="0.55,0.55,0" /> 
+      <position method="uniform" min="-,-,0" max=",,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="8" max_trials="15"> 
+      <entity quantity="" max_trials="15"> 
         <e-puck id="fb" 
                   rab_range = "1">
           <controller config="python" />
@@ -101,7 +101,7 @@
     <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
     <!-- ************************************************************************ -->
   <qt-opengl>
-      <user_functions library="/home/volker/geth-argos/argos-python/build/loop_functions/libid_loop_functions"
+      <user_functions library="/home/eksander/geth-argos/argos-python/build/loop_functions/libid_loop_functions"
                       label="id_qtuser_functions" />
     <camera>
       <placements>

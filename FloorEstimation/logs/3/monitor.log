@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO main 26] Initialising Python Geth Console...
 [INFO main 33] Initialising peer buffer...
 [INFO main 33] Initialising TCP server...
@@ -8,6 +9,20 @@
 [DEBUG events 1463] 0x0000000000000000000000000000000000000000
 [DEBUG events 1465] Registered on-chain
 [WARNING events 4456] execution reverted: Robot must register first
+=======
+[INFO main 27] Initialising Python Geth Console...
+[INFO main 32] Initialising peer buffer...
+[INFO main 33] Initialising TCP server...
+[INFO main 33] Initialising RandB board...
+[INFO main 33] Initialising ground-sensors...
+[INFO main 33] Initialising random-walk...
+[INFO main 5304] Starting Experiment
+[INFO main 6348] Added peer: 8, enode: enode://15a055abaa2dc70996901114bbf5cf0bfb131aacc74bad6e9a929a248509cfeba97577f7b5292e42a18ea918abb19d8adbf4166420e15047926d3fbc125bf6e6@10.0.1.10:30303?discport=0
+[DEBUG events 7398] 0x0000000000000000000000000000000000000000
+[DEBUG events 7400] Registered on-chain
+[INFO main 8442] Added peer: 4, enode: enode://d51aa01553b2e23c35f0f69dedfbbd2934f67894f9b9f046103d14930f49bc58e32cd423e5f54a9ba831a0c9677ed9da0c6c28c1239cea4aa03085be655c1c47@10.0.1.6:30303?discport=0
+[WARNING events 10446] execution reverted: Robot must register first
+>>>>>>> 829e7c448e43ed266b8f9cd39335281e63581804
 
 ========= Remote Traceback (1) =========
 Traceback (most recent call last):
@@ -37,6 +52,7 @@ Traceback (most recent call last):
     raise ContractLogicError(response['error']['message'])
 web3.exceptions.ContractLogicError: execution reverted: Robot must register first
 
+<<<<<<< HEAD
 [INFO main 130429] Added peer: 8, enode: enode://f5f75370d675649ba95f4e6bc6703c1e62aa2be7250fc09bde309b196276518ab145fc4a7808d9194e9d5f5f165e8b98482b542c7c30bbac7b2a91b2e89fb47d@10.0.1.9:30303?discport=0
 [DEBUG events 135453] 0x0000000000000000000000000000000000000000
 [DEBUG events 135453] Registered on-chain
@@ -598,3 +614,10 @@ ValueError: {'code': -32000, 'message': 'insufficient funds for gas * price + va
 [INFO main 6845135] Added peer: 2, enode: enode://c8e177da078109ec0666718dd66bcd119ee0e872f3a4907679c0a0706b568328736052f7f4397dc0f8f43dd38b5b93238cb28830bc3d1661b87044af976dc2b1@10.0.1.10:30303?discport=0
 [INFO main 6848972] Removed peer: 1
 [INFO main 6849451] Removed peer: 2
+=======
+[INFO main 18436] Removed peer: 4
+[INFO main 20455] Removed peer: 8
+[DEBUG events 31431] 0x05d6edC4ff8ef40321aBCf7886Bc606ed13327b0
+[DEBUG events 31432] Registered on-chain
+[DEBUG events 37440] Asked for UBI: 40
+>>>>>>> 829e7c448e43ed266b8f9cd39335281e63581804
