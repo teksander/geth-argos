@@ -3,24 +3,32 @@
 # Assumptions:
 # - tmux is installed 
 # - docker is running containers with names "ethereum_eth.{ID}"
+# Options:
+# -t list of robot IDs to tmux (string, e.g. "1 2 3 4")
+# -n number of robots to tmux  (integer, e.g. 1)
+# -c script to be executed     (string, geth, bash, python. Default: bash)
+# -l logs to be displayed      (string, monitor.log, sc.csv, estimate.csv, etc. Default: monitor.log)
+
+
 source experimentconfig.sh
 
 # ip a | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v .255
 
-NUM_ROB=$(docker ps | grep ethereum_eth. | wc -l) 
+# docker exec -it "$CT" /bin/bash
+# $1 docker exec -it "${ALL_CTS[0]}" /bin/bash 
 
-# Collect all containers in a list
-ALL_CTS=()
-for ID in $(seq 1 $NUM_ROB); do
-	ALL_CTS+=($(docker ps -q -f name="ethereum_eth.${ID}\."))
-done
+# tail -f "${EXPERIMENTFOLDER}"/logs/"${ID}"/"$2" 
+# $1 tail -f "${EXPERIMENTFOLDER}"/logs/"1"/"$2"
 
+# docker logs --tail 2000 --follow $(docker ps -q -f name="ethereum_eth.${ID}\.")
+# $1 docker logs --tail 2000 --follow $(docker ps -q -f name="ethereum_eth.1\.")
 
 tmux_ALL() {
 	# Create an sequence of split window action for each container ID
 	split_list=()
 	for CT in "${ALL_CTS[@]:1}"; do
-	    split_list+=( split-pane docker exec -it "$CT" /bin/bash ';' select-layout even-vertical ';' )
+		ID=$(docker ps -f ID=$CT --format "{{.Names}}" | cut -d '.' -f2)
+    split_list+=( split-pane docker exec -it "$CT" /bin/bash ';' select-layout even-vertical ';' )
 	done
 
 	# Define the terminal geometry (larger if there are many robots)
@@ -41,8 +49,9 @@ tmux_ALL() {
 tmux_ALL_logs() {
 	# Create an sequence of split window action for each container ID
 	split_list=()
-	for ID in $(seq 2 $NUM_ROB); do
-	    split_list+=( split-pane tail -f "${EXPERIMENTFOLDER}"/logs/"${ID}"/"$2" ';' select-layout even-vertical ';' )
+	for CT in "${ALL_CTS[@]:1}"; do
+		ID=$(docker ps -f ID=$CT --format "{{.Names}}" | cut -d '.' -f2)
+	  split_list+=( split-pane tail -f "${EXPERIMENTFOLDER}"/logs/"${ID}"/"$2" ';' select-layout even-vertical ';' )
 	done
 
 	# Define the terminal geometry (larger if there are many robots)
@@ -61,10 +70,11 @@ tmux_ALL_logs() {
 }
 
 tmux_ALL_geth_logs() {
-	# Create an sequence of split window action for each container ID
+	# Create an sequence of split window action for each container
 	split_list=()
-	for ID in $(seq 2 $NUM_ROB); do
-	    split_list+=( split-pane docker logs --tail 2000 --follow $(docker ps -q -f name="ethereum_eth.${ID}\.") ';' select-layout even-vertical ';' )
+	for CT in "${ALL_CTS[@]:1}"; do
+			ID=$(docker ps -f ID=$CT --format "{{.Names}}" | cut -d '.' -f2)
+	    split_list+=( split-pane docker logs --tail 2000 --follow $CT ';' select-layout even-vertical ';' )
 	done
 
 	# Define the terminal geometry (larger if there are many robots)
@@ -76,43 +86,88 @@ tmux_ALL_geth_logs() {
 	fi
 
 	# Open the terminal and configure it 
-	gnome-terminal --geometry="$geom" -- tmux new -s $1 docker logs --tail 2000 --follow $(docker ps -q -f name="ethereum_eth.1\.")  ';' \
+	gnome-terminal --geometry="$geom" -- tmux new -s $1 docker logs --tail 2000 --follow "${ALL_CTS[0]}"  ';' \
 	    "${split_list[@]}" \
 	    set-option -w synchronize-panes ';' \
 		select-layout tiled ';' 
 }
 
 
+NUM_ROB=""
+TARGETS=""
+SCRIPT="bash"
+LOGS="geth"
 
-if [[ $# -eq 0 ]]; then 
-	tmux kill-session -t BASH >/dev/null 2>&1
-	tmux_ALL "BASH"
+while getopts ":n:t:c:l:" opt; do
+
+  case ${opt} in
+
+    t ) # process option t
+			TARGETS=${OPTARG}
+      ;;
+    n ) # process option n
+			NUM_ROB=${OPTARG}
+			;;
+    c ) # process option c
+			SCRIPT=${OPTARG}
+      ;;
+    l ) # process option l
+			LOGS=${OPTARG}
+      ;;
+    \? ) echo "Usage: cmd [-t] [-n] [-c] [-l]"
+      ;;
+
+  esac
+done
+
+
+if [ "$NUM_ROB" = "" ]; then
+	NUM_ROB=$(docker ps | grep ethereum_eth. | wc -l) 
+fi
+
+if [ "$TARGETS" = "" ]; then
+	ALL_IDS=()
+	ALL_CTS=()
+	for ID in $(seq 1 $NUM_ROB); do
+		ALL_IDS+=(${ID})
+		ALL_CTS+=($(docker ps -q -f name="ethereum_eth.${ID}\."))
+	done
+
+else
+	ALL_IDS=()
+	ALL_CTS=()
+	for ID in $TARGETS; do
+		ALL_IDS+=(${ID})
+	  ALL_CTS+=($(docker ps -q -f name="ethereum_eth.${ID}\."))
+	done
+	NUM_ROB=${#ALL_IDS[@]}
+
 fi
 
 
-if [[ $# -ge 1 ]]; then 
-	if [[ $1 == "logs" ]]; then
-		tmux kill-session -t LOGS >/dev/null 2>&1
-		tmux_ALL_logs "LOGS" monitor.log
+if [ "$SCRIPT" = "bash" ]; then 
+	echo $SCRIPT
+	tmux kill-session -t BASH >/dev/null 2>&1
+	tmux_ALL "BASH"
 
-		if [[ $# -eq 2 ]]; then
-			if [[ $2 == "geth" ]]; then
-				tmux kill-session -t LOGS-GETH >/dev/null 2>&1
-				tmux_ALL_geth_logs "LOGS-GETH"
-			else
-				tmux kill-session -t LOGS >/dev/null 2>&1
-				tmux_ALL_logs "LOGS" $2
-			fi
-		fi
-
-	elif [[ $1 == "geth" ]]; then
-	tmux kill-session -t GETH >/dev/null 2>&1
- 	tmux_ALL "GETH"
-	tmux send-keys -t GETH "bash geth_attach.sh" Enter
-
-    elif [[ $1 == "python" ]]; then
+elif [ "$SCRIPT" = "python" ]; then 
+	echo $SCRIPT
 	tmux kill-session -t PYTHON >/dev/null 2>&1
 	tmux_ALL "PYTHON"
 	tmux send-keys -t PYTHON "python3 -i /root/python_scripts/console_robot.py Estimation.abi" Enter
-    fi
+
+elif [ $SCRIPT = "geth" ]; then
+	tmux kill-session -t GETH >/dev/null 2>&1
+ 	tmux_ALL "GETH"
+	tmux send-keys -t GETH "bash geth_attach.sh" Enter
 fi
+
+
+if [ $LOGS = "geth" ]; then
+	tmux kill-session -t LOGS-GETH >/dev/null 2>&1
+	tmux_ALL_geth_logs "LOGS-GETH"
+else
+	tmux kill-session -t LOGS >/dev/null 2>&1
+	tmux_ALL_logs "LOGS" $LOGS
+fi	
+

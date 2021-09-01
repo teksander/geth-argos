@@ -20,9 +20,9 @@ CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/Estimation.abi"
 # ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-small.argos"
 # NUMROBOTS=8
 
-# ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-medium.argosx"
-# ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-medium.argos"
-# NUMROBOTS=16
+ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-medium.argosx"
+ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-medium.argos"
+NUMROBOTS=16
 
 # ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-large.argosx"
 # ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-large.argos"
