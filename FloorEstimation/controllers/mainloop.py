@@ -13,7 +13,7 @@ tcpPort = 5000
 erbDist = 175
 erbtFreq = 10
 gsFreq = 20
-rwSpeed = 600
+rwSpeed = 250
 pcID = '100'
 
 estimateRate = 1

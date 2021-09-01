@@ -14,7 +14,6 @@ import glob
 
 global tstart
 
-# datadir = '/home/volker/geth-argos/FloorEstimation/results/data'
 #datadir = '/home/volker/geth-pi-pucks/results/data'
 datadir = '/home/eksander/geth-argos/FloorEstimation/results/data'
 

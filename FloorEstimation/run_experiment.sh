@@ -1,6 +1,5 @@
-for rep in $(seq 1 ${repetitions});
-do
-
+for rep in $(seq 1 ${repetitions}); do
+for num_byzantine in "${num_byzantines[@]}"; do
 
 	killall argos3
 	killall python3
@@ -30,5 +29,6 @@ do
 
 	sleep 5
 
+done
 done
 
