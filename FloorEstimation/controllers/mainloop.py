@@ -270,7 +270,7 @@ def controlstep():
             else:
                 pass
             eventTimer = time.time()
-
+        print(robot.variables.get_attribute("isByz"))
         simlog.log([round(time.time()-stepTimer, 2)])
         stepTimer = time.time()
 

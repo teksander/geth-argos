@@ -11,6 +11,7 @@ def init():
     for robot in byzantines:
         robot.variables.set_byzantine_style(lfp.byzantine_swarm_style)
         print("Making robot", robot.variables.get_id(), "Byzantine.")
+        robot.variables.set_attribute("isByz","True")
     
 def reset():
     pass
@@ -38,6 +39,7 @@ def is_experiment_finished():
 
 def post_experiment():
     print("Finished from Python!!")
+
 
 
 
