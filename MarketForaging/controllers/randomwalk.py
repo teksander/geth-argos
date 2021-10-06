@@ -98,21 +98,6 @@ class RandomWalk(object):
     def getIr(self):
         """ This method returns the IR readings """
         return self.ir
-        
-
-    def setWalk(self, state):
-        """ This method is called set the random-walk to on without disabling I2C"""
-        self.__walk = state
-
-    def setLEDs(self, state):
-        """ This method is called set the outer LEDs to an 8-bit state """
-        if self.__LEDState != state:
-            self.__isLEDset = False
-            self.__LEDState = state
-        
-    def getIr(self):
-        """ This method returns the IR readings """
-        return self.ir
 
     def start(self):
         pass

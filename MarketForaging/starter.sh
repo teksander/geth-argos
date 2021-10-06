@@ -5,10 +5,15 @@ source experimentconfig_backup.sh
 
 echo "MAINFOLDER IS $MAINFOLDER"
 
+# echo "Updating the Floor image"
+# echo "+-----------------------------------------------------------+"
+# python3 experiments/floors/generate_floor.py
+
 echo "Updating the ARGoS XML file"
 echo "+-----------------------------------------------------------+"
 
 sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
+    -e "s|RAB_RANGE|$RAB_RANGE|g"\
     -e "s|NUMBYZANTINE|$NUMBYZANTINE|g"\
     -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
     -e "s|FLOORFILE|$FLOORFILE|g"\
