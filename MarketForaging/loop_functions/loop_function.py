@@ -10,13 +10,13 @@ from types import SimpleNamespace
 
 # General Parameters
 generic_params = dict()
-generic_params['arena_size'] = os.environ["ARENADIM"]
+generic_params['arena_size'] = float(os.environ["ARENADIM"])
 generic_params['num_robots'] = int(os.environ["NUMROBOTS"])
 
 # Parameters for marketplace
 market_params = dict()
 market_params['position'] = 'left'
-market_params['size'] = 0.2
+market_params['size'] = 0.1 * generic_params['arena_size'] 
 
 # Parameters for new resources
 resource_params = dict()
@@ -24,9 +24,9 @@ resource_params['count'] = 2*generic_params['num_robots']
 resource_params['quality_mu'] = 0.1
 resource_params['quality_sigma'] = 0.01
 resource_params['quantity_min'] = 2
-resource_params['quantity_max'] = 4
+resource_params['quantity_max'] = 15
 
-global resource_list
+global resource_list, market
 resource_list = []
 resource_file = 'resources.txt'
 
@@ -38,19 +38,17 @@ class resource_obj(object):
         self.y = y
         self.quality = quality
         self.quantity = quantity
-        self.timeStamp = time.time()
-        self.__json = str(vars(self)).replace("\'", "\"")
+        self.timeStamp = 0
 
     def getJSON(self):
-        return self.__json
+        return str(vars(self)).replace("\'", "\"")
 
-market = resource_obj(x = 0, y = 0, quality = 0.1, quantity = 1)
 
 def generate_resource(n = 1):
 
     for param, val in generic_params.items(): exec(param + '=val')
     for param, val in market_params.items(): exec(param + '=val')
-    arena_size = float(generic_params['arena_size'])
+    arena_size = generic_params['arena_size']
 
     for _ in range(n):
         overlap = True
@@ -79,11 +77,11 @@ def generate_resource(n = 1):
                 overlap = True
 
         resource_list.append(resource_obj(x, y, quality, quantity))
-        print('Created Resource: ' + resource_list[-1].getJSON())
+        # print('Created Resource: ' + resource_list[-1].getJSON())
 
-        with open(resource_file, 'w', buffering=1) as f:
-            for res in resource_list:
-               f.write(res.getJSON()+'\n')
+        # with open(resource_file, 'w', buffering=1) as f:
+        #     for res in resource_list:
+        #        f.write(res.getJSON()+'\n')
 
 def is_in_circle(point, circle_center, circle_radius):
     dx = abs(point[0] - circle_center[0])
@@ -97,11 +95,18 @@ def is_in_circle(point, circle_center, circle_radius):
         return False
 
 def init():
+    global market
 
+    # Initialize robot parameters
     for robot in allrobots:
+        robot.variables.set_attribute("newResource", "")
         robot.variables.set_attribute("hasResource", "False")
+        robot.variables.set_attribute("resourceCount", "0")
 
+    # Initialize arena
+    market = resource_obj(x = 0, y = 0, quality = market_params['size'], quantity = 1)
     generate_resource(resource_params['count'])
+
 
 def reset():
     pass
@@ -110,36 +115,44 @@ def destroy():
     pass
 
 def pre_step():
-    pass
+
+    with open(resource_file, 'w', buffering=1) as f:
+        for res in resource_list:
+            f.write(res.getJSON()+'\n')
 
 def post_step():
 
-    # Has robot stepped into resource?
+    
     for robot in allrobots:
+        for res in resource_list:
 
-        if robot.variables.get_attribute("hasResource") == "False":
+            # Has robot stepped into resource? YES -> Update knowledge
+            if is_in_circle(robot.position.get_position(), (res.x, res.y), res.quality):
+                robot.variables.set_attribute("newResource", res.getJSON())
 
-            for res in resource_list:
-                if is_in_circle(robot.position.get_position(), (res.x, res.y), res.quality):
+                # Does the robot carry resource? NO -> Pickup resource
+                if robot.variables.get_attribute("hasResource") == "False":
 
-                    robot.variables.set_attribute("hasResource", "True")
-                    print('Robot got resource!')
-                    res.quantity -= 1
-                    robot.variables.set_attribute("knownResource", res.getJSON())
-                    if res.quantity <= 0:
-                        resource_list.remove(res)
-                        print("Depleted resource")
-                        robot.variables.set_attribute("knownResource", "")
+                        robot.variables.set_attribute("hasResource", "True")
+                        res.quantity -= 1
+                        robot.variables.set_attribute("newResource", res.getJSON())
+                        # print('Robot got resource!')
 
-                        generate_resource()
+                        # Has resource expired? YES -> Generate new
+                        if res.quantity <= 0:
+                            resource_list.remove(res)
+                            generate_resource()
 
+        # Has robot stepped into market? YES
+        if is_in_circle(robot.position.get_position(), (market.x, market.y), market.quality):
 
-        if robot.variables.get_attribute("hasResource") == "True":        
-            if is_in_circle(robot.position.get_position(), [0,0], 0.1):
+            # Does the robot carry resource? YES -> Sell resource
+            if robot.variables.get_attribute("hasResource") == "True":        
+            
                 robot.variables.set_attribute("hasResource", "False")
-                print('Robot sold resource!')
+                robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
+                # print('Robot sold resource! Count='+robot.variables.get_attribute("resourceCount"))
 
-                
 
 def is_experiment_finished():
     # Determine whether all robots have reached a consensus 

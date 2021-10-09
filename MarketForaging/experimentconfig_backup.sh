@@ -17,7 +17,7 @@ ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
 # [XML]
-export NUMROBOTS="5"
+export NUMROBOTS="20"
 RAB_RANGE="0.3"
 VISUALIZATION=visualization # visualization or none
 export DENSITY=1.5

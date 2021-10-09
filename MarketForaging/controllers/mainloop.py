@@ -13,7 +13,7 @@ tcpPort = 5000
 erbDist = 175
 erbtFreq = 10
 gsFreq = 20
-rwSpeed = 700
+rwSpeed = 500
 pcID = '100'
 
 estimateRate = 1
@@ -71,6 +71,10 @@ totalBlack = 0
 global peered
 peered = set()
 
+global resource_set
+resource_set  = set()
+resource_objs = list()
+
 global consensus, submodules, logmodules
 submodules = []
 logmodules = []
@@ -79,71 +83,14 @@ consensus = False
 global estTimer, buffTimer, eventTimer, peerSecurityTimer
 estTimer = buffTimer = eventTimer = peerSecurityTimer = time.time()
 
-global resource_list
-
 global mainlogger
-global List2
-nest_location = [0,0]
-global knows_location
-knows_location = False
-
-class location(object):
-
-    def __init__(type, coordinates, quality):
-        self.type = type
-        self.coords = coordinates
-        self.quality = quality
-        self.timeStamp = time.time()
-
-known_locations = [] 
-
-def go_to_location(location = [0,0]):
-
-    # Fixed Parameters
-    L = 0.053  # Distance between wheels
-    R = 0.0205 # Wheel radius
-
-    # Tuneable Parameters
-    Kp = 5
-
-    position_current = robot.position.get_position()[0:2]
-    position_desired = location
-    position_error = ((position_desired[0]-position_current[0]),(position_desired[1]-position_current[1]))
-
-    orientation_current = robot.position.get_orientation()
-    orientation_desired = math.atan2(position_error[1], position_error[0])
-    orientation_error = math.atan2(math.sin(orientation_desired-orientation_current), math.cos(orientation_desired-orientation_current))
-    
-
-    orientation_error_dot = -Kp * orientation_error
-
-    max_distance = math.sqrt(2 * arena_size ** 2)/2
-    safety_factor = 0.8
-    v = math.sqrt(position_error[0]**2 + position_error[1]**2)/max_distance * safety_factor
-    # v = 0
-
-    v_right = (2*v + L*orientation_error_dot) / (2*R)
-    v_left = (2*v - L*orientation_error_dot) / (2*R)
-    # print(v_right, v_left)
-
-    robot.epuck_wheels.set_speed(v_right, v_left)
-
-    arrived = False
-    if math.sqrt(position_error[0]**2 + position_error[1]**2) < 0.05:
-        arrived = True 
-
-    return arrived
 
 def explore(rate = estimateRate):
     """ Control routine to update the local estimate of the robot """
     global estimate, totalWhite, totalBlack
     # Set counters for grid colors
     newValues = gs.getNew()
-    # print([newValue for newValue in newValues])
-    
-    if 0.28 < sum(newValues)/3 < 0.3: 
-        known_locations.append(location('Resource', robot.position.get_position(), 0.5))
-        robot.variables.set_attribute("hasResource", "True")
+    # print([newValue for newValue in newValues])  
 
 def buffer(rate = bufferRate, ageLimit = ageLimit):
     """ Control routine for robot-to-robot dynamic peering """
@@ -289,7 +236,7 @@ mainmodules = [estimateTh, bufferTh, eventTh]
 
 
 def init():
-    global me, w3, rw, gs, erb, tcp, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, simlog, submodules, logmodules 
+    global me, rb, w3, rw, gs, erb, tcp, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, simlog, submodules, logmodules 
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robot.variables.set_consensus(False) 
 
@@ -373,7 +320,11 @@ def init():
     mainlogger.info('Initialising peer buffer...')
     pb = PeerBuffer(ageLimit)
 
-    # # /* Init TCP server, __hosting process and request function */
+    # /* Init an instance of the buffer for resources  */
+    mainlogger.info('Initialising resource buffer...')
+    rb = ResourceBuffer()
+
+    # /* Init TCP server, __hosting process and request function */
     mainlogger.info('Initialising TCP server...')
     tcp = TCP_server(me.enode, 'localhost', tcpPort+int(me.id), unlocked = True)
 
@@ -395,8 +346,117 @@ def init():
     # List of submodules --> iterate .start() to start all
     submodules = [w3, tcp, erb, gs, rw]
 
+class ResourceBuffer(object):
+    """ Establish the resource buffer class 
+    """
+    def __init__(self, ageLimit = 2):
+        """ Constructor
+        :type id__: str
+        :param id__: id of the peer
+        """
+        # Add the known peer details
+        self.buffer = []
+        self.ageLimit = ageLimit
+        self.__stop = True
+
+    def start(self):
+        """ This method is called to start calculating peer ages"""
+        if self.__stop:  
+            self.__stop = False
+
+            # Initialize background daemon thread
+            self.thread = threading.Thread(target=self.__aging, args=())
+            self.thread.daemon = True   
+            # Start the execution                         
+            self.thread.start()   
+
+    def stop(self):
+        """ This method is called before a clean exit """   
+        self.__stop = True
+        self.thread.join()
+        logger.info('Peer aging stopped') 
+
+    def __aging(self):
+        """ This method runs in the background until program is closed 
+        self.age is the time elapsed since the robots meeting.
+        """            
+        while True:
+
+            self.step()
+
+            if self.__stop:
+                break
+            else:
+                time.sleep(0.05);   
+
+    def step(self):
+        """ This method performs a single sequence of operations """          
+
+        for peer in self.buffer:
+            peer.age = time.time() - peer.tStamp
+
+            if peer.age > self.ageLimit:
+                peer.kill()
+
+            if peer.timeout != 0:
+                if (peer.timeout - (time.time() - peer.timeoutStamp)) <= 0:
+                    peer.timeout = 0      
+
+
+    def addResource(self, newResourceJSON):
+        """ This method is called to add a new resource JSON
+        """   
+        new_res = json.loads(newResourceJSON, object_hook=lambda d: SimpleNamespace(**d))
+        new_res.timeStamp = time.time()
+
+        # Is in the buffer? YES -> Update information
+        if (new_res.x, new_res.y)  in self.getLocations():
+            res = self.getResourceByLocation((new_res.x, new_res.y))
+            res.quantity = new_res.quantity
+            res.timeStamp = new_res.timeStamp
+
+            if res.quantity <= 0:
+                self.buffer.remove(res)
+
+            # if me.id =="1":
+            #     print("Updated known resource")
+            #     print(str(vars(res)).replace("\'", "\""))
+
+        # Is in the buffer? NO    
+        elif new_res.quantity > 0:
+            self.buffer.append(new_res)
+            # if me.id =="1":
+            #     print("Added unknown resource")
+            #     print(str(vars(new_res)).replace("\'", "\""))
+
+
+    def removeResource(self, oldResource):
+        """ This method is called to remove a peer Id
+            newPeer is the new peer object
+        """   
+        self.buffer.remove(oldResource)
+
+
+    def getQuantities(self):
+        return [res.age for res in self.buffer]
+    def getQualities(self):
+        return [res.quality for res in self.buffer]
+    def getTimeStamps(self):
+        return [res.timeStamp for res in self.buffer]       
+    def getLocations(self):
+        return [(res.x, res.y) for res in self.buffer]
+
+    def getResourceByLocation(self, location):
+        return self.buffer[self.getLocations().index(location)]
+
+    def getResourceByTimestamp(self, timeStamp):
+        return self.buffer[self.getLocations().index(timeStamp)]
+
+    def getBestResource(self):
+        return self.buffer[0]
+
 def controlstep():
-    global startFlag, startTime, estTimer, buffTimer, eventTimer, stepTimer, bufferTh, eventTh, List2, knows_location
+    global startFlag, startTime, estTimer, buffTimer, eventTimer, stepTimer, bufferTh, eventTh, resource_set, resource_objs
 
     # Actions to perform on the first step    
     if not startFlag:
@@ -414,32 +474,43 @@ def controlstep():
     # Actions to perform at every step
     else:
 
-        
+        # Collect visible resource data
+        new_resource = robot.variables.get_attribute("newResource")
 
-        # Do I have food? YES
+        # Visible resource is unique? YES
+        if new_resource and new_resource not in resource_set:
+            resource_set.add(new_resource)
+            rb.addResource(new_resource)
+
+        # Do I have food? YES -> Go to market
         if robot.variables.get_attribute("hasResource") == "True":
             rgb.setLED(rgb.all, 3*['red'])
-            go_to_location([0,0])
+            rw.navigate((0,0))
 
-
-        # Do I have food? NO
+        # Do I have food? NO 
         if robot.variables.get_attribute("hasResource") == "False":
             rgb.setLED(rgb.all, 3*['black'])
 
-            resource = robot.variables.get_attribute("knownResource")
+            # Do I know location? YES -> Navigate to best resource
+            if rb.buffer:
+                resource = rb.getBestResource()
+                rw.navigate((resource.x, resource.y))
 
-            # Do I know location? NO
-            if resource == "":
+                if rw.hasArrived():
+                    rb.removeResource(resource)
+                    # print("Resource no longer availiable")
+
+
+            # Do I know location? NO -> Random-walk
+            else:
                 rw.step()
 
-            # Do I know location? YES   
-            else:
-                resource = json.loads(resource, object_hook=lambda d: SimpleNamespace(**d))
-                arrived = go_to_location((resource.x, resource.y))
 
-                if arrived:
-                    robot.variables.set_attribute("knownResource", "")
-                    print("Resource no longer availiable")
+               
+
+        # if me.id == "1":
+        #     rgb.setLED(rgb.all, 3*['red'])
+        #     print(rb.buffer)
 
             # No
 
