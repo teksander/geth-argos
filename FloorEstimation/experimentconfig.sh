@@ -1,6 +1,6 @@
 # This file contains FIXED parameters that are the same for ALL experiments
 
-export repetitions=20
+export repetitions=10
 export SLEEPTIME=20
 export MAINFOLDER="$HOME/geth-argos"
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
@@ -15,5 +15,5 @@ export CONTAINERNAMEBASE="ethereum_eth."
 export ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-dynamic.argosx"
 export ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-dynamic.argos"
 export VISUALIZATION=visualization # visualization or none
-export CELLDIMENSION="0.1"
+export CELLDIMENSION="0.05"
 export python_config_file="loop_function_params.py"

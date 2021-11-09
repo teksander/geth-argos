@@ -1,2 +1,2 @@
-num_byzantine=2
+num_byzantine=0
 byzantine_swarm_style=1

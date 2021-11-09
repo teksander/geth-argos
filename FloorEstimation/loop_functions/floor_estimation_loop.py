@@ -26,13 +26,15 @@ def post_step():
 
 def is_experiment_finished():
 
-    # Determine whether all robots have reached a consensus 
-    finished = True
-    for r in allrobots: 
-        finished = finished and r.variables.get_consensus()
+    finished = False
 
-    if finished:
-        print("A consensus was reached")
+    # # Determine whether all robots have reached a consensus 
+    # finished = True
+    # for r in allrobots: 
+    #     finished = finished and r.variables.get_consensus()
+
+    # if finished:
+    #     print("A consensus was reached")
 
     return finished
 

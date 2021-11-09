@@ -292,6 +292,15 @@ def Estimate(rate = estimateRate):
         estimate = 0
     elif byzantine_style == 2:
         estimate = 1        
+    elif byzantine_style == 3:
+        # 50% chance white, 50% change black
+        p = random.uniform(0, 1)
+        if p < 0.5:
+            estimate = 0
+        else:
+            estimate = 1
+    elif byzantine_style == 4:
+        estimate = random.uniform(0, 1)
     else:
         estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
     estimatelog.log([round(estimate,3),totalWhite,totalBlack,newValues[0],newValues[1],newValues[2]]) 
