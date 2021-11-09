@@ -16,8 +16,9 @@ source experimentconfig.sh
 # 		exit 1
 # 	fi
 # 	fi
-# fi	
-cp -r $EXPERIMENTFOLDER/logs/ $EXPERIMENTFOLDER/results/data/$1
+# fi
+mkdir -p $EXPERIMENTFOLDER/results/data/$1
+cp -r $EXPERIMENTFOLDER/logs/* $EXPERIMENTFOLDER/results/data/$1
 
 
 

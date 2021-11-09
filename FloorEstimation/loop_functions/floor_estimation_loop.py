@@ -27,22 +27,13 @@ def post_step():
 
 def is_experiment_finished():
 
-<<<<<<< HEAD
-    finished = False
-=======
+    # For the long runime experiments:
+    # finished = False
+
     # Determine whether all robots have reached a consensus 
     finished = True
     for robot in allrobots: 
         finished = finished and robot.variables.get_consensus()
->>>>>>> 6287f893073c7a0f962163a8f85360c42f323add
-
-    # # Determine whether all robots have reached a consensus 
-    # finished = True
-    # for r in allrobots: 
-    #     finished = finished and r.variables.get_consensus()
-
-    # if finished:
-    #     print("A consensus was reached")
 
     return finished
 
