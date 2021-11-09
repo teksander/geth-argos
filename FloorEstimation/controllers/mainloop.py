@@ -41,6 +41,7 @@ txList = []
 #######################################################################
 import random, math
 import sys
+import subprocess
 import os
 experimentFolder = os.environ["EXPERIMENTFOLDER"]
 sys.path.insert(1, experimentFolder+'/controllers')
@@ -100,47 +101,47 @@ def init():
 
     header = ['ESTIMATE','W','B','S1','S2','S3']
     log_filename = log_folder + 'estimate.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)
     estimatelog = Logger(log_filename, header, ID = robotID)
     
     header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
     log_filename = log_folder + 'buffer.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)
     bufferlog = Logger(log_filename, header, 2, ID = robotID)
     
     header = ['VOTE']
     log_filename = log_folder + 'vote.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)
     votelog = Logger(log_filename, header, ID = robotID)
     
     header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
     log_filename = log_folder + 'block.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)    
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)    
     blocklog = Logger(log_filename, header, ID = robotID)
     
     header = ['BLOCK', 'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
     log_filename = log_folder + 'sc.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)        
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)        
     sclog = Logger(log_filename, header, ID = robotID)
     
     header = ['#BLOCKS']
     log_filename = log_folder + 'sync.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)    
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)    
     synclog = Logger(log_filename, header, ID = robotID)
     
-    header = ['%RAM', '%CPU']
+    header = ['CHAINDATASIZE', '%RAM', '%CPU']
     log_filename = log_folder + 'extra.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)   
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)   
     extralog = Logger(log_filename, header, 5, ID = robotID)
     
     header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
     log_filename = log_folder + 'tx.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)       
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)       
     txlog = Logger(log_filename, header, ID = robotID)
 
     header = ['FPS']
     log_filename = log_folder + 'sim.csv'
-    # os.makedirs(os.path.dirname(log_filename), exist_ok=True)       
+    os.makedirs(os.path.dirname(log_filename), exist_ok=True)       
     simlog = Logger(log_filename, header, ID = robotID)
 
     # List of logmodules --> iterate .start() to start all; remove from list to ignore
@@ -270,7 +271,6 @@ def controlstep():
             else:
                 pass
             eventTimer = time.time()
-        print(robot.variables.get_attribute("isByz"))
         simlog.log([round(time.time()-stepTimer, 2)])
         stepTimer = time.time()
 
@@ -364,12 +364,18 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 
         if bufferlog.isReady():
+            gethPeers = getEnodes()
+            nGethPeers = len(gethPeers)
+
             # Low frequency logging of chaindata size and cpu usage
-            if me.id == '1':
-                ramPercent = getRAMPercent()
-                cpuPercent = getCPUPercent()
-                extralog.log([ramPercent,cpuPercent])
-                #bufferlog.log([nGethPeers, len(peers), len(tcp.allowed)])
+            docker_container = identifersExtract(me.id, query = 'DOCKERID')
+            chainSize_raw = subprocess.run(["docker", "exec", "-it", docker_container, "du", "-cs", "/root/.ethereum/devchain/geth"], stdout=subprocess.PIPE)
+            chainSize = chainSize_raw.stdout.decode('utf-8').split('\t')[0]
+            ramPercent = getRAMPercent()
+            cpuPercent = getCPUPercent()
+            extralog.log([chainSize, cpuPercent, ramPercent])
+            bufferlog.log([nGethPeers, len(peers), len(tcp.allowed)])   
+                
 
     if globalPeers:
         pass
@@ -681,5 +687,6 @@ def identifersExtract(robotID, query = 'IP'):
         if line.__contains__(namePrefix):
             if query == 'IP':
                 return line.split()[-1]
-            if query == 'ENODE':
+            # TODO: This is not the enode?!
+            if query == 'DOCKERID':
                 return line.split()[1]
