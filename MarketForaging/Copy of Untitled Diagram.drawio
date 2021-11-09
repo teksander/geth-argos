@@ -1,0 +1,116 @@
+<mxfile host="app.diagrams.net" modified="2021-10-24T02:11:34.460Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36" etag="Zqczu3-jnvnl3seJJc8N" version="15.5.8" type="github">
+  <diagram id="f4kXxPAZHq8HEQr6WA96" name="Page-1">
+    <mxGraphModel dx="1990" dy="1137" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ti8HzYMtxsDq99cQNuae-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-3" target="ti8HzYMtxsDq99cQNuae-8" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-3" value="Navigate to Market&lt;br&gt;Sell Resource" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="210" y="670" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-4" target="ti8HzYMtxsDq99cQNuae-15" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="630" />
+              <mxPoint x="440" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-4" value="Navigate/Search" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="470" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-5" target="ti8HzYMtxsDq99cQNuae-12" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-5" value="&lt;b&gt;Foraging Strategy&lt;/b&gt;&lt;br&gt;Collect or Not?&lt;br&gt;Depends on distance, resource type (price). how rich the robot is, etc" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="318" y="440" width="120" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-10" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-8" target="ti8HzYMtxsDq99cQNuae-5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-30" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-8" target="ti8HzYMtxsDq99cQNuae-28" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="343" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-31" value="no = LIMIT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-8" target="ti8HzYMtxsDq99cQNuae-29" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="405" />
+            </Array>
+            <mxPoint x="550" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-8" value="Knows Location?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="170" y="450" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-14" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="ti8HzYMtxsDq99cQNuae-12" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="530" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-24" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="ti8HzYMtxsDq99cQNuae-12" target="ti8HzYMtxsDq99cQNuae-23" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-12" value="Collect?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="490" y="450" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-17" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-15" target="ti8HzYMtxsDq99cQNuae-4" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="395" y="700" />
+              <mxPoint x="530" y="700" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-19" value="no = LIMIT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-15" target="ti8HzYMtxsDq99cQNuae-8" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-22" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-15" target="ti8HzYMtxsDq99cQNuae-3" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="395" y="700" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-15" value="Found?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="355" y="590" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-23" value="&lt;b&gt;Hiring Strategy&lt;/b&gt;&lt;br&gt;Max pay?&lt;br&gt;Profit = Price - Pay" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="619" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-28" target="ti8HzYMtxsDq99cQNuae-8" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="384" y="300" />
+              <mxPoint x="150" y="300" />
+              <mxPoint x="150" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-28" value="&lt;b&gt;Exploration Strategy&lt;/b&gt;&lt;br&gt;Random-walk" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="318" y="308" width="132" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="ti8HzYMtxsDq99cQNuae-29" target="ti8HzYMtxsDq99cQNuae-4" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="400" />
+              <mxPoint x="760" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ti8HzYMtxsDq99cQNuae-29" value="&lt;b&gt;Employment Strategy&lt;/b&gt;&lt;br&gt;Profit = Pay - Cost" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="613" y="370" width="132" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

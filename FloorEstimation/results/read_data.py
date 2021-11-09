@@ -13,6 +13,31 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import glob
 
+<<<<<<< HEAD
+=======
+global tstart
+
+#datadir = '/home/volker/geth-argos/FloorEstimation/results/data'
+datadir = '/home/volker/geth-pi-pucks/results/data'
+
+
+def create_df_old(experiment, datafile):
+
+    dd = dict()
+    for repetition_folder in glob.glob('{}/Experiment_{}/*'.format(datadir, experiment)):
+
+        data = list()
+        for robot_file in glob.glob('{}/*/{}.csv'.format(repetition_folder, datafile)):
+#             print(robot_file)
+            newdf = pd.read_csv(robot_file, delimiter=" ")
+            data.append(perform_corrections(newdf))
+
+        dd[repetition_folder.split('/')[-1]] = pd.concat(data, ignore_index=True)
+
+        dd_allreps = pd.concat(list(dd.values()), ignore_index=True)
+
+    return dd, dd_allreps
+>>>>>>> 6287f893073c7a0f962163a8f85360c42f323add
 
 def perform_corrections(df):
     df['TIME'] = (1000*df['TIME']).astype(int)
@@ -44,6 +69,7 @@ def create_df(experiment, datafile, datadir):
             df = perform_corrections(df)
             data_list.append(df)
             
+<<<<<<< HEAD
     #print(data_list)  
     if data_list:          
         full_df = pd.concat(data_list, ignore_index=True)
@@ -167,3 +193,14 @@ if __name__ == "__main__":
 
 
     #shutil.make_archive("all_files", 'zip', data_folder)
+=======
+    full_df = pd.concat(data_list, ignore_index=True)
+    return full_df
+
+def tic():
+    global tstart
+    tstart = time.time()
+    
+def toc():
+    print(time.time()-tstart)
+>>>>>>> 6287f893073c7a0f962163a8f85360c42f323add
