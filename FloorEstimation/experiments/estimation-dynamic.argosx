@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="1" method="balance_quantity" />
-    <experiment length="0"
+    <experiment length="120"
       ticks_per_second="1"
       real_time="true"
       random_seed="5" />
@@ -24,7 +24,7 @@
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
 
-        <epuck_range_and_bearing implementation="medium" range="0.09"  />
+        <epuck_range_and_bearing implementation="medium" range="0.13"  />
       </actuators>
       <sensors>
         <epuck_proximity implementation="default"  />

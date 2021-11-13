@@ -1,0 +1,175 @@
+[INFO main 25] Initialising Python Geth Console...
+[INFO main 33] Initialising peer buffer...
+[INFO main 33] Initialising TCP server...
+[INFO main 33] Initialising RandB board...
+[INFO main 33] Initialising ground-sensors...
+[INFO main 33] Initialising random-walk...
+[INFO main 291] Starting Experiment
+[DEBUG events 6259] 0x0000000000000000000000000000000000000000
+[DEBUG events 6259] Registered on-chain
+[WARNING events 9278] execution reverted: Robot must register first
+
+========= Remote Traceback (1) =========
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/site-packages/rpyc/core/protocol.py", line 324, in _dispatch_request
+    res = self._HANDLERS[handler](self, *args)
+  File "/usr/lib/python3.8/site-packages/rpyc/core/protocol.py", line 592, in _handle_call
+    return obj(*args, **dict(kwargs))
+  File "/root/python_scripts/web3wrapper_docker.py", line 157, in exposed_call
+    return self.w3if.call(function)
+  File "/root/python_scripts/web3wrapper_docker.py", line 92, in call
+    return getattr(self.sc.functions, func)().call()
+  File "/usr/lib/python3.8/site-packages/web3/contract.py", line 957, in call
+    return call_contract_function(
+  File "/usr/lib/python3.8/site-packages/web3/contract.py", line 1501, in call_contract_function
+    return_data = web3.eth.call(
+  File "/usr/lib/python3.8/site-packages/web3/module.py", line 57, in caller
+    result = w3.manager.request_blocking(method_str,
+  File "/usr/lib/python3.8/site-packages/web3/manager.py", line 187, in request_blocking
+    return self.formatted_response(response,
+  File "/usr/lib/python3.8/site-packages/web3/manager.py", line 167, in formatted_response
+    apply_error_formatters(error_formatters, response)
+  File "/usr/lib/python3.8/site-packages/web3/manager.py", line 67, in apply_error_formatters
+    formatted_resp = pipe(response, error_formatters)
+  File "cytoolz/functoolz.pyx", line 667, in cytoolz.functoolz.pipe
+  File "cytoolz/functoolz.pyx", line 642, in cytoolz.functoolz.c_pipe
+  File "/usr/lib/python3.8/site-packages/web3/_utils/method_formatters.py", line 566, in raise_solidity_error_on_revert
+    raise ContractLogicError(response['error']['message'])
+web3.exceptions.ContractLogicError: execution reverted: Robot must register first
+
+[INFO main 25302] Added peer: 2, enode: enode://15e6cb51f9ae61411d78d5fd8b163834244289b6d011469b65b600d5ac6e8af3cc4dbecaebc895fdaca5467199aa69000d8264f5a0173e24f66cea32c6f86ba4@10.0.1.7:30303?discport=0
+[INFO main 32239] Removed peer: 2
+[INFO main 76269] Added peer: 8, enode: enode://0e2357225f0c16fb40deb1dc2a8feea19a46ea3db2dc2a80a287d88b8b0a9035670e139a58aa6e120b338b655aca80be57ecde837867d45939d0491e47c55147@10.0.1.6:30303?discport=0
+[INFO main 84271] Removed peer: 8
+[DEBUG events 93261] 0x0000000000000000000000000000000000000000
+[DEBUG events 93263] Registered on-chain
+[WARNING events 95264] execution reverted: Robot must register first
+
+========= Remote Traceback (1) =========
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/site-packages/rpyc/core/protocol.py", line 324, in _dispatch_request
+    res = self._HANDLERS[handler](self, *args)
+  File "/usr/lib/python3.8/site-packages/rpyc/core/protocol.py", line 592, in _handle_call
+    return obj(*args, **dict(kwargs))
+  File "/root/python_scripts/web3wrapper_docker.py", line 157, in exposed_call
+    return self.w3if.call(function)
+  File "/root/python_scripts/web3wrapper_docker.py", line 92, in call
+    return getattr(self.sc.functions, func)().call()
+  File "/usr/lib/python3.8/site-packages/web3/contract.py", line 957, in call
+    return call_contract_function(
+  File "/usr/lib/python3.8/site-packages/web3/contract.py", line 1501, in call_contract_function
+    return_data = web3.eth.call(
+  File "/usr/lib/python3.8/site-packages/web3/module.py", line 57, in caller
+    result = w3.manager.request_blocking(method_str,
+  File "/usr/lib/python3.8/site-packages/web3/manager.py", line 187, in request_blocking
+    return self.formatted_response(response,
+  File "/usr/lib/python3.8/site-packages/web3/manager.py", line 167, in formatted_response
+    apply_error_formatters(error_formatters, response)
+  File "/usr/lib/python3.8/site-packages/web3/manager.py", line 67, in apply_error_formatters
+    formatted_resp = pipe(response, error_formatters)
+  File "cytoolz/functoolz.pyx", line 667, in cytoolz.functoolz.pipe
+  File "cytoolz/functoolz.pyx", line 642, in cytoolz.functoolz.c_pipe
+  File "/usr/lib/python3.8/site-packages/web3/_utils/method_formatters.py", line 566, in raise_solidity_error_on_revert
+    raise ContractLogicError(response['error']['message'])
+web3.exceptions.ContractLogicError: execution reverted: Robot must register first
+
+[INFO main 130264] Added peer: 7, enode: enode://6fd330d9551eba840862a633107918c674d8c6f9c75572d32d4f09d12e2238cd5a07927f4158c78bebd04d08b1917b1f255f6ff673b8f911417e752f1203383f@10.0.1.5:30303?discport=0
+[INFO main 135264] Removed peer: 7
+[INFO main 154304] Added peer: 3, enode: enode://19499320f6d4f1b857157666470b0668dbf86d3e3a7a12e2d3f03da526818ed1ea3e6bfed09322250657cd1f27e39e8d5386dc8ff9f86628aab4e133214c401e@10.0.1.8:30303?discport=0
+[INFO main 155256] Added peer: 5, enode: enode://b9ecee40b9ecb106ba79986570086e4343dba05dab086cbb78ae6215348fee3dbfd94c276c6e47532e5fb65eae4b13ac1a3389b963e946687ea950e222ebc446@10.0.1.10:30303?discport=0
+[INFO main 161287] Removed peer: 3
+[INFO main 161314] Removed peer: 5
+[DEBUG events 171281] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 171281] Registered on-chain
+[INFO main 172298] Added peer: 8, enode: enode://0e2357225f0c16fb40deb1dc2a8feea19a46ea3db2dc2a80a287d88b8b0a9035670e139a58aa6e120b338b655aca80be57ecde837867d45939d0491e47c55147@10.0.1.6:30303?discport=0
+[DEBUG events 181280] Asked for UBI: 60
+[INFO main 187273] Removed peer: 8
+[INFO main 192260] Added peer: 3, enode: enode://19499320f6d4f1b857157666470b0668dbf86d3e3a7a12e2d3f03da526818ed1ea3e6bfed09322250657cd1f27e39e8d5386dc8ff9f86628aab4e133214c401e@10.0.1.8:30303?discport=0
+[INFO main 198267] Added peer: 8, enode: enode://0e2357225f0c16fb40deb1dc2a8feea19a46ea3db2dc2a80a287d88b8b0a9035670e139a58aa6e120b338b655aca80be57ecde837867d45939d0491e47c55147@10.0.1.6:30303?discport=0
+[INFO main 199263] Removed peer: 3
+[INFO main 200259] Added peer: 1, enode: enode://09f2421445dce4b17c0a3b8d4be37d1e53354b12637a207f237c3785bc4d2ee9504ddb44a4e7320eab75d78f0ebbd8a3a64a30592fe6a4a9a0a2eb5576f4cb18@10.0.1.3:30303?discport=0
+[DEBUG events 202284] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 202284] Registered on-chain
+[INFO main 206282] Removed peer: 8
+[INFO main 207276] Removed peer: 1
+[DEBUG voting 209312] Voted successfully: 0.21 (1/1)
+[INFO main 212257] Added peer: 2, enode: enode://15e6cb51f9ae61411d78d5fd8b163834244289b6d011469b65b600d5ac6e8af3cc4dbecaebc895fdaca5467199aa69000d8264f5a0173e24f66cea32c6f86ba4@10.0.1.7:30303?discport=0
+[DEBUG events 217290] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 217292] Registered on-chain
+[DEBUG voting 228271] Voted successfully: 0.22 (1/1)
+[INFO main 231268] Added peer: 1, enode: enode://09f2421445dce4b17c0a3b8d4be37d1e53354b12637a207f237c3785bc4d2ee9504ddb44a4e7320eab75d78f0ebbd8a3a64a30592fe6a4a9a0a2eb5576f4cb18@10.0.1.3:30303?discport=0
+[INFO main 232288] Added peer: 3, enode: enode://19499320f6d4f1b857157666470b0668dbf86d3e3a7a12e2d3f03da526818ed1ea3e6bfed09322250657cd1f27e39e8d5386dc8ff9f86628aab4e133214c401e@10.0.1.8:30303?discport=0
+[DEBUG events 236267] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 236269] Registered on-chain
+[INFO main 243277] Removed peer: 1
+[INFO main 244261] Removed peer: 2
+[DEBUG voting 244265] Voted successfully: 0.23 (1/1)
+[INFO main 247314] Removed peer: 3
+[DEBUG events 252313] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 252313] Registered on-chain
+[DEBUG events 263263] Updated mean
+[DEBUG voting 264312] Voted successfully: 0.24 (1/1)
+[INFO main 317271] Added peer: 4, enode: enode://c829e7cd7115a9ee4ff3ad39233498d3c758a2eab9bb7cf5174895e4d8d51a9307c90f7b71178f861be1d13c8b6b240cbdc1e442c60d9474501a9e4f5e8a9526@10.0.1.9:30303?discport=0
+[INFO main 323279] Removed peer: 4
+[DEBUG events 336293] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 336295] Registered on-chain
+[INFO main 337337] Added peer: 7, enode: enode://6fd330d9551eba840862a633107918c674d8c6f9c75572d32d4f09d12e2238cd5a07927f4158c78bebd04d08b1917b1f255f6ff673b8f911417e752f1203383f@10.0.1.5:30303?discport=0
+[DEBUG events 344291] Asked for UBI: 20
+[DEBUG events 345288] Asked for payout: 128
+[INFO main 347277] Removed peer: 7
+[DEBUG events 355307] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 355311] Registered on-chain
+[DEBUG events 361316] Asked for UBI: 20
+[DEBUG events 363290] Asked for payout: 128
+[INFO main 404278] Added peer: 7, enode: enode://6fd330d9551eba840862a633107918c674d8c6f9c75572d32d4f09d12e2238cd5a07927f4158c78bebd04d08b1917b1f255f6ff673b8f911417e752f1203383f@10.0.1.5:30303?discport=0
+[DEBUG events 409283] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 409284] Registered on-chain
+[INFO main 411298] Removed peer: 7
+[DEBUG voting 417282] Voted successfully: 0.25 (1/1)
+[INFO main 418364] Added peer: 5, enode: enode://b9ecee40b9ecb106ba79986570086e4343dba05dab086cbb78ae6215348fee3dbfd94c276c6e47532e5fb65eae4b13ac1a3389b963e946687ea950e222ebc446@10.0.1.10:30303?discport=0
+[INFO main 424301] Removed peer: 5
+[DEBUG events 425295] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 425296] Registered on-chain
+[INFO main 427297] Added peer: 8, enode: enode://0e2357225f0c16fb40deb1dc2a8feea19a46ea3db2dc2a80a287d88b8b0a9035670e139a58aa6e120b338b655aca80be57ecde837867d45939d0491e47c55147@10.0.1.6:30303?discport=0
+[INFO main 434279] Added peer: 2, enode: enode://15e6cb51f9ae61411d78d5fd8b163834244289b6d011469b65b600d5ac6e8af3cc4dbecaebc895fdaca5467199aa69000d8264f5a0173e24f66cea32c6f86ba4@10.0.1.7:30303?discport=0
+[DEBUG voting 434309] Voted successfully: 0.24 (1/1)
+[INFO main 438309] Removed peer: 8
+[INFO main 441306] Added peer: 7, enode: enode://6fd330d9551eba840862a633107918c674d8c6f9c75572d32d4f09d12e2238cd5a07927f4158c78bebd04d08b1917b1f255f6ff673b8f911417e752f1203383f@10.0.1.5:30303?discport=0
+[INFO main 442288] Removed peer: 2
+[DEBUG events 446298] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 446299] Registered on-chain
+[INFO main 449282] Removed peer: 7
+[DEBUG voting 455303] Voted successfully: 0.24 (1/1)
+[DEBUG events 463281] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 463289] Registered on-chain
+[INFO main 463308] Added peer: 1, enode: enode://09f2421445dce4b17c0a3b8d4be37d1e53354b12637a207f237c3785bc4d2ee9504ddb44a4e7320eab75d78f0ebbd8a3a64a30592fe6a4a9a0a2eb5576f4cb18@10.0.1.3:30303?discport=0
+[DEBUG voting 471284] Voted successfully: 0.24 (1/1)
+[INFO main 473285] Removed peer: 1
+[INFO main 487284] Added peer: 4, enode: enode://c829e7cd7115a9ee4ff3ad39233498d3c758a2eab9bb7cf5174895e4d8d51a9307c90f7b71178f861be1d13c8b6b240cbdc1e442c60d9474501a9e4f5e8a9526@10.0.1.9:30303?discport=0
+[INFO main 494288] Removed peer: 4
+[DEBUG events 499336] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 499336] Registered on-chain
+[INFO main 501305] Added peer: 5, enode: enode://b9ecee40b9ecb106ba79986570086e4343dba05dab086cbb78ae6215348fee3dbfd94c276c6e47532e5fb65eae4b13ac1a3389b963e946687ea950e222ebc446@10.0.1.10:30303?discport=0
+[DEBUG events 505297] Asked for payout: 45
+[INFO main 506294] Removed peer: 5
+[DEBUG events 512310] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 512312] Registered on-chain
+[DEBUG events 522290] Asked for payout: 45
+[INFO main 533292] Added peer: 7, enode: enode://6fd330d9551eba840862a633107918c674d8c6f9c75572d32d4f09d12e2238cd5a07927f4158c78bebd04d08b1917b1f255f6ff673b8f911417e752f1203383f@10.0.1.5:30303?discport=0
+[INFO main 540301] Removed peer: 7
+[INFO main 551290] Added peer: 5, enode: enode://b9ecee40b9ecb106ba79986570086e4343dba05dab086cbb78ae6215348fee3dbfd94c276c6e47532e5fb65eae4b13ac1a3389b963e946687ea950e222ebc446@10.0.1.10:30303?discport=0
+[INFO main 558302] Removed peer: 5
+[INFO main 584295] Added peer: 1, enode: enode://09f2421445dce4b17c0a3b8d4be37d1e53354b12637a207f237c3785bc4d2ee9504ddb44a4e7320eab75d78f0ebbd8a3a64a30592fe6a4a9a0a2eb5576f4cb18@10.0.1.3:30303?discport=0
+[INFO main 590297] Added peer: 8, enode: enode://0e2357225f0c16fb40deb1dc2a8feea19a46ea3db2dc2a80a287d88b8b0a9035670e139a58aa6e120b338b655aca80be57ecde837867d45939d0491e47c55147@10.0.1.6:30303?discport=0
+[INFO main 591297] Removed peer: 1
+[DEBUG events 597292] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 597293] Registered on-chain
+[INFO main 598310] Added peer: 5, enode: enode://b9ecee40b9ecb106ba79986570086e4343dba05dab086cbb78ae6215348fee3dbfd94c276c6e47532e5fb65eae4b13ac1a3389b963e946687ea950e222ebc446@10.0.1.10:30303?discport=0
+[DEBUG voting 606306] Voted successfully: 0.24 (1/1)
+[INFO main 608307] Added peer: 1, enode: enode://09f2421445dce4b17c0a3b8d4be37d1e53354b12637a207f237c3785bc4d2ee9504ddb44a4e7320eab75d78f0ebbd8a3a64a30592fe6a4a9a0a2eb5576f4cb18@10.0.1.3:30303?discport=0
+[INFO main 608342] Removed peer: 8
+[INFO main 609306] Removed peer: 5
+[DEBUG events 611316] 0x77B770ceB4b2537e52f4534Bb39e43754eB5B7e5
+[DEBUG events 611316] Registered on-chain
+[DEBUG events 611409] Updated mean
+[DEBUG voting 611419] Voted successfully: 0.25 (1/1)

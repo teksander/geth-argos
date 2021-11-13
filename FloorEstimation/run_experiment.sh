@@ -10,6 +10,9 @@ for num_byzantine in "${num_byzantines[@]}"; do
 
 	# Create config file
 
+	# Comment this out for all experiments except Exp. 2
+	python3 experiments/generate_floor/generate_floor.py 
+
 	echo "num_byzantine=${num_byzantine}" > $python_config_file
 	echo "byzantine_swarm_style=${byzantine_swarm_style}" >> $python_config_file
 

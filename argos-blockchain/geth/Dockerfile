@@ -11,7 +11,7 @@ USER root
 WORKDIR /root/
 
 RUN apk add --no-cache --update git bash nodejs npm perl python3 python3-dev py3-pip build-base 
-RUN npm config set unsafe-perm true && npm install -g npm@next && npm config set unsafe-perm false
+#RUN npm config set unsafe-perm true && npm install -g npm@next && npm config set unsafe-perm false
 RUN cd /root &&\
     npm install solc@0.8.5 &&\
     npm install web3@1.3.4

@@ -107,9 +107,9 @@ contract Estimation {
 
     for (uint i = 0; i < myBlocksUBI.length; i++) {
       if (block.number < myBlocksUBI[i]) {
- payoutUBI = (i - robot[msg.sender].lastUBI) * myValueUBI;
- robot[msg.sender].lastUBI = i;
- break;
+        payoutUBI = (i - robot[msg.sender].lastUBI) * myValueUBI;
+        robot[msg.sender].lastUBI = i;
+        break;
       }
     }
 
@@ -140,31 +140,18 @@ contract Estimation {
  
   function sendVote(int estimate) public payable {
 
-  // uint myTicketPrice = 39;  
-
-  //require(robot[msg.sender].isRegistered, "Robot must register first");
-
-  require(msg.value >= 39 ether, "Robot must pay the ticket price");
-
-  // uint myTicketPrice = 40;  
-  //   if (!robot[msg.sender].isRegistered || msg.value < myTicketPrice * 1 ether) {
-  //      revert();
-  //   }
-   
-  //  if (msg.value > myTicketPrice * 1 ether) {
+    require(msg.value >= 39 ether, "Robot must pay the ticket price");
        
     voteCount += 1;
 
-      round[roundCount].push(voteInfo(msg.sender, estimate));
-   
-      if (round[roundCount].length == robotCount && robotCount > 4) {
-        roundCount += 1;
-        newRound = true;
+    round[roundCount].push(voteInfo(msg.sender, estimate));
+     
+    if (round[roundCount].length == robotCount && robotCount > 4) {
+      roundCount += 1;
+      newRound = true;
     }
 
     robot[msg.sender].myVoteCounter += 1;
-  //}
-    
   }
    
   function updateMean() public {  
@@ -173,13 +160,10 @@ contract Estimation {
 
     require(lastUpdate < roundCount, "Mean has been updated already");
 
-    // if (!robot[msg.sender].isRegistered || lastUpdate >= roundCount) {
-    //    revert();
-    // }
-
     int oldMean = mean;  
     uint r = lastUpdate;
     int myThreshold = 1000000;
+    uint roundVoteOkCount = 0;
 
     // Check for OK Votes
     for (uint i = 0; i < round[r].length ; i++) {
@@ -188,6 +172,27 @@ contract Estimation {
 
       if (r == 0 || abs(delta) < myThreshold) {
         voteOkCount += 1;
+        roundVoteOkCount += 1;
+
+        // Update mean
+        int256 w_n = 1;
+        W_n = W_n + w_n;
+        mean += (w_n * delta) / W_n;
+
+        // Record robots that will be refunded
+        robotsToPay.push(round[r][i].robotAddress);
+      }
+    }
+
+    // If none of the votes fulfills the criteria, accept all votes
+    // (this prevents deadlock situations)!
+    if (roundVoteOkCount == 0) {
+      for (uint i = 0; i < round[r].length ; i++) {
+
+        int256 delta = round[r][i].vote - mean;
+
+        voteOkCount += 1;
+        roundVoteOkCount += 1;
 
         // Update mean
         int256 w_n = 1;

@@ -9,10 +9,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-np.random.seed(seed=1)
+# For the printed floor, we have used seed=1
+#np.random.seed(seed=1)
+# For the artifacts study, we remove the seed
 
 percentage_white = 0.25
-tiles_per_side_list = [22, 31, 38]
+#tiles_per_side_list = [22, 31, 38]
+tiles_per_side_list = [38]
 #tiles_per_side_list = [10]
 
 def create_shuffled_matrix(tiles_per_side):
@@ -49,27 +52,28 @@ def create_shuffled_matrix(tiles_per_side):
     plt.margins(0,0)
 
     # Save as png
-    img_name = str(tiles_per_side) + ".png"
+    img_name = "experiments/" + str(tiles_per_side) + "_dynamic" + ".png"
     print("Saving image to " + img_name)
     plt.savefig(img_name, bbox_inches = 'tight')
 
-    # Save as pdf
-    img_name_pdf = str(tiles_per_side) + ".pdf"
-    print("Saving image to " + img_name_pdf)
-    plt.savefig(img_name_pdf, bbox_inches = 'tight')
+    # # Save as pdf
+    # img_name_pdf = str(tiles_per_side) + ".pdf"
+    # print("Saving image to " + img_name_pdf)
+    # plt.savefig(img_name_pdf, bbox_inches = 'tight')
 
-    # Save as svg
-    img_name_svg = str(tiles_per_side) + ".svg"
-    print("Saving image to " + img_name_svg)
-    plt.savefig(img_name_svg, bbox_inches = 'tight')    
+    # # Save as svg
+    # img_name_svg = str(tiles_per_side) + ".svg"
+    # print("Saving image to " + img_name_svg)
+    # plt.savefig(img_name_svg, bbox_inches = 'tight')    
     
-    # Save as csv
-    csv_name = str(tiles_per_side) + ".csv"
-    np.savetxt(csv_name, total_tiles_array, delimiter='\n', fmt='%d')
+    # # Save as csv
+    # csv_name = str(tiles_per_side) + ".csv"
+    # np.savetxt(csv_name, total_tiles_array, delimiter='\n', fmt='%d')
     
     # Remove white space around the image
     os.system('convert ' + img_name +  ' -trim ' + img_name)
-    print("Saving CSV layout file to " + csv_name)
+    
+    #print("Saving CSV layout file to " + csv_name)
     
     
 

@@ -1,7 +1,7 @@
 # Iterate over experimental settings and start experiments
  #!/bin/sh
 
-source experimentconfig_backup.sh
+source experimentconfig.sh
 
 echo "MAINFOLDER IS $MAINFOLDER"
 
