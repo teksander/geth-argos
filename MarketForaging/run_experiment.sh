@@ -1,5 +1,6 @@
-for rep in $(seq 1 ${repetitions}); do
-for num_byzantine in "${num_byzantines[@]}"; do
+EXPERIMENT="SHARE_SECOND_BEST"
+
+for REP in $(seq 1 ${REPS}); do
 
 	killall argos3
 	killall python3
@@ -7,12 +8,6 @@ for num_byzantine in "${num_byzantines[@]}"; do
     base_log_folder='logs/'
     rm -rf logs
     mkdir logs
-
-	# Create config file
-
-	echo "num_byzantine=${num_byzantine}" > $python_config_file
-	echo "byzantine_swarm_style=${byzantine_swarm_style}" >> $python_config_file
-
 
 	# Restart docker containers
 	source starter.sh
@@ -22,12 +17,12 @@ for num_byzantine in "${num_byzantines[@]}"; do
 	sleep $SLEEPTIME
 	argos3 -z -c $ARGOSFILE
 
-	sleep 5
+	sleep 1
 	# Collect logged data
-	bash collect-logs "Experiment_${EXPERIMENT}/${robots}rob-${num_byzantine}byz-$rep"
-	echo "Experiment_${EXPERIMENT}/${robots}rob-${num_byzantine}byz-$rep"
+	bash collect-logs "Experiment_${EXPERIMENT}/${NUMROBOTS}rob-${rep}"
+	echo "Experiment_${EXPERIMENT}/${NUMROBOTS}rob-${rep}"
 
-	sleep 5
+	sleep 1
 
 done
 done

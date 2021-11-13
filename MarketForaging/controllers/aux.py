@@ -7,6 +7,9 @@ import subprocess
 import os
 import logging
 import psutil
+import math
+import json
+from types import SimpleNamespace
 
 # The logs that go to console
 # logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -19,10 +22,24 @@ import psutil
 
 logger = logging.getLogger(__name__)
 
+
+class Timer:
+    def __init__(self, rate, name = None):
+        self.name = name
+        self.rate = rate
+        self.time = time.time()
+
+    def query(self):
+        if time.time() - self.time > self.rate:
+            self.time = time.time()
+            return True
+        else:
+            return False
+
 class TicToc(object):
     """ Pendulum Class to Synchronize Output Times
     """
-    def __init__(self, delay, name = None):
+    def __init__(self, delay, name = None, sleep = True):
         """ Constructor
         :type delay: float
         :param delay: Time to wait
@@ -35,8 +52,12 @@ class TicToc(object):
         self.stime = time.time()    
 
     def toc(self):
-        dtime = time.time() - self.stime 
-        if dtime < self.delay:
+        dtime = time.time() - self.stime
+
+        if not sleep:
+            print(round(dtime,3)) 
+
+        if sleep and dtime < self.delay:
             time.sleep(self.delay - dtime)
         else:
             # logger.warning('{} Pendulum too Slow. Elapsed: {}'.format(self.name,dtime))
@@ -156,6 +177,12 @@ class TCP_server(object):
         self.newIds = set()
         return temp
 
+    def setData(self, data):
+        self.data = data       
+
+    def getData(self):
+        return self.data
+
     def start(self):
         """ This method is called to start __hosting a TCP server """
         if self.__stop:
@@ -224,7 +251,7 @@ class PeerBuffer(object):
         self.ageLimit = ageLimit
         self.__stop = True
 
-    def start(self,):
+    def start(self):
         """ This method is called to start calculating peer ages"""
         if self.__stop:  
             self.__stop = False
@@ -311,6 +338,7 @@ class Logger(object):
         self.rate = rate
         self.tStamp = 0
         self.tStart = 0
+        self.latest = time.time()
         pHeader = ' '.join([str(x) for x in header])
         self.file.write('{} {} {}\n'.format('ID', 'TIME', pHeader))
         
@@ -331,6 +359,7 @@ class Logger(object):
                 tString = str(round(self.tStamp-self.tStart, 3))
                 pData = ' '.join([str(x) for x in data])
                 self.file.write('{} {} {}\n'.format(self.id, tString, pData))
+                self.latest = self.tStamp
             except:
                 pass
                 logger.warning('Failed to log data to file')
@@ -370,3 +399,108 @@ def getFolderSize(folder):
             total_size += getFolderSize(itempath)
     return total_size
 
+class Vector2D:
+    """A two-dimensional vector with Cartesian coordinates."""
+
+    def __init__(self, x = 0, y = 0, polar = False, degrees = False):
+
+            self.x = x
+            self.y = y
+
+            if isinstance(x, (list, tuple)) and not y: 
+                self.x = x[0]
+                self.y = x[1]
+            
+            if degrees:
+                y = math.radians(y)
+
+            if polar:
+                self.x = x * math.cos(y)
+                self.y = x * math.sin(y)
+
+            self.length = self.__abs__()
+            self.angle = math.atan2(self.y, self.x)
+
+    def __str__(self):
+        """Human-readable string representation of the vector."""
+        return '{:g}i + {:g}j'.format(self.x, self.y)
+
+    def __repr__(self):
+        """Unambiguous string representation of the vector."""
+        return repr((self.x, self.y))
+
+    def dot(self, other):
+        """The scalar (dot) product of self and other. Both must be vectors."""
+
+        if not isinstance(other, Vector2D):
+            raise TypeError('Can only take dot product of two Vector2D objects')
+        return self.x * other.x + self.y * other.y
+    # Alias the __matmul__ method to dot so we can use a @ b as well as a.dot(b).
+    __matmul__ = dot
+
+    def cross(self, other):
+        """The vector (cross) product of self and other. Both must be vectors."""
+
+        if not isinstance(other, Vector2D):
+            raise TypeError('Can only take cross product of two Vector2D objects')
+        return abs(self) * abs(other) * math.sin(self-other)
+    # Alias the __matmul__ method to dot so we can use a @ b as well as a.dot(b).
+    __matmul__ = cross
+
+
+    def __sub__(self, other):
+        """Vector subtraction."""
+        return Vector2D(self.x - other.x, self.y - other.y)
+
+    def __add__(self, other):
+        """Vector addition."""
+        return Vector2D(self.x + other.x, self.y + other.y)
+
+    def __mul__(self, scalar):
+        """Multiplication of a vector by a scalar."""
+
+        if isinstance(scalar, int) or isinstance(scalar, float):
+            return Vector2D(self.x*scalar, self.y*scalar)
+        raise NotImplementedError('Can only multiply Vector2D by a scalar')
+
+    def __rmul__(self, scalar):
+        """Reflected multiplication so vector * scalar also works."""
+        return self.__mul__(scalar)
+
+    def __neg__(self):
+        """Negation of the vector (invert through origin.)"""
+        return Vector2D(-self.x, -self.y)
+
+    def __truediv__(self, scalar):
+        """True division of the vector by a scalar."""
+        return Vector2D(self.x / scalar, self.y / scalar)
+
+    def __mod__(self, scalar):
+        """One way to implement modulus operation: for each component."""
+        return Vector2D(self.x % scalar, self.y % scalar)
+
+    def __abs__(self):
+        """Absolute value (magnitude) of the vector."""
+        return math.sqrt(self.x**2 + self.y**2)
+
+    def rotate(self, angle):
+
+        return Vector2D(self.length, self.angle + angle, polar = True)
+
+    def normalize(self):
+        """Normalized vector"""
+        if self.x == 0 and self.y == 0:
+            return self
+        else:
+            return Vector2D(self.x/abs(self), self.y/abs(self))
+            
+            # self.x = normalized.x
+            # self.y = normalized.y
+
+    def distance_to(self, other):
+        """The distance between vectors self and other."""
+        return abs(self - other)
+
+    def to_polar(self):
+        """Return the vector's components in polar coordinates."""
+        return self.length, self.angle
