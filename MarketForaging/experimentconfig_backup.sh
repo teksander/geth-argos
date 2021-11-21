@@ -26,6 +26,7 @@ ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
 
 
 # [OTHER]
+export FPS=20
 export REPS=5
 export SLEEPTIME=5
 export TIMELIMIT=10

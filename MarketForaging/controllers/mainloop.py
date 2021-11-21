@@ -46,8 +46,11 @@ import sys
 import os
 experimentFolder = os.environ["EXPERIMENTFOLDER"]
 arena_size = float(os.environ["ARENADIM"])
+step_size = 1/float(os.environ["FPS"])
 sys.path.insert(1, experimentFolder+'/controllers')
+sys.path.insert(1, experimentFolder+'/loop_functions')
 sys.path.insert(1, experimentFolder)
+from loop_function_params import *
 import time
 import rpyc
 import copy
@@ -92,8 +95,10 @@ clocks = dict()
 
 clocks['share'] = Timer(1)
 clocks['buffer'] = Timer(bufferRate)
-clocks['peer_security'] = Timer(peerSecurityRate)
+
 clocks['collect_resources'] = Timer(1)
+clocks['peer_check'] = Timer(peerSecurityRate)
+clocks['balance_check'] = Timer(1)
 
 estTimer =  eventTimer  = time.time()
 
@@ -122,7 +127,7 @@ def buffer(rate = bufferRate, ageLimit = ageLimit):
             # start_new_thread(w3.addPeer, (enode,))
             peered.add(peer)
 
-            mainlogger.info('Added peer: %s, enode: %s', peer, enode)
+            # mainlogger.info('Added peer: %s, enode: %s', peer, enode)
 
     temp = copy.copy(peered)
     for peer in temp:
@@ -131,14 +136,14 @@ def buffer(rate = bufferRate, ageLimit = ageLimit):
             enode = tcp.request('localhost', tcpPort+int(peer))
             w3.removePeer(enode)
             peered.remove(peer)
-            mainlogger.info('Removed peer: %s', peer)
+            # mainlogger.info('Removed peer: %s', peer)
 
 
     # The following part is a security check:
     # it determines if there are peers in geth that are
     # not supposed to be there based on the information in the variable peered
 
-    if clocks['peer_security'].query():
+    if clocks['peer_check'].query():
         gethPeers_enodes = getEnodes()
         gethPeers_ids = getIds(gethPeers_enodes)
         gethPeers_count = len(gethPeers_enodes)
@@ -182,18 +187,8 @@ bufferTh = threading.Thread(target=buffer, args=())
 mainmodules = []
 
 
-class State(Enum):
-    class Explorer(Enum):
-        EXPLORE = auto()
-        GO_TO_MARKET = auto()
-        GO_TO_RESOURCE = auto()
-    class Recruit(Enum):
-        IDLE = auto()
-        GO_TO_MARKET = auto()
-        GO_TO_RESOURCE = auto()
 
-global state, time_exploring, EXPLORE
-state = State.Explorer.GO_TO_MARKET
+global time_exploring
 time_exploring = 0
 exploration_period = 1
 tau = 100
@@ -244,8 +239,6 @@ class ResourceBuffer(object):
 
         if res.quantity <= 0:
                 self.removeResource(res)
-
-        self.sortBy('Value')
 
     def removeResource(self, oldResource):
         """ This method is called to remove a peer Id
@@ -396,7 +389,7 @@ def init():
     votelogger = logging.getLogger('voting')
 
     # List of logmodules --> specify submodule loglevel if desired
-    logging.getLogger('main').setLevel(40)
+    logging.getLogger('main').setLevel(10)
     logging.getLogger('estimate').setLevel(50)
     logging.getLogger('buffer').setLevel(50)
     logging.getLogger('events').setLevel(10)
@@ -455,11 +448,44 @@ def init():
     # List of submodules --> iterate .start() to start all
     submodules = [tcp, tcpr, erb, gs]
 
+class Idle(Enum):
+    IDLE = 1
+
+class Explorer(Enum):
+    EXPLORE = 2
+    GO_TO_MARKET = 3
+    GO_TO_RESOURCE = 4
+
+class Recruit(Enum):
+    WAIT = 5
+    GO_TO_MARKET = 6
+    GO_TO_RESOURCE = 7
+
+class FiniteStateMachine(object):
+
+    def __init__(self, robot = None):
+
+        self.Idle = Idle
+        self.Explorer = Explorer
+        self.Recruit = Recruit
+
+        self._currState = self.Idle.IDLE
+    
+    def getState(self):
+        return self._currState
+
+    def setState(self, state):
+        self._currState = state
+        mainlogger.info("Robot state is " + str(self._currState) )
+
+fsm = FiniteStateMachine()
+
 def controlstep():
     global state, startFlag, startTime, estTimer, eventTimer, shareTimer, stepTimer, bufferTh, eventTh, resource_set, resource_objs, time_exploring, EXPLORE, clocks
 
     # Actions to perform on the first step    
     if not startFlag:
+
         startFlag = True 
         stepTimer = startTime = time.time()
 
@@ -480,12 +506,69 @@ def controlstep():
             module.step()
 
 
-        ##### Finite-State-Machine Transitions #####
-        if w3.getBalance() > explorationThresh:
-            state = State.Explorer.EXPLORE
-        else:
-            state = State.Recruit.GO_TO_MARKET
+        #### TIMED QUERIES ####
 
+
+        #### STATE-SPECIFIC ACTIONS ####
+        if fsm.getState() == fsm.Idle.IDLE:
+
+            if clocks['balance_check'].query():
+                balance = w3.getBalance()
+
+            if balance > 20:
+                fsm.setState(fsm.Explorer.EXPLORE)
+     
+
+        if fsm.getState() == fsm.Explorer.EXPLORE:
+            
+
+            # Exploration scheme
+            robot.rw.random()
+
+            # Collection of new resources
+            resource_js = rs.getNew()
+            if resource_js:
+                rb.addResource(resource_js)
+                # rb.buffer[-1].fuel_spent = economy_params['fuel_cost'] * robot.rw.get_distance_traveled()*step_size 
+
+
+            # Estimate fuel spent so far
+            if clocks['balance_check'].query():
+                balance = w3.getBalance()
+
+                print("Exploration cost: ",  economy_params['fuel_cost'] * robot.rw.get_distance_traveled()*step_size)
+
+        #         # Logic to define the price to sell resource for
+        #         cost = rw.get_distance() * fuel_cost
+        #         value = rb.getValue()
+        #         price = 111111
+        #         profit = cost - price
+
+        #         # FSM transition to GO_TO_MARKET
+        #         # To sell new resource
+        #         if profit > 0:
+        #             fsm.setState(fsm.Explorer.GO_TO_MARKET)
+
+
+        #         # To be recruited
+        #         if balance < 2 * nav.get_distance(0,0) * fuel_cost
+        #             fsm.setState(fsm.Explorer.GO_TO_MARKET)
+
+        # if fsm.getState() == fsm.Explorer.GO_TO_MARKET:
+        #     nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
+
+        #     if nav.hasArrived():
+        #         fsm.setState(fsm.Idle.IDLE)
+
+        # if fsm.getState() == fsm.Recruit.WAIT:
+        #     if clocks['recruit_wait'].query()
+
+        #         if w3.getFilter('blocks').getNew()
+        #             sc_resources = w3.call('getResources')
+
+        #             # Logic for deciding to take a resource contract
+
+        # if fsm.getState() == fsm.Recruit.GO_TO_RESOURCE
 
 
 
@@ -497,81 +580,81 @@ def controlstep():
 
 
 
-        # Collect resource data from the virtual sensor
-        if clocks['collect_resources'].query():
-            resource_js = rs.getNew()
-            if resource_js:
-                # mainlogger.debug('Got resources from sensor:'+resource_js) 
-                rb.addResource(resource_js)
+        # # Collect resource data from the virtual sensor
+        # if clocks['collect_resources'].query():
+        #     resource_js = rs.getNew()
+        #     if resource_js:
+        #         # mainlogger.debug('Got resources from sensor:'+resource_js) 
+        #         rb.addResource(resource_js)
         
-        if clocks['share'].query():
-            mainlogger.critical(rb.getJSONs())
+        # if clocks['share'].query():
+        #     mainlogger.critical(rb.getJSONs())
 
-            # Collect resource data from peers
-            if rb.getCount() < 1:
-                for peer_id, count, _, _ in erb.getData():
-                    resource_js = tcpr.request('localhost', tcprPort+int(peer_id))
+        #     # Collect resource data from peers
+        #     if rb.getCount() < 1:
+        #         for peer_id, count, _, _ in erb.getData():
+        #             resource_js = tcpr.request('localhost', tcprPort+int(peer_id))
 
-                    if resource_js and resource_js != 'None':
-                        # mainlogger.debug("Got resource from peer:"+resource_js)
-                        rb.addResource(resource_js)
+        #             if resource_js and resource_js != 'None':
+        #                 # mainlogger.debug("Got resource from peer:"+resource_js)
+        #                 rb.addResource(resource_js)
 
-            # Share resource data to peers
+        #     # Share resource data to peers
 
-            if rb.getCount() > 0:
-                if rb.buffer[0].quantity > 3:
-                    resource_js = rb.getJSON(rb.buffer[0])
-                    if tcpr.getData() != resource_js:
-                        mainlogger.debug("Sharing Resource "+resource_js)
-                        tcpr.setData(resource_js)
-
-
-        ###### NAVIGATION DECISION MAKING ######
-
-        # Do I have food? YES -> Go to market
-        if robot.variables.get_attribute("hasResource"):
-            nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
+        #     if rb.getCount() > 0:
+        #         if rb.buffer[0].quantity > 3:
+        #             resource_js = rb.getJSON(rb.buffer[0])
+        #             if tcpr.getData() != resource_js:
+        #                 mainlogger.debug("Sharing Resource "+resource_js)
+        #                 tcpr.setData(resource_js)
 
 
-        # Do I have food? NO 
-        else:
+        # ###### NAVIGATION DECISION MAKING ######
 
-            # Should I explore more?
+        # # Do I have food? YES -> Go to market
+        # if robot.variables.get_attribute("hasResource"):
+        #     nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
 
-            # Do I know location? NO -> Random-walk
-            if not rb.buffer:
-                EXPLORE = True
 
-            # Do I know location? YES -> Foraging Strategy
-            if rb.buffer and EXPLORE:
-                EXPLORE = False
-                # if time_exploring > exploration_period:
+        # # Do I have food? NO 
+        # else:
 
-                #     best_res = rb.getBestResource()
+        #     # Should I explore more?
 
-                #     Pc = resource_price[best_res.quality]*0.5 - 100*math.sqrt((-best_res.x)**2 + (-best_res.y)**2)/arena_size * 0.2 + 100*(1-math.exp(-time_exploring/tau))
-                #     # EXPLORE = random.choices([True, False], [100-Pc, Pc])[0]
-                #     EXPLORE = False
-                #     # print(Pc)
-                #     time_exploring = 0
+        #     # Do I know location? NO -> Random-walk
+        #     if not rb.buffer:
+        #         EXPLORE = True
 
-            if EXPLORE:
-                time_exploring += 0.1
-                robot.rw.random()
+        #     # Do I know location? YES -> Foraging Strategy
+        #     if rb.buffer and EXPLORE:
+        #         EXPLORE = False
+        #         # if time_exploring > exploration_period:
 
-            else:
-                # best_res = rb.getBestResource()
-                best_res = rb.buffer[-1]
-                nav.navigate_with_obstacle_avoidance((best_res.xn, best_res.yn))
+        #         #     best_res = rb.getBestResource()
 
-                if nav.distance_to_target() < best_res.radius:
-                    robot.variables.set_attribute("collectResource", "True")
-                else:
-                    robot.variables.set_attribute("collectResource", "")
+        #         #     Pc = resource_price[best_res.quality]*0.5 - 100*math.sqrt((-best_res.x)**2 + (-best_res.y)**2)/arena_size * 0.2 + 100*(1-math.exp(-time_exploring/tau))
+        #         #     # EXPLORE = random.choices([True, False], [100-Pc, Pc])[0]
+        #         #     EXPLORE = False
+        #         #     # print(Pc)
+        #         #     time_exploring = 0
 
-                if nav.distance_to_target() < 0.5 * best_res.radius:
-                    rb.removeResource(best_res)
-                    EXPLORE = True
+        #     if EXPLORE:
+        #         time_exploring += 0.1
+        #         robot.rw.random()
+
+        #     else:
+        #         # best_res = rb.getBestResource()
+        #         best_res = rb.buffer[-1]
+        #         nav.navigate_with_obstacle_avoidance((best_res.xn, best_res.yn))
+
+        #         if nav.distance_to_target() < best_res.radius:
+        #             robot.variables.set_attribute("collectResource", "True")
+        #         else:
+        #             robot.variables.set_attribute("collectResource", "")
+
+        #         if nav.distance_to_target() < 0.5 * best_res.radius:
+        #             rb.removeResource(best_res)
+        #             EXPLORE = True
 
         # Execute main-modules
         if clocks['buffer'].query:

@@ -13,6 +13,7 @@ echo "Updating the ARGoS XML file"
 echo "+-----------------------------------------------------------+"
 
 sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
+    -e "s|FPS|$FPS|g"\
     -e "s|RAB_RANGE|$RAB_RANGE|g"\
     -e "s|NUMBYZANTINE|$NUMBYZANTINE|g"\
     -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
@@ -61,16 +62,15 @@ cp $CONTRACTABI ./OLDABI.abi
 sed -e "s|\"stateMutability\":\"payable\"|\"stateMutability\":\"payable\",\"payable\":\"true\"|g" ./OLDABI.abi > $CONTRACTABI
 rm ./OLDABI.abi
 
-echo "Starting Experiment"
-echo "+-----------------------------------------------------------+"
+if [[ $1 == "--reset-docker" ]]; then
+    # Restart docker
+    echo "Shuting down docker process..."
+    bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
 
-# # Restart docker
-# echo "Shuting down docker process..."
-# bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
-
-# echo "Starting new docker process..."
-# sudo systemctl restart docker.service
-# bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
+    echo "Starting new docker process..."
+    sudo systemctl restart docker.service
+    bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
+fi
 
 # Get containers
 docker ps --format '{{.Names}} {{.ID}}' > temp1.txt
@@ -87,8 +87,11 @@ paste ids.txt temp1.txt temp2.txt > identifiers.txt
 # paste ids.txt temp3.txt > enodes.txt
 rm temp1.txt temp2.txt ids.txt 
 
-rm -r logs
-mkdir logs
+# rm -r logs
+# mkdir logs
+
+echo "Starting Experiment"
+echo "+-----------------------------------------------------------+"
 
 argos3 -c $ARGOSFILE
 # sleep 2

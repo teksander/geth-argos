@@ -21,6 +21,10 @@ resource_params['quantity_min'] = 1
 resource_params['quantity_max'] = 20
 resource_params['min_distance'] = 0.25 * generic_params['arena_size']  
 
+# Parameters for the economy
+economy_params = dict()
+economy_params['fuel_cost'] = 0.025 # 0.01 eth per cm travelled
+
 # Initialize the files which store QT_draw information 
 #(TO-DO: Find a better way to share draw info to qtuser_function.py)
 resource_file = 'resources.txt'

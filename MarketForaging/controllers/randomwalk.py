@@ -4,6 +4,7 @@ import time
 import logging
 from aux import Vector2D
 
+
 rays_file = 'rays.txt'
 
 
@@ -43,6 +44,7 @@ class Navigate(object):
         self.old_vec  = 0
         self.old_time = 0
         self.accumulator_I = 0
+        self.__distance_traveled = 0
 
     def navigate_with_obstacle_avoidance(self, location = [0,0]):
 
@@ -137,6 +139,9 @@ class Navigate(object):
         # Set wheel speeds
         self.robot.epuck_wheels.set_speed(right, left)
 
+        # Accumulate the costs of movement
+        self.__distance_traveled += (right + left)/2 
+
         # Store the distance to arrive at target
         self.__distance_to_target = abs(vec_target)
 
@@ -154,8 +159,16 @@ class Navigate(object):
 
         return left, right
 
-    def distance_to_target(self):
+    def get_distance_to_target(self):
         return self.__distance_to_target
+
+    def get_distance_traveled(self, reset = False):
+
+        if reset:
+            temp = self.__distance_traveled
+            self.__distance_traveled = 0
+
+        return self.__distance_traveled
 
     def saturate(self, left, right, style = 1):
         # Saturate Speeds greater than MAX_SPEED
@@ -225,7 +238,7 @@ class RandomWalk(object):
         self.old_time = time.time()
         self.old_vec = 0
         self.accumulator_I = 0
-
+        self.__distance_traveled = 0
 
     def step(self):
         """ This method runs in the background until program is closed """
@@ -258,12 +271,24 @@ class RandomWalk(object):
             right = self.MAX_SPEED/2
 
         # Avoid Obstacles
-        left, right = self.avoid_vec_lua(left, right)
+        left, right = self.avoid(left, right)
         left, right = self.saturate(left, right)
 
         # Set wheel speeds
         self.robot.epuck_wheels.set_speed(right, left)
+
+        # Accumulate the costs of movement
+        self.__distance_traveled += (right + left)/2 
+
         self.robot.variables.set_attribute("rays", "")
+
+    def get_distance_traveled(self, reset = False):
+
+        if reset:
+            temp = self.__distance_traveled
+            self.__distance_traveled = 0
+
+        return self.__distance_traveled
 
     def navigate(self, location = [0,0]):
 

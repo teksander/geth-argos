@@ -66,7 +66,7 @@ class ResourceVirtualSensor(object):
     The __sensing() method will be started and it will run in the background
     until the application exits.
     """
-    def __init__(self, robot, freq = 0.1):
+    def __init__(self, robot, freq = 1):
         """ Constructor
         :type freq: str
         :param freq: frequency of measurements in Hz (tip: 20Hz)
@@ -82,12 +82,14 @@ class ResourceVirtualSensor(object):
 
     def step(self):
         # Read frequency @ self.freq (Hz).
-        # if time.time() - self.timer > (self.rate):
-            # self.timer = time.time()
-        resource = self.robot.variables.get_attribute("newResource")
+        if time.time() - self.timer > (self.rate):
+            self.timer = time.time()
+            resource = self.robot.variables.get_attribute("newResource")
 
-        if resource:
-            self.resource = resource
+            if resource:
+                self.resource = resource
+            else:
+                self.resource = None
 
     def getNew(self):
         """ This method returns the instant ground value """
