@@ -1,6 +1,8 @@
+ulimit -n 16000
+
 for rep in $(seq 1 ${repetitions}); do
 for num_byzantine in "${num_byzantines[@]}"; do
-
+    
 	killall argos3
 	killall python3
 	# Recreate the temporary logging folder

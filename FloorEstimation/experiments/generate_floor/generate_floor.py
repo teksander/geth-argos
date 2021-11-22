@@ -15,7 +15,8 @@ import os
 
 percentage_white = 0.25
 #tiles_per_side_list = [22, 31, 38]
-tiles_per_side_list = [38]
+#tiles_per_side_list = [38]
+tiles_per_side_list = [85]
 #tiles_per_side_list = [10]
 
 def create_shuffled_matrix(tiles_per_side):
@@ -54,7 +55,7 @@ def create_shuffled_matrix(tiles_per_side):
     # Save as png
     img_name = "experiments/" + str(tiles_per_side) + "_dynamic" + ".png"
     print("Saving image to " + img_name)
-    plt.savefig(img_name, bbox_inches = 'tight')
+    plt.savefig(img_name, bbox_inches = 'tight', dpi=300)
 
     # # Save as pdf
     # img_name_pdf = str(tiles_per_side) + ".pdf"
