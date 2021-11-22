@@ -7,7 +7,7 @@
   <framework>
     <system threads="1" method="balance_quantity" />
     <experiment length="0"
-      ticks_per_second="10"
+      ticks_per_second="30"
       real_time="true"
       random_seed="5" />
   </framework>
@@ -27,7 +27,7 @@
       </actuators>
       <sensors>
         <positioning implementation="default" />
-        <epuck_proximity implementation="default"  />
+        <epuck_proximity implementation="default" show_rays="true" />
         <epuck_ground implementation="rot_z_only" />
         <differential_steering implementation="default" />
         <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>

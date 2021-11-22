@@ -2,7 +2,7 @@
 # Short script to extract log files from all robots listed
 # Assumptions:
 # - The Pi-puck IDs are listed in pi-pucks.txt
-source experimentconfig.sh
+source experimentconfig_backup.sh
 
 # if [ "$#" -eq 1 ]; then
 
@@ -17,7 +17,9 @@ source experimentconfig.sh
 # 	fi
 # 	fi
 # fi	
-cp -r $EXPERIMENTFOLDER/logs/ $EXPERIMENTFOLDER/results/data/$1
+
+
+cp -rp $EXPERIMENTFOLDER/logs/ $EXPERIMENTFOLDER/results/data/$1
 
 
 

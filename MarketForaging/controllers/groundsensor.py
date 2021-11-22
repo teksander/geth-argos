@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import time
 import logging
-
-
-
+import json
+from types import SimpleNamespace
 
 class GroundSensor(object):
     """ Set up a ground-sensor data acquisition loop on a background thread
@@ -55,6 +54,46 @@ class GroundSensor(object):
         """ This method returns the instant ground value """
 
         return self.groundValues;
+        
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+class ResourceVirtualSensor(object):
+    """ Set up a ground-sensor data acquisition loop on a background thread
+    The __sensing() method will be started and it will run in the background
+    until the application exits.
+    """
+    def __init__(self, robot, freq = 0.1):
+        """ Constructor
+        :type freq: str
+        :param freq: frequency of measurements in Hz (tip: 20Hz)
+        """
+        self.freq = freq
+        self.rate = 1/freq
+        self.robot = robot
+        self.timer = time.time()
+        self.resource = None
+
+        logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
+        logger = logging.getLogger(__name__)
+
+    def step(self):
+        # Read frequency @ self.freq (Hz).
+        # if time.time() - self.timer > (self.rate):
+            # self.timer = time.time()
+        resource = self.robot.variables.get_attribute("newResource")
+
+        if resource:
+            self.resource = resource
+
+    def getNew(self):
+        """ This method returns the instant ground value """
+        temp = self.resource
+        self.resource = None
+        return temp
         
     def start(self):
         pass

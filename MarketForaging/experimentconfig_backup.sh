@@ -17,13 +17,18 @@ ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
 # [XML]
-export NUMROBOTS="20"
-RAB_RANGE="0.3"
-VISUALIZATION=visualization # visualization or none
+export NUMROBOTS=5
 export DENSITY=1.5
 export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
+RAB_RANGE="0.3"
+VISUALIZATION=none # visualization or none
 ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
 
+
+# [OTHER]
+export REPS=5
+export SLEEPTIME=5
+export TIMELIMIT=10
 
 
 

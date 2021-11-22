@@ -1,43 +1,42 @@
 #!/usr/bin/env python3
-
 import random
 import time
-import loop_function_params as lfp
 import configparser
 import os
 import json
 from types import SimpleNamespace
+import math
+import os
+experimentFolder = os.environ["EXPERIMENTFOLDER"]
+import sys
+sys.path.insert(1, experimentFolder+'/controllers')
+sys.path.insert(1, experimentFolder+'/loop_functions')
+from aux import Vector2D, Logger
+from enum import Enum
 
-# General Parameters
-generic_params = dict()
-generic_params['arena_size'] = float(os.environ["ARENADIM"])
-generic_params['num_robots'] = int(os.environ["NUMROBOTS"])
+from loop_function_params import *
 
-# Parameters for marketplace
-market_params = dict()
-market_params['position'] = 'left'
-market_params['size'] = 0.1 * generic_params['arena_size'] 
+open(resource_file, 'w+').close()
+open(robot_file, 'w+').close()
+open(rays_file, 'w+').close()
 
-# Parameters for new resources
-resource_params = dict()
-resource_params['count'] = 2*generic_params['num_robots']
-resource_params['quality_mu'] = 0.1
-resource_params['quality_sigma'] = 0.01
-resource_params['quantity_min'] = 2
-resource_params['quantity_max'] = 15
 
-global resource_list, market
+# Other inits
+global resource_list, resource_counter, sttime, market
+
+resource_price = {'red': 20, 'green': 40 , 'blue': 60, 'yellow': 80}
+resource_frequency = {'red': 0.4, 'green': 0.3 , 'blue': 0.2, 'yellow': 0.1}
+resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
+
 resource_list = []
-resource_file = 'resources.txt'
 
-
-
-class resource_obj(object):
-    def __init__(self, x, y, quality, quantity):
+class Location(object):
+    def __init__(self, x, y, radius, quantity, quality):
         self.x = x
         self.y = y
-        self.quality = quality
+        self.radius = radius
         self.quantity = quantity
+        self.quality = quality
         self.timeStamp = 0
 
     def getJSON(self):
@@ -45,43 +44,47 @@ class resource_obj(object):
 
 
 def generate_resource(n = 1):
-
-    for param, val in generic_params.items(): exec(param + '=val')
-    for param, val in market_params.items(): exec(param + '=val')
-    arena_size = generic_params['arena_size']
-
     for _ in range(n):
         overlap = True
-        quality = 0
+        radius = 0
 
         while overlap:
-            # Generate parameters for a new resource
-            x = round(random.uniform(-arena_size/2, arena_size/2), 2)
-            y = round(random.uniform(-arena_size/2, arena_size/2), 2)
 
-            while quality <= 0:
-                quality = round(random.gauss(resource_params['quality_mu'], resource_params['quality_sigma']),2)
+            # Generate a new resource position
+            x = round(random.uniform(-generic_params['arena_size']/2, generic_params['arena_size']/2), 2)
+            y = round(random.uniform(-generic_params['arena_size']/2, generic_params['arena_size']/2), 2)
 
+            # Generate a new resource radius
+            while radius <= 0:
+                radius = round(random.gauss(resource_params['radius_mu'], resource_params['radius_sigma']),2)
+
+            # Generate quantity of resource and quality
             quantity = random.randint(resource_params['quantity_min'], resource_params['quantity_max'])
+            quality = random.choices(list(resource_frequency), weights=resource_frequency.values())[0]
 
+            
             overlap = False
-            # Check if it overlaps with arena sides or other resources
-            if (max((abs(a)) for a in [x,y])  + quality > arena_size/2):
+            # Discard if resource overlaps with sides of arena
+            if (max((abs(a)) for a in [x,y])  + radius > generic_params['arena_size']/2):
                 overlap = True
 
+            # Discard if resource overlaps with other resources
             for res in resource_list:
-                if is_in_circle((res.x, res.y), (x,y), res.quality+quality):
+                if is_in_circle((res.x, res.y), (x,y), res.radius+radius):
                     overlap = True
 
-            if is_in_circle((market.x, market.y), (x,y), market.quality+quality):
+            # Discard if resource overlaps with market
+            if is_in_circle((market.x, market.y), (x,y), market.radius+radius):
                 overlap = True
 
-        resource_list.append(resource_obj(x, y, quality, quantity))
+            # Discard if resource overlaps with minimum area
+            if is_in_circle((market.x, market.y), (x,y), resource_params['min_distance']+radius):
+                overlap = True
+
+        # Append new resource to the global list of resources
+        resource_list.append(Location(x, y, radius, quantity, quality))
         # print('Created Resource: ' + resource_list[-1].getJSON())
 
-        # with open(resource_file, 'w', buffering=1) as f:
-        #     for res in resource_list:
-        #        f.write(res.getJSON()+'\n')
 
 def is_in_circle(point, circle_center, circle_radius):
     dx = abs(point[0] - circle_center[0])
@@ -95,47 +98,53 @@ def is_in_circle(point, circle_center, circle_radius):
         return False
 
 def init():
-    global market
+    global market, looplog, simlog, sttime
+    sttime = time.time()
 
-    # Initialize robot parameters
+    log_folder = experimentFolder + '/logs/0/'
+    os.makedirs(os.path.dirname(log_folder), exist_ok=True)    
+
+    header = list(resource_price) + ['TOTAL', 'VALUE']
+    log_filename = log_folder + 'loop_function.csv'
+    looplog = Logger(log_filename, header, ID = '0')
+    looplog.start()
+
+    header = ['FPS']
+    log_filename = log_folder + 'simulation.csv'  
+    simlog = Logger(log_filename, header, ID = '0')
+    simlog.start()
+
+    # # Initialize robot parameters
     for robot in allrobots:
-        robot.variables.set_attribute("newResource", "")
-        robot.variables.set_attribute("hasResource", "False")
-        robot.variables.set_attribute("resourceCount", "0")
+    #     robot.variables.set_attribute("newResource", "")
+    #     robot.variables.set_attribute("hasResource", "")
+    #     robot.variables.set_attribute("resourceCount", "0")
+    #     robot.variables.set_attribute("rays", "")
 
-    # Initialize arena
-    market = resource_obj(x = 0, y = 0, quality = market_params['size'], quantity = 1)
+        print(robot.variables.get_all_attributes())
+
+    # Initialize locations in the arena
+    market = Location(x = 0, y = 0, radius = market_params['size'], quantity = 1, quality = 'yellow')
     generate_resource(resource_params['count'])
 
-
-def reset():
-    pass
-
-def destroy():
-    pass
-
+            
 def pre_step():
-
-    with open(resource_file, 'w', buffering=1) as f:
-        for res in resource_list:
-            f.write(res.getJSON()+'\n')
-
-def post_step():
-
+    global resource_counter
     
     for robot in allrobots:
+        robot.variables.set_attribute("newResource", "")
+        
+        # Has robot stepped into resource? YES -> Update virtual sensor
         for res in resource_list:
-
-            # Has robot stepped into resource? YES -> Update knowledge
-            if is_in_circle(robot.position.get_position(), (res.x, res.y), res.quality):
+            if is_in_circle(robot.position.get_position(), (res.x, res.y), res.radius):
                 robot.variables.set_attribute("newResource", res.getJSON())
 
-                # Does the robot carry resource? NO -> Pickup resource
-                if robot.variables.get_attribute("hasResource") == "False":
+                # Does the robot not carry resource and chooses to pick up? YES -> Pickup resource
+                if not robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("collectResource"):
 
-                        robot.variables.set_attribute("hasResource", "True")
+                        robot.variables.set_attribute("hasResource", res.quality)
                         res.quantity -= 1
-                        robot.variables.set_attribute("newResource", res.getJSON())
+                        # robot.variables.set_attribute("newResource", "")
                         # print('Robot got resource!')
 
                         # Has resource expired? YES -> Generate new
@@ -144,30 +153,73 @@ def post_step():
                             generate_resource()
 
         # Has robot stepped into market? YES
-        if is_in_circle(robot.position.get_position(), (market.x, market.y), market.quality):
+        if is_in_circle(robot.position.get_position(), (market.x, market.y), market.radius):
 
             # Does the robot carry resource? YES -> Sell resource
-            if robot.variables.get_attribute("hasResource") == "True":        
-            
-                robot.variables.set_attribute("hasResource", "False")
+            resource_quality = robot.variables.get_attribute("hasResource")
+            if resource_quality:      
+                resource_counter[resource_quality] += 1  
+
+                robot.variables.set_attribute("hasResource", "")
                 robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
                 # print('Robot sold resource! Count='+robot.variables.get_attribute("resourceCount"))
 
+                looplog.log([str(value) for value in resource_counter.values()] 
+                          + [sum(resource_counter.values())] 
+                          + [sum([resource_counter[x]*resource_price[x] for x in resource_price])])
+
+
+def post_step():
+    global simlog
+    ### The way to share information to qtuser_function should be improved ### \
+
+    # Record the resources to be drawn to a file
+    with open(resource_file, 'w', buffering=1) as f:
+        for res in resource_list:
+            f.write(res.getJSON()+'\n')
+
+    # Record the carried resourced to be drawn to a file
+    with open(robot_file, 'w', buffering=1) as f:
+        for robot in allrobots:
+            if robot.variables.get_attribute("hasResource"):
+                robotID = str(int(robot.variables.get_id()[2:])+1)
+                x = str(robot.position.get_position()[0])
+                y = str(robot.position.get_position()[1])
+                f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("hasResource")) + '\n')
+
+    # Record the rays to be drawn for each robot
+    for robot in allrobots:
+        p = 'a'
+        if robot.variables.get_attribute("id") == "1":
+            p = 'w+'
+        with open(rays_file, p, buffering=1) as f:
+            f.write(robot.variables.get_attribute("rays"))
+
+    # Low frequency logging of chaindata size and cpu usage   
+
+    simlog.log([round(time.time()-simlog.latest, 2)])
+    # stepTimer = time.time()
+
+    # if looplogger.isReady():
+    #     if me.id == '1':
+    #         ramPercent = getRAMPercent()
+    #         cpuPercent = getCPUPercent()
+    #         looplogger.info([ramPercent,cpuPercent])
 
 def is_experiment_finished():
-    # Determine whether all robots have reached a consensus 
-    finished = True
 
-    for robot in allrobots:
-        finished = finished and robot.variables.get_consensus()
+    finished = time.time() - sttime > generic_params['time_limit'] * 60
 
     if finished:
-        print("A consensus was reached")
+        print("Experiment has finished")
 
     return finished
 
-def get_floor_color():
-    print("Executing Python side")
+def reset():
+    pass
+
+def destroy():
+    pass
 
 def post_experiment():
     print("Finished from Python!!")
