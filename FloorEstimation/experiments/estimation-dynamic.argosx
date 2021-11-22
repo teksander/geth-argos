@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="1" method="balance_quantity" />
-    <experiment length="120"
+    <experiment length="5000"
       ticks_per_second="1"
       real_time="true"
       random_seed="5" />

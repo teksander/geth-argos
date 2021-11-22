@@ -64,13 +64,13 @@ rm ./OLDABI.abi
 echo "Starting Experiment"
 echo "+-----------------------------------------------------------+"
 
-# Restart docker
-echo "Shuting down docker process..."
-bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
+# # Restart docker
+# echo "Shuting down docker process..."
+# bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
 
-echo "Starting new docker process..."
-sudo systemctl restart docker.service
-bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
+# echo "Starting new docker process..."
+# sudo systemctl restart docker.service
+# bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
 
 # Get containers
 docker ps --format '{{.Names}} {{.ID}}' > temp1.txt
@@ -87,6 +87,9 @@ paste ids.txt temp1.txt temp2.txt > identifiers.txt
 # paste ids.txt temp3.txt > enodes.txt
 rm temp1.txt temp2.txt ids.txt 
 
-wait
-# Start w3 servers
-#gnome-terminal --tab -- python3 -i controllers/web3wrapper.py
+rm -r logs
+mkdir logs
+
+argos3 -c $ARGOSFILE
+# sleep 2
+# ./tmux-all -l monitor.log
