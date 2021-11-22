@@ -1,10 +1,10 @@
 source experimentconfig.sh
 
-EXPERIMENT="G9_with_bufferlog"
+EXPERIMENT="debug"
 
-export NUMROBOTS=24
-export robots=24
-export num_byzantines=6
+export NUMROBOTS=2
+export robots=2
+export num_byzantines=(0)
 export byzantine_swarm_style=1
 export FLOORFILE=38.png
 export ARENADIM=1.90

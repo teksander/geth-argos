@@ -128,3 +128,21 @@ plot.x.by.y(df, "NBYZ", "TIME", "Number of Byzantine robots", "Convergence time"
     custom.base.breaks.x=c(0, 3, 6, 9, 12),
     custom.base.breaks.y=seq(0, 5000, 500),
     my.fill="EXP")
+
+
+# Experiment 5, 6, and 9 (average connectivity)
+library(dplyr)
+
+experiments <- paste0("G", c(5, 6, 9))
+my_files = paste0("processed_data/average_connectivity/peers_", experiments, ".csv")
+my_data <- lapply(my_files, read.csv, sep=" ")
+names(my_data) <- experiments
+df <- bind_rows(my_data, .id = "EXP")
+
+print(aggregate(df$CONNECTIVITY, by=list(EXP=df$EXP, NROB=df$NROB), FUN=mean))
+
+
+#EXP = "G6"
+#csv_file = paste0("processed_data/average_connectivity/peers_", EXP, ".csv")
+
+#df <- read.csv(csv_file, sep=" ")

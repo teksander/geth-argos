@@ -12,32 +12,8 @@ import sys
 import pandas as pd
 from matplotlib import pyplot as plt
 import glob
+import numpy as np
 
-<<<<<<< HEAD
-=======
-global tstart
-
-#datadir = '/home/volker/geth-argos/FloorEstimation/results/data'
-datadir = '/home/volker/geth-pi-pucks/results/data'
-
-
-def create_df_old(experiment, datafile):
-
-    dd = dict()
-    for repetition_folder in glob.glob('{}/Experiment_{}/*'.format(datadir, experiment)):
-
-        data = list()
-        for robot_file in glob.glob('{}/*/{}.csv'.format(repetition_folder, datafile)):
-#             print(robot_file)
-            newdf = pd.read_csv(robot_file, delimiter=" ")
-            data.append(perform_corrections(newdf))
-
-        dd[repetition_folder.split('/')[-1]] = pd.concat(data, ignore_index=True)
-
-        dd_allreps = pd.concat(list(dd.values()), ignore_index=True)
-
-    return dd, dd_allreps
->>>>>>> 6287f893073c7a0f962163a8f85360c42f323add
 
 def perform_corrections(df):
     df['TIME'] = (1000*df['TIME']).astype(int)
@@ -69,8 +45,6 @@ def create_df(experiment, datafile, datadir):
             df = perform_corrections(df)
             data_list.append(df)
             
-<<<<<<< HEAD
-    #print(data_list)  
     if data_list:          
         full_df = pd.concat(data_list, ignore_index=True)
         return full_df
@@ -126,7 +100,7 @@ if __name__ == "__main__":
 
         with open(file_name_csv, "w") as f: 
 
-            print("NROB NBYZ NREP TIME MAXTIME MEAN SETUP", file=f)
+            print("NROB NBYZ NREP TIME MAXTIME MEAN AVGESTIMATE SETUP", file=f)
             
             for setup in setups:
 
@@ -137,13 +111,26 @@ if __name__ == "__main__":
 
                 # Collect data
                 df = create_df(EXP, 'sc', datadir)
+                df_estimate = create_df(EXP, 'estimate', datadir)
 
-                if df is not None:
+                if df is not None and df_estimate is not None:
 
                     df['TIME'] = pd.to_numeric(df['TIME'])
 
                     groups = df.groupby(['NROB', 'NBYZ', 'NREP'])
+                    groups_estimate = df_estimate.groupby(['NROB', 'NBYZ', 'NREP'])
 
+                    average_estimates = []
+
+                    for x, run in groups_estimate:
+                        print(x)
+                        #print(run['NROB'], run['NBYZ'], run['NREP'])
+                        average_estimate = np.mean(run.groupby('ID').last()['ESTIMATE'])
+                        average_estimate = round(average_estimate, 4)
+                        average_estimates.append(average_estimate)
+                        
+
+                    m = 0
                     for x, run in groups:
 
                         consensus_reached = run[(run['C?'])]
@@ -161,7 +148,8 @@ if __name__ == "__main__":
                         cons_time = consensus_reached_first['TIME'][cons_time_idx] / 1000
                         mean = consensus_reached_first['MEAN'][cons_time_idx]
 
-                        print(x[0], x[1], x[2], cons_time, max_time, mean, setup, file=f) 
+                        print(x[0], x[1], x[2], cons_time, max_time, mean, average_estimates[m], setup, file=f) 
+                        m = m + 1
 
 
 
@@ -191,11 +179,56 @@ if __name__ == "__main__":
     #     print(x[0], x[1], x[2], cons_time, mean, setup, file=f) 
 
 
+    # Connectivity experiments
+    experiments = ['G5', 'G6', 'G9']
+
+    setups = ["reality"]
+
+
+    for EXP in experiments:
+
+        connectivity_folder = data_folder + "average_connectivity/"
+
+        if not os.path.exists(connectivity_folder):
+
+            os.makedirs(connectivity_folder)
+
+        file_name_base = "peers_" + EXP
+        file_name_csv = connectivity_folder + file_name_base + ".csv"
+
+        with open(file_name_csv, "w") as f: 
+
+            print("NROB NBYZ NREP CONNECTIVITY SETUP", file=f)    
+
+
+            for setup in setups:
+
+                if setup == "reality":
+                    datadir = datadir_real
+                elif setup == "simulation":
+                    datadir = datadir_sim
+
+
+            # Collect data
+            df = create_df(EXP, 'buffer', datadir)
+
+            if df is not None:
+
+                df['TIME'] = pd.to_numeric(df['TIME'])
+
+                groups = df.groupby(['NROB', 'NBYZ', 'NREP'])
+
+                for x, run in groups:
+
+                    # TODO: Calculate average connectivity here
+                    average_connectivity = sum(run['#BUFFER']) / len(run['#BUFFER'])
+                    print(x[0], x[1], x[2], average_connectivity, setup, file=f) 
+
+
 
     #shutil.make_archive("all_files", 'zip', data_folder)
-=======
-    full_df = pd.concat(data_list, ignore_index=True)
-    return full_df
+    #full_df = pd.concat(data_list, ignore_index=True)
+    #return full_df
 
 def tic():
     global tstart
@@ -203,4 +236,3 @@ def tic():
     
 def toc():
     print(time.time()-tstart)
->>>>>>> 6287f893073c7a0f962163a8f85360c42f323add
