@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="1" method="balance_quantity" />
-    <experiment length="5000"
+    <experiment length="7500"
       ticks_per_second="1"
       real_time="true"
       random_seed="5" />
@@ -35,7 +35,7 @@
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
       <params script="EXPERIMENTFOLDER/controllers/mainloop.py"
-      timeRate="1" />
+      timeRate="2" />
     </python_controller>
 
   </controllers>

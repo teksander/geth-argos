@@ -1,6 +1,6 @@
 # This file contains FIXED parameters that are the same for ALL experiments
 
-export repetitions=10
+export repetitions=20
 export SLEEPTIME=20
 export MAINFOLDER="$HOME/geth-argos"
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
