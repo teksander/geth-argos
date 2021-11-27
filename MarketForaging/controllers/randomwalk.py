@@ -163,12 +163,12 @@ class Navigate(object):
         return self.__distance_to_target
 
     def get_distance_traveled(self, reset = False):
+        temp = self.__distance_traveled
 
         if reset:
-            temp = self.__distance_traveled
             self.__distance_traveled = 0
 
-        return self.__distance_traveled
+        return temp
 
     def saturate(self, left, right, style = 1):
         # Saturate Speeds greater than MAX_SPEED
@@ -281,14 +281,15 @@ class RandomWalk(object):
         self.__distance_traveled += (right + left)/2 
 
         self.robot.variables.set_attribute("rays", "")
-
+        
     def get_distance_traveled(self, reset = False):
+        temp = self.__distance_traveled
 
         if reset:
-            temp = self.__distance_traveled
             self.__distance_traveled = 0
 
-        return self.__distance_traveled
+        return temp
+
 
     def navigate(self, location = [0,0]):
 

@@ -24,8 +24,8 @@ open(rays_file, 'w+').close()
 # Other inits
 global resource_list, resource_counter, sttime, market
 
-resource_price = {'red': 20, 'green': 40 , 'blue': 60, 'yellow': 80}
-resource_frequency = {'red': 0.4, 'green': 0.3 , 'blue': 0.2, 'yellow': 0.1}
+resource_price = resource_params['prices']
+resource_frequency = resource_params['frequency']
 resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
 
 resource_list = []
@@ -37,7 +37,6 @@ class Location(object):
         self.radius = radius
         self.quantity = quantity
         self.quality = quality
-        self.timeStamp = 0
 
     def getJSON(self):
         return str(vars(self)).replace("\'", "\"")

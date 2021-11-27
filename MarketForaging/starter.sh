@@ -31,7 +31,7 @@ echo "+-----------------------------------------------------------+"
 solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCTEMPLATE
 cp -r "${EXPERIMENTFOLDER}/scs/build/." "${DOCKERFOLDER}/geth/deployed_contract/"
 
-BINDATA=`cat ${EXPERIMENTFOLDER}/scs/build/Estimation.bin-runtime`
+BINDATA=`cat ${CONTRACTBIN}`
 
 echo "+-----------------------------------------------------------+"
 
@@ -64,11 +64,12 @@ rm ./OLDABI.abi
 
 if [[ $1 == "--reset-docker" ]]; then
     # Restart docker
+    docker service scale ethereum_eth=0
     echo "Shuting down docker process..."
     bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
 
     echo "Starting new docker process..."
-    sudo systemctl restart docker.service
+    # sudo systemctl restart docker.service
     bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
 fi
 
@@ -93,6 +94,6 @@ rm temp1.txt temp2.txt ids.txt
 echo "Starting Experiment"
 echo "+-----------------------------------------------------------+"
 
-argos3 -c $ARGOSFILE
+# argos3 -c $ARGOSFILE
 # sleep 2
 # ./tmux-all -l monitor.log

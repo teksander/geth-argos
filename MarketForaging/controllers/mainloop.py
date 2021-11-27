@@ -11,6 +11,7 @@ logtofile = False
 #######################################################################
 tcpPort = 5000 
 tcprPort = 6000 
+tcpkPort = 7000 
 erbDist = 175
 erbtFreq = 10
 gsFreq = 20
@@ -52,23 +53,24 @@ sys.path.insert(1, experimentFolder+'/loop_functions')
 sys.path.insert(1, experimentFolder)
 from loop_function_params import *
 import time
-import rpyc
 import copy
 import logging
 import shutil
 import json 
 from types import SimpleNamespace
+from collections import namedtuple
 from aenum import Enum, auto
 
 from erandb import ERANDB
 from aux import *
+from console import *
 from randomwalk import RandomWalk, Navigate
 from groundsensor import GroundSensor, ResourceVirtualSensor
 from rgbleds import RGBLEDs
-from _thread import start_new_thread
+from _thread import start_new_thread as thread
 import threading
 
-sys.path.insert(1, experimentFolder+'/loop_functions')
+
 from loop_function_params import *
 
 # Some experiment variables
@@ -98,12 +100,16 @@ clocks['buffer'] = Timer(bufferRate)
 
 clocks['collect_resources'] = Timer(1)
 clocks['peer_check'] = Timer(peerSecurityRate)
-clocks['balance_check'] = Timer(1)
+clocks['balance_check'] = Timer(1.5)
+clocks['change_offer'] = Timer(1)
+clocks['block'] = Timer(15)
+clocks['pay_fuel'] = Timer(10)
+clocks['explore'] = Timer(150)
 
 estTimer =  eventTimer  = time.time()
 
 global resource_price
-resource_price = {'red': 20, 'green': 40 , 'blue': 60, 'yellow': 80}
+resource_price = resource_params['prices']
 
 r = market_params['size'] * math.sqrt(random.random())
 theta = 2 * math.pi * random.random()
@@ -123,20 +129,22 @@ def buffer(rate = bufferRate, ageLimit = ageLimit):
         if peer not in peered:
             enode = tcp.request('localhost', tcpPort+int(peer)) 
             # mainlogger.info('got enode: %s', enode)
-            w3.addPeer(enode)
-            # start_new_thread(w3.addPeer, (enode,))
+
+            w3.geth.admin.addPeer(enode)
             peered.add(peer)
 
             # mainlogger.info('Added peer: %s, enode: %s', peer, enode)
 
     temp = copy.copy(peered)
-    for peer in temp:
 
+    for peer in temp:
         if peer not in peers:
             enode = tcp.request('localhost', tcpPort+int(peer))
-            w3.removePeer(enode)
+
+            w3.geth.admin.removePeer(enode)
+
             peered.remove(peer)
-            # mainlogger.info('Removed peer: %s', peer)
+            mainlogger.info('Removed peer: %s', peer)
 
 
     # The following part is a security check:
@@ -150,14 +158,14 @@ def buffer(rate = bufferRate, ageLimit = ageLimit):
 
         if not peered:
             for enode in gethPeers_enodes:
-                w3.removePeer(enode)
+                w3.geth.admin.removePeer(enode)
 
         # else:
         #     for ID in peered:
         #         if ID not in gethPeers_ids:
         #             enode = getEnodeById(ID, gethPeers_enodes)
         #             print(ID)
-        #             # w3.addPeer(enode)
+        #             # w3.geth.admin.addPeer(enode)
 
 
          # Turn on LEDs according to geth Peers
@@ -187,7 +195,6 @@ bufferTh = threading.Thread(target=buffer, args=())
 mainmodules = []
 
 
-
 global time_exploring
 time_exploring = 0
 exploration_period = 1
@@ -206,47 +213,68 @@ class ResourceBuffer(object):
         self.buffer = []
         self.ageLimit = ageLimit
 
-    def addResource(self, new_res_json):
-        """ This method is called to add a new resource JSON
-        """   
-        new_res = json.loads(new_res_json, object_hook=lambda d: SimpleNamespace(**d))
-        # new_res = new_res_json
-        # new_res.timeStamp = time.time()
-        new_res.timeStamp = 0
-        new_res.value = new_res.quantity * resource_price[new_res.quality]
-        
-        r = new_res.radius * math.sqrt(random.random())
+    def readJSON(self, resource_json):
+        # Default resource attrs: x, y, radius, quality, quantity
+        resource = json.loads(resource_json, object_hook=lambda d: SimpleNamespace(**d))
+
+        # Calculate the total value of the resource
+        resource.value = resource.quantity * resource_price[resource.quality]
+        resource.price = resource.value
+
+        # Introduce the measurement error
+        r = resource.radius * math.sqrt(random.random())
         theta = 2 * math.pi * random.random()
-        new_res.xn = new_res.x + r * math.cos(theta)
-        new_res.yn = new_res.y + r * math.sin(theta)
+        resource.__xr = resource.x + r * math.cos(theta)
+        resource.__yr = resource.y + r * math.sin(theta)
 
-        # Is in the buffer? YES -> Update buffer
-        if (new_res.x, new_res.y)  in self.getLocations():
-            res = self.getResourceByLocation((new_res.x, new_res.y))
+        # Introduce the timestamp
+        resource.__timeStamp = time.time()
+        resource.__isSold = False
+        return resource
 
-            if new_res.quantity < res.quantity or new_res.timeStamp < res.timeStamp:
-                res.quantity = new_res.quantity
-                res.timeStamp = new_res.timeStamp
-                res.value = new_res.value
+    def getJSON(self, resource):
+        public_vars = { k:v for k,v in vars(resource).items() if not k.startswith('_') }
+        return str(public_vars).replace("\'", "\"")
 
-                mainlogger.info("Updated resource: "+str(vars(res)).replace("\'", "\""))
+    def getJSONs(self, idx = None):
+        return {self.getJSON(res) for res in self.buffer}
+
+    def addResource(self, new_res):
+        """ This method is called to add a new resource
+        """   
+        if isinstance(new_res, str):
+            new_res = readJSON(new_res)
 
         # Is in the buffer? NO -> Add to buffer
-        else :
+        if (new_res.x, new_res.y) not in self.getLocations():
             res = new_res
             self.buffer.append(res)
-            mainlogger.info("Added resource: "+str(vars(res)).replace("\'", "\""))
+            mainlogger.info("Added resource: "+self.getJSON(res))
+
+        # Is in the buffer? YES -> Update buffer
+        else:
+            res = self.getResourceByLocation((new_res.x, new_res.y))
+
+            if new_res.quantity < res.quantity or new_res.__timeStamp > res.__timeStamp:
+                res = new_res
+                # res.quantity = new_res.quantity
+                # res.value = new_res.value
+                # res.__timeStamp = new_res.__timeStamp
+
+                mainlogger.info("Updated resource: "+self.getJSON(res))
 
         if res.quantity <= 0:
                 self.removeResource(res)
 
-    def removeResource(self, oldResource):
+        return res
+
+    def removeResource(self, resource):
         """ This method is called to remove a peer Id
             newPeer is the new peer object
         """   
-        self.buffer.remove(oldResource)
+        self.buffer.remove(resource)
 
-        mainlogger.info("Removed resource: "+str(vars(oldResource)).replace("\'", "\""))
+        # mainlogger.info("Removed resource: "+str(vars(oldResource)).replace("\'", "\""))
 
     def __len__(self):
         return len(self.buffer)
@@ -261,21 +289,15 @@ class ResourceBuffer(object):
         else:
             return self.buffer.sort(key=lambda x: x.value, reverse=True)
 
+
     def getCount(self):
         return self.__len__()
 
-    def value(self):
-        return [res.quantity*resource_price[res.quality] ]
+    def getAttr(self, attr):
+        return [getattr(res, attr) for res in self.buffer] 
 
     def getValues(self):
         return [res.quantity*resource_price[res.quality] for res in self.buffer]
-
-    def getJSON(self, resource):
-        return str(vars(resource)).replace("\'", "\"")
-
-    def getJSONs(self, idx = None):
-        return {str(vars(res)).replace("\'", "\"") for res in self.buffer}
-        # return {str(vars(res)).replace("\'", "\"") for res in self.buffer if res != self.getBestResource()}
 
     def getQuantities(self):
         return [res.age for res in self.buffer]
@@ -323,6 +345,72 @@ class ResourceBuffer(object):
         # print(Qp, Qc_r, Qc_m)
         Pc = [x-y-z for x, y, z in zip(Qp,Qc_m,Qc_r)]
         return self.buffer[Pc.index(max(Pc))]
+
+class Transaction(object):
+
+    def __init__(self, txHash, tx = None, txReceipt = None):
+        self.txHash = txHash
+        self.tx = tx
+        self.txReceipt = txReceipt
+
+class TransactionBuffer(object):
+    """ Establish the transaction buffer class 
+    """
+
+    def __init__(self):
+        self.buffer = []
+
+    def addTransaction(self, txHash):
+
+        if txHash not in self.getHashes():
+
+            tx = w3.eth.getTransaction(txHash)
+            txReceipt = w3.eth.getTransactionReceipt(txHash)
+
+            self.buffer.append(Transaction(txHash, tx, txReceipt))
+        else:
+            print("tx already in buffer")
+
+    def getHashes(self):
+        return [tx.hash for tx in self.buffer]
+
+    def update(self):
+        for tx in self.buffer:
+            if not tx.txReceipt:
+                tx.txReceipt = w3.eth.getTransactionReceipt(txHash)
+
+
+
+class Idle(Enum):
+    IDLE = 1
+
+class Explorer(Enum):
+    EXPLORE = 2
+    GO_TO_MARKET = 3
+    GO_TO_RESOURCE = 4
+
+class Recruit(Enum):
+    WAIT = 5
+    FORAGE = 6
+    GO_TO_MARKET = 7
+    GO_TO_RESOURCE = 8
+
+class FiniteStateMachine(object):
+
+    def __init__(self, robot = None):
+
+        self.Idle = Idle
+        self.Explorer = Explorer
+        self.Recruit = Recruit
+
+        self._currState = self.Idle.IDLE
+    
+    def getState(self):
+        return self._currState
+
+    def setState(self, state):
+        self._currState = state
+        mainlogger.info("Robot state is " + str(self._currState) )
 
 def init():
     global me, nav, rb, w3, gs, rs, erb, tcp, tcpr, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, submodules, logmodules 
@@ -399,10 +487,11 @@ def init():
     #######################################################################
     # # /* Init web3.py */
     mainlogger.info('Initialising Python Geth Console...')
-    w3 = init_web3()
+    w3 = init_web3(robotID)
+    # w3.sc.functions.getAllowance().transact()
 
     # /* Init an instance of peer for this Pi-Puck */
-    me = Peer(robotID, w3.getEnode(), w3.getKey())
+    me = Peer(robotID, w3.enode, w3.key)
 
     # /* Init an instance of peer for the monitor PC */
     pc = Peer(pcID)
@@ -418,6 +507,10 @@ def init():
     # /* Init TCP server for enode requests */
     mainlogger.info('Initialising TCP server...')
     tcp = TCP_server(me.enode, 'localhost', tcpPort+int(me.id), unlocked = True)
+
+    # /* Init TCP server for key requests */
+    mainlogger.info('Initialising TCP server...')
+    tcpk = TCP_server(me.key, 'localhost', tcpkPort+int(me.id), unlocked = True)
 
     # /* Init TCP server for resource requests */
     mainlogger.info('Initialising TCP server...')
@@ -445,43 +538,28 @@ def init():
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
 
+    # /* Init Finite-State-Machine */
+    robot.fsm = FiniteStateMachine()
+
     # List of submodules --> iterate .start() to start all
-    submodules = [tcp, tcpr, erb, gs]
+    submodules = [w3.geth.miner, tcp, tcpr, erb, gs]
 
-class Idle(Enum):
-    IDLE = 1
 
-class Explorer(Enum):
-    EXPLORE = 2
-    GO_TO_MARKET = 3
-    GO_TO_RESOURCE = 4
-
-class Recruit(Enum):
-    WAIT = 5
-    GO_TO_MARKET = 6
-    GO_TO_RESOURCE = 7
-
-class FiniteStateMachine(object):
-
-    def __init__(self, robot = None):
-
-        self.Idle = Idle
-        self.Explorer = Explorer
-        self.Recruit = Recruit
-
-        self._currState = self.Idle.IDLE
-    
-    def getState(self):
-        return self._currState
-
-    def setState(self, state):
-        self._currState = state
-        mainlogger.info("Robot state is " + str(self._currState) )
-
-fsm = FiniteStateMachine()
+bc_balance = 21
+balance = 0
+offer_decrease_rate = 0.02
+offer_increase_rate = 0.05
+offer_multiplier = 0.1
+explore_duration = 0
+explore_threshold = 15
+txReceipt = None
+txHash = None
+fuel_cost = economy_params['fuel_cost']
+txReceipt_fuel = None
+txHash_fuel = None
 
 def controlstep():
-    global state, startFlag, startTime, estTimer, eventTimer, shareTimer, stepTimer, bufferTh, eventTh, resource_set, resource_objs, time_exploring, EXPLORE, clocks
+    global explore_duration, txReceipt_fuel,txHash_fuel, txReceipt, txHash, bc_balance, balance, state, startFlag, startTime, estTimer, eventTimer, shareTimer, stepTimer, bufferTh, eventTh, resource_set, resource_objs, time_exploring, EXPLORE, clocks
 
     # Actions to perform on the first step    
     if not startFlag:
@@ -507,36 +585,145 @@ def controlstep():
 
 
         #### TIMED QUERIES ####
-
+    
+        # print(w3.eth.coinbase())
 
         #### STATE-SPECIFIC ACTIONS ####
-        if fsm.getState() == fsm.Idle.IDLE:
+        if robot.fsm.getState() == robot.fsm.Idle.IDLE:
+            robot.epuck_wheels.set_speed(0,0)
+
 
             if clocks['balance_check'].query():
-                balance = w3.getBalance()
+                balance = float(w3.getBalance())
+                explore_duration = (balance - explore_threshold)/fuel_cost
 
-            if balance > 20:
-                fsm.setState(fsm.Explorer.EXPLORE)
+                if explore_duration > explore_threshold:
+                    print(explore_duration)
+
+                    if not txHash_fuel:
+                        tx = {'from': me.key, 'value': w3.toWei(explore_duration * fuel_cost, 'ether')}
+                        txHash_fuel = w3.sc.functions.buyFuel().transact(tx)
+
+                    else:
+                        print('Starting explore', explore_duration)
+                        clocks['explore'].set(explore_duration)
+                        robot.fsm.setState(robot.fsm.Explorer.EXPLORE)
+
+                else:
+                    robot.fsm.setState(robot.fsm.Recruit.WAIT)
      
 
-        if fsm.getState() == fsm.Explorer.EXPLORE:
+        if robot.fsm.getState() == robot.fsm.Explorer.EXPLORE:
             
-
-            # Exploration scheme
+            # Exploration strategy
             robot.rw.random()
 
             # Collection of new resources
             resource_js = rs.getNew()
+            
             if resource_js:
-                rb.addResource(resource_js)
-                # rb.buffer[-1].fuel_spent = economy_params['fuel_cost'] * robot.rw.get_distance_traveled()*step_size 
+                resource = rb.readJSON(resource_js)
+                rb.addResource(resource)
+
+                if not resource._ResourceBuffer__isSold:
+                    try:
+                        w3.sc.functions.addResource(resource_js,50,50,10).transact()
+                        print('added res')
+                        resource._ResourceBuffer__isSold = True
+                    except:
+                        pass
 
 
-            # Estimate fuel spent so far
-            if clocks['balance_check'].query():
-                balance = w3.getBalance()
+            # # Calculate the cost of fuel spent so far
+            # if clocks['balance_check'].query():
+            #     bc_balance = w3.getBalance()
 
-                print("Exploration cost: ",  economy_params['fuel_cost'] * robot.rw.get_distance_traveled()*step_size)
+            # if clocks['pay_fuel'].query():
+
+            #      * robot.rw.get_distance_traveled(reset = True) * 
+            #     tx = {'from': me.key, 'value': w3.toWei(fuel_cost, 'ether')}
+            #     thread(w3.sc.functions.buyFuel().transact, (tx,))
+
+            #     # w3.sc.functions.buyFuel().transact(tx)
+            #     mainlogger.info("Paid Fuel: %s ether",  fuel_cost)
+            #     mainlogger.info("BALANCE: %s ether",  float(bc_balance))
+
+
+            if clocks['explore'].query():
+                print('Explore time finished')
+                robot.fsm.setState(robot.fsm.Idle.IDLE)
+
+                # thread(w3.sc.functions.buyFuel().transact, (tx,))
+
+            # if clocks['change_offer'].query():
+    
+            #     for resource in rb.buffer:
+            #         resource.price = resource.price * (1-offer_decrease_rate)
+
+            #     mainlogger.info("Exploration cost: %s",  exploration_cost)
+            #     mainlogger.info("Resources Count: %s",  len(rb.buffer))
+            #     mainlogger.info("Resources Price: %s",  sum(rb.getAttr('price')))
+
+            #     balance = float(bc_balance) - exploration_cost + sum(rb.getAttr('price'))
+            #     mainlogger.info("BALANCE: %s",  balance)
+
+            #     if balance <= explore_threshold:
+            #         robot.fsm.setState(robot.fsm.Idle.IDLE)
+
+
+
+        if robot.fsm.getState() == robot.fsm.Recruit.WAIT:
+
+            # Now we decide which resource to harvest
+
+            # Not recruited yet ? NO -> Buy, or increase offer
+            # if clocks['change_offer'].query():
+            #     offer_multiplier += offer_increase_rate
+
+
+            # Recruited? YES -> Start harvesting
+            if rb.buffer:
+                robot.fsm.setState(robot.fsm.Recruit.FORAGE)
+                
+
+        if robot.fsm.getState() == robot.fsm.Recruit.FORAGE:
+
+            current_resource = rb.buffer[-1] # Actually, sc.buy
+
+            # Do I have item? YES -> Go to market
+            if robot.variables.get_attribute("hasResource"):
+                nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
+
+
+            # Do I have item? No -> Go to resource
+            else:
+                nav.navigate_with_obstacle_avoidance((current_resource.__xr, current_resource.__yr))
+
+                if nav.get_distance_to_target() < current_resource.radius:
+                    robot.variables.set_attribute("collectResource", "True")
+                else:
+                    robot.variables.set_attribute("collectResource", "")
+
+                if nav.get_distance_to_target() < 0.5 * current_resource.radius:
+                    rb.removeResource(current_resource)
+
+            if not rb.buffer:
+                robot.fsm.setState(robot.fsm.Idle.IDLE)
+
+            
+
+
+        #         best_res = rb.buffer[-1]
+        #         nav.navigate_with_obstacle_avoidance((best_res.xn, best_res.yn))
+
+        #         if nav.distance_to_target() < best_res.radius:
+        #             robot.variables.set_attribute("collectResource", "True")
+        #         else:
+        #             robot.variables.set_attribute("collectResource", "")
+
+        #         if nav.distance_to_target() < 0.5 * best_res.radius:
+        #             rb.removeResource(best_res)
+        #             EXPLORE = True
 
         #         # Logic to define the price to sell resource for
         #         cost = rw.get_distance() * fuel_cost
@@ -574,11 +761,6 @@ def controlstep():
 
         ##### COLLECTION OF RESOURCE INFORMATION #####
         
-
-
-
-
-
 
         # # Collect resource data from the virtual sensor
         # if clocks['collect_resources'].query():
@@ -686,10 +868,13 @@ def reset():
 
 def destroy():
     if startFlag:
-        w3.stop()
+        w3.geth.miner.stop()
+        # w3.stop()
         bufferTh.join()
         for enode in getEnodes():
-            w3.removePeer(enode)
+            # print(enode)
+            w3.geth.admin.removePeer(enode)
+            # w3.removePeer(enode)
 
     print('Killed')
     # STOP()
@@ -778,7 +963,8 @@ def STOP(modules = submodules, logs = logmodules):
 #         return set(getIds())-set(pb.getIds())-{me.enode}
 
 def getEnodes():
-    return [peer['enode'] for peer in w3.getPeers()]
+    return [peer['enode'] for peer in w3.geth.admin.peers()]
+    # return [peer['enode'] for peer in w3.getPeers()]
 
 def getEnodeById(__id, gethEnodes = None):
     if not gethEnodes:
@@ -798,36 +984,6 @@ def getIds(__enodes = None):
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-# Move this script to console and import it like in the robots
-def init_web3():
-    global ticketPrice, ticketPriceWei
-
-    # Get ID from argos
-    robotID = int(robot.variables.get_id()[2:])+1
-
-    # Connect to the RPYC which hosts web3.py (port 4xxx where xxx is robot ID)
-    dockerIP = identifersExtract(robotID, 'IP')
-    
-    #conn = rpyc.connect("localhost", 4000+int(robotID), config = {"allow_all_attrs" : True})
-    conn = rpyc.connect(dockerIP, 4000, config = {"allow_all_attrs" : True})
-    w3 = conn.root
-
-    ticketPrice = 40
-    ticketPriceWei = w3.toWei(ticketPrice)
-    return w3
-
-
-def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.' + str(robotID) + '.'
-    containersFile = open('identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            if query == 'IP':
-                return line.split()[-1]
-            if query == 'ENODE':
-                return line.split()[1]
-
-
 # enode = enodesExtract(peer, query = 'ENODE')
 def enodesExtract(robotID, query = 'ENODE'):
     namePrefix = str(robotID)
@@ -836,3 +992,5 @@ def enodesExtract(robotID, query = 'ENODE'):
         if line.__contains__(namePrefix):
                 temp = line.split()[-1]
                 return temp[1:-1]
+
+

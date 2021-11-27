@@ -66,7 +66,7 @@
     </box>
 
     <distribute>
-      <position method="uniform" min="-ARENADIMH,-ARENADIMH,0" max="ARENADIMH,ARENADIMH,0" /> 
+      <position method="uniform" min="-0.4,-0.4,0" max="0.4,0.4,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
       <entity quantity="NUMROBOTS" max_trials="15"> 
         <e-puck id="fb" rab_range = "1">
