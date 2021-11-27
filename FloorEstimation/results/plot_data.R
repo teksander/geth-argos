@@ -1,5 +1,6 @@
 library(ggplot2)
 library(reshape2)
+library(dplyr)
 
 base_breaks_x <- function(x){
     b <- x
@@ -26,6 +27,17 @@ base_breaks_y <- function(x){
        scale_y_continuous(breaks=b))
 }
 
+my.theme <- theme(axis.text=element_text(size=15, colour="gray25"),
+              axis.title=element_text(size=20, colour="gray25"),
+              axis.line = element_blank(),              
+              axis.ticks.length=unit(-0.25, "cm"),
+              axis.ticks = element_line(colour = 'gray25'),
+              panel.spacing.x=unit(.8, "lines"),
+              legend.position="none",
+              strip.background = element_rect(size = 1.3),
+              axis.text.x = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm"),
+                                         angle = 0, vjust = 0, hjust=0.5),
+              axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")))
 
 #' Create a box-plot
 plot.x.by.y <- function(df, x, y, xlab, ylab, out.name, report.dir,
@@ -33,29 +45,23 @@ plot.x.by.y <- function(df, x, y, xlab, ylab, out.name, report.dir,
                         plot.smooth=FALSE, extreme.outlier.count=NA,
                         count.outliers=F,
                         custom.base.breaks.x=c(0, 1, 2, 3, 4),
-                        custom.base.breaks.y=seq(0, 25, 5)) {
+                        custom.base.breaks.y=seq(0, 25, 5),
+                        annotation=NULL,
+                        my.fill="SETUP") {
 
 
 	df[,x] <- as.factor(df[,x])
 	df$NROB <- as.factor(df$NROB)
-##    df <- df[df$byz >= start.x.at, ]
-    
+    df$SETUP <- as.factor(df$SETUP)
 
-    #print(df)
+
     p <- ggplot(df, aes_string(x=x, y=y)) +
-        geom_boxplot(width=0.8, aes_string(fill="SETUP")) +
+        geom_boxplot(width=0.8, aes_string(fill=my.fill)) +
+        scale_fill_manual(values = c("#4daf4a", "#984ea3", "#e41a1c", "#377eb8")) +
+        #geom_boxplot(data=df, aes(x=NBYZ, y=ESTIMATEERROR)) +
+        annotation +
         theme_classic() +
-         theme(axis.text=element_text(size=15, colour="gray25"),
-              axis.title=element_text(size=20, colour="gray25"),
-              axis.line = element_blank(),              
-              axis.ticks.length=unit(-0.25, "cm"),
-              axis.ticks = element_line(colour = 'gray25'),
-              panel.spacing.x=unit(.8, "lines"),
-              #legend.position="none",
-              strip.background = element_rect(size = 1.3),
-              axis.text.x = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm"),
-                                         angle = 0, vjust = 0, hjust=0.5),
-              axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")))  +
+         my.theme  +
         ylab(ylab) +
         xlab(xlab) +
      base_breaks_y(custom.base.breaks.y) +
@@ -74,21 +80,10 @@ plot.line <- function(df, x, y, xlab, ylab, out.name, report.dir,
                         custom.base.breaks.x=c(0, 1, 2, 3, 4),
                         custom.base.breaks.y=seq(0, 25, 5)) {
 
-
     p <- ggplot(df, aes_string(x=x, y=y, color="NROB")) +
         geom_line() +
         theme_classic() +
-         theme(axis.text=element_text(size=15, colour="gray25"),
-              axis.title=element_text(size=20, colour="gray25"),
-              axis.line = element_blank(),              
-              axis.ticks.length=unit(-0.25, "cm"),
-              axis.ticks = element_line(colour = 'gray25'),
-              panel.spacing.x=unit(.8, "lines"),
-              #legend.position="none",
-              strip.background = element_rect(size = 1.3),
-              axis.text.x = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm"),
-                                         angle = 0, vjust = 0, hjust=0.5),
-              axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")))  +
+         my.theme +
         ylab(ylab) +
         xlab(xlab) +
      base_breaks_y(custom.base.breaks.y) +
@@ -102,7 +97,23 @@ plot.line <- function(df, x, y, xlab, ylab, out.name, report.dir,
 
 ground_truth = 0.25
 
+# Split df into results from simulation/reality and the average estimate
+split.df <- function(df) {
 
+    df$ESTIMATEERROR <- abs(df$AVGESTIMATE - ground_truth)
+    df.estimate.error <- df[c("NROB", "NBYZ", "NREP", "ESTIMATEERROR")]
+    names(df.estimate.error)[names(df.estimate.error) == 'ESTIMATEERROR'] <- 'ERROR'
+    df.estimate.error$SETUP <- "baseline"
+
+    df.experiments <- df[c("NROB", "NBYZ", "NREP", "ERROR", "SETUP")]
+
+    df.full <- rbind(df.experiments, df.estimate.error)
+
+    return(df.full)
+}
+
+
+# Experiment 1
 EXP = "G1"
 csv_file = paste0("processed_data/csv_aggregated/combined_", EXP, ".csv")
 error_file = paste0("error_", EXP, ".png")
@@ -113,92 +124,131 @@ df$MEAN <- df$MEAN / 10000000
 df$ERROR <- abs(df$MEAN - ground_truth)
 
 
-plot.x.by.y(df, "NBYZ", "ERROR", "Number of Byzantine robots", "Absolute error", error_file, ".",
+df.full <- split.df(df)
+
+
+my.annotation = annotate(geom = "text",
+            x = c(0.72, 0.99, 1.25),
+            y = 0.05,
+            label = c("reality", "simulation", "baseline"),
+            color = c("gray25"),
+             angle = 90)
+
+plot.x.by.y(df.full, "NBYZ", "ERROR", "Number of Byzantine robots", "Absolute error", error_file, ".",
     custom.base.breaks.x=c(0, 3, 6, 9, 12),
-                        custom.base.breaks.y=seq(0, 0.25, 0.05))
+                        custom.base.breaks.y=seq(0, 0.25, 0.05),
+                        annotation=my.annotation)
+
+my.annotation = annotate(geom = "text",
+            x = c(0.79, 1.18),
+            y = 1600,
+            label = c("reality", "simulation"),
+            color = c("gray25"),
+             angle = 90)
 
 plot.x.by.y(df, "NBYZ", "TIME", "Number of Byzantine robots", "Convergence time", time_file, ".",
     custom.base.breaks.x=c(0, 3, 6, 9, 12),
-                        custom.base.breaks.y=seq(0, 5000, 500))
+                        custom.base.breaks.y=seq(0, 5000, 500),
+                        annotation=my.annotation)
 
 
+# Experiment 2
+ground_truth = 0.25
+experiments <- c("G1", "G2", "G3", "G4")
+my_files = paste0("processed_data/csv_aggregated/combined_", experiments, ".csv")
+my_data <- lapply(my_files, read.csv, sep=" ")
+names(my_data) <- experiments
 
-EXP = "G2"
-csv_file = paste0("processed_data/csv_aggregated/combined_", EXP, ".csv")
-error_file = paste0("error_", EXP, ".png")
-time_file = paste0("time_", EXP, ".png")
-
-df <- read.csv(csv_file, sep=" ")
+df <- bind_rows(my_data, .id = "EXP")
 df$MEAN <- df$MEAN / 10000000
 df$ERROR <- abs(df$MEAN - ground_truth)
+df <- df[df$SETUP == "simulation",]
 
+error_file = "error_2.png"
+time_file = "time_2.png"
+
+
+my.annotation = annotate(geom = "text",
+            x = c(0.67, 0.88, 1.1, 1.28),
+            y = 0.03,
+            hjust = 0,
+            label = c("always 0.0", "changing tile layout", "50:50", "uniform distribution"),
+            color = c("gray25"),
+             angle = 90)
 
 plot.x.by.y(df, "NBYZ", "ERROR", "Number of Byzantine robots", "Absolute error", error_file, ".",
     custom.base.breaks.x=c(0, 3, 6, 9, 12),
-                        custom.base.breaks.y=seq(0, 0.25, 0.05))
+    custom.base.breaks.y=seq(0, 0.25, 0.05),
+    annotation=my.annotation,
+    my.fill="EXP")
+
+my.annotation = annotate(geom = "text",
+            x = c(0.67, 0.88, 1.1, 1.28),
+            y = 1300,
+            hjust = 0,
+            label = c("always 0.0", "changing tile layout", "50:50", "uniform distribution"),
+            color = c("gray25"),
+             angle = 90)
 
 plot.x.by.y(df, "NBYZ", "TIME", "Number of Byzantine robots", "Convergence time", time_file, ".",
     custom.base.breaks.x=c(0, 3, 6, 9, 12),
-                        custom.base.breaks.y=seq(0, 5000, 500))
+    custom.base.breaks.y=seq(0, 5000, 500),
+    annotation=my.annotation,
+    my.fill="EXP")
 
 
 
-EXP = "G3"
-csv_file = paste0("processed_data/csv_aggregated/combined_", EXP, ".csv")
-error_file = paste0("error_", EXP, ".png")
-time_file = paste0("time_", EXP, ".png")
 
-df <- read.csv(csv_file, sep=" ")
-df$MEAN <- df$MEAN / 10000000
-df$ERROR <- abs(df$MEAN - ground_truth)
+EXPS = c("G5", "G6", "G9")
 
+for (EXP in EXPS) {
+    csv_file = paste0("processed_data/csv_aggregated/combined_", EXP, ".csv")
+    error_file = paste0("error_", EXP, ".png")
+    time_file = paste0("time_", EXP, ".png")
 
-plot.x.by.y(df, "NBYZ", "ERROR", "Number of Byzantine robots", "Absolute error", error_file, ".",
-    custom.base.breaks.x=c(0, 3, 6, 9, 12),
-                        custom.base.breaks.y=seq(0, 0.25, 0.05))
+    df <- read.csv(csv_file, sep=" ")
+    df$MEAN <- df$MEAN / 10000000
+    df$ERROR <- abs(df$MEAN - ground_truth)
 
-plot.x.by.y(df, "NBYZ", "TIME", "Number of Byzantine robots", "Convergence time", time_file, ".",
-    custom.base.breaks.x=c(0, 3, 6, 9, 12),
-                        custom.base.breaks.y=seq(0, 2000, 200))
+    df.full <- split.df(df)
 
+    df.full.real <- df.full[df.full$SETUP == "reality",]
+    df.full.sim <- df.full[df.full$SETUP == "simulation",]
+    df.full.base <- df.full[df.full$SETUP == "baseline",]
 
-EXP = "G4"
-csv_file = paste0("processed_data/csv_aggregated/combined_", EXP, ".csv")
-error_file = paste0("error_", EXP, ".png")
-time_file = paste0("time_", EXP, ".png")
-
-df <- read.csv(csv_file, sep=" ")
-df$MEAN <- df$MEAN / 10000000
-df$ERROR <- abs(df$MEAN - ground_truth)
+    my.annotation = annotate(geom = "text",
+                x = c(0.72, 0.99, 1.25),
+                y = c(max(df.full.real$ERROR), max(df.full.sim$ERROR), max(df.full.base$ERROR)),
+                hjust = 0,
+                label = c("reality", "simulation", "baseline"),
+                color = c("gray25"),
+                 angle = 90)
 
 
-plot.x.by.y(df, "NBYZ", "ERROR", "Number of Byzantine robots", "Absolute error", error_file, ".",
-    custom.base.breaks.x=c(0, 3, 6, 9, 12),
-                        custom.base.breaks.y=seq(0, 0.25, 0.05))
-
-plot.x.by.y(df, "NBYZ", "TIME", "Number of Byzantine robots", "Convergence time", time_file, ".",
-    custom.base.breaks.x=c(0, 3, 6, 9, 12),
-                        custom.base.breaks.y=seq(0, 5000, 200))
+    df.real <- df[df$SETUP == "reality",]
+    df.sim <- df[df$SETUP == "simulation",]
 
 
-
-EXP = "G5"
-csv_file = paste0("processed_data/csv_aggregated/combined_", EXP, ".csv")
-error_file = paste0("error_", EXP, ".png")
-time_file = paste0("time_", EXP, ".png")
-
-df <- read.csv(csv_file, sep=" ")
-df$MEAN <- df$MEAN / 10000000
-df$ERROR <- abs(df$MEAN - ground_truth)
+    plot.x.by.y(df.full, "NROB", "ERROR", "Number of robots", "Absolute error", error_file, ".",
+        custom.base.breaks.x=c(8, 16, 24),
+                            custom.base.breaks.y=seq(0, 0.25, 0.05),
+                            annotation=my.annotation)
 
 
-plot.x.by.y(df, "NROB", "ERROR", "Number of robots", "Absolute error", error_file, ".",
-    custom.base.breaks.x=c(8, 16, 24),
-                        custom.base.breaks.y=seq(0, 0.25, 0.05))
+    my.annotation = annotate(geom = "text",
+                x = c(0.79, 1.18),
+                y = c(max(df.real$TIME) + 200, max(df.sim$TIME) + 200),
+                hjust = 0,          
+                label = c("reality", "simulation"),
+                color = c("gray25"),
+                 angle = 90)
 
-plot.x.by.y(df, "NROB", "TIME", "Number of robots", "Convergence time", time_file, ".",
-    custom.base.breaks.x=c(8, 16, 24),
-                        custom.base.breaks.y=seq(0, 5000, 200))
+    plot.x.by.y(df, "NROB", "TIME", "Number of robots", "Convergence time", time_file, ".",
+        custom.base.breaks.x=c(8, 16, 24),
+                            custom.base.breaks.y=seq(0, 5000, 500),
+                            annotation=my.annotation)
+
+}
 
 
 EXP = "G7"
@@ -319,9 +369,9 @@ df.estimate$MEAN <- df.estimate$MEAN / 10000000
 df.estimate$NROB <- as.factor(df.estimate$NROB)
 df.estimate <- df.estimate[df.estimate$MEAN != 0,]
 df.estimate$TIME <- df.estimate$TIME
-print(df$CHAINDATASIZE)
-print(df$TIME)
-print(head(df))
+#print(df$CHAINDATASIZE)
+#print(df$TIME)
+#print(head(df))
 
 plot.line(df, "TIME", "CHAINDATASIZE", "Time (in seconds)", "Blockchain Size in MB", blockchain_size_file, ".",
     custom.base.breaks.x=c(0, 5000, 10000),
@@ -330,22 +380,3 @@ plot.line(df, "TIME", "CHAINDATASIZE", "Time (in seconds)", "Blockchain Size in 
 plot.line(df.estimate, "TIME", "MEAN", "Time (in seconds)", "Swarm estimate", estimate_file, ".",
     custom.base.breaks.x=c(0, 5000, 10000),
                         custom.base.breaks.y=seq(0, 0.5, 0.1))
-
-
-EXP = "G9"
-csv_file = paste0("processed_data/csv_aggregated/combined_", EXP, ".csv")
-error_file = paste0("error_", EXP, ".png")
-time_file = paste0("time_", EXP, ".png")
-
-df <- read.csv(csv_file, sep=" ")
-df$MEAN <- df$MEAN / 10000000
-df$ERROR <- abs(df$MEAN - ground_truth)
-
-
-plot.x.by.y(df, "NROB", "ERROR", "Number of Robots", "Mean", error_file, ".",
-	custom.base.breaks.x=c(8, 16, 24),
-                        custom.base.breaks.y=seq(0, 0.25, 0.05))
-
-plot.x.by.y(df, "NROB", "TIME", "Number of robots", "Consensus time", time_file, ".",
-	custom.base.breaks.x=c(8, 16, 24),
-                        custom.base.breaks.y=seq(0, 2000, 200))

@@ -129,7 +129,7 @@ def init():
     os.makedirs(os.path.dirname(log_filename), exist_ok=True)    
     synclog = Logger(log_filename, header, ID = robotID)
     
-    header = ['CHAINDATASIZE', '%RAM', '%CPU']
+    header = ['CHAINDATASIZE', '%CPU', '%RAM']
     log_filename = log_folder + 'extra.csv'
     os.makedirs(os.path.dirname(log_filename), exist_ok=True)   
     extralog = Logger(log_filename, header, 5, ID = robotID)

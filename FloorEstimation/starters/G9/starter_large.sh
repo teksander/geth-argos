@@ -1,6 +1,6 @@
 source experimentconfig.sh
 
-EXPERIMENT="G9"
+EXPERIMENT="G9_with_bufferlog"
 
 export NUMROBOTS=24
 export robots=24
