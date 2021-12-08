@@ -15,6 +15,7 @@ export BLOCKCHAINPATH="$HOME/eth_data_para/data"
 export CONTAINERNAMEBASE="ethereum_eth."
 export ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-dynamic.argosx"
 export ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-dynamic.argos"
+export CONTROLLER="mainloop.py"
 export LOOPFUNCTION="floor_estimation_loop.py"
 export VISUALIZATION=visualization # visualization or none
 export CELLDIMENSION="0.05"
