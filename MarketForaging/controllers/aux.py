@@ -30,11 +30,21 @@ class Timer:
         self.time = time.time()
 
     def query(self):
-        if time.time() - self.time > self.rate:
-            self.time = time.time()
+        if self.remaining() < 0:
+            self.reset()
             return True
         else:
             return False
+
+    def remaining(self):
+        return self.rate - (time.time() - self.time)
+
+    def set(self, rate):
+        self.rate = rate
+        self.time = time.time()
+
+    def reset(self):
+        self.time = time.time()
 
 class TicToc(object):
     """ Pendulum Class to Synchronize Output Times

@@ -7,11 +7,14 @@ export BLOCKCHAINPATH="$HOME/eth_data_para/data"
 export CONTAINERNAMEBASE="ethereum_eth."
 
 # [FILES]
-GENESISFILE="${DOCKERFOLDER}/geth/files/genesis_poa.json"
-SCTEMPLATE="${EXPERIMENTFOLDER}/scs/experiment_volker.sol" # <- this is the smart contract you want to use
+CONTRACTNAME="MarketForaging"
+GENESISNAME="genesis_poa"
+SCTEMPLATE="${EXPERIMENTFOLDER}/scs/resource_market.sol" # <- this is the smart contract you want to use
 
+GENESISFILE="${DOCKERFOLDER}/geth/files/$GENESISNAME.json"
 CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
-CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/Estimation.abi"
+CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
+CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
 
 ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
@@ -26,9 +29,10 @@ ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
 
 
 # [OTHER]
+export FPS=20
 export REPS=5
 export SLEEPTIME=5
-export TIMELIMIT=10
+export TIMELIMIT=20
 
 
 

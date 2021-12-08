@@ -7,7 +7,7 @@
   <framework>
     <system threads="1" method="balance_quantity" />
     <experiment length="0"
-      ticks_per_second="30"
+      ticks_per_second="20"
       real_time="true"
       random_seed="5" />
   </framework>
@@ -66,7 +66,7 @@
     </box>
 
     <distribute>
-      <position method="uniform" min="-.912,-.912,0" max=".912,.912,0" /> 
+      <position method="uniform" min="-0.4,-0.4,0" max="0.4,0.4,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
       <entity quantity="5" max_trials="15"> 
         <e-puck id="fb" rab_range = "1">
