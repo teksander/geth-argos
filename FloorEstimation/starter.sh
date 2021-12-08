@@ -8,7 +8,9 @@ echo "MAINFOLDER IS $MAINFOLDER"
 echo "Updating the ARGoS XML file"
 echo "+-----------------------------------------------------------+"
 
-sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
+sed -e "s|LOOPFUNCTION|$LOOPFUNCTION|g"\
+    -e "s|LENGTH|$LENGTH|g"\
+    -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|NUMBYZANTINE|$NUMBYZANTINE|g"\
     -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
     -e "s|FLOORFILE|$FLOORFILE|g"\

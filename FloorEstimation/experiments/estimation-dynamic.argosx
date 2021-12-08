@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="1" method="balance_quantity" />
-    <experiment length="5000"
+    <experiment length="LENGTH"
       ticks_per_second="1"
       real_time="true"
       random_seed="5" />
@@ -42,7 +42,7 @@
 
     <loop_functions library="ARGOSFOLDER/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
-    <params script="EXPERIMENTFOLDER/loop_functions/floor_estimation_loop.py"/>
+    <params script="EXPERIMENTFOLDER/loop_functions/LOOPFUNCTION"/>
   </loop_functions>
 
 

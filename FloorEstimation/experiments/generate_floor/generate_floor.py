@@ -16,7 +16,8 @@ import os
 percentage_white = 0.25
 #tiles_per_side_list = [22, 31, 38]
 #tiles_per_side_list = [38]
-tiles_per_side_list = [85]
+#tiles_per_side_list = [247]
+tiles_per_side_list = [54]
 #tiles_per_side_list = [10]
 
 def create_shuffled_matrix(tiles_per_side):
