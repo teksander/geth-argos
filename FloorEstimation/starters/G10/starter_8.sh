@@ -1,7 +1,11 @@
 source experimentconfig.sh
 
-EXPERIMENT="G9_with_bufferlog"
 
+EXPERIMENT="G10"
+
+export repetitions=1
+export LOOPFUNCTION="floor_estimation_no_convergence_loop.py"
+export LENGTH=36000
 export NUMROBOTS=8
 export robots=8
 export num_byzantines=2

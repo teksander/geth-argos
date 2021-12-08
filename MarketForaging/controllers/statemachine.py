@@ -1,60 +1,36 @@
 #!/usr/bin/env python3
 from aenum import Enum, auto
 
+class Idle(Enum):
+    IDLE = 1
 
-class State(Enum):
+class Explorer(Enum):
+    EXPLORE = 2
+    GO_TO_MARKET = 3
+    GO_TO_RESOURCE = 4
 
-    class Explorer(Enum):
-        EXPLORE = auto()
-        GO_TO_MARKET = auto()
-        GO_TO_RESOURCE = auto()
-    class Recruit(Enum):
-        GO_TO_MARKET = auto()
-        GO_TO_RESOURCE = auto()
-
-class Transition(Enum):
-
-    class Explorer(Enum):
-        EXPLORE = auto()
-        GO_TO_MARKET = auto()
-        GO_TO_RESOURCE = auto()
-    class Recruit(Enum):
-        GO_TO_MARKET = auto()
-        GO_TO_RESOURCE = auto()
+class Recruit(Enum):
+    WAIT = 5
+    FORAGE = 6
+    GO_TO_MARKET = 7
+    GO_TO_RESOURCE = 8
 
 class FiniteStateMachine(object):
-    """ Establish the FMS class 
-    """
+
     def __init__(self, robot = None):
-        self.state = None
 
-    def transition(self, _to, _from = None ):
-        if _from:
-            if self.state != _from:
+        self.Idle = Idle
+        self.Explorer = Explorer
+        self.Recruit = Recruit
 
-
-
-    def step(self):
-        """ Logic for state transitions. Lots of if statements
-        """
-
-        # Do I have enough money to explore? YES -> Become Explorer
-        if robot.w3.getBalance() > explorationThresh:
-            self.transition(State.Explorer.EXPLORE)
-
-        # # Do I have food? YES -> Go to market
-        # if robot.variables.get_attribute("hasResource"):
-        #     self.state = States.GO_TO_MARKET
-
-        # # Do I know location? NO -> Explore
-        # elif robot.variables.get_attribute("currentResource"):
-        #     self.state = States.EXPLORE
-
-
-
-
+        self._currState = self.Idle.IDLE
+    
     def getState(self):
-        return self.state
+        return self._currState
+
+    def setState(self, state):
+        self._currState = state
+        mainlogger.info("Robot state is " + str(self._currState) )
 
 
 if __name__== '__main__':

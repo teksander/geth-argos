@@ -167,7 +167,7 @@ elif [ "$SCRIPT" = "python" ]; then
 	echo $SCRIPT
 	tmux kill-session -t PYTHON >/dev/null 2>&1
 	tmux_ALL "PYTHON"
-	tmux send-keys -t PYTHON "python3 -i /root/python_scripts/console_robot.py Estimation.abi" Enter
+	tmux send-keys -t PYTHON "python3 -i /root/python_scripts/console_robot.py ${CONTRACTNAME}.abi" Enter
 
 elif [ $SCRIPT = "geth" ]; then
 	tmux kill-session -t GETH >/dev/null 2>&1

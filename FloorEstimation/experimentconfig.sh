@@ -2,6 +2,7 @@
 
 export repetitions=20
 export SLEEPTIME=20
+export LENGTH=3600
 export MAINFOLDER="$HOME/geth-argos"
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
@@ -14,6 +15,8 @@ export BLOCKCHAINPATH="$HOME/eth_data_para/data"
 export CONTAINERNAMEBASE="ethereum_eth."
 export ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/estimation-dynamic.argosx"
 export ARGOSFILE="$EXPERIMENTFOLDER/experiments/estimation-dynamic.argos"
+export CONTROLLER="mainloop.py"
+export LOOPFUNCTION="floor_estimation_loop.py"
 export VISUALIZATION=visualization # visualization or none
 export CELLDIMENSION="0.05"
 export python_config_file="loop_function_params.py"

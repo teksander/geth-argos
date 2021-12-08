@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="1" method="balance_quantity" />
-    <experiment length="7500"
+    <experiment length="LENGTH"
       ticks_per_second="1"
       real_time="true"
       random_seed="5" />
@@ -34,15 +34,15 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="EXPERIMENTFOLDER/controllers/mainloop.py"
-      timeRate="2" />
+      <params script="EXPERIMENTFOLDER/controllers/CONTROLLER"
+      timeRate="1" />
     </python_controller>
 
   </controllers>
 
     <loop_functions library="ARGOSFOLDER/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
-    <params script="EXPERIMENTFOLDER/loop_functions/floor_estimation_loop.py"/>
+    <params script="EXPERIMENTFOLDER/loop_functions/LOOPFUNCTION"/>
   </loop_functions>
 
 

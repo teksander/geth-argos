@@ -1,14 +1,17 @@
 # Iterate over experimental settings and start experiments
  #!/bin/sh
 
-source experimentconfig.sh
+#source experimentconfig.sh
 
 echo "MAINFOLDER IS $MAINFOLDER"
 
 echo "Updating the ARGoS XML file"
 echo "+-----------------------------------------------------------+"
 
-sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
+sed -e "s|CONTROLLER|$CONTROLLER|g"\
+    -e "s|LOOPFUNCTION|$LOOPFUNCTION|g"\
+    -e "s|LENGTH|$LENGTH|g"\
+    -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|NUMBYZANTINE|$NUMBYZANTINE|g"\
     -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
     -e "s|FLOORFILE|$FLOORFILE|g"\
