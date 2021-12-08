@@ -5,8 +5,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1400M
+          cpus: '0.9'
+          memory: 512M
     ports:
      - "4000"
     entrypoint: /root/start.sh
