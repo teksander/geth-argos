@@ -19,33 +19,18 @@ contract MarketForaging {
  
  resource[] public resource_list;
  mapping(address => string) public purchases;
- // mapping(string => uint) public utilities;
- // utilities['red'] = 2;
- // utilities['green'] = 4;
- // utilities['blue'] = 5;
- // utilities['yellow'] = 8;
-
  uint public id = 0;
 
-function addResource(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, int _value, uint _price, uint _decrease_rate) public payable {
+function addResource(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, int _value, uint _price, uint _decrease_rate) public {
 
-
-  // Resource must be unique
   for (uint i=0; i < resource_list.length; i++) {
     if (keccak256(bytes(_json)) == keccak256(bytes(resource_list[i].json))) {
       return;
     }
   }
 
-  // Append the new resource to the list
   resource_list.push(resource(msg.sender, address(0), id, _json, _x, _y, _qtty, _qlty,_value, _price, _decrease_rate, block.number));
   id += 1;
-
-  // If the explorer also wants to recruit, he has priority for the following trip
-  // if (msg.value == utilities * 1 ether) {
-  //   resource_list[-1].recruit = msg.sender
-  // }
-
 } 
 
 

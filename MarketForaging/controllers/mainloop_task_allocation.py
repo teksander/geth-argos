@@ -82,28 +82,34 @@ totalBlack = 0
 global peered
 peered = set()
 
+global resource_set
+resource_set  = set()
+resource_objs = list()
+
 global consensus, submodules, logmodules
 submodules = []
 logmodules = []
 consensus = False
 
 
-global clocks
+global clocks, estTimer, eventTimer
 clocks = dict()
 
 clocks['share'] = Timer(1)
 clocks['buffer'] = Timer(bufferRate)
+
 clocks['collect_resources'] = Timer(1)
 clocks['peer_check'] = Timer(peerSecurityRate)
 clocks['balance_check'] = Timer(1.5)
 clocks['query_resources'] = Timer(1)
-clocks['block'] = Timer(1)
+clocks['block'] = Timer(15)
 clocks['pay_fuel'] = Timer(10)
-clocks['explore'] = Timer(30)
-clocks['homing'] = Timer(1)
+clocks['explore'] = Timer(150)
 
-global resource_utility
-resource_utility = resource_params['utilities']
+estTimer =  eventTimer  = time.time()
+
+global resource_price
+resource_price = resource_params['prices']
 
 r = market_params['radius'] * math.sqrt(random.random())
 theta = 2 * math.pi * random.random()
@@ -180,10 +186,21 @@ def buffer(rate = bufferRate, ageLimit = ageLimit):
 # # estimateTh.daemon = True   
 
 bufferTh = threading.Thread(target=buffer, args=())
-# # bufferTh.daemon = True                                              
+# # bufferTh.daemon = True                         
+
+# eventTh = threading.Thread(target=event, args=())
+# # eventTh.daemon = True                        
 
 # Ignore mainmodules by removing from list:
 mainmodules = []
+
+
+global time_exploring
+time_exploring = 0
+exploration_period = 1
+tau = 100
+EXPLORE = True
+
 
 class Resource(object):
     """ Establish the resource class 
@@ -196,7 +213,7 @@ class Resource(object):
             setattr(self, attr, resource_dict[attr])
 
         # Calculate the total value of the resource
-        self.value = self.quantity * resource_utility[self.quality]
+        self.value = self.quantity * resource_price[self.quality]
         self.price = 0.5 * self.value
 
         # Introduce the measurement error
@@ -209,7 +226,6 @@ class Resource(object):
         self._timeStamp = time.time()
         self._isSold = False
 
-    @property
     def _json(self):
         public_vars = { k:v for k,v in vars(self).items() if not k.startswith('_')}
         return str(public_vars).replace("\'", "\"")
@@ -226,10 +242,9 @@ class ResourceBuffer(object):
         # Add the known peer details
         self.buffer = []
         self.ageLimit = ageLimit
-        self.best = None
 
     def getJSON(self, resource):
-        return resource._json
+        return resource._json()
 
     def getJSONs(self, idx = None):
         return {self.getJSON(res) for res in self.buffer}
@@ -244,7 +259,7 @@ class ResourceBuffer(object):
         if (new_res.x, new_res.y) not in self.getLocations():
             res = new_res
             self.buffer.append(res)
-            mainlogger.info("Added resource: %s; Total: %s " % (self.getJSON(res), len(self)))
+            mainlogger.info("Added resource: "+self.getJSON(res))
 
         # Is in the buffer? YES -> Update buffer
         else:
@@ -268,7 +283,8 @@ class ResourceBuffer(object):
             newPeer is the new peer object
         """   
         self.buffer.remove(resource)
-        mainlogger.info("Removed resource: "+self.getJSON(resource))
+
+        # mainlogger.info("Removed resource: "+str(vars(oldResource)).replace("\'", "\""))
 
     def __len__(self):
         return len(self.buffer)
@@ -291,10 +307,7 @@ class ResourceBuffer(object):
         return [getattr(res, attr) for res in self.buffer] 
 
     def getValues(self):
-        return [res.quantity*res.price for res in self.buffer]
-
-    def getPrices(self):
-        return [res.price for res in self.buffer]
+        return [res.quantity*resource_price[res.quality] for res in self.buffer]
 
     def getQuantities(self):
         return [res.age for res in self.buffer]
@@ -326,30 +339,22 @@ class ResourceBuffer(object):
     def getResourceByValue(self, value):
         return self.buffer[self.getValues().index(value)]
 
-    def getPCs(self):
+    def getBestResource(self):
         # Algorithm for best resource decision making goes here
         # return self.buffer[0]
 
         # dists_to_market = self.getDistances(0,0) 
         # return self.buffer[dists_to_market.index(min(dists_to_market))]
-        # my_x = robot.position.get_position()[0]
-        # my_y = robot.position.get_position()[1]
+        my_x = robot.position.get_position()[0]
+        my_y = robot.position.get_position()[1]
 
         # print(len(self))
-        Qp = self.getPrices()
-        Qc_m = [2*distance/arena_size for distance in self.getDistances(0,0)]
-        # Qc_r = [100*distance/arena_size * 0.3 for distance in self.getDistances(my_x,my_y)]
-        # print(Qp, Qc_r, Qc_m) res.price - 2*
-        Pc = [x-y for x, y in zip(Qp,Qc_m)]
-        return Pc
-
-    def getBestResource(self):
-        if self.buffer:
-            Pc = self.getPCs()
-            self.best = self.buffer[Pc.index(max(Pc))]
-            return self.best 
-        else: 
-            return None
+        Qp = [resource_price[quality] for quality in self.getQualities()]
+        Qc_m = [100*distance/arena_size * 0.3 for distance in self.getDistances(0,0)]
+        Qc_r = [100*distance/arena_size * 0.3 for distance in self.getDistances(my_x,my_y)]
+        # print(Qp, Qc_r, Qc_m)
+        Pc = [x-y-z for x, y, z in zip(Qp,Qc_m,Qc_r)]
+        return self.buffer[Pc.index(max(Pc))]
 
 class Transaction(object):
 
@@ -387,16 +392,14 @@ class TransactionBuffer(object):
 
 class Idle(Enum):
     IDLE = 1
+    HOMING = 2
 
 class Scout(Enum):
-    SELL = 2
     EXPLORE = 3
-    HOMING = 4
 
 class Recruit(Enum):
-    BUY = 5
-    FORAGE = 6
-    HOMING = 7
+    BUY = 4
+    FORAGE = 5
 
 class FiniteStateMachine(object):
 
@@ -406,22 +409,17 @@ class FiniteStateMachine(object):
     def getState(self):
         return self._currState
 
-    def setState(self, state, message = ""):
-        robot.epuck_wheels.set_speed(0,0)
-
-        if message != None:
-            mainlogger.info("%s -> %s | %s", self._currState, state, message)
-
+    def setState(self, state, message = None):
+        mainlogger.info("%s -> %s", self._currState, state)
+        if message:
+            mainlogger.info("Note: %s", message)
         self._currState = state
     
     def query(self, state):
         return self._currState == state
 
-####################################################################################################################################################################################
-#### INIT STEP #####################################################################################################################################################################
-####################################################################################################################################################################################
 def init():
-    global clocks, me, nav, rb, w3, gs, rs, erb, tcp, tcpr, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, resourcelog, extralog, submodules, logmodules 
+    global me, nav, rb, w3, gs, rs, erb, tcp, tcpr, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog, submodules, logmodules 
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robot.variables.set_attribute("id", str(robotID))
     robot.variables.set_consensus(False) 
@@ -429,6 +427,7 @@ def init():
     robot.variables.set_attribute("collectResource", "")
     robot.variables.set_attribute("hasResource", "")
     robot.variables.set_attribute("resourceCount", "0")
+    robot.variables.set_attribute("wallet", "50")
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
@@ -437,21 +436,44 @@ def init():
     # Monitor logs (recorded to file)
     monitor_file =  log_folder + 'monitor.log'
     os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
-    logging.basicConfig(filename=monitor_file, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
+    logging.basicConfig(filename=monitor_file, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 
     # Experiment data logs (recorded to file)
 
-    header = ['COUNT']
-    log_filename = log_folder + 'resource.csv'
-    resourcelog = Logger(log_filename, header, 5, ID = robotID)
+    header = ['ESTIMATE','W','B','S1','S2','S3']
+    log_filename = log_folder + 'estimate.csv'
+    estimatelog = Logger(log_filename, header, ID = robotID)
     
     header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
     log_filename = log_folder + 'buffer.csv'
     bufferlog = Logger(log_filename, header, 2, ID = robotID)
-   
+    
+    header = ['#RESOURCES']
+    log_filename = log_folder + 'vote.csv'
+    votelog = Logger(log_filename, header, ID = robotID)
+    
+    header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
+    log_filename = log_folder + 'block.csv'
+    blocklog = Logger(log_filename, header, ID = robotID)
+    
+    header = ['BLOCK', 'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
+    log_filename = log_folder + 'sc.csv'     
+    sclog = Logger(log_filename, header, ID = robotID)
+    
+    header = ['#BLOCKS']
+    log_filename = log_folder + 'sync.csv' 
+    synclog = Logger(log_filename, header, ID = robotID)
+    
+    header = ['%RAM', '%CPU']
+    log_filename = log_folder + 'extra.csv'
+    extralog = Logger(log_filename, header, 5, ID = robotID)
+    
+    header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
+    log_filename = log_folder + 'tx.csv'     
+    txlog = Logger(log_filename, header, ID = robotID)
 
     # List of logmodules --> iterate .start() to start all; remove from list to ignore
-    logmodules = [bufferlog, resourcelog]
+    logmodules = [bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog]
 
     # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
     mainlogger = logging.getLogger('main')
@@ -464,6 +486,8 @@ def init():
     logging.getLogger('main').setLevel(10)
     logging.getLogger('estimate').setLevel(50)
     logging.getLogger('buffer').setLevel(50)
+    logging.getLogger('events').setLevel(10)
+    logging.getLogger('voting').setLevel(10)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -526,26 +550,23 @@ def init():
     # List of submodules --> iterate .start() to start all
     submodules = [w3.geth.miner, tcp, tcpr, erb, gs]
 
+
 bc_balance = 21
 balance = 0
 offer_decrease_rate = 0.02
 offer_increase_rate = 0.05
 offer_multiplier = 0.1
-explore_duration = 30
+explore_duration = 0
 explore_threshold = 15
 txReceipt = None
 txHash = None
-fuel_cost = 0 # economy_params['fuel_cost']
+fuel_cost = economy_params['fuel_cost']
 txReceipt_fuel = None
 txHash_fuel = None
 current_resource = None
 
-
-####################################################################################################################################################################################
-#### CONTROL STEP ##################################################################################################################################################################
-####################################################################################################################################################################################
 def controlstep():
-    global current_resource, explore_duration, txReceipt_fuel,txHash_fuel, txReceipt, txHash, bc_balance, balance, state, startFlag, startTime, stepTimer, bufferTh, clocks
+    global current_resource, explore_duration, txReceipt_fuel,txHash_fuel, txReceipt, txHash, bc_balance, balance, state, startFlag, startTime, estTimer, eventTimer, shareTimer, stepTimer, bufferTh, eventTh, resource_set, resource_objs, time_exploring, EXPLORE, clocks
 
     # Actions to perform on the first step    
     if not startFlag:
@@ -554,15 +575,12 @@ def controlstep():
         stepTimer = startTime = time.time()
 
         mainlogger.info('--//-- Starting Experiment --//--')
-
         for module in logmodules+submodules+mainmodules:
             try:
                 module.start()
             except:
                 mainlogger.critical('Error Starting Module: %s', module)
 
-        for clock in clocks.values():
-            clock.reset()
 
     # Actions to perform at every step
     else:
@@ -573,198 +591,154 @@ def controlstep():
         for module in [erb, rs]:
             module.step()
 
-        if resourcelog.isReady():
-            resourcelog.log([len(rb)])
-
         ###########################
         #### MAIN-MODULE STEPS ####
         ###########################
-
-        if clocks['buffer'].query():
+        if clocks['buffer'].query:
             if not bufferTh.is_alive():
                 bufferTh = threading.Thread(target=buffer)
                 bufferTh.start()
             else:
                 pass   
 
-
         ##############################
         #### STATE-SPECIFIC STEPS ####
         ##############################
-
-        #########################################################################################################
         if robot.fsm.query(Idle.IDLE):
+            robot.epuck_wheels.set_speed(0,0)
 
-            clocks['explore'].reset()
-            robot.fsm.setState(Scout.EXPLORE)
 
+            if clocks['balance_check'].query():
+                balance = float(w3.getBalance())
+                explore_duration = (balance - explore_threshold)/fuel_cost
+
+                if explore_duration > explore_threshold:
+
+                    if not txHash_fuel:
+
+                        tx = {'from': me.key, 
+                             'value': w3.toWei(explore_duration * fuel_cost, 'ether')}
+
+                        txHash_fuel = w3.sc.functions.buyFuel().transact(tx)
+
+                    else:
+                        clocks['explore'].set(explore_duration)
+                        robot.fsm.setState(Scout.EXPLORE, message = 'Explore duration %s' % explore_duration)
+
+                else:
+                    robot.fsm.setState(Recruit.BUY, message = 'Too poor to explore')
 
         #########################################################################################################
-
-        # Exploration strategy. Non-homogeneous robots could have a better strategy
-        elif robot.fsm.query(Scout.EXPLORE):
-
-            # Perform random-walk step
+        if robot.fsm.query(Scout.EXPLORE):
+            
+            # Exploration strategy. Non-homogeneous robots could have a better strategy
             robot.rw.random()
 
-            # Collect resources from sensor
+            # Collection of new resources
             resource_js = rs.getNew()
             
             if resource_js:
                 resource = Resource(resource_js)
                 rb.addResource(resource)
 
-            if clocks['explore'].query(reset = False):
+                if not resource._isSold:
+                    try: 
+                        w3.sc.functions.addResource(resource.json, 
+                                                    int(resource.x * 100), 
+                                                    int(resource.y * 100),
+                                                    int(resource.radius * 100),
+                                                    resource.quantity,
+                                                    resource.quality,
+                                                    resource.value,
+                                                    resource.price,
+                                                    10).transact()
 
-                rb.getBestResource()
-
-                if len(rb) > 1:
-                    robot.fsm.setState(Scout.SELL, message = "Sell: found %s resources" % len(rb))
-
-                elif len(rb) == 1:
-                    robot.fsm.setState(Scout.HOMING, message = "Home: found %s resources" % len(rb))
-
-                else: 
-                    robot.fsm.setState(Recruit.BUY, message = "Buy: found %s resources" % len(rb))
-                                    
-                    
-
-        #########################################################################################################
-        
-        # Selling strategy. Non-homogeneous robots could have a better strategy
-        elif robot.fsm.query(Scout.SELL):
-            
-            # Sell non-best resources and remove them from robot memory
-            if rb.buffer[-1] != rb.best:
-                resource = rb.buffer.pop(-1)
-            else:
-                resource = rb.buffer.pop(-2)
-
-            try: 
-                w3.sc.functions.addResource(resource._json, 
-                                            int(resource.x * 100), 
-                                            int(resource.y * 100),
-                                            int(resource.quantity),
-                                            resource.quality,
-                                            int(resource.value),
-                                            int(resource.price),
-                                            10).transact()
-
-                mainlogger.info('Sold: %s', resource._json)
-
-            except Exception as e:
-                mainlogger.warning(e.args)
-
-            # Once there is just best left; return home
-            if len(rb) == 1:
-                robot.fsm.setState(Scout.HOMING, message = "Kept: %s" % rb.buffer[0]._json)
-
-        #########################################################################################################
-        
-        # Buying strategy. Non-homogeneous robots could have a better strategy
-        elif robot.fsm.query(Recruit.BUY):
-
-            if clocks['block'].query():
-
-                resources = w3.sc.functions.getResources().call()
-
-                if resources:
-                    mainlogger.info('%s resources for sale', len(resources))
-
-
-                    if not txHash:
-                        try:
-                            txHash = w3.sc.functions.buyResource().transact({'value': w3.eth.getBalance(me.key) - w3.toWei(1, 'ether')})
-                            mainlogger.info('Transacted to buy resource')
-                        except Exception as e:
-                            mainlogger.info(e)
-
-                if txHash:
-                    try:
-                        txReceipt = w3.eth.getTransactionReceipt(txHash)
-                        mainlogger.info('Received receipt of purchase')
+                        mainlogger.info('Sold resource')
+                        resource._isSold = True
                     except Exception as e:
                         pass
 
-                if txReceipt:
-
-                    if txReceipt['status']:
-                        resource_js = w3.sc.functions.purchases(me.key).call()
-                        mainlogger.info('Bought resource: '+resource_js)                  
-                        rb.addResource(Resource(resource_js))
-                        robot.fsm.setState(Recruit.FORAGE, 'Foraging purchased resource')
-                    else:
-                        mainlogger.info('Bought resource but transaction failed')
-
-                    txReceipt = txHash = None
 
             if clocks['explore'].query(reset = False):
-                robot.fsm.setState(Scout.HOMING, message = None)
-                
+                mainlogger.info('Explore time finished')
+                robot.fsm.setState(Idle.HOMING)
+
         #########################################################################################################
-        elif robot.fsm.query(Scout.HOMING):
+        if robot.fsm.query(Idle.HOMING):
 
-            # Navigate to the market
-            nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
-            arrived = False
+            nav.navigate_with_obstacle_avoidance((0, 0))
 
-            if nav.get_distance_to_target() < 0.6*market_params['radius']:           
-                arrived = True
-                
+            if nav.get_distance_to_target() < 0.6*market_params['radius']:
+                robot.fsm.setState(Idle.IDLE, message = "Arrived at Market")
 
             elif nav.get_distance_to_target() < 1.2*market_params['radius'] and len(peered) > 1:
-                arrived = True
-
-            # Once arrived at the market decide if forage or buy
-            if arrived:
-
-                if rb.buffer:
-                    rb.getBestResource()
-                    robot.fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._json)
-                else:
-                    robot.fsm.setState(Recruit.BUY, message = None)
+                robot.fsm.setState(Idle.IDLE, message = "Arrived at Market")
 
         #########################################################################################################
-        elif robot.fsm.query(Recruit.FORAGE):
+        if robot.fsm.query(Recruit.BUY):
+            
+
+            if clocks['query_resources'].query():
+
+                balance = math.floor(float(w3.getBalance()))
+                resources = w3.sc.functions.getResources().call()
+
+                current_resource_js = None
+                for resource in resources:
+                    if resource[1] == me.key:
+                        current_resource_js = resource[3]
+
+                if resources and not current_resource_js:
+                    min_price = min([x[5] for x in resources])
+
+                    if balance >= min_price:
+
+                        if not txHash:
+                            try:
+                                txHash = w3.sc.functions.buyResource().transact({'value': w3.toWei(balance-3, 'ether')})
+                                mainlogger.info('Bought resource')
+                            except:
+                                pass
+                        else:
+                            try:
+                                txReceipt = w3.eth.getTransactionReceipt(txHash)
+                            except Exception as e:
+                                mainlogger.info('TX not mined yet')
+                    else:
+                        mainlogger.info('Not enough funds to buy any resource:', balance)
+
+                elif current_resource_js:
+                    txReceipt = txHash = None
+                    current_resource = Resource(current_resource_js)
+                    robot.fsm.setState(Recruit.FORAGE, 'Became Recruit')
+
+                
+        #########################################################################################################
+        if robot.fsm.query(Recruit.FORAGE):
 
             # Do I have item? NO -> Go to forage
             if not robot.variables.get_attribute("hasResource"):
-                nav.navigate_with_obstacle_avoidance((rb.best._xr, rb.best._yr))
+                nav.navigate_with_obstacle_avoidance((current_resource._xr, current_resource._yr))
 
-                if nav.get_distance_to_target() < rb.best.radius:
+                if nav.get_distance_to_target() < current_resource.radius:
                     robot.variables.set_attribute("collectResource", "True")
                 else:
                     robot.variables.set_attribute("collectResource", "")
 
-                # if nav.get_distance_to_target() < 0.4 * rb.best.radius:       
-                #     # rb.removeResource(current_resource)
-                #     rb.removeResource(rb.best)
+                if nav.get_distance_to_target() < 0.4 * current_resource.radius:
+                    
+                    current_resource = None
+                    # w3.sc.functions.removeResource().transact()
+                    robot.fsm.setState(Idle.HOMING, 'Resource Depleted or Not Found')
+
 
             # Do I have item? YES -> Go to market
             else:
-                robot.fsm.setState(Recruit.HOMING)
+                nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
 
+                if nav.get_distance_to_target() < 0.9 * market_params['radius']:
+                    w3.sc.functions.sellItem(current_resource.value).transact()
 
-        #########################################################################################################
-        elif robot.fsm.query(Recruit.HOMING):
-
-            nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
-            arrived = False
-
-            if nav.get_distance_to_target() < 0.6*market_params['radius']:
-                arrived = True
-
-            elif nav.get_distance_to_target() < 1.2*market_params['radius'] and len(peered) > 1:
-                arrived = True
-
-            if arrived:
-                clocks['explore'].reset()
-                robot.fsm.setState(Scout.EXPLORE, message = 'Exploring: %ss' % explore_duration)
-                
-
-####################################################################################################################################################################################
-#### RESET ##################################################################################################################################################################
-####################################################################################################################################################################################
 
 def reset():
     pass
@@ -777,7 +751,7 @@ def destroy():
         for enode in getEnodes():
             w3.geth.admin.removePeer(enode)
 
-    print('Killed robot '+ me.id)
+    print('Killed')
     # STOP()
 
 

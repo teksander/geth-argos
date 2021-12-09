@@ -1,30 +1,41 @@
-[INFO main 45] Initialising Python Geth Console...
-[INFO main 53] Initialising peer buffer...
-[INFO main 53] Initialising resource buffer...
-[INFO main 53] Initialising TCP server...
-[INFO main 53] Initialising TCP server...
-[INFO main 53] Initialising TCP server...
-[INFO main 53] Initialising RandB board...
-[INFO main 53] Initialising ground-sensors...
-[INFO main 53] Initialising random-walk...
-[INFO main 53] Initialising navigation...
-[INFO main 1980] --//-- Starting Experiment --//--
-[INFO main 3641] Robot state is Explorer.EXPLORE
-[INFO main 12391] Removed peer: 1
-[INFO main 13152] Removed peer: 5
-[INFO main 13839] Removed peer: 4
-[INFO main 27806] Added resource: {"x": -0.52, "y": -0.23, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 28837] Updated resource: {"x": -0.52, "y": -0.23, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 29838] Updated resource: {"x": -0.52, "y": -0.23, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 30887] Updated resource: {"x": -0.52, "y": -0.23, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 31888] Updated resource: {"x": -0.52, "y": -0.23, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 38088] Added resource: {"x": -0.81, "y": -0.35, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 39138] Updated resource: {"x": -0.81, "y": -0.35, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 41184] Added resource: {"x": -0.79, "y": -0.54, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 42185] Updated resource: {"x": -0.79, "y": -0.54, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 43187] Updated resource: {"x": -0.79, "y": -0.54, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 44234] Updated resource: {"x": -0.79, "y": -0.54, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 45235] Updated resource: {"x": -0.79, "y": -0.54, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 46288] Updated resource: {"x": -0.79, "y": -0.54, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 62738] Added resource: {"x": -0.31, "y": -0.76, "radius": 0.09, "quantity": 5, "quality": "red", "value": 20, "price": 20}
-[INFO main 63666] Robot state is Idle.IDLE
+[2 INFO main 73] Initialising Python Geth Console...
+[2 INFO main 80] Initialising peer buffer...
+[2 INFO main 80] Initialising resource buffer...
+[2 INFO main 80] Initialising TCP server...
+[2 INFO main 80] Initialising TCP server...
+[2 INFO main 80] Initialising TCP server...
+[2 INFO main 80] Initialising RandB board...
+[2 INFO main 81] Initialising ground-sensors...
+[2 INFO main 81] Initialising random-walk...
+[2 INFO main 81] Initialising navigation...
+[2 INFO main 93263] --//-- Starting Experiment --//--
+[2 INFO main 93303] Idle.IDLE -> Scout.EXPLORE | 
+[2 INFO main 123310] Scout.EXPLORE -> Recruit.BUY | Buy: found 0 resources
+[2 INFO main 146519] 1 resources for sale
+[2 INFO main 146546] Transacted to buy resource
+[2 INFO main 150022] 1 resources for sale
+[2 INFO main 151028] 1 resources for sale
+[2 INFO main 152168] Received receipt of purchase
+[2 INFO main 152175] Bought resource: {"x": 0.06, "y": 0.55, "radius": 0.09, "quantity": 4, "quality": "green", "value": 16, "price": 8.0}
+[2 INFO main 152176] Added resource: {"x": 0.06, "y": 0.55, "radius": 0.09, "quantity": 4, "quality": "green", "value": 16, "price": 8.0}; Total: 1 
+[2 INFO main 152176] Recruit.BUY -> Recruit.FORAGE | Foraging purchased resource
+[2 INFO main 152182] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.06, "y": 0.55, "radius": 0.09, "quantity": 4, "quality": "green", "value": 16, "price": 8.0}
+[2 INFO main 173761] Recruit.FORAGE -> Recruit.HOMING | 
+[2 INFO main 182414] Recruit.HOMING -> Scout.EXPLORE | Exploring: 30s
+[2 INFO main 207363] Added resource: {"x": 0.71, "y": -0.31, "radius": 0.09, "quantity": 2, "quality": "green", "value": 8, "price": 4.0}; Total: 2 
+[2 INFO main 212463] Scout.EXPLORE -> Scout.SELL | Sell: found 2 resources
+[2 INFO main 212532] Sold: {"x": 0.71, "y": -0.31, "radius": 0.09, "quantity": 2, "quality": "green", "value": 8, "price": 4.0}
+[2 INFO main 212532] Scout.SELL -> Scout.HOMING | Kept: {"x": 0.06, "y": 0.55, "radius": 0.09, "quantity": 4, "quality": "green", "value": 16, "price": 8.0}
+[2 INFO main 237465] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.06, "y": 0.55, "radius": 0.09, "quantity": 4, "quality": "green", "value": 16, "price": 8.0}
+[2 INFO main 255460] Recruit.FORAGE -> Recruit.HOMING | 
+[2 INFO main 266460] Recruit.HOMING -> Scout.EXPLORE | Exploring: 30s
+[2 INFO main 296461] Scout.EXPLORE -> Scout.HOMING | Home: found 1 resources
+[2 INFO main 322810] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.06, "y": 0.55, "radius": 0.09, "quantity": 4, "quality": "green", "value": 16, "price": 8.0}
+[2 INFO main 340010] Recruit.FORAGE -> Recruit.HOMING | 
+[2 INFO main 350965] Recruit.HOMING -> Scout.EXPLORE | Exploring: 30s
+[2 INFO main 381010] Scout.EXPLORE -> Scout.HOMING | Home: found 1 resources
+[2 INFO main 407461] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.06, "y": 0.55, "radius": 0.09, "quantity": 4, "quality": "green", "value": 16, "price": 8.0}
+[2 INFO main 427613] Recruit.FORAGE -> Recruit.HOMING | 
+[2 INFO main 437160] Recruit.HOMING -> Scout.EXPLORE | Exploring: 30s
+[2 INFO main 467161] Scout.EXPLORE -> Scout.HOMING | Home: found 1 resources
+[2 INFO main 491962] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.06, "y": 0.55, "radius": 0.09, "quantity": 4, "quality": "green", "value": 16, "price": 8.0}

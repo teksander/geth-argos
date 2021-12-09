@@ -1,5 +1,6 @@
+ #!/bin/bash
 # Iterate over experimental settings and start experiments
- #!/bin/sh
+
 
 source experimentconfig_backup.sh
 
@@ -13,6 +14,7 @@ echo "Updating the ARGoS XML file"
 echo "+-----------------------------------------------------------+"
 
 sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
+    -e "s|STARTDIM|$STARTDIM|g"\
     -e "s|FPS|$FPS|g"\
     -e "s|RAB_RANGE|$RAB_RANGE|g"\
     -e "s|NUMBYZANTINE|$NUMBYZANTINE|g"\
@@ -36,7 +38,7 @@ BINDATA=`cat ${CONTRACTBIN}`
 echo "+-----------------------------------------------------------+"
 
 # Create genesis using puppeth
-bash ${DOCKERFOLDER}/geth/files/reset-genesis ${NUMROBOTS}
+bash ${DOCKERFOLDER}/geth/files/reset-genesis ${NUMROBOTS} $BLOCKPERIOD
 
 echo "Deploying the Smart Contract"
 echo "+-----------------------------------------------------------+"
@@ -62,15 +64,9 @@ cp $CONTRACTABI ./OLDABI.abi
 sed -e "s|\"stateMutability\":\"payable\"|\"stateMutability\":\"payable\",\"payable\":\"true\"|g" ./OLDABI.abi > $CONTRACTABI
 rm ./OLDABI.abi
 
-if [[ $1 == "--reset-docker" ]]; then
-    # Restart docker
-    docker service scale ethereum_eth=0
-    echo "Shuting down docker process..."
-    bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
 
-    echo "Starting new docker process..."
-    # sudo systemctl restart docker.service
-    bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
+if [[ $1 == "--reset-geth" ]]; then
+    ./reset-geth
 fi
 
 # Get containers
@@ -81,19 +77,37 @@ sort -o temp1.txt temp1.txt
 seq 1 $NUMROBOTS > ids.txt
 
 # Get IPs
-./exec-all.sh "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
+./bash-all "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
 
 # Collect everything in a single file
 paste ids.txt temp1.txt temp2.txt > identifiers.txt
 # paste ids.txt temp3.txt > enodes.txt
 rm temp1.txt temp2.txt ids.txt 
 
-# rm -r logs
-# mkdir logs
 
-echo "Starting Experiment"
+echo "Cleaning logs folder..."
 echo "+-----------------------------------------------------------+"
 
-# argos3 -c $ARGOSFILE
-# sleep 2
-# ./tmux-all -l monitor.log
+# Keep files 0-$NUMROBOTS in order to prevent having to reopen logs
+eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
+
+
+echo "Waiting web3 to respond..."
+echo "+-----------------------------------------------------------+"
+
+ready=0
+while [[ $ready != $NUMROBOTS ]]; do
+    ready=0
+    for host in $(awk '{print $4}' identifiers.txt); do
+        if echo -e '\x1dclose\x0d' | telnet $host 4000 2>/dev/null | grep -q Connected ; then
+            let "ready=ready+1"
+        fi
+    done
+done
+
+if [[ $2 == "--start" ]]; then
+    echo "Starting Experiment"
+    echo "+-----------------------------------------------------------+"
+
+    argos3 -c $ARGOSFILE
+fi

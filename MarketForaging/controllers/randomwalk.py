@@ -107,7 +107,7 @@ class Navigate(object):
         D =  (T - A) #.normalize()
 
         # Change to global coordinates for the plotting
-        self.robot.variables.set_attribute("rays", self.__id + ', ' + repr(position) + ', ' + repr(T.rotate(orientation)) + ', ' + repr(-A.rotate(orientation))+ ', ' + repr(D.rotate(orientation)) +'\n')
+        self.robot.variables.set_attribute("rays", self.__id + ', ' + repr(position) + ', ' + repr(vec_target.rotate(orientation)) + ', ' + repr(-A.rotate(orientation))+ ', ' + repr(D.rotate(orientation)) +'\n')
 
         dotProduct = 0
         Kp = 50

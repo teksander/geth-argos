@@ -19,12 +19,21 @@ source experimentconfig_backup.sh
 # fi	
 
 
-cp -rp $EXPERIMENTFOLDER/logs/ $EXPERIMENTFOLDER/results/data/$1
 
+# Create the experiment directory
+mkdir -p $EXPERIMENTFOLDER/logs/ $EXPERIMENTFOLDER/results/data/experiment_$1
 
+# Find the latest repetition in that folder
+last_rep=$(ls results/data/experiment_$1/ -v | tail -1 | sed 's/^0*//')
+new_rep=$(printf "%03d\n" $(($last_rep+1)))
 
+# Collect geth related logs from docker folder
+cp -rp $DOCKERFOLDER/geth/logs/* $EXPERIMENTFOLDER/logs/
 
+# Collect argos related logs from experiment folder
+cp -rp $EXPERIMENTFOLDER/logs/ $EXPERIMENTFOLDER/results/data/experiment_$1/$new_rep
 
+echo "Storing data to: /results/data/experiment_$1/$new_rep"
 
 # backup
 # if [ "$#" -eq 1 ]; then

@@ -11,8 +11,9 @@ experimentFolder = os.environ["EXPERIMENTFOLDER"]
 import sys
 sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder+'/loop_functions')
-from aux import Vector2D, Logger
+from aux import Vector2D, Logger, getRAMPercent, getCPUPercent
 from enum import Enum
+import psutil
 
 from loop_function_params import *
 
@@ -24,8 +25,9 @@ open(rays_file, 'w+').close()
 # Other inits
 global resource_list, resource_counter, sttime, market
 
-resource_price = resource_params['prices']
-resource_frequency = resource_params['frequency']
+resource_utilities = resource_params['utilities']
+# resource_frequency = resource_params['rel_frequency']
+resource_frequency = resource_params['abs_frequency']
 resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
 
 resource_list = []
@@ -42,8 +44,9 @@ class Location(object):
         return str(vars(self)).replace("\'", "\"")
 
 
-def generate_resource(n = 1):
-    for _ in range(n):
+def generate_resource(n = 1, qualities = None):
+
+    for i in range(n):
         overlap = True
         radius = 0
 
@@ -59,8 +62,12 @@ def generate_resource(n = 1):
 
             # Generate quantity of resource and quality
             quantity = random.randint(resource_params['quantity_min'], resource_params['quantity_max'])
-            quality = random.choices(list(resource_frequency), weights=resource_frequency.values())[0]
 
+            if not qualities:
+                quality = random.choices(list(resource_frequency), weights=resource_frequency.values())[0]
+            else:
+                quality = qualities[i]
+                
             
             overlap = False
             # Discard if resource overlaps with sides of arena
@@ -103,12 +110,12 @@ def init():
     log_folder = experimentFolder + '/logs/0/'
     os.makedirs(os.path.dirname(log_folder), exist_ok=True)    
 
-    header = list(resource_price) + ['TOTAL', 'VALUE']
+    header = list(resource_utilities) + ['TOTAL', 'VALUE']
     log_filename = log_folder + 'loop_function.csv'
     looplog = Logger(log_filename, header, ID = '0')
     looplog.start()
 
-    header = ['FPS']
+    header = ['FPS', 'RAM', 'CPU']
     log_filename = log_folder + 'simulation.csv'  
     simlog = Logger(log_filename, header, ID = '0')
     simlog.start()
@@ -123,8 +130,15 @@ def init():
         print(robot.variables.get_all_attributes())
 
     # Initialize locations in the arena
-    market = Location(x = 0, y = 0, radius = market_params['size'], quantity = 1, quality = 'yellow')
-    generate_resource(resource_params['count'])
+    market = Location(x = 0, y = 0, radius = market_params['radius'], quantity = 1, quality = 'yellow')
+
+    # generate_resource(resource_params['count'])
+
+    lst = []
+    for k,v in resource_params['abs_frequency'].items():
+        lst.extend(v*[k])
+    print(lst)
+    generate_resource(resource_params['count'], qualities = lst)
 
             
 def pre_step():
@@ -149,7 +163,7 @@ def pre_step():
                         # Has resource expired? YES -> Generate new
                         if res.quantity <= 0:
                             resource_list.remove(res)
-                            generate_resource()
+                            generate_resource(1, [res.quality])
 
         # Has robot stepped into market? YES
         if is_in_circle(robot.position.get_position(), (market.x, market.y), market.radius):
@@ -165,11 +179,14 @@ def pre_step():
 
                 looplog.log([str(value) for value in resource_counter.values()] 
                           + [sum(resource_counter.values())] 
-                          + [sum([resource_counter[x]*resource_price[x] for x in resource_price])])
+                          + [sum([resource_counter[x]*resource_utilities[x] for x in resource_utilities])])
 
+RAM = getRAMPercent()
+CPU = getCPUPercent()
+tlast = time.time()
 
 def post_step():
-    global simlog
+    global simlog, tlast, RAM, CPU
     ### The way to share information to qtuser_function should be improved ### \
 
     # Record the resources to be drawn to a file
@@ -194,20 +211,20 @@ def post_step():
         with open(rays_file, p, buffering=1) as f:
             f.write(robot.variables.get_attribute("rays"))
 
-    # Low frequency logging of chaindata size and cpu usage   
+    # Logging of FPS, RAM and CPU usage   
+    if time.time()-tlast > 10:
+        RAM = getRAMPercent()
+        CPU = getCPUPercent()
+        tlast = time.time()
+    FPS = round(1/(time.time()-simlog.latest))
 
-    simlog.log([round(time.time()-simlog.latest, 2)])
-    # stepTimer = time.time()
+    simlog.log([FPS, CPU, RAM])
 
-    # if looplogger.isReady():
-    #     if me.id == '1':
-    #         ramPercent = getRAMPercent()
-    #         cpuPercent = getCPUPercent()
-    #         looplogger.info([ramPercent,cpuPercent])
+
 
 def is_experiment_finished():
 
-    finished = time.time() - sttime > generic_params['time_limit'] * 60
+    finished = time.time() - sttime > generic_params['time_limit']
 
     if finished:
         print("Experiment has finished")

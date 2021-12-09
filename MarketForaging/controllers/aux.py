@@ -22,6 +22,30 @@ from types import SimpleNamespace
 
 logger = logging.getLogger(__name__)
 
+class TxTimer:
+    def __init__(self, rate, name = None):
+        self.name = name
+        self.rate = rate
+        self.time = time.time()
+
+    def query(self, reset = True):
+        if self.remaining() < 0:
+            if reset:
+                self.reset()
+            return True
+        else:
+            return False
+
+    def remaining(self):
+        return self.rate - (time.time() - self.time)
+
+    def set(self, rate):
+        self.rate = rate
+        self.time = time.time()
+
+    def reset(self):
+        self.time = time.time()
+
 
 class Timer:
     def __init__(self, rate, name = None):
@@ -29,9 +53,10 @@ class Timer:
         self.rate = rate
         self.time = time.time()
 
-    def query(self):
+    def query(self, reset = True):
         if self.remaining() < 0:
-            self.reset()
+            if reset:
+                self.reset()
             return True
         else:
             return False

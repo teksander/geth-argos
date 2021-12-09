@@ -11,80 +11,73 @@ import sys
 import pandas as pd
 from matplotlib import pyplot as plt
 import glob
+from graphviz import Digraph
+import pydotplus
+import networkx as nx
+from networkx.algorithms.shortest_paths.generic import shortest_path as get_mainchain
 
 global tstart
 
-#datadir = '/home/volker/geth-pi-pucks/results/data'
-datadir = '/home/eksander/geth-argos/FloorEstimation/results/data'
-
-def create_df_old(experiment, datafile):
-
-    dd = dict()
-    for repetition_folder in glob.glob('{}/Experiment_{}/*'.format(datadir, experiment)):
-
-        data = list()
-        for robot_file in glob.glob('{}/*/{}.csv'.format(repetition_folder, datafile)):
-#             print(robot_file)
-            newdf = pd.read_csv(robot_file, delimiter=" ")
-            data.append(perform_corrections(newdf))
-
-        dd[repetition_folder.split('/')[-1]] = pd.concat(data, ignore_index=True)
-
-        dd_allreps = pd.concat(list(dd.values()), ignore_index=True)
-
-    return dd, dd_allreps
-
-def perform_corrections(df):
-    df['TIME'] = (1000*df['TIME']).astype(int)
-    try:
-        df['ESTIMATE'] = pd.to_numeric(df['ESTIMATE'], errors='coerce')
-    except KeyError:
-        pass
-
-    return df
-        
-# This function should yield per robot DFs, per experiment DFs, or all if the person requests
-def create_dfV2(experiment, datafile):
-
-    rep_df_dict = dict()
-    for repetition_folder in glob.glob('{}/Experiment_{}/*'.format(datadir, experiment)):
-        
-        rob_df_dict = dict()                
-        for robot_file in glob.glob('{}/*/{}.csv'.format(repetition_folder, datafile)):
-            df = pd.read_csv(robot_file, delimiter=" ")
-            df = perform_corrections(df)
-            rob_df_dict[robot_file.split('/')[-2]] = df
-            
-            
-        rep_df_dict[repetition_folder.split('/')[-1]] = rob_df_dict
-        
-        
-    return rep_df_dict
-
-def create_df(experiment, datafile):
-    data_list = []
-
-    for rep_folder in glob.glob('{}/Experiment_{}/*'.format(datadir, experiment)):
-        rep = rep_folder.split('/')[-1]
-        
-        for rob_file in glob.glob('{}/*/{}.csv'.format(rep_folder, datafile)):
-
-            rob = rob_file.split('/')[-2]
-            
-            #print(rep)
-            df = pd.read_csv(rob_file, delimiter=" ")
-            df['NREP'] = int(rep.split('-')[-1])
-            df['NBYZ'] = int(rep.split('-')[-2][:-3])
-            df['NROB'] = int(rep.split('-')[-3][:-3])
-            df = perform_corrections(df)
-            data_list.append(df)
-            
-    full_df = pd.concat(data_list, ignore_index=True)
-    return full_df
-
+datadir = '/home/eksander/geth-argos/MarketForaging/results/data'
 def tic():
     global tstart
     tstart = time.time()
-    
 def toc():
     print(time.time()-tstart)
+    
+def create_df(experiment, logfile):
+    df_list = []
+    csvfile_list = sorted(glob.glob('%s/experiment_%s/*/*/%s.csv' % (datadir, experiment, logfile)))
+
+    for csvfile in csvfile_list:
+        
+        df = pd.read_csv(csvfile, delimiter=" ")
+        df['NREP'] = csvfile.split('/')[-3]
+        
+#         df['NROB'] = csvfile.split('/')[-2]
+#         df = perform_corrections(df)
+        df_list.append(df)
+        
+    if df_list:
+        full_df = pd.concat(df_list, ignore_index=True)
+        return full_df
+    else:
+        return None
+
+def perform_corrections(df):
+    df['TIME_M'] = (1000*df['TIME']).astype(int)
+    return df
+
+
+# Construct digraph
+def create_digraph(df):
+    # Default settings for blockchain viz
+    digraph = Digraph(comment='Blockchain', 
+                      edge_attr={'arrowhead':'none'},
+                      node_attr={'shape': 'record', 'margin': '0', 'fontsize':'9', 'height':'0.35', 'width':'0.35'}, 
+                      graph_attr={'rankdir': 'LR', 'ranksep': '0.1', 'splines':'ortho'})
+    
+
+#     df.apply(lambda row : digraph.node(row['HASH'], str(row['BLOCK'])), axis = 1)
+    digraph.node(df['PHASH'].iloc[0], '<f0> {} | <f1> {}'.format(df['PHASH'].iloc[0][2:6], 'Genesis'))
+    df.apply(lambda row : digraph.node(row['HASH'], '<f0> {} | <f1> {}'.format(row['HASH'][2:6], str(row['BLOCK']))), axis = 1)
+    df.apply(lambda row : digraph.edge(row['PHASH'], row['HASH']), axis = 1)
+    
+    return digraph
+
+def convert_digraph(digraph):
+    return nx.nx_pydot.from_pydot(pydotplus.graph_from_dot_data(digraph.source))
+
+# Remove childless blocks
+def trim_chain(df, levels=1):
+    sub_df = df
+    while levels:
+        sub_df = sub_df.query('HASH in PHASH')
+        levels -= 1
+    return sub_df
+
+def paths_longer_than(paths, n):
+    return [x for x in paths if len(x)>=n]
+
+def nodes_in_paths(paths):
+    return [item for sublist in paths for item in sublist]

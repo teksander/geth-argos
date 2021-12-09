@@ -33,7 +33,7 @@ def init():
 	global market, item_list
 
 	# Create the market instance
-	market = resource_obj(x = 0, y = 0, radius = market_params['size'], quantity = 1, quality = 'yellow')
+	market = resource_obj(x = 0, y = 0, radius = market_params['radius'], quantity = 1, quality = 'yellow')
 
 	# Create a list of random circles centered around (0,0)	
 	item_list = []

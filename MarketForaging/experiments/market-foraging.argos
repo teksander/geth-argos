@@ -8,8 +8,7 @@
     <system threads="1" method="balance_quantity" />
     <experiment length="0"
       ticks_per_second="20"
-      real_time="true"
-      random_seed="5" />
+      real_time="true"/>
   </framework>
 
   <!-- *************** -->
@@ -23,7 +22,7 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-        <epuck_range_and_bearing implementation="medium" range="0.3"/>
+        <epuck_range_and_bearing implementation="medium" range="0.25"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />
@@ -66,7 +65,7 @@
     </box>
 
     <distribute>
-      <position method="uniform" min="-0.4,-0.4,0" max="0.4,0.4,0" /> 
+      <position method="uniform" min="-.365,-.365,0" max=".365,.365,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
       <entity quantity="5" max_trials="15"> 
         <e-puck id="fb" rab_range = "1">

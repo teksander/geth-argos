@@ -19,17 +19,23 @@ CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
 ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
-# [XML]
+# [ARGOS_XML]
+export FPS=20
 export NUMROBOTS=5
 export DENSITY=1.5
 export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
-RAB_RANGE="0.3"
+RAB_RANGE="0.25"
 VISUALIZATION=none # visualization or none
 ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
+STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
+
+# [GETH]
+export BLOCKPERIOD=2
+
+# [SC]
 
 
 # [OTHER]
-export FPS=20
 export REPS=5
 export SLEEPTIME=5
 export TIMELIMIT=20
