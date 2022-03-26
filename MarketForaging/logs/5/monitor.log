@@ -1,30 +1,107 @@
-[5 INFO main 57] Initialising Python Geth Console...
-[5 INFO main 64] Initialising peer buffer...
-[5 INFO main 64] Initialising resource buffer...
-[5 INFO main 64] Initialising TCP server...
-[5 INFO main 64] Initialising TCP server...
-[5 INFO main 64] Initialising TCP server...
-[5 INFO main 64] Initialising RandB board...
-[5 INFO main 64] Initialising ground-sensors...
-[5 INFO main 64] Initialising random-walk...
-[5 INFO main 64] Initialising navigation...
-[5 INFO main 92972] --//-- Starting Experiment --//--
-[5 INFO main 93004] Idle.IDLE -> Scout.EXPLORE | 
-[5 INFO main 111661] Added resource: {"x": 0.57, "y": 0.46, "radius": 0.09, "quantity": 3, "quality": "blue", "value": 18, "price": 9.0}; Total: 1 
-[5 INFO main 123011] Scout.EXPLORE -> Scout.HOMING | Home: found 1 resources
-[5 INFO main 149315] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.57, "y": 0.46, "radius": 0.09, "quantity": 3, "quality": "blue", "value": 18, "price": 9.0}
-[5 INFO main 165260] Recruit.FORAGE -> Recruit.HOMING | 
-[5 INFO main 181296] Recruit.HOMING -> Scout.EXPLORE | Exploring: 30s
-[5 INFO main 211311] Scout.EXPLORE -> Scout.HOMING | Home: found 1 resources
-[5 INFO main 233361] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.57, "y": 0.46, "radius": 0.09, "quantity": 3, "quality": "blue", "value": 18, "price": 9.0}
-[5 INFO main 257111] Recruit.FORAGE -> Recruit.HOMING | 
-[5 INFO main 274266] Recruit.HOMING -> Scout.EXPLORE | Exploring: 30s
-[5 INFO main 304312] Scout.EXPLORE -> Scout.HOMING | Home: found 1 resources
-[5 INFO main 330961] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.57, "y": 0.46, "radius": 0.09, "quantity": 3, "quality": "blue", "value": 18, "price": 9.0}
-[5 INFO main 351814] Recruit.FORAGE -> Recruit.HOMING | 
-[5 INFO main 368963] Recruit.HOMING -> Scout.EXPLORE | Exploring: 30s
-[5 INFO main 397666] Added resource: {"x": 0.06, "y": -0.76, "radius": 0.09, "quantity": 2, "quality": "red", "value": 4, "price": 2.0}; Total: 2 
-[5 INFO main 399011] Scout.EXPLORE -> Scout.SELL | Sell: found 2 resources
-[5 INFO main 399128] Sold: {"x": 0.06, "y": -0.76, "radius": 0.09, "quantity": 2, "quality": "red", "value": 4, "price": 2.0}
-[5 INFO main 399129] Scout.SELL -> Scout.HOMING | Kept: {"x": 0.57, "y": 0.46, "radius": 0.09, "quantity": 3, "quality": "blue", "value": 18, "price": 9.0}
-[5 INFO main 419666] Scout.HOMING -> Recruit.FORAGE | Foraging: {"x": 0.57, "y": 0.46, "radius": 0.09, "quantity": 3, "quality": "blue", "value": 18, "price": 9.0}
+[5 INFO main 43] Initialising Python Geth Console...
+[5 INFO main 48] Initialising peer buffer...
+[5 INFO main 48] Initialising resource buffer...
+[5 INFO main 48] Initialising TCP server...
+[5 INFO main 48] Initialising TCP server...
+[5 INFO main 48] Initialising RandB board...
+[5 INFO main 48] Initialising resource sensor...
+[5 INFO main 48] Initialising random-walk...
+[5 INFO main 48] Initialising navigation...
+[5 INFO main 48] Initialising odometry...
+[5 INFO main 1955] --//-- Starting Experiment --//--
+[5 INFO main 2056] Idle.IDLE -> Scout.EXPLORE | Duration: 41.50
+[5 INFO main 43574] Scout.EXPLORE -> Recruit.BUY | Found 0
+[5 INFO main 73610] Recruit.BUY -> Idle.IDLE | Buy expired
+[5 INFO main 73731] Idle.IDLE -> Scout.EXPLORE | Duration: 42.01
+[5 INFO main 115753] Scout.EXPLORE -> Recruit.BUY | Found 0
+[5 INFO main 145792] Recruit.BUY -> Idle.IDLE | Buy expired
+[5 INFO main 145935] Idle.IDLE -> Scout.EXPLORE | Duration: 40.03
+[5 INFO main 185994] Scout.EXPLORE -> Recruit.BUY | Found 0
+[5 INFO main 216060] Recruit.BUY -> Idle.IDLE | Buy expired
+[5 INFO main 216172] Idle.IDLE -> Scout.EXPLORE | Duration: 42.28
+[5 INFO main 258472] Scout.EXPLORE -> Recruit.BUY | Found 0
+[5 INFO main 288562] Recruit.BUY -> Idle.IDLE | Buy expired
+[5 INFO main 288662] Idle.IDLE -> Scout.EXPLORE | Duration: 42.84
+[5 INFO main 331564] Scout.EXPLORE -> Recruit.BUY | Found 0
+[5 INFO main 361580] Recruit.BUY -> Idle.IDLE | Buy expired
+[5 INFO main 361680] Idle.IDLE -> Scout.EXPLORE | Duration: 39.42
+[5 INFO main 401136] Scout.EXPLORE -> Recruit.BUY | Found 0
+[5 INFO main 431184] Recruit.BUY -> Idle.IDLE | Buy expired
+[5 INFO main 431291] Idle.IDLE -> Scout.EXPLORE | Duration: 42.57
+[5 INFO main 473907] Scout.EXPLORE -> Recruit.BUY | Found 0
+[5 INFO main 482231] Bought
+[5 WARNING main 492540] Failed: Status 0
+[5 INFO main 492542] Recruit.BUY -> Recruit.PLAN | Buy failed
+[5 INFO main 492674] Recruit.PLAN -> Recruit.BUY | Buy again
+[5 INFO main 495014] Bought
+[5 INFO main 499155] Confirming: 1/3
+[5 INFO main 503191] Confirming: 3/3
+[5 INFO main 503192] Recruit.BUY -> Recruit.PLAN | Buy success
+[5 INFO main 503238] Added: {-1.1, 0.08, red, 15}; Total: 1 
+[5 INFO main 503238] Recruit.PLAN -> Recruit.FORAGE | Foraging: {-1.1, 0.08, red, 15}
+[5 INFO main 530514] Collect: {-1.1, 0.08, red, 15}
+[5 INFO main 530612] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 14, "quality": "red", "utility": 2}
+[5 INFO main 530613] Collect: {-1.1, 0.08, red, 14}
+[5 INFO main 530613] Recruit.FORAGE -> Recruit.HOMING | 
+[5 INFO main 549275] Dropped: {-1.1, 0.08, red, 14}
+[5 INFO main 549391] Selling: {-1.1, 0.08, red, 14}
+[5 INFO main 555567] Confirming: 1/3
+[5 INFO main 557580] Confirming: 2/3
+[5 INFO main 559638] Confirming: 3/3
+[5 INFO main 559644] Scout.SELL -> Recruit.PLAN | Sell success
+[5 INFO main 559743] Added: {-1.1, 0.08, red, 13}; Total: 1 
+[5 INFO main 559743] Recruit.PLAN -> Recruit.FORAGE | Foraging: {-1.1, 0.08, red, 13}
+[5 INFO main 586769] Collect: {-1.1, 0.08, red, 13}
+[5 INFO main 586868] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 12, "quality": "red", "utility": 2}
+[5 INFO main 586868] Collect: {-1.1, 0.08, red, 12}
+[5 INFO main 586869] Recruit.FORAGE -> Recruit.HOMING | 
+[5 INFO main 621606] Dropped: {-1.1, 0.08, red, 12}
+[5 INFO main 621727] Selling: {-1.1, 0.08, red, 12}
+[5 INFO main 629963] Confirming: 1/3
+[5 INFO main 631975] Confirming: 3/3
+[5 INFO main 631977] Scout.SELL -> Recruit.PLAN | Sell success
+[5 INFO main 632054] Added: {-1.1, 0.08, red, 10}; Total: 1 
+[5 INFO main 632055] Recruit.PLAN -> Recruit.FORAGE | Foraging: {-1.1, 0.08, red, 10}
+[5 INFO main 652742] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 9, "quality": "red", "utility": 2}
+[5 INFO main 652742] Collect: {-1.1, 0.08, red, 9}
+[5 INFO main 652841] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 8, "quality": "red", "utility": 2}
+[5 INFO main 652841] Collect: {-1.1, 0.08, red, 8}
+[5 INFO main 652841] Recruit.FORAGE -> Recruit.HOMING | 
+[5 INFO main 691482] Dropped: {-1.1, 0.08, red, 8}
+[5 INFO main 691602] Selling: {-1.1, 0.08, red, 8}
+[5 INFO main 699815] Confirming: 1/3
+[5 INFO main 701870] Confirming: 2/3
+[5 INFO main 703954] Confirming: 3/3
+[5 INFO main 703956] Scout.SELL -> Recruit.PLAN | Sell success
+[5 INFO main 704016] Added: {-1.1, 0.08, red, 7}; Total: 1 
+[5 INFO main 704016] Recruit.PLAN -> Recruit.FORAGE | Foraging: {-1.1, 0.08, red, 7}
+[5 INFO main 708356] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 6, "quality": "red", "utility": 2}
+[5 INFO main 730672] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 5, "quality": "red", "utility": 2}
+[5 INFO main 736774] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 4, "quality": "red", "utility": 2}
+[5 INFO main 736774] Collect: {-1.1, 0.08, red, 4}
+[5 INFO main 736882] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 3, "quality": "red", "utility": 2}
+[5 INFO main 736882] Collect: {-1.1, 0.08, red, 3}
+[5 INFO main 736883] Recruit.FORAGE -> Recruit.HOMING | 
+[5 INFO main 762086] Dropped: {-1.1, 0.08, red, 3}
+[5 INFO main 762217] Selling: {-1.1, 0.08, red, 3}
+[5 INFO main 774358] Confirming: 1/3
+[5 INFO main 776360] Confirming: 3/3
+[5 INFO main 776361] Scout.SELL -> Recruit.PLAN | Sell success
+[5 INFO main 776485] Added: {-1.1, 0.08, red, 3}; Total: 1 
+[5 INFO main 776485] Recruit.PLAN -> Recruit.FORAGE | Foraging: {-1.1, 0.08, red, 3}
+[5 INFO main 780724] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 2, "quality": "red", "utility": 2}
+[5 INFO main 782750] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 1, "quality": "red", "utility": 2}
+[5 INFO main 806047] Collect: {-1.1, 0.08, red, 1}
+[5 INFO main 806146] Updated resource: {"x": -1.1, "y": 0.08, "radius": 0.16, "quantity": 0, "quality": "red", "utility": 2}
+[5 INFO main 806146] Collect: {-1.1, 0.08, red, 0}
+[5 INFO main 806146] Recruit.FORAGE -> Recruit.HOMING | 
+[5 INFO main 841032] Dropped: {-1.1, 0.08, red, 0}
+[5 INFO main 841159] Selling: {-1.1, 0.08, red, 0}
+[5 INFO main 847337] Confirming: 1/3
+[5 INFO main 849407] Confirming: 2/3
+[5 INFO main 851405] Confirming: 3/3
+[5 INFO main 851407] Scout.SELL -> Recruit.PLAN | Sell success
+[5 INFO main 851508] Recruit.PLAN -> Recruit.BUY | Buy again
+[5 INFO main 851620] Recruit.BUY -> Idle.IDLE | Buy expired
+[5 INFO main 851689] Idle.IDLE -> Scout.EXPLORE | Duration: 38.16
+[5 INFO main 889857] Scout.EXPLORE -> Recruit.BUY | Found 0

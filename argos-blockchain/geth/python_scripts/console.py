@@ -12,32 +12,34 @@ import os
 logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
 logger = logging.getLogger(__name__)
 
+
 def init_web3(__ip = None):
+
 	w3 = None
 
 	if __ip:
 		provider = WebsocketProvider('ws://'+__ip+':8545')
 	else:
-		provider = IPCProvider('~/geth-pi-pucks/geth.ipc')
+		provider = IPCProvider('/root/.ethereum/devchain/geth.ipc')
 
 	w3 = Web3(provider)
 	w3.provider = provider
 	w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 	w3.geth.personal.unlockAccount(w3.eth.coinbase,"",0)
 	w3.eth.defaultAccount = w3.eth.coinbase
-	key = w3.eth.coinbase
-	enode = w3.geth.admin.nodeInfo().enode
+	w3.key = w3.eth.coinbase
+	w3.enode = w3.geth.admin.nodeInfo().enode
 
 	logger.info('VERSION: %s', w3.clientVersion)
-	logger.info('ADDRESS: %s', key)
-	logger.info('ENODE: %s', enode)
+	logger.info('ADDRESS: %s', w3.key)
+	logger.info('ENODE: %s', w3.enode)
 
 	return w3
 
 def registerSC(w3):
     sc = None
 
-    abiPath = '/root/deployed_contract/Estimation.abi'
+    abiPath = '/root/deployed_contract/MarketForaging.abi'
     abi = json.loads(open(abiPath).read())
     addressPath = '/root/deployed_contract/contractAddress.txt'
     address = '0x' + open(addressPath).read().rstrip()

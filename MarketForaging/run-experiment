@@ -1,0 +1,158 @@
+#!/bin/bash
+# Iterate over experimental settings and start experiments
+
+##################################################################################
+### EXAMPLE: config "NUMROBOTS" 10 
+config() {
+	sed -i "s/^export ${1}=.*/export ${1}=${2}/" experimentconfig.sh
+}
+
+##################################################################################
+### EXAMPLE: copy "test116_patchy/20_blockchain1"
+copy() {
+	# Collect the config from results
+	cp results/data/experiment_${1}/001/experimentconfig.sh .
+	cp results/data/experiment_${1}/001/controller_params.py controllers/
+	cp results/data/experiment_${1}/001/loop_function_params.py loop_functions/
+}
+##################################################################################
+### EXAMPLE: run "test116_patchy/20_blockchain1"
+run() {
+	for REP in $(seq 1 ${REPS}); do
+
+		# Perform experiment
+		. starter --reset-geth --start-novis
+
+		# Collect logged data
+		if [ $# -eq 1 ]; then
+		    bash collect-logs ${1}
+		fi
+		
+	done
+}
+
+
+EXP=test118_scarce_big
+copy "test117_scarce_big/20_blockchain1"
+config "REPS"8
+
+
+# Experiment parameter
+config "NUM1" 25
+config "NUM2" 0
+config "MAXRECRUITS" 1
+wait
+run    "${EXP}/25_blockchain1"
+
+# Experiment parameter
+config "NUM1" 25
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/25_blockchain2"
+
+# Experiment parameter
+config "NUM1" 25
+config "NUM2" 0
+config "MAXRECRUITS" 3
+wait
+run    "${EXP}/25_blockchain3"
+
+# Experiment parameter
+config "NUM1" 25
+config "NUM2" 0
+config "MAXRECRUITS" 4
+wait
+run    "${EXP}/25_blockchain4"
+
+# Experiment parameter
+config "NUM1" 25
+config "NUM2" 0
+config "MAXRECRUITS" 5
+wait
+run    "${EXP}/25_blockchain5"
+
+
+# Experiment parameters
+config "NUM1" 0
+config "NUM2" 25
+wait
+run    "${EXP}/25_greedy"
+
+##########################################3
+
+# # Experiment parameter
+# config "NUM1" 20
+# config "NUM2" 0
+# config "MAXRECRUITS" 5
+# run    "${EXP}/20_blockchain5"
+
+
+# # Experiment parameters
+# config "NUM1" 0
+# config "NUM2" 20
+# run        "${EXP}/20_greedy"
+
+# # Experiment parameters
+# config "NUM1" 20
+# config "NUM2" 0
+# config "MAXRECRUITS" 1
+# run        "${EXP}/20_blockchain1"
+
+# # Experiment parameter
+# config "NUM1" 20
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# run        "${EXP}/20_blockchain2"
+
+# # Experiment parameters
+# config "NUM1" 0
+# config "NUM2" 10
+# run        "${EXP}/10_greedy"
+
+# # Experiment parameters
+# config "NUM1" 0
+# config "NUM2" 15
+# run        "${EXP}/15_greedy"
+
+# # Experiment parameters
+# config "NUM1" 10
+# config "NUM2" 0
+# config "MAXRECRUITS" 1
+# run        "${EXP}/10_blockchain1"
+
+# # Experiment parameters
+# config "NUM1" 15
+# config "NUM2" 0
+# config "MAXRECRUITS" 1
+# run        "${EXP}/15_blockchain1"
+
+
+
+
+# # Experiment parameter
+# config "NUM1" 10
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# run        "${EXP}/10_blockchain2"
+
+# # Experiment parameter
+# config "NUM1" 15
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# run        "${EXP}/15_blockchain2"
+
+
+
+# # Experiment parameter
+# config "NUM1" 10
+# config "NUM2" 0
+# config "MAXRECRUITS" 3
+# run        "${EXP}/10_blockchain3"
+
+# # Experiment parameter
+# config "NUM1" 15
+# config "NUM2" 0
+# config "MAXRECRUITS" 3
+# run        "${EXP}/15_blockchain3"
+

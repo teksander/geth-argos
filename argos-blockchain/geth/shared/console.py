@@ -37,7 +37,7 @@ def init_web3(__ip = None):
 def registerSC(w3):
     sc = None
 
-    abiPath = '/root/deployed_contract/Estimation.abi'
+    abiPath = '/root/deployed_contract/MarketForaging.abi'
     abi = json.loads(open(abiPath).read())
     addressPath = '/root/deployed_contract/contractAddress.txt'
     address = '0x' + open(addressPath).read().rstrip()

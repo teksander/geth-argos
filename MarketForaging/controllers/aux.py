@@ -27,24 +27,65 @@ class TxTimer:
         self.name = name
         self.rate = rate
         self.time = time.time()
+        self.lock = False
 
-    def query(self, reset = True):
+    def query(self, step = True, reset = True):
         if self.remaining() < 0:
-            if reset:
-                self.reset()
+            if reset: self.reset() 
             return True
         else:
+            if step: self.step()   
             return False
 
     def remaining(self):
         return self.rate - (time.time() - self.time)
 
     def set(self, rate):
-        self.rate = rate
-        self.time = time.time()
+        if not self.lock:
+            self.rate = rate
+            self.time = time.time()
 
     def reset(self):
-        self.time = time.time()
+        if not self.lock:
+            self.time = time.time()
+
+    def lock(self, lock = True):
+        self.lock = lock
+
+class Counter:
+    def __init__(self, rate = None, name = None):
+        self.name  = name
+        self.rate  = rate
+        self.count = 0
+
+    def query(self, step = True, reset = True):
+        print(self.count)
+        if self.remaining() <= 0:
+            if reset: self.reset()
+            return True
+        else: 
+            if step: self.step()
+            return False
+
+    def remaining(self):
+        return self.rate - self.count
+
+    def step(self):
+        self.count += 1
+
+    def dec(self):
+        self.count -= 1
+
+    def get(self):
+        return self.count
+
+    def set(self, rate):
+        self.rate = rate
+        self.count = 0
+
+    def reset(self):
+        self.count = 0
+
 
 
 class Timer:
@@ -52,6 +93,7 @@ class Timer:
         self.name = name
         self.rate = rate
         self.time = time.time()
+        self.isLocked = False
 
     def query(self, reset = True):
         if self.remaining() < 0:
@@ -65,11 +107,24 @@ class Timer:
         return self.rate - (time.time() - self.time)
 
     def set(self, rate):
-        self.rate = rate
-        self.time = time.time()
+        if not self.isLocked:
+            self.rate = rate
+            self.time = time.time()
+        return self
 
     def reset(self):
-        self.time = time.time()
+        if not self.isLocked:
+            self.time = time.time()
+        return self
+
+    def lock(self):
+        self.isLocked = True
+        return self
+
+    def unlock(self):
+        self.isLocked = False
+        return self
+
 
 class TicToc(object):
     """ Pendulum Class to Synchronize Output Times
@@ -482,13 +537,16 @@ class Vector2D:
     # Alias the __matmul__ method to dot so we can use a @ b as well as a.dot(b).
     __matmul__ = cross
 
-
     def __sub__(self, other):
         """Vector subtraction."""
         return Vector2D(self.x - other.x, self.y - other.y)
 
     def __add__(self, other):
         """Vector addition."""
+        return Vector2D(self.x + other.x, self.y + other.y)
+
+    def __radd__(self, other):
+        """Recursive vector addition."""
         return Vector2D(self.x + other.x, self.y + other.y)
 
     def __mul__(self, scalar):
@@ -519,7 +577,6 @@ class Vector2D:
         return math.sqrt(self.x**2 + self.y**2)
 
     def rotate(self, angle):
-
         return Vector2D(self.length, self.angle + angle, polar = True)
 
     def normalize(self):
@@ -539,3 +596,21 @@ class Vector2D:
     def to_polar(self):
         """Return the vector's components in polar coordinates."""
         return self.length, self.angle
+        
+class mydict(dict):
+    def __mul__(self, k):
+        return mydict([[key, self[key] * k] for key in self])
+
+    def __truediv__(self, k):
+        return mydict([[key, self[key] / k] for key in self])
+
+    def root(self, n):
+        return mydict([[key, math.sqrt(self[key])] for key in self])
+
+    def power(self, n):
+        return mydict([[key, math.power(self[key])] for key in self])
+
+    def round(self, n = 0):
+        if n == 0:
+            return mydict([[key, round(self[key])] for key in self])
+        return mydict([[key, round(self[key], n)] for key in self])

@@ -8,6 +8,7 @@
 import time
 import os
 import sys
+import subprocess
 import pandas as pd
 from matplotlib import pyplot as plt
 import glob
@@ -25,27 +26,89 @@ def tic():
 def toc():
     print(time.time()-tstart)
     
-def create_df(experiment, logfile):
-    df_list = []
-    csvfile_list = sorted(glob.glob('%s/experiment_%s/*/*/%s.csv' % (datadir, experiment, logfile)))
+# def create_df(experiment, logfile):
+#     df_list = []
+#     csvfile_list = sorted(glob.glob('%s/experiment_%s/*/*/%s.csv' % (datadir, experiment, logfile)))
 
-    for csvfile in csvfile_list:
+#     for csvfile in csvfile_list:
         
-        df = pd.read_csv(csvfile, delimiter=" ")
-        df['NREP'] = csvfile.split('/')[-3]
+#         df = pd.read_csv(csvfile, delimiter=" ")
+#         df['REP'] = csvfile.split('/')[-3]
         
-#         df['NROB'] = csvfile.split('/')[-2]
-#         df = perform_corrections(df)
-        df_list.append(df)
+# #         df['NROB'] = csvfile.split('/')[-2]
+# #         df = perform_corrections(df)
+#         df_list.append(df)
+        
+#     if df_list:
+#         full_df = pd.concat(df_list, ignore_index=True)
+#         return full_df
+#     else:
+#         return None
+    
+def create_df(experiments, logfile, configs = 'all', configs_excl = None):
+    
+    df_list = []
+    experiments = [experiments] if isinstance(experiments, str) else experiments
+    
+    for experiment in experiments:
+        if configs == 'all':
+            configs = sorted(glob.glob('%s/experiment_%s/*/' % (datadir, experiment)))
+
+        if configs_excl:
+            for config_excl in configs_excl:
+                configs = [x for x in configs if config_excl not in x]
+
+        for config in configs:
+            csvfile_list = sorted(glob.glob('%s/*/*/%s.csv' % (config, logfile)))
+            
+            for csvfile in csvfile_list:
+                df = pd.read_csv(csvfile, delimiter=" ")
+                df['REP'] = csvfile.split('/')[-3]
+                df['EXP'] = experiment + '/'+ config.split('/')[-2]
+                df = perform_corrections(df)
+                df_list.append(df)
         
     if df_list:
         full_df = pd.concat(df_list, ignore_index=True)
+        full_df.get_param = get_param_df
         return full_df
     else:
         return None
 
+def get_param_df(df, param_dict, param, alias = None):
+    df = df.groupby(['EXP','REP']).apply(lambda x: get_param(x, x.name , param_dict, param, alias))
+    return df
+
+def get_param(group, name, param_dict, param, alias):
+    exp = name[0]
+    rep = name[1]
+            
+    configfile = '%s/experiment_%s/%s/config.py' % (datadir, exp, rep)
+    exec(open(configfile).read(), globals())
+    param_dict = eval(param_dict)
+    if param in param_dict:
+        if alias:
+            group[alias] = param_dict[param]
+        else:
+            group[param] = param_dict[param]
+    return group
+
 def perform_corrections(df):
-    df['TIME_M'] = (1000*df['TIME']).astype(int)
+
+    if 'DIST' in df.columns:
+        df['DIST'] = df['DIST']/100
+        
+    if 'RECRUIT_DIST' in df.columns:
+        df['RECRUIT_DIST'] = df['RECRUIT_DIST']/100
+        
+    if 'SCOUT_DIST' in df.columns:
+        df['SCOUT_DIST'] = df['SCOUT_DIST']/100
+        
+    if 'MB' in df.columns:
+        df['MB'] = df['MB']*10e-6
+        
+    df['CONTROLLER'] = df['EXP'].str.split('/').str[-1].str[3:]
+    
     return df
 
 
@@ -81,3 +144,25 @@ def paths_longer_than(paths, n):
 
 def nodes_in_paths(paths):
     return [item for sublist in paths for item in sublist]
+
+###########################################################################
+from scipy.optimize import curve_fit
+def LinearRegression0(group, x, y):
+    # objective function
+    def model(x, a):
+        return a * x
+    coefs, _ = curve_fit(model, group[x], group[y])
+    a = float(coefs)
+    group['COEFS'] = a
+    group['LREG'] = model(group[x], a)
+    return group
+
+def LinearRegression(group, x, y):
+    # objective function
+    def model(x, a, b):
+        return a * x + b
+    coefs, _ = curve_fit(model, group[x], group[y])
+#     a = float(coefs)
+    group['COEFS'] = repr(coefs)
+    group['LREG'] = model(group[x], *coefs)
+    return group

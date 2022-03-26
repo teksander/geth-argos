@@ -13,23 +13,19 @@ if test -f "${parent_path}/genesis.conf"; then
     rm "${parent_path}/genesis.conf"
 fi
 
-########## Genesis Block Creation ############
-echo "Creating a Genesis Block for $NUM_NODES nodes"
-echo "+-----------------------------------------------------------+"
-########## Genesis Block Creation ############
-
 
 ########## Genesis Configuration File ############
 echo "Configuring Genesis Block..."
-echo "+-----------------------------------------------------------+"
-########## Genesis Configuration File ############
+echo "${parent_path}/genesis_poa.json"
+echo "Block period = $2s"
+
 
 echo "2" >> "${parent_path}/genesis.conf"  # Manage existing genesis
 echo "3" >> "${parent_path}/genesis.conf"  # Remove existing genesis
 echo "2" >> "${parent_path}/genesis.conf"  # Configure new genesis
 echo "1" >> "${parent_path}/genesis.conf"  # Create new genesis from scratch
 echo "2" >> "${parent_path}/genesis.conf"  # Clique - proof-of-authority
-echo "15" >> "${parent_path}/genesis.conf" # 15 seconds block time
+echo  $2 >> "${parent_path}/genesis.conf"  # Block period
 
 # List of sealers
 echo "Key Mapping"
@@ -63,13 +59,11 @@ echo "2" >> "${parent_path}/genesis.conf"    # Export genesis configurations
  # Store Genesis Configuration File
 echo ${parent_path} >> "${parent_path}/genesis.conf"
 
-########## Generate Genesis Block ############
-echo "Generating Genesis Block..."
-echo "+-----------------------------------------------------------+"
+
 ########## Generate Genesis Block ############
 
 cat "${parent_path}/genesis.conf" | "${parent_path}/puppeth" --network=pipucks >/dev/null 2>&1
-rm "${parent_path}/genesis.conf"
+# rm "${parent_path}/genesis.conf"
 
 ########## Upload Genesis File ############
 rm "${parent_path}/genesis_poa.json"

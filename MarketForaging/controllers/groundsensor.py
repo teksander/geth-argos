@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import time
+import math, random, time
 import logging
 import json
 from types import SimpleNamespace
@@ -61,31 +61,74 @@ class GroundSensor(object):
     def stop(self):
         pass
 
+class Resource(object):
+    """ Establish the resource class 
+    """
+    def __init__(self, resource_js):
+        # Required resource attrs: x, y, radius
+
+        if isinstance(resource_js, dict):
+            resource_dict = resource_js
+        else:
+            resource_dict = json.loads(resource_js.replace("\'", "\""))
+
+        # Read the default resource attributes
+        for attr in resource_dict:
+            setattr(self, attr, resource_dict[attr])
+
+        # Introduce the measurement error
+        r = self.radius * math.sqrt(random.random()) * 0.7
+        theta = 2 * math.pi * random.random()
+        self._xr = self.x + r * math.cos(theta)
+        self._yr = self.y + r * math.sin(theta)
+        self._pr = (self._xr, self._yr)
+        self._pos  = (self.x, self.y)
+
+        # Introduce the timestamp
+        self._timeStamp = time.time()
+        self._isSold = False
+
+    @property
+    def _json(self):
+        public_vars = { k:v for k,v in vars(self).items() if not k.startswith('_')}
+        return str(public_vars).replace("\'", "\"")
+
+    @property
+    def _desc(self):
+        return '{%s, %s, %s, %s}' % (self.x, self.y, self.quality, self.quantity)
+
+    @property
+    def _calldata(self):
+        return (str(self._json), 
+                int(self.x * 100), 
+                int(self.y * 100), 
+                int(self.quantity), 
+                str(self.quality), 
+                int(self.utility))
+
 class ResourceVirtualSensor(object):
     """ Set up a ground-sensor data acquisition loop on a background thread
     The __sensing() method will be started and it will run in the background
     until the application exits.
     """
-    def __init__(self, robot, freq = 1):
+    def __init__(self, robot, freq = 100):
         """ Constructor
         :type freq: str
         :param freq: frequency of measurements in Hz (tip: 20Hz)
         """
-        self.freq = freq
-        self.rate = 1/freq
         self.robot = robot
-        self.timer = time.time()
+        self.freq = freq
+        self.last = time.time()
         self.resource = None
 
-        logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
-        logger = logging.getLogger(__name__)
 
     def step(self):
-        # Read frequency @ self.freq (Hz).
-        if time.time() - self.timer > (self.rate):
-            self.timer = time.time()
-            resource = self.robot.variables.get_attribute("newResource")
 
+        # Read frequency @ self.freq (Hz).
+        if time.time() - self.last > (1/self.freq):
+            self.last = time.time()
+
+            resource = self.robot.variables.get_attribute("newResource")
             if resource:
                 self.resource = resource
             else:
@@ -93,10 +136,18 @@ class ResourceVirtualSensor(object):
 
     def getNew(self):
         """ This method returns the instant ground value """
-        temp = self.resource
-        self.resource = None
-        return temp
-        
+        if self.resource:
+            return Resource(self.resource)
+
+                     
+    # def getNew(self):
+    #     """ This method returns the instant ground value """
+    #     temp = None
+    #     if self.resource:
+    #         temp = Resource(self.resource)
+    #     self.resource = None
+    #     return temp    
+
     def start(self):
         pass
 

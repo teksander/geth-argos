@@ -156,6 +156,9 @@ class TCP_server(object):
         self.newIds = set()
         return temp
 
+    def setData(self, data):
+        self.data = data
+
     def start(self):
         """ This method is called to start __hosting a TCP server """
         if self.__stop:

@@ -1,0 +1,114 @@
+#!/bin/bash
+# Start an experiment
+source experimentconfig.sh
+
+echo "+-----------------------------------------------------------+"
+echo "MAINFOLDER IS $MAINFOLDER"
+
+echo "+-----------------------------------------------------------+"
+echo "Updating the ARGoS XML file"
+
+sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
+    -e "s|CON1|$CON1|g"\
+    -e "s|CON2|$CON2|g"\
+    -e "s|NUM1|$NUM1|g"\
+    -e "s|NUM2|$NUM2|g"\
+    -e "s|STARTDIM|$STARTDIM|g"\
+    -e "s|TPS|$TPS|g"\
+    -e "s|RABRANGE|$RABRANGE|g"\
+    -e "s|NUMBYZANTINE|$NUMBYZANTINE|g"\
+    -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
+    -e "s|FLOORFILE|$FLOORFILE|g"\
+    -e "s|ARGOSFOLDER|$ARGOSFOLDER|g"\
+    -e "s|ARENADIMH|$ARENADIMH|g"\
+    -e "s|ARENADIM|$ARENADIM|g"\
+  $ARGOSTEMPLATE > $ARGOSFILE
+
+if [[ $1 == "--reset-geth" ]]; then
+
+    echo "+-----------------------------------------------------------+"
+    echo "Updating the Smart Contract"
+
+    sed -e "s|MAXRECRUITS|$MAXRECRUITS|g"\
+      $SCFILE > $SCTEMPLATE
+
+    echo "+-----------------------------------------------------------+"
+    echo "Compiling the Smart Contract"
+
+    # Compile smart contract
+    solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCTEMPLATE
+    cp -r "${EXPERIMENTFOLDER}/scs/build/." "${DOCKERFOLDER}/geth/deployed_contract/"
+
+    BINDATA=`cat ${CONTRACTBIN}`
+
+    echo "+-----------------------------------------------------------+"
+    echo "Generating the Genesis block"
+
+    # Create genesis using puppeth
+    bash ${DOCKERFOLDER}/geth/files/reset-genesis ${NUMROBOTS} $BLOCKPERIOD
+
+    # Insert the smart contract into the genesis 
+    sed -ie "s|123\": {|123\": {\n\"code\": \"0xBINDATA\",|g" ${GENESISFILE}
+    sed -ie "s|BINDATA|$BINDATA|g" ${GENESISFILE}
+    # Change the gas limit
+    sed -ie "s|0x47b760|0x9000000000000|g" ${GENESISFILE}
+    # Change the value of the pre-funded accounts
+    sed -ie "s|\"0x200000000000000000000000000000000000000000000000000000000000000\"|\"0x1236efcbcbb340000\"|g" ${GENESISFILE}
+    # # Undo for the contract account (first match)
+    sed -ie "0,/\"0x1236efcbcbb340000\"/s//\"0x200000000000000000000000000000000000000000000000000000000000000\"/" ${GENESISFILE}
+
+    # 0x1236efcbcbb340000 = 21 ether
+    # 0xde0b6b3a7640000 = 1 ether
+
+    echo "+-----------------------------------------------------------+"
+    echo "Resetting Geth..."
+    ./reset-geth
+fi
+
+# Get containers
+docker ps --format '{{.Names}} {{.ID}}' > temp1.txt
+sort -o temp1.txt temp1.txt
+
+# Create a list of IDs (temporary solution)
+seq 1 $NUMROBOTS > ids.txt
+
+# Get IPs
+./bash-all "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
+
+# Collect everything in a single file
+paste ids.txt temp1.txt temp2.txt > identifiers.txt
+rm temp1.txt temp2.txt ids.txt 
+
+echo "+-----------------------------------------------------------+"
+echo "Waiting web3 to respond..."
+
+ready=0
+while [[ $ready != $NUMROBOTS ]]; do
+    ready=0
+    for host in $(awk '{print $4}' identifiers.txt); do
+        if echo -e '\x1dclose\x0d' | telnet $host 4000 2>/dev/null | grep -q Connected ; then
+            let "ready=ready+1"
+        fi
+    done
+    sleep 0.5
+done
+
+echo "+-----------------------------------------------------------+"
+echo "Cleaning logs folder..."
+
+# Keep files 0-$NUMROBOTS in order to prevent having to reopen logs
+eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
+
+if [[ $2 == "--start" ]]; then
+    echo "+-----------------------------------------------------------+"
+    echo "Starting Experiment-GUI"
+
+    argos3 -c $ARGOSFILE
+fi
+
+if [[ $2 == "--start-novis" ]]; then
+    echo "+-----------------------------------------------------------+"
+    echo "Starting Experiment"
+
+    argos3 -z -c $ARGOSFILE
+fi

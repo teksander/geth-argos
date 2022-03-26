@@ -11,7 +11,7 @@
 # -l logs to be displayed      (string, geth, monitor.log, sc.csv, estimate.csv, etc. Default: geth )
 
 
-source experimentconfig_backup.sh
+source experimentconfig.sh
 
 tmux_ALL() {
 

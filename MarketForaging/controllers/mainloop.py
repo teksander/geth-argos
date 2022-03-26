@@ -1,6 +1,29 @@
 #!/usr/bin/env python3
 # This is the main control loop running in each argos robot
- 
+
+# /* Import Packages */
+#######################################################################
+import random, math, copy
+import time, sys, os
+import logging, threading
+from types import SimpleNamespace
+from collections import namedtuple
+
+experimentFolder = os.environ["EXPERIMENTFOLDER"]
+sys.path.insert(1, experimentFolder+'/controllers')
+sys.path.insert(1, experimentFolder+'/loop_functions')
+sys.path.insert(1, experimentFolder)
+
+from movement import RandomWalk, Navigate, Odometry
+from groundsensor import GroundSensor, ResourceVirtualSensor, Resource
+from erandb import ERANDB
+from rgbleds import RGBLEDs
+from console import *
+from aux import *
+from statemachine import *
+
+from loop_function_params import *
+from controller_params import *
 
 # /* Logging Levels for Console and File */
 #######################################################################
@@ -11,107 +34,60 @@ logtofile = False
 #######################################################################
 tcpPort = 5000 
 tcprPort = 6000 
-tcpkPort = 7000 
 erbDist = 175
 erbtFreq = 10
 gsFreq = 20
-rwSpeed = 350
-pcID = '100'
+rwSpeed = controller_params['scout_speed']
+navSpeed = controller_params['recruit_speed']
 
-estimateRate = 1
-bufferRate = 0.5 # reality is 0.25
+bufferRate = 0.5 
 peerSecurityRate = 1.5
-eventRate = 1
-globalPeers = 0
+globalPeers = False
 ageLimit = 2
 
+arena_size = float(os.environ["ARENADIM"])
+step_size = 1/float(os.environ["TPS"])
 
 # /* Global Variables */
 #######################################################################
-global startFlag, isbyz
+global startFlag
 startFlag = False
-isbyz = False
 
-global gasLimit, gasprice, gas
-gasLimit = 0x9000000
-gasprice = 0x900000
-gas = 0x90000
-
-global txList
+global peered, txList
+peered = set()
 txList = []
 
-# /* Import Packages */
-#######################################################################
-import random, math
-import sys
-import os
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-arena_size = float(os.environ["ARENADIM"])
-step_size = 1/float(os.environ["FPS"])
-sys.path.insert(1, experimentFolder+'/controllers')
-sys.path.insert(1, experimentFolder+'/loop_functions')
-sys.path.insert(1, experimentFolder)
-from loop_function_params import *
-import time
-import copy
-import logging
-import shutil
-import json 
-from types import SimpleNamespace
-from collections import namedtuple
-from aenum import Enum, auto
-
-from erandb import ERANDB
-from aux import *
-from console import *
-from randomwalk import RandomWalk, Navigate
-from groundsensor import GroundSensor, ResourceVirtualSensor
-from rgbleds import RGBLEDs
-from _thread import start_new_thread as thread
-import threading
-
-
-from loop_function_params import *
-
-# Some experiment variables
-global estimate, totalWhite, totalBlack
-estimate = 0
-totalWhite = 0
-totalBlack = 0
-
-global peered
-peered = set()
-
-global consensus, submodules, logmodules
+global submodules
 submodules = []
-logmodules = []
-consensus = False
 
-
-global clocks
+global clocks, counters, logs, txs
 clocks = dict()
+counters = dict()
+logs = dict()
+txs = dict()
 
 clocks['share'] = Timer(1)
 clocks['buffer'] = Timer(bufferRate)
+clocks['search'] = Timer(rate = 5)
 clocks['collect_resources'] = Timer(1)
 clocks['peer_check'] = Timer(peerSecurityRate)
 clocks['balance_check'] = Timer(1.5)
 clocks['query_resources'] = Timer(1)
-clocks['block'] = Timer(1)
+clocks['block'] = Timer(2)
+clocks['attempt'] = Timer(7)
 clocks['pay_fuel'] = Timer(10)
-clocks['explore'] = Timer(30)
+clocks['explore'] = Timer(1)
 clocks['homing'] = Timer(1)
+clocks['availiable'] = Timer(7)
+clocks['buy'] = Timer(controller_params['buy_duration'])
+clocks['double_check_tx_exists'] = Timer(5)
+clocks['wait_on_last'] = Timer(8)
+clocks['rs'] = Timer(0.02)
 
-global resource_utility
-resource_utility = resource_params['utilities']
 
-r = market_params['radius'] * math.sqrt(random.random())
-theta = 2 * math.pi * random.random()
-
-market_xn = r * math.cos(theta)     
-market_yn = r * math.sin(theta)   
-
-# global mainlogger
+# Store the position of the market
+market_js = {"x":0, "y":0, "radius":  market_params['radius'], "radius_dropoff": market_params['radius_dropoff']}
+market = Resource(market_js)
 
 def buffer(rate = bufferRate, ageLimit = ageLimit):
     """ Control routine for robot-to-robot dynamic peering """
@@ -122,29 +98,23 @@ def buffer(rate = bufferRate, ageLimit = ageLimit):
     for peer in peers:
         if peer not in peered:
             enode = tcp.request('localhost', tcpPort+int(peer)) 
-            # mainlogger.info('got enode: %s', enode)
+            # bufferlogger.info('Received enode: %s', enode)
 
             w3.geth.admin.addPeer(enode)
             peered.add(peer)
-
-            # mainlogger.info('Added peer: %s, enode: %s', peer, enode)
+            # bufferlogger.info('Added peer: %s, enode: %s', peer, enode)
 
     temp = copy.copy(peered)
 
     for peer in temp:
         if peer not in peers:
             enode = tcp.request('localhost', tcpPort+int(peer))
-
             w3.geth.admin.removePeer(enode)
-
             peered.remove(peer)
-            # mainlogger.info('Removed peer: %s', peer)
+            # robot.log.info('Removed peer: %s', peer)
 
 
-    # The following part is a security check:
-    # it determines if there are peers in geth that are
-    # not supposed to be there based on the information in the variable peered
-
+    # Double-check stale peers
     if clocks['peer_check'].query():
         gethPeers_enodes = getEnodes()
         gethPeers_ids = getIds(gethPeers_enodes)
@@ -175,44 +145,7 @@ def buffer(rate = bufferRate, ageLimit = ageLimit):
 
 # /* Initialize background daemon threads for the Main-Modules*/
 #######################################################################
-
-# estimateTh = threading.Thread(target=explore, args=())
-# # estimateTh.daemon = True   
-
-bufferTh = threading.Thread(target=buffer, args=())
-# # bufferTh.daemon = True                                              
-
-# Ignore mainmodules by removing from list:
-mainmodules = []
-
-class Resource(object):
-    """ Establish the resource class 
-    """
-    def __init__(self, resource_js):
-
-        # Default resource attrs: x, y, radius, quality, quantity
-        resource_dict = json.loads(resource_js)
-        for attr in resource_dict:
-            setattr(self, attr, resource_dict[attr])
-
-        # Calculate the total value of the resource
-        self.value = self.quantity * resource_utility[self.quality]
-        self.price = 0.5 * self.value
-
-        # Introduce the measurement error
-        r = self.radius * math.sqrt(random.random())
-        theta = 2 * math.pi * random.random()
-        self._xr = self.x + r * math.cos(theta)
-        self._yr = self.y + r * math.sin(theta)
-
-        # Introduce the timestamp
-        self._timeStamp = time.time()
-        self._isSold = False
-
-    @property
-    def _json(self):
-        public_vars = { k:v for k,v in vars(self).items() if not k.startswith('_')}
-        return str(public_vars).replace("\'", "\"")
+bufferTh = threading.Thread(target=buffer, args=())                                     
 
 
 class ResourceBuffer(object):
@@ -234,32 +167,30 @@ class ResourceBuffer(object):
     def getJSONs(self, idx = None):
         return {self.getJSON(res) for res in self.buffer}
 
-    def addResource(self, new_res):
+    def addResource(self, new_res, update_best = False):
         """ This method is called to add a new resource
         """   
         if isinstance(new_res, str):
-            resource = Resource(resource_js)
+            new_res = Resource(new_res)
 
         # Is in the buffer? NO -> Add to buffer
         if (new_res.x, new_res.y) not in self.getLocations():
             res = new_res
             self.buffer.append(res)
-            mainlogger.info("Added resource: %s; Total: %s " % (self.getJSON(res), len(self)))
+            robot.log.info("Added: %s; Total: %s " % (res._desc, len(self)))
 
         # Is in the buffer? YES -> Update buffer
         else:
             res = self.getResourceByLocation((new_res.x, new_res.y))
 
-            if new_res.quantity < res.quantity or new_res._timeStamp > res._timeStamp:
-                res = new_res
-                # res.quantity = new_res.quantity
-                # res.value = new_res.value
-                # res._timeStamp = new_res._timeStamp
+            # if new_res.quantity < res.quantity or new_res._timeStamp > res._timeStamp:
+            if new_res.quantity < res.quantity:
+                res.quantity = new_res.quantity
+                res._timeStamp = new_res._timeStamp
+                robot.log.info("Updated resource: %s" % self.getJSON(res))
 
-                # mainlogger.info("Updated resource: "+self.getJSON(res))
-
-        if res.quantity <= 0:
-                self.removeResource(res)
+        if update_best:
+            self.best = self.getResourceByLocation((new_res.x, new_res.y))
 
         return res
 
@@ -268,7 +199,7 @@ class ResourceBuffer(object):
             newPeer is the new peer object
         """   
         self.buffer.remove(resource)
-        mainlogger.info("Removed resource: "+self.getJSON(resource))
+        robot.log.info("Removed resource: "+self.getJSON(resource))
 
     def __len__(self):
         return len(self.buffer)
@@ -279,9 +210,9 @@ class ResourceBuffer(object):
             if by == 'timeStamp':
                 pass
             elif by == 'value':
-                self.buffer.sort(key=lambda x: x.value, reverse=True)
+                self.buffer.sort(key=lambda x: x.utility, reverse=True)
         else:
-            return self.buffer.sort(key=lambda x: x.value, reverse=True)
+            return self.buffer.sort(key=lambda x: x.utility, reverse=True)
 
 
     def getCount(self):
@@ -291,10 +222,10 @@ class ResourceBuffer(object):
         return [getattr(res, attr) for res in self.buffer] 
 
     def getValues(self):
-        return [res.quantity*res.price for res in self.buffer]
+        return [res.quantity*res.utility for res in self.buffer]
 
-    def getPrices(self):
-        return [res.price for res in self.buffer]
+    def getUtilities(self):
+        return [res.utility for res in self.buffer]
 
     def getQuantities(self):
         return [res.age for res in self.buffer]
@@ -326,109 +257,112 @@ class ResourceBuffer(object):
     def getResourceByValue(self, value):
         return self.buffer[self.getValues().index(value)]
 
-    def getPCs(self):
-        # Algorithm for best resource decision making goes here
-        # return self.buffer[0]
+    # def getPCs(self):
+    #     # Algorithm for best resource decision making goes here
+    #     # return self.buffer[0]
 
-        # dists_to_market = self.getDistances(0,0) 
-        # return self.buffer[dists_to_market.index(min(dists_to_market))]
-        # my_x = robot.position.get_position()[0]
-        # my_y = robot.position.get_position()[1]
+    #     # dists_to_market = self.getDistances(0,0) 
+    #     # return self.buffer[dists_to_market.index(min(dists_to_market))]
+    #     # my_x = robot.position.get_position()[0]
+    #     # my_y = robot.position.get_position()[1]
 
-        # print(len(self))
-        Qp = self.getPrices()
-        Qc_m = [2*distance/arena_size for distance in self.getDistances(0,0)]
-        # Qc_r = [100*distance/arena_size * 0.3 for distance in self.getDistances(my_x,my_y)]
-        # print(Qp, Qc_r, Qc_m) res.price - 2*
-        Pc = [x-y for x, y in zip(Qp,Qc_m)]
-        return Pc
+    #     # print(len(self))
+    #     Qp = self.getUtilities()
+    #     Qc_m = [2*distance/arena_size for distance in self.getDistances(0,0)]
+    #     # Qc_r = [100*distance/arena_size * 0.3 for distance in self.getDistances(my_x,my_y)]
+    #     # print(Qp, Qc_r, Qc_m) res.price - 2*
+    #     Pc = [x-y for x, y in zip(Qp,Qc_m)]
+    #     return Pc
 
-    def getBestResource(self):
-        if self.buffer:
-            Pc = self.getPCs()
-            self.best = self.buffer[Pc.index(max(Pc))]
-            return self.best 
-        else: 
-            return None
+    # def getBestResource(self):
+    #     if self.buffer:
+    #         Pc = self.getPCs()
+    #         self.best = self.buffer[Pc.index(max(Pc))]
+    #         return self.best 
+    #     else: 
+    #         return None
 
+txList = []
 class Transaction(object):
 
-    def __init__(self, txHash, tx = None, txReceipt = None):
-        self.txHash = txHash
-        self.tx = tx
-        self.txReceipt = txReceipt
+    def __init__(self, txHash, name = "", query_latency = 2):
+        self.name      = name
+        self.tx        = None
+        self.hash      = txHash
+        self.receipt   = None
+        self.fail      = False
+        self.block     = w3.eth.blockNumber()
+        self.last      = 0
+        self.timer     = Timer(query_latency)
 
-class TransactionBuffer(object):
-    """ Establish the transaction buffer class 
-    """
+        if self.hash:
+            self.getTransaction()
+        txList.append(self)
 
-    def __init__(self):
-        self.buffer = []
+    def query(self, min_confirmations = 0):
+        confirmations = 0
 
-    def addTransaction(self, txHash):
+        if not self.hash:
+            return False
 
-        if txHash not in self.getHashes():
+        if self.timer.query():
+            self.getTransaction()
+            self.getTransactionReceipt()
+            self.block = w3.eth.blockNumber()
 
-            tx = w3.eth.getTransaction(txHash)
-            txReceipt = w3.eth.getTransactionReceipt(txHash)
+        if not self.tx:
+            robot.log.warning('Failed: not found')
+            self.fail = True
+            return False
 
-            self.buffer.append(Transaction(txHash, tx, txReceipt))
+        elif not self.receipt:
+            return False
+
+        elif not self.receipt['status']:
+            robot.log.warning('Failed: Status 0')
+            self.fail = True
+            return False
+
         else:
-            print("tx already in buffer")
+            confirmations = self.block - self.receipt['blockNumber']
 
-    def getHashes(self):
-        return [tx.hash for tx in self.buffer]
+            if self.last < confirmations:
+                self.last = confirmations
+                robot.log.info('Confirming: %s/%s', confirmations, min_confirmations)
+                
+            if confirmations >= min_confirmations:
+                self.last = 0
+                return True
+            else:
+                return False
 
-    def update(self):
-        for tx in self.buffer:
-            if not tx.txReceipt:
-                tx.txReceipt = w3.eth.getTransactionReceipt(txHash)
+    def getTransactionReceipt(self):
+        try:
+            self.receipt = w3.eth.getTransactionReceipt(self.hash)
+        except Exception as e:
+            self.receipt = None
 
-
-class Idle(Enum):
-    IDLE = 1
-
-class Scout(Enum):
-    SELL = 2
-    EXPLORE = 3
-    HOMING = 4
-
-class Recruit(Enum):
-    BUY = 5
-    FORAGE = 6
-    HOMING = 7
-
-class FiniteStateMachine(object):
-
-    def __init__(self):
-        self._currState = Idle.IDLE
-    
-    def getState(self):
-        return self._currState
-
-    def setState(self, state, message = ""):
-        robot.epuck_wheels.set_speed(0,0)
-
-        if message != None:
-            mainlogger.info("%s -> %s | %s", self._currState, state, message)
-
-        self._currState = state
-    
-    def query(self, state):
-        return self._currState == state
+    def getTransaction(self):
+        try:
+            self.tx = w3.eth.getTransaction(self.hash)
+        except Exception as e:
+            self.tx = None
 
 ####################################################################################################################################################################################
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks, me, nav, rb, w3, gs, rs, erb, tcp, tcpr, rgb, mainlogger, estimatelogger, bufferlogger, eventlogger, votelogger, bufferlog, resourcelog, extralog, submodules, logmodules 
+    global clocks, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robot.variables.set_attribute("id", str(robotID))
     robot.variables.set_consensus(False) 
     robot.variables.set_attribute("newResource", "")
+    robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("collectResource", "")
+    robot.variables.set_attribute("dropResource", "")
     robot.variables.set_attribute("hasResource", "")
     robot.variables.set_attribute("resourceCount", "0")
+    robot.variables.set_attribute("state", "")
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
@@ -438,27 +372,24 @@ def init():
     monitor_file =  log_folder + 'monitor.log'
     os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
     logging.basicConfig(filename=monitor_file, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
-
-    # Experiment data logs (recorded to file)
-
-    header = ['COUNT']
-    log_filename = log_folder + 'resource.csv'
-    resourcelog = Logger(log_filename, header, 5, ID = robotID)
     
+    # Experiment data logs (recorded to file)
+    name   =  'odometry.csv'
+    header = ['DIST']
+    logs['odometry'] = Logger(log_folder+name, header, 10, ID = robotID)
+
+    name   = 'resource.csv'
+    header = ['COUNT']
+    logs['resources'] = Logger(log_folder+name, header, 5, ID = robotID)
+
+    name   = 'buffer.csv'
     header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-    log_filename = log_folder + 'buffer.csv'
-    bufferlog = Logger(log_filename, header, 2, ID = robotID)
+    logs['buffer'] = Logger(log_folder+name, header, 2, ID = robotID)
    
-
-    # List of logmodules --> iterate .start() to start all; remove from list to ignore
-    logmodules = [bufferlog, resourcelog]
-
     # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    mainlogger = logging.getLogger('main')
+    robot.log = logging.getLogger('main')
     estimatelogger = logging.getLogger('estimate')
     bufferlogger = logging.getLogger('buffer')
-    eventlogger = logging.getLogger('events')
-    votelogger = logging.getLogger('voting')
 
     # List of logmodules --> specify submodule loglevel if desired
     logging.getLogger('main').setLevel(10)
@@ -468,307 +399,333 @@ def init():
     # /* Initialize Sub-modules */
     #######################################################################
     # # /* Init web3.py */
-    mainlogger.info('Initialising Python Geth Console...')
+    robot.log.info('Initialising Python Geth Console...')
     w3 = init_web3(robotID)
-    # w3.sc.functions.getAllowance().transact()
 
     # /* Init an instance of peer for this Pi-Puck */
     me = Peer(robotID, w3.enode, w3.key)
 
-    # /* Init an instance of peer for the monitor PC */
-    pc = Peer(pcID)
-
     # /* Init an instance of the buffer for peers  */
-    mainlogger.info('Initialising peer buffer...')
+    robot.log.info('Initialising peer buffer...')
     pb = PeerBuffer(ageLimit)
 
     # /* Init an instance of the buffer for resources  */
-    mainlogger.info('Initialising resource buffer...')
+    robot.log.info('Initialising resource buffer...')
     rb = ResourceBuffer()
 
     # /* Init TCP server for enode requests */
-    mainlogger.info('Initialising TCP server...')
+    robot.log.info('Initialising TCP server...')
     tcp = TCP_server(me.enode, 'localhost', tcpPort+int(me.id), unlocked = True)
 
-    # /* Init TCP server for key requests */
-    mainlogger.info('Initialising TCP server...')
-    tcpk = TCP_server(me.key, 'localhost', tcpkPort+int(me.id), unlocked = True)
-
     # /* Init TCP server for resource requests */
-    mainlogger.info('Initialising TCP server...')
+    robot.log.info('Initialising TCP server...')
     tcpr = TCP_server("None", 'localhost', tcprPort+int(me.id), unlocked = True)
 
     # /* Init E-RANDB __listening process and transmit function
-    mainlogger.info('Initialising RandB board...')
+    robot.log.info('Initialising RandB board...')
     erb = ERANDB(robot, erbDist, erbtFreq)
 
-    # /* Init Ground-Sensors, __mapping process and vote function */
-    mainlogger.info('Initialising ground-sensors...')
-    gs = GroundSensor(robot, gsFreq)
-
     #/* Init Resource-Sensors */
+    robot.log.info('Initialising resource sensor...')
     rs = ResourceVirtualSensor(robot)
 
     # /* Init Random-Walk, __walking process */
-    mainlogger.info('Initialising random-walk...')
-    robot.rw = RandomWalk(robot, rwSpeed)
+    robot.log.info('Initialising random-walk...')
+    rw = RandomWalk(robot, rwSpeed)
 
     # /* Init Navigation, __navigate process */
-    mainlogger.info('Initialising navigation...')
-    nav = Navigate(robot, 350)
+    robot.log.info('Initialising navigation...')
+    nav = Navigate(robot, navSpeed)
+
+    # /* Init Navigation, __navigate process */
+    robot.log.info('Initialising odometry...')
+    odo = Odometry(robot)
 
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
 
     # /* Init Finite-State-Machine */
-    robot.fsm = FiniteStateMachine()
+    fsm = FiniteStateMachine(robot, start = Idle.IDLE)
 
     # List of submodules --> iterate .start() to start all
-    submodules = [w3.geth.miner, tcp, tcpr, erb, gs]
+    submodules = [w3.geth.miner, tcp, tcpr, erb]
 
-bc_balance = 21
-balance = 0
-offer_decrease_rate = 0.02
-offer_increase_rate = 0.05
-offer_multiplier = 0.1
-explore_duration = 30
-explore_threshold = 15
-txReceipt = None
-txHash = None
-fuel_cost = 0 # economy_params['fuel_cost']
-txReceipt_fuel = None
-txHash_fuel = None
-current_resource = None
+    txs['sell'] = Transaction(None)
+    txs['buy']  = Transaction(None)
 
+#########################################################################################################################
+#### CONTROL STEP #######################################################################################################
+#########################################################################################################################
 
-####################################################################################################################################################################################
-#### CONTROL STEP ##################################################################################################################################################################
-####################################################################################################################################################################################
 def controlstep():
-    global current_resource, explore_duration, txReceipt_fuel,txHash_fuel, txReceipt, txHash, bc_balance, balance, state, startFlag, startTime, stepTimer, bufferTh, clocks
+    global clocks, counters, startFlag, startTime, bufferTh
 
-    # Actions to perform on the first step    
     if not startFlag:
 
+        ##########################
+        #### FIRST STEP ##########
+        ##########################
+
         startFlag = True 
-        stepTimer = startTime = time.time()
+        startTime = time.time()
 
-        mainlogger.info('--//-- Starting Experiment --//--')
+        robot.log.info('--//-- Starting Experiment --//--')
 
-        for module in logmodules+submodules+mainmodules:
+        for module in submodules:
             try:
                 module.start()
             except:
-                mainlogger.critical('Error Starting Module: %s', module)
+                robot.log.critical('Error Starting Module: %s', module)
+
+        for log in logs.values():
+            log.start()
 
         for clock in clocks.values():
             clock.reset()
 
-    # Actions to perform at every step
     else:
 
         ##########################
         #### SUB-MODULE STEPS ####
         ##########################
-        for module in [erb, rs]:
+
+        for module in [erb, rs, odo]:
             module.step()
 
-        if resourcelog.isReady():
-            resourcelog.log([len(rb)])
+        ##########################
+        #### LOG-MODULE STEPS ####
+        ##########################
+
+        if logs['resources'].isReady():
+            logs['resources'].log([len(rb)])
+
+        if logs['odometry'].isReady():
+            logs['odometry'].log([odo.getNew()])
 
         ###########################
         #### MAIN-MODULE STEPS ####
         ###########################
 
-        if clocks['buffer'].query():
+        if clocks['buffer'].query(): 
             if not bufferTh.is_alive():
                 bufferTh = threading.Thread(target=buffer)
                 bufferTh.start()
+
+        ##############################
+        #### STATE-MACHINE STEPS ####
+        ##############################
+
+        # Routines to be used in state machine steps:
+
+        def homing(to_drop = False):
+            # Navigate to the market
+
+            arrived = True
+
+            if to_drop:
+                if nav.get_distance_to((0,0)) < market.radius + 0.5* (market.radius_dropoff - market.radius):
+                    nav.avoid(move = True)
+                else:
+                    nav.navigate_with_obstacle_avoidance(market._pr)
+                    arrived = False
             else:
-                pass   
+                if nav.get_distance_to(market._pr) < 0.5*market.radius:           
+                    nav.avoid(move = True)
+                    
+                elif nav.get_distance_to(market._pr) < market.radius and len(peered) > 1:
+                    nav.avoid(move = True)
 
+                else:
+                    nav.navigate_with_obstacle_avoidance(market._pr)
+                    arrived = False
 
-        ##############################
-        #### STATE-SPECIFIC STEPS ####
-        ##############################
+            return arrived
+
+        def sensing():
+            if clocks['rs'].query(): 
+                resource = rs.getNew()
+                if resource:
+                    rb.addResource(resource)
+                    return resource
 
         #########################################################################################################
-        if robot.fsm.query(Idle.IDLE):
+        #### Idle.IDLE
+        #########################################################################################################
+        if fsm.query(Idle.IDLE):
 
-            clocks['explore'].reset()
-            robot.fsm.setState(Scout.EXPLORE)
-
+            # State transition: Scout.EXPLORE
+            explore_duration = random.gauss(controller_params['explore_mu'], controller_params['explore_sg'])
+            clocks['explore'].set(explore_duration)
+            fsm.setState(Scout.EXPLORE, message = "Duration: %.2f" % explore_duration)
 
         #########################################################################################################
+        #### Scout.EXPLORE
+        #########################################################################################################
 
-        # Exploration strategy. Non-homogeneous robots could have a better strategy
-        elif robot.fsm.query(Scout.EXPLORE):
+        elif fsm.query(Scout.EXPLORE):
 
-            # Perform random-walk step
-            robot.rw.random()
+            # Perform a random-walk 
+            rw.step()
 
-            # Collect resources from sensor
-            resource_js = rs.getNew()
-            
-            if resource_js:
-                resource = Resource(resource_js)
-                rb.addResource(resource)
+            # Look for resources
+            sensing()
 
+            # Transition state
             if clocks['explore'].query(reset = False):
 
-                rb.getBestResource()
+                # Sucess exploration: Sell
+                if rb.buffer:
+                    fsm.setState(Scout.SELL, message = "Found %s" % len(rb))
 
-                if len(rb) > 1:
-                    robot.fsm.setState(Scout.SELL, message = "Sell: found %s resources" % len(rb))
+                # Unsucess exploration: Buy
+                else:
+                    clocks['buy'].reset()
+                    fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
 
-                elif len(rb) == 1:
-                    robot.fsm.setState(Scout.HOMING, message = "Home: found %s resources" % len(rb))
-
-                else: 
-                    robot.fsm.setState(Recruit.BUY, message = "Buy: found %s resources" % len(rb))
-                                    
-                    
 
         #########################################################################################################
-        
-        # Selling strategy. Non-homogeneous robots could have a better strategy
-        elif robot.fsm.query(Scout.SELL):
-            
-            # Sell non-best resources and remove them from robot memory
-            if rb.buffer[-1] != rb.best:
-                resource = rb.buffer.pop(-1)
+        #### Scout.SELL
+        #########################################################################################################
+
+        elif fsm.query(Scout.SELL):
+
+            # Navigate to market
+            if fsm.query(Recruit.HOMING, previous = True):
+                homing(to_drop = True)
             else:
-                resource = rb.buffer.pop(-2)
+                homing()
 
-            try: 
-                w3.sc.functions.addResource(resource._json, 
-                                            int(resource.x * 100), 
-                                            int(resource.y * 100),
-                                            int(resource.quantity),
-                                            resource.quality,
-                                            int(resource.value),
-                                            int(resource.price),
-                                            10).transact()
+            # Sell resource information  
+            if rb.buffer:
+                resource = rb.buffer.pop(-1)
+                sellHash = w3.sc.functions.addResource(*resource._calldata).transact()
+                txs['sell'] = Transaction(sellHash)
+                robot.log.info('Selling: %s', resource._desc)
 
-                mainlogger.info('Sold: %s', resource._json)
+            # Transition state  
+            else:
+                if txs['sell'].query(3):
+                    txs['sell'] = Transaction(None)
+                    fsm.setState(Recruit.PLAN, message = "Sell success")
 
-            except Exception as e:
-                mainlogger.warning(e.args)
+                elif txs['sell'].fail == True:    
+                    txs['sell'] = Transaction(None)
+                    fsm.setState(Recruit.PLAN, message = "Sell failed")
 
-            # Once there is just best left; return home
-            if len(rb) == 1:
-                robot.fsm.setState(Scout.HOMING, message = "Kept: %s" % rb.buffer[0]._json)
+                elif txs['sell'].hash == None:
+                    fsm.setState(Recruit.PLAN, message = "None to sell")
+
 
         #########################################################################################################
-        
-        # Buying strategy. Non-homogeneous robots could have a better strategy
-        elif robot.fsm.query(Recruit.BUY):
+        #### Recruit.BUY  
+        #########################################################################################################
+
+        elif fsm.query(Recruit.BUY):
+
+            # Navigate home
+            homing()
+
+            if txs['buy'].query(3):
+                txs['buy'] = Transaction(None)
+                fsm.setState(Recruit.PLAN, message = "Buy success")
+
+            elif txs['buy'].fail == True:    
+                txs['buy'] = Transaction(None)
+                fsm.setState(Recruit.PLAN, message = "Buy failed")
+
+            elif txs['buy'].hash == None:
+
+                if clocks['block'].query():
+
+                    resources  = w3.sc.functions.getResources().call()
+                    availiable = [res for res in resources if 0 in [eval(x) for x in res[1]]]
+
+                    if availiable:
+                        try:
+                            txBuy = w3.sc.functions.buyResource().transact()
+                            txs['buy'] = Transaction(txBuy)
+                            robot.log.info('Bought')     
+
+                        except Exception as e:
+                            fsm.setState(Recruit.PLAN, message = "Buy failed")
+                            txs['buy'] = Transaction(None)
+                            robot.log.warning(e.args)
+                            
+            if clocks['buy'].query():
+                fsm.setState(Idle.IDLE, message = "Buy expired")
+
+        #########################################################################################################
+        #### Recruit.PLAN  
+        ######################################################################################################### 
+
+        elif fsm.query(Recruit.PLAN):
+
+            resource = w3.sc.functions.getMyResource().call()
+
+            if resource:
+                rb.addResource(resource, update_best = True)
+
+                if fsm.getPreviousState() == Recruit.FORAGE:
+                    fsm.setState(Recruit.FORAGE, message = None)
+                else:
+                    fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._desc)
+
+            else:
+                fsm.setState(Recruit.BUY, message = "Buy again")
+
+        #########################################################################################################
+        #### Recruit.FORAGE
+        #########################################################################################################
+        elif fsm.query(Recruit.FORAGE):
 
             if clocks['block'].query():
+                # Update foraging resource
+                fsm.setState(Recruit.PLAN, message = None)
 
-                resources = w3.sc.functions.getResources().call()
-
-                if resources:
-                    mainlogger.info('%s resources for sale', len(resources))
-
-
-                    if not txHash:
-                        try:
-                            txHash = w3.sc.functions.buyResource().transact({'value': w3.eth.getBalance(me.key) - w3.toWei(1, 'ether')})
-                            mainlogger.info('Transacted to buy resource')
-                        except Exception as e:
-                            mainlogger.info(e)
-
-                if txHash:
-                    try:
-                        txReceipt = w3.eth.getTransactionReceipt(txHash)
-                        mainlogger.info('Received receipt of purchase')
-                    except Exception as e:
-                        pass
-
-                if txReceipt:
-
-                    if txReceipt['status']:
-                        resource_js = w3.sc.functions.purchases(me.key).call()
-                        mainlogger.info('Bought resource: '+resource_js)                  
-                        rb.addResource(Resource(resource_js))
-                        robot.fsm.setState(Recruit.FORAGE, 'Foraging purchased resource')
-                    else:
-                        mainlogger.info('Bought resource but transaction failed')
-
-                    txReceipt = txHash = None
-
-            if clocks['explore'].query(reset = False):
-                robot.fsm.setState(Scout.HOMING, message = None)
-                
-        #########################################################################################################
-        elif robot.fsm.query(Scout.HOMING):
-
-            # Navigate to the market
-            nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
-            arrived = False
-
-            if nav.get_distance_to_target() < 0.6*market_params['radius']:           
-                arrived = True
-                
-
-            elif nav.get_distance_to_target() < 1.2*market_params['radius'] and len(peered) > 1:
-                arrived = True
-
-            # Once arrived at the market decide if forage or buy
-            if arrived:
-
-                if rb.buffer:
-                    rb.getBestResource()
-                    robot.fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._json)
-                else:
-                    robot.fsm.setState(Recruit.BUY, message = None)
-
-        #########################################################################################################
-        elif robot.fsm.query(Recruit.FORAGE):
-
-            # Do I have item? NO -> Go to forage
-            if not robot.variables.get_attribute("hasResource"):
-                nav.navigate_with_obstacle_avoidance((rb.best._xr, rb.best._yr))
-
-                if nav.get_distance_to_target() < rb.best.radius:
-                    robot.variables.set_attribute("collectResource", "True")
-                else:
-                    robot.variables.set_attribute("collectResource", "")
-
-                # if nav.get_distance_to_target() < 0.4 * rb.best.radius:       
-                #     # rb.removeResource(current_resource)
-                #     rb.removeResource(rb.best)
-
-            # Do I have item? YES -> Go to market
             else:
-                robot.fsm.setState(Recruit.HOMING)
+
+                # Resource virtual sensor
+                resource = sensing()
+
+                # Found the resource? YES -> Collect
+                if resource and resource._pos == rb.best._pos:
+                    robot.variables.set_attribute("collectResource", "True")
+                    robot.log.info('Collect: %s', resource._desc)        
+
+                # Collected resource? NO -> Navigate to resource site
+                if not robot.variables.get_attribute("hasResource"):
+                    nav.navigate_with_obstacle_avoidance(rb.best._pr)
+
+                    if nav.get_distance_to(rb.best._pr) < 0.1*rb.best.radius:
+                        rb.best.quantity = 0
+                        fsm.setState(Scout.SELL, message = 'Failed foraging trip')
+
+                # Collected resource? YES -> Go to market
+                else:
+                    fsm.setState(Recruit.HOMING)
 
 
         #########################################################################################################
-        elif robot.fsm.query(Recruit.HOMING):
+        #### Recruit.HOMING
+        #########################################################################################################
+        elif fsm.query(Recruit.HOMING):
 
-            nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
-            arrived = False
-
-            if nav.get_distance_to_target() < 0.6*market_params['radius']:
-                arrived = True
-
-            elif nav.get_distance_to_target() < 1.2*market_params['radius'] and len(peered) > 1:
-                arrived = True
+            # Navigate home
+            arrived = homing(to_drop = True)
 
             if arrived:
-                clocks['explore'].reset()
-                robot.fsm.setState(Scout.EXPLORE, message = 'Exploring: %ss' % explore_duration)
-                
+                robot.variables.set_attribute("dropResource", "True")
+                if not robot.variables.get_attribute("hasResource"):
+                    robot.variables.set_attribute("dropResource", "")
+                    robot.log.info('Dropped: %s', rb.best._desc)  
+                    fsm.setState(Scout.SELL, message = None)
 
-####################################################################################################################################################################################
-#### RESET ##################################################################################################################################################################
-####################################################################################################################################################################################
+#########################################################################################################################
+#### RESET-DESTROY STEPS ################################################################################################
+#########################################################################################################################
 
 def reset():
     pass
-
 
 def destroy():
     if startFlag:
@@ -777,95 +734,19 @@ def destroy():
         for enode in getEnodes():
             w3.geth.admin.removePeer(enode)
 
+    variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
+    with open(variables_file, 'w+') as vf:
+        vf.write(repr(fsm.getTimers())) 
+
     print('Killed robot '+ me.id)
-    # STOP()
 
+#########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
 
-def START(modules = submodules, logs = logmodules):
-    global startFlag, startTime
-    startTime = time.time()
-
-    mainlogger.info('Starting Experiment')
-
-    for log in logs:
-        try:
-            log.start()
-        except:
-            mainlogger.critical('Error Starting Log: %s', log)
-
-    startFlag = True 
-    for module in modules:
-        try:
-            module.start()
-        except:
-            mainlogger.critical('Error Starting Module: %s', module)
-
-def STOP(modules = submodules, logs = logmodules):
-    mainlogger.info('Stopping Experiment')
-    global startFlag
-
-    mainlogger.info('--/-- Stopping Main-modules --/--')
-    startFlag = False
-    time.sleep(1.5)
-
-    mainlogger.info('--/-- Stopping Sub-modules --/--')
-    for submodule in modules:
-        try:
-            submodule.stop()
-        except:
-            mainlogger.warning('Error stopping submodule')
-
-    for log in logs:
-        try:
-            log.close()
-        except:
-            mainlogger.warning('Error Closing Logfile')
-            
-    if isbyz:
-        pass
-        mainlogger.info('This Robot was BYZANTINE')
-
-    txlog.start()
-    
-    for txHash in txList:
-
-        try:
-            tx = w3.eth.getTransaction(txHash)
-        except:
-            txlog.log(['Lost'])
-        else:
-            try:
-                txRecpt = w3.eth.getTransactionReceipt(txHash)
-                mined = 'Yes' 
-                txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
-            except:
-                mined = 'No' 
-                txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
-
-    txlog.close()
-
-
-# /* Some useful functions */
-#######################################################################
-
-# def getBalance():
-#     return round(w3.fromWei(w3.eth.getBalance(me.key), 'ether'), 2)
-
-# def getDiffEnodes(gethEnodes = None):
-#     if gethEnodes:
-#         return set(gethEnodes)-set(pb.getEnodes())-{me.enode}
-#     else:
-#         return set(getEnodes())-set(pb.getEnodes())-{me.enode}
-
-# def getDiff(gethIds = None):
-#     if gethIds:
-#         return set(gethIds)-set(pb.getIds())-{me.id}
-#     else:
-#         return set(getIds())-set(pb.getIds())-{me.enode}
 
 def getEnodes():
     return [peer['enode'] for peer in w3.geth.admin.peers()]
-    # return [peer['enode'] for peer in w3.getPeers()]
 
 def getEnodeById(__id, gethEnodes = None):
     if not gethEnodes:
@@ -875,7 +756,6 @@ def getEnodeById(__id, gethEnodes = None):
         if readEnode(enode, output = 'id') == __id:
             return enode
 
-
 def getIds(__enodes = None):
     if __enodes:
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
@@ -883,94 +763,69 @@ def getIds(__enodes = None):
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
 
 
-#### #### #### #### #### #### #### #### #### #### #### #### #### 
+# def START(modules = submodules, logs = logmodules):
+#     global startFlag, startTime
+#     startTime = time.time()
 
-# enode = enodesExtract(peer, query = 'ENODE')
-def enodesExtract(robotID, query = 'ENODE'):
-    namePrefix = str(robotID)
-    enodesFile = open('enodes.txt', 'r')
-    for line in enodesFile.readlines():
-        if line.__contains__(namePrefix):
-                temp = line.split()[-1]
-                return temp[1:-1]
+#     robot.log.info('Starting Experiment')
 
-############## BACKUPS
+#     for log in logs:
+#         try:
+#             log.start()
+#         except:
+#             robot.log.critical('Error Starting Log: %s', log)
 
- ##### COLLECTION OF RESOURCE INFORMATION #####
-        
+#     startFlag = True 
+#     for module in modules:
+#         try:
+#             module.start()
+#         except:
+#             robot.log.critical('Error Starting Module: %s', module)
 
-        # # Collect resource data from the virtual sensor
-        # if clocks['collect_resources'].query():
-        #     resource_js = rs.getNew()
-        #     if resource_js:
-        #         # mainlogger.debug('Got resources from sensor:'+resource_js) 
-        #         rb.addResource(resource_js)
-        
-        # if clocks['share'].query():
-        #     mainlogger.critical(rb.getJSONs())
+# def STOP(modules = submodules, logs = logmodules):
+#     robot.log.info('Stopping Experiment')
+#     global startFlag
 
-        #     # Collect resource data from peers
-        #     if rb.getCount() < 1:
-        #         for peer_id, count, _, _ in erb.getData():
-        #             resource_js = tcpr.request('localhost', tcprPort+int(peer_id))
+#     robot.log.info('--/-- Stopping Main-modules --/--')
+#     startFlag = False
 
-        #             if resource_js and resource_js != 'None':
-        #                 # mainlogger.debug("Got resource from peer:"+resource_js)
-        #                 rb.addResource(resource_js)
+#     robot.log.info('--/-- Stopping Sub-modules --/--')
+#     for submodule in modules:
+#         try:
+#             submodule.stop()
+#         except:
+#             robot.log.warning('Error stopping submodule')
 
-        #     # Share resource data to peers
+#     for log in logs:
+#         try:
+#             log.close()
+#         except:
+#             robot.log.warning('Error Closing Logfile')
+            
+#     if isbyz:
+#         pass
+#         robot.log.info('This Robot was BYZANTINE')
 
-        #     if rb.getCount() > 0:
-        #         if rb.buffer[0].quantity > 3:
-        #             resource_js = rb.getJSON(rb.buffer[0])
-        #             if tcpr.getData() != resource_js:
-        #                 mainlogger.debug("Sharing Resource "+resource_js)
-        #                 tcpr.setData(resource_js)
+#     txlog.start()
+    
+#     for txHash in txList:
+
+#         try:
+#             tx = w3.eth.getTransaction(txHash)
+#         except:
+#             txlog.log(['Lost'])
+#         else:
+#             try:
+#                 txRecpt = w3.eth.getTransactionReceipt(txHash)
+#                 mined = 'Yes' 
+#                 txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
+#             except:
+#                 mined = 'No' 
+#                 txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
+
+#     txlog.close()
 
 
-        # ###### NAVIGATION DECISION MAKING ######
-
-        # # Do I have food? YES -> Go to market
-        # if robot.variables.get_attribute("hasResource"):
-        #     nav.navigate_with_obstacle_avoidance((market_xn,market_yn))
 
 
-        # # Do I have food? NO 
-        # else:
 
-        #     # Should I explore more?
-
-        #     # Do I know location? NO -> Random-walk
-        #     if not rb.buffer:
-        #         EXPLORE = True
-
-        #     # Do I know location? YES -> Foraging Strategy
-        #     if rb.buffer and EXPLORE:
-        #         EXPLORE = False
-        #         # if time_exploring > exploration_period:
-
-        #         #     best_res = rb.getBestResource()
-
-        #         #     Pc = resource_price[best_res.quality]*0.5 - 100*math.sqrt((-best_res.x)**2 + (-best_res.y)**2)/arena_size * 0.2 + 100*(1-math.exp(-time_exploring/tau))
-        #         #     # EXPLORE = random.choices([True, False], [100-Pc, Pc])[0]
-        #         #     EXPLORE = False
-        #         #     # print(Pc)
-        #         #     time_exploring = 0
-
-        #     if EXPLORE:
-        #         time_exploring += 0.1
-        #         robot.rw.random()
-
-        #     else:
-        #         # best_res = rb.getBestResource()
-        #         best_res = rb.buffer[-1]
-        #         nav.navigate_with_obstacle_avoidance((best_res.xn, best_res.yn))
-
-        #         if nav.distance_to_target() < best_res.radius:
-        #             robot.variables.set_attribute("collectResource", "True")
-        #         else:
-        #             robot.variables.set_attribute("collectResource", "")
-
-        #         if nav.distance_to_target() < 0.5 * best_res.radius:
-        #             rb.removeResource(best_res)
-        #             EXPLORE = True
