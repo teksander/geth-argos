@@ -42,7 +42,7 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXRECRUITS=4
+export MAXRECRUITS=2
 
 # [OTHER]
 export SEED=350
