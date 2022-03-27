@@ -1,46 +1,26 @@
 % Encoding: ISO-8859-1
-
 @string{aamas2010 = {Proceedings of the 9th International Conference on Autonomous Agents and MultiAgent Systems (AAMAS 2010)}}
-
 @string{aamas2014 = {Proceedings of the 13th International Conference on Autonomous Agents and MultiAgent Systems (AAMAS 2014)}}
-
 @string{aamas2018 = {Proceedings of the 17th International Conference on Autonomous Agents and MultiAgent Systems (AAMAS 2018)}}
-
 @string{acmtaas = {ACM Transactions on Autonomous and Adaptive Systems}}
-
 @string{ants2016 = {Swarm Intelligence -- Proceedings of ANTS 2016 -- Tenth International Conference}}
-
 @string{ants2018 = {Swarm Intelligence -- Proceedings of ANTS 2018 -- Eleventh International Conference}}
-
 @string{autrob = {Autonomous Robots}}
-
 @string{lncs = {Lecture Notes in Computer Science}}
-
 @string{aisc = {Advances in Intelligent Systems and Computing}}
-
 @string{ieee = {IEEE Press}}
-
 @string{oup-n = {Oxford University Press}}
-
 @string{oup-n-ad = {New York}}
-
 @string{plos = {PLOS ONE}}
-
 @string{science = {Science}}
-
 @string{si = {Swarm Intelligence}}
-
 @string{springer-lncs = {Springer}}
-
 @string{springer-ad = {Cham, Switzerland}}
-
 @string{ifaamas = {International Foundation for Autonomous Agents and Multiagent Systems}}
-
 @string{ifaamas-ad = {Richland, SC, USA}}
-
 @string{taros2013 = {Towards Autonomous Robotic Systems - Proceedings of TAROS 2013 - 14th Annual Conference}}
 
-@Online{solitidy:online,
+@Online{solidity_online,
   author        = {{Ethereum}},
   title         = {Solidity documentation},
   year          = {2017},
@@ -50,7 +30,7 @@
   urldate       = {2017-10-13},
 }
 
-@Online{ethereum:online,
+@Online{ethereum_online,
   author        = {{Ethereum Foundation (Stiftung Ethereum)}},
   title         = {Ethereum Project},
   year          = {2017},
@@ -59,32 +39,12 @@
   urldate       = {2017-10-22},
 }
 
-@techreport{Nak2008:techreport,
+@Online{bitcoin_online,
   author        = {Satoshi Nakamoto},
   title         = {Bitcoin: {A} peer-to-peer electronic cash system},
   year          = {2008},
   __markedentry = {[volker:6]},
-  abstract      = {A purely peer-to-peer version of electronic cash would allow online
-payments to be sent directly from one party to another without going through a
-financial institution. Digital signatures provide part of the solution, but the main
-benefits are lost if a trusted third party is still required to prevent double-spending.
-We propose a solution to the double-spending problem using a peer-to-peer network.
-The network timestamps transactions by hashing them into an ongoing chain of
-hash-based proof-of-work, forming a record that cannot be changed without redoing
-the proof-of-work. The longest chain not only serves as proof of the sequence of
-events witnessed, but proof that it came from the largest pool of CPU power. As
-long as a majority of CPU power is controlled by nodes that are not cooperating to
-attack the network, they'll generate the longest chain and outpace attackers. The
-network itself requires minimal structure. Messages are broadcast on a best effort
-basis, and nodes can leave and rejoin the network at will, accepting the longest
-proof-of-work chain as proof of what happened while they were gone.},
-  bdsk-url-1    = {https://bitcoin.org/bitcoin.pdf},
-  file          = {:Nak2008techreport.pdf:PDF},
-  groups        = {FRIA-proposal, Blockchain},
-  keywords      = {read},
-  owner         = {volker},
-  timestamp     = {2016-10-04},
-  note           = {\url{https://bitcoin.org/bitcoin.pdf}, Accessed Aug. 11, 2018},
+  url           = {https://bitcoin.org/bitcoin.pdf},
   urldate       = {2016-09-10},
 }
 
@@ -127,6 +87,85 @@ proof-of-work chain as proof of what happened while they were gone.},
   keywords      = {skimmed},
   note= {\url{http://gavwood.com/paper.pdf}, Accessed Jul. 18, 2019},
   urldate       = {2016-11-14},
+}
+
+@article{StrCasDor2020_frontiers,
+author={Strobel, Volker and Castelló Ferrer, Eduardo and Dorigo, Marco},   
+title={Blockchain Technology Secures Robot Swarms: {A} Comparison of Consensus Protocols and Their Resilience to {B}yzantine Robots},      
+journal={Frontiers in Robotics and AI},      
+volume={7},      
+pages={54},     
+year={2020},
+doi={10.3389/frobt.2020.00054}  
+}
+
+@inproceedings{pitonakova_understanding_2014,
+	title = {Understanding the {Role} of {Recruitment} in {Collective} {Robot} {Foraging}},
+	url = {https://direct.mit.edu/isal/article/doi/10.1162/978-0-262-32621-6-ch043/99004/Understanding-the-Role-of-Recruitment-in},
+	doi = {10.1162/978-0-262-32621-6-ch043},
+	language = {en},
+	urldate = {2021-11-05},
+	publisher = {MIT Press},
+	author = {Pitonakova, Lenka and Crowder, Richard and Bullock, Seth},
+	month = jul,
+	year = {2014},
+	pages = {264--271},
+	file = {Full Text PDF:/home/eksander/Zotero/storage/SX5IHU7G/Pitonakova et al. - 2014 - Understanding the Role of Recruitment in Collectiv.pdf:application/pdf;Snapshot:/home/eksander/Zotero/storage/L2TFNQ68/99004.html:text/html},
+}
+
+@article{pitonakova_icr_2018,
+	title = {The {Information}-{Cost}-{Reward} framework for understanding robot swarm foraging},
+	volume = {12},
+	issn = {1935-3820},
+	url = {https://doi.org/10.1007/s11721-017-0148-3},
+	doi = {10.1007/s11721-017-0148-3},
+	abstract = {Demand for autonomous swarms, where robots can cooperate with each other without human intervention, is set to grow rapidly in the near future. Currently, one of the main challenges in swarm robotics is understanding how the behaviour of individual robots leads to an observed emergent collective performance. In this paper, a novel approach to understanding robot swarms that perform foraging is proposed in the form of the Information-Cost-Reward (ICR) framework. The framework relates the way in which robots obtain and share information (about where work needs to be done) to the swarmâ€™s ability to exploit that information in order to obtain reward efficiently in the context of a particular task and environment. The ICR framework can be applied to analyse underlying mechanisms that lead to observed swarm performance, as well as to inform hypotheses about the suitability of a particular robot control strategy for new swarm missions. Additionally, the information-centred understanding that the framework offers paves a way towards a new swarm design methodology where general principles of collective robot behaviour guide algorithm design.},
+	language = {en},
+	number = {1},
+	urldate = {2021-12-01},
+	journal = {Swarm Intelligence},
+	author = {Pitonakova, Lenka and Crowder, Richard and Bullock, Seth},
+	month = mar,
+	year = {2018},
+	pages = {71--96},
+	file = {Springer Full Text PDF:/home/eksander/Zotero/storage/GXVNPKY3/Pitonakova et al. - 2018 - The Information-Cost-Reward framework for understa.pdf:application/pdf},
+}
+
+@inproceedings{pacheco_ants_2020,
+	address = {Cham},
+	series = {Lecture {Notes} in {Computer} {Science}},
+	title = {A {Blockchain}-{Controlled} {Physical} {Robot} {Swarm} {Communicating} via an {Ad}-{Hoc} {Network}},
+	isbn = {978-3-030-60376-2},
+	doi = {10.1007/978-3-030-60376-2\_1},
+	abstract = {We present a robot swarm composed of Pi-puck robots that maintain a blockchain network. The blockchain serves as security layer to neutralize Byzantine robots (faulty, malfunctioning, or malicious robots). In the context of this work, we implemented a framework for high-throughput communication using a decentralized mobile ad-hoc network. This work serves as a building block for secure real-world deployments of robot swarms. Our results show that the use of a blockchain is feasible and warranted in embodied robot swarm deployments.},
+	language = {en},
+	booktitle = {Swarm {Intelligence}},
+	publisher = {Springer International Publishing},
+	author = {Pacheco, Alexandre and Strobel, Volker and Dorigo, Marco},
+	editor = {Dorigo, Marco and StÃ¼tzle, Thomas and Blesa, Maria J. and Blum, Christian and Hamann, Heiko and Heinrich, Mary Katherine and Strobel, Volker},
+	year = {2020},
+	pages = {3--15},
+	file = {Springer Full Text PDF:/home/eksander/Zotero/storage/8BE7EJYB/Pacheco et al. - 2020 - A Blockchain-Controlled Physical Robot Swarm Commu.pdf:application/pdf},
+}
+
+@techreport{PacStrDor2020_techreport,
+  author={Alexandre Pacheco and Volker Strobel and Marco Dorigo},
+  title={A Framework for Swarm Robotics Experimentation with {Pi-puck} Robots and an {E}thereum-based Blockchain},
+  institution={IRIDIA, Universit{\'e} Libre de Bruxelles},
+  year={2020},
+  number={TR/IRIDIA/2020-001},
+  address={Brussels, Belgium},
+  month={}
+}
+
+
+@Online{poa:online,
+  author        = {Péter Szilágyi},
+  title         = {{EIP} 225: Clique proof-of-authority consensus protocol},
+  year          = {2017},
+  url           = {https://github.com/ethereum/EIPs/issues/225},
+  note = {{A}ccessed May 10, 2020},
+  urldate       = {2020-04-04},
 }
 
 @Online{Atz2016:ssrn,
@@ -1487,34 +1526,6 @@ doi={10.1109/P2P.2006.10}
   publisher={Elsevier}
 }
 
-@article{StrCasDor2020:frontiers,
-author={Strobel, Volker and Castelló Ferrer, Eduardo and Dorigo, Marco},   
-title={Blockchain Technology Secures Robot Swarms: {A} Comparison of Consensus Protocols and Their Resilience to {B}yzantine Robots},      
-journal={Frontiers in Robotics and AI},      
-volume={7},      
-pages={54},     
-year={2020},
-doi={10.3389/frobt.2020.00054}  
-}
-
-@Online{poa:online,
-  author        = {Péter Szilágyi},
-  title         = {{EIP} 225: Clique proof-of-authority consensus protocol},
-  year          = {2017},
-  url           = {https://github.com/ethereum/EIPs/issues/225},
-  note = {{A}ccessed May 10, 2020},
-  urldate       = {2020-04-04},
-}
-
-@techreport{PacStrDor2020:techreport-001,
-  author={Alexandre Pacheco and Volker Strobel and Marco Dorigo},
-  title={A Framework for Swarm Robotics Experimentation with {Pi-puck} Robots and an {E}thereum-based Blockchain},
-  institution={IRIDIA, Universit{\'e} Libre de Bruxelles},
-  year={2020},
-  number={TR/IRIDIA/2020-001},
-  address={Brussels, Belgium},
-  month={}
-}
 
 @article{QueWes2019:arxiv,
   Author = {Jorge Peña Queralta and Tomi Westerlund},
