@@ -5,5 +5,5 @@ source ../experimentconfig.sh
 DATAFOLDER="$EXPERIMENTFOLDER/results/data/"
 
 # From server in Alex's office to Alex's Intel NUC
-tar cvzf export_data.tar.gz $DATAFOLDER/
-scp export_data.tar.gz eksander@esme:/$DATAFOLDER/
+cd data
+tar -zc * | ssh eksander@esme "cat > $DATAFOLDER/data-import.tar.gz"
