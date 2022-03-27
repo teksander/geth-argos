@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant max_recruits = 4;
+  uint constant max_recruits = 5;
 
     struct resource {
     address scout;

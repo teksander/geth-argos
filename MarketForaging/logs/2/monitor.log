@@ -1,108 +1,48 @@
-[2 INFO main 43] Initialising Python Geth Console...
-[2 INFO main 48] Initialising peer buffer...
-[2 INFO main 48] Initialising resource buffer...
-[2 INFO main 48] Initialising TCP server...
-[2 INFO main 48] Initialising TCP server...
-[2 INFO main 48] Initialising RandB board...
-[2 INFO main 48] Initialising resource sensor...
-[2 INFO main 48] Initialising random-walk...
-[2 INFO main 48] Initialising navigation...
-[2 INFO main 48] Initialising odometry...
-[2 INFO main 2185] --//-- Starting Experiment --//--
-[2 INFO main 2288] Idle.IDLE -> Scout.EXPLORE | Duration: 39.94
-[2 INFO main 42303] Scout.EXPLORE -> Recruit.BUY | Found 0
-[2 INFO main 71114] Bought
-[2 INFO main 72309] Recruit.BUY -> Idle.IDLE | Buy expired
-[2 INFO main 72402] Idle.IDLE -> Scout.EXPLORE | Duration: 41.92
-[2 INFO main 114402] Scout.EXPLORE -> Recruit.BUY | Found 0
-[2 INFO main 114570] Confirming: 15/3
-[2 INFO main 114576] Recruit.BUY -> Recruit.PLAN | Buy success
-[2 INFO main 114687] Added: {1.19, -0.03, red, 15}; Total: 1 
-[2 INFO main 114688] Recruit.PLAN -> Recruit.FORAGE | Foraging: {1.19, -0.03, red, 15}
-[2 INFO main 123761] Added: {0.54, 0.98, blue, 13}; Total: 2 
-[2 INFO main 155545] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 13, "quality": "red", "utility": 2}
-[2 INFO main 155545] Collect: {1.19, -0.03, red, 13}
-[2 INFO main 155849] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 12, "quality": "red", "utility": 2}
-[2 INFO main 155849] Collect: {1.19, -0.03, red, 12}
-[2 INFO main 155849] Recruit.FORAGE -> Recruit.HOMING | 
-[2 INFO main 178312] Dropped: {1.19, -0.03, red, 12}
-[2 INFO main 178429] Selling: {0.54, 0.98, blue, 13}
-[2 INFO main 178534] Selling: {1.19, -0.03, red, 12}
-[2 INFO main 195034] Confirming: 1/3
-[2 INFO main 201148] Confirming: 2/3
-[2 INFO main 203141] Confirming: 3/3
-[2 INFO main 203142] Scout.SELL -> Recruit.PLAN | Sell success
-[2 INFO main 203237] Added: {1.19, -0.03, red, 12}; Total: 1 
-[2 INFO main 203237] Recruit.PLAN -> Recruit.FORAGE | Foraging: {1.19, -0.03, red, 12}
-[2 INFO main 231755] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 10, "quality": "red", "utility": 2}
-[2 INFO main 243083] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 9, "quality": "red", "utility": 2}
-[2 INFO main 243083] Collect: {1.19, -0.03, red, 9}
-[2 INFO main 243189] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 8, "quality": "red", "utility": 2}
-[2 INFO main 243190] Collect: {1.19, -0.03, red, 8}
-[2 INFO main 243190] Recruit.FORAGE -> Recruit.HOMING | 
-[2 INFO main 273012] Dropped: {1.19, -0.03, red, 8}
-[2 INFO main 273133] Selling: {1.19, -0.03, red, 8}
-[2 INFO main 279292] Confirming: 1/3
-[2 INFO main 281416] Confirming: 2/3
-[2 INFO main 283481] Confirming: 4/3
-[2 INFO main 283488] Scout.SELL -> Recruit.PLAN | Sell success
-[2 INFO main 283558] Added: {1.19, -0.03, red, 8}; Total: 1 
-[2 INFO main 283558] Recruit.PLAN -> Recruit.FORAGE | Foraging: {1.19, -0.03, red, 8}
-[2 INFO main 309435] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 5, "quality": "red", "utility": 2}
-[2 INFO main 309435] Collect: {1.19, -0.03, red, 5}
-[2 INFO main 309541] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 4, "quality": "red", "utility": 2}
-[2 INFO main 309542] Collect: {1.19, -0.03, red, 4}
-[2 INFO main 309542] Recruit.FORAGE -> Recruit.HOMING | 
-[2 INFO main 331193] Dropped: {1.19, -0.03, red, 4}
-[2 INFO main 331321] Selling: {1.19, -0.03, red, 4}
-[2 INFO main 345594] Confirming: 1/3
-[2 INFO main 347674] Confirming: 2/3
-[2 INFO main 351736] Confirming: 4/3
-[2 INFO main 351741] Scout.SELL -> Recruit.PLAN | Sell success
-[2 INFO main 351876] Added: {1.19, -0.03, red, 4}; Total: 1 
-[2 INFO main 351876] Recruit.PLAN -> Recruit.FORAGE | Foraging: {1.19, -0.03, red, 4}
-[2 INFO main 394669] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 3, "quality": "red", "utility": 2}
-[2 INFO main 411943] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 1, "quality": "red", "utility": 2}
-[2 INFO main 411943] Collect: {1.19, -0.03, red, 1}
-[2 INFO main 412043] Updated resource: {"x": 1.19, "y": -0.03, "radius": 0.16, "quantity": 0, "quality": "red", "utility": 2}
-[2 INFO main 412043] Collect: {1.19, -0.03, red, 0}
-[2 INFO main 412043] Recruit.FORAGE -> Recruit.HOMING | 
-[2 INFO main 442699] Dropped: {1.19, -0.03, red, 0}
-[2 INFO main 442839] Selling: {1.19, -0.03, red, 0}
-[2 INFO main 448985] Confirming: 1/3
-[2 INFO main 453039] Confirming: 3/3
-[2 INFO main 453045] Scout.SELL -> Recruit.PLAN | Sell success
-[2 INFO main 453140] Recruit.PLAN -> Recruit.BUY | Buy again
-[2 INFO main 453235] Recruit.BUY -> Idle.IDLE | Buy expired
-[2 INFO main 453330] Idle.IDLE -> Scout.EXPLORE | Duration: 42.68
-[2 INFO main 496092] Scout.EXPLORE -> Recruit.BUY | Found 0
-[2 INFO main 526141] Recruit.BUY -> Idle.IDLE | Buy expired
-[2 INFO main 526245] Idle.IDLE -> Scout.EXPLORE | Duration: 42.06
-[2 INFO main 568321] Scout.EXPLORE -> Recruit.BUY | Found 0
-[2 INFO main 598329] Recruit.BUY -> Idle.IDLE | Buy expired
-[2 INFO main 598429] Idle.IDLE -> Scout.EXPLORE | Duration: 41.06
-[2 INFO main 639552] Scout.EXPLORE -> Recruit.BUY | Found 0
-[2 INFO main 669647] Recruit.BUY -> Idle.IDLE | Buy expired
-[2 INFO main 669752] Idle.IDLE -> Scout.EXPLORE | Duration: 44.02
-[2 INFO main 713855] Scout.EXPLORE -> Recruit.BUY | Found 0
-[2 INFO main 743915] Recruit.BUY -> Idle.IDLE | Buy expired
-[2 INFO main 744015] Idle.IDLE -> Scout.EXPLORE | Duration: 46.62
-[2 INFO main 779050] Added: {0.2, -1.2, blue, 15}; Total: 1 
-[2 INFO main 790695] Scout.EXPLORE -> Scout.SELL | Found 1
-[2 INFO main 790826] Selling: {0.2, -1.2, blue, 15}
-[2 INFO main 803172] Confirming: 1/3
-[2 INFO main 807250] Confirming: 4/3
-[2 INFO main 807251] Scout.SELL -> Recruit.PLAN | Sell success
-[2 INFO main 807297] Recruit.PLAN -> Recruit.BUY | Buy again
-[2 INFO main 807430] Recruit.BUY -> Idle.IDLE | Buy expired
-[2 INFO main 807498] Idle.IDLE -> Scout.EXPLORE | Duration: 40.37
-[2 INFO main 838252] Added: {0.2, -1.2, blue, 14}; Total: 1 
-[2 INFO main 847958] Scout.EXPLORE -> Scout.SELL | Found 1
-[2 INFO main 848150] Selling: {0.2, -1.2, blue, 14}
-[2 INFO main 856352] Confirming: 1/3
-[2 INFO main 858353] Confirming: 2/3
-[2 INFO main 860311] Confirming: 3/3
-[2 INFO main 860312] Scout.SELL -> Recruit.PLAN | Sell success
-[2 INFO main 860415] Recruit.PLAN -> Recruit.BUY | Buy again
-[2 INFO main 860520] Recruit.BUY -> Idle.IDLE | Buy expired
-[2 INFO main 860601] Idle.IDLE -> Scout.EXPLORE | Duration: 41.64
+[2 INFO main 42] Initialising Python Geth Console...
+[2 INFO main 47] Initialising peer buffer...
+[2 INFO main 47] Initialising resource buffer...
+[2 INFO main 47] Initialising TCP server...
+[2 INFO main 47] Initialising TCP server...
+[2 INFO main 47] Initialising RandB board...
+[2 INFO main 47] Initialising resource sensor...
+[2 INFO main 47] Initialising random-walk...
+[2 INFO main 47] Initialising navigation...
+[2 INFO main 47] Initialising odometry...
+[2 INFO main 2534] --//-- Starting Experiment --//--
+[2 INFO main 2640] Idle.IDLE -> Scout.EXPLORE | Duration: 42.24
+[2 INFO main 44916] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 74978] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 75068] Idle.IDLE -> Scout.EXPLORE | Duration: 39.46
+[2 INFO main 114619] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 144682] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 144784] Idle.IDLE -> Scout.EXPLORE | Duration: 41.13
+[2 INFO main 185961] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 216006] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 216106] Idle.IDLE -> Scout.EXPLORE | Duration: 38.98
+[2 INFO main 255163] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 285233] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 285333] Idle.IDLE -> Scout.EXPLORE | Duration: 39.58
+[2 INFO main 324985] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 355030] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 355122] Idle.IDLE -> Scout.EXPLORE | Duration: 42.48
+[2 INFO main 397622] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 427701] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 427801] Idle.IDLE -> Scout.EXPLORE | Duration: 41.47
+[2 INFO main 469369] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 499417] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 499508] Idle.IDLE -> Scout.EXPLORE | Duration: 41.59
+[2 INFO main 541181] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 571235] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 571325] Idle.IDLE -> Scout.EXPLORE | Duration: 42.60
+[2 INFO main 613996] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 644042] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 644136] Idle.IDLE -> Scout.EXPLORE | Duration: 40.42
+[2 INFO main 684599] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 714660] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 714750] Idle.IDLE -> Scout.EXPLORE | Duration: 41.66
+[2 INFO main 756413] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 786460] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 786568] Idle.IDLE -> Scout.EXPLORE | Duration: 41.69
+[2 INFO main 828327] Scout.EXPLORE -> Recruit.BUY | Found 0
+[2 INFO main 858363] Recruit.BUY -> Idle.IDLE | Buy expired
+[2 INFO main 858464] Idle.IDLE -> Scout.EXPLORE | Duration: 44.21

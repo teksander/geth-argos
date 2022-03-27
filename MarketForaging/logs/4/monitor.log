@@ -1,51 +1,48 @@
-[4 INFO main 44] Initialising Python Geth Console...
-[4 INFO main 49] Initialising peer buffer...
-[4 INFO main 49] Initialising resource buffer...
-[4 INFO main 49] Initialising TCP server...
-[4 INFO main 49] Initialising TCP server...
-[4 INFO main 49] Initialising RandB board...
-[4 INFO main 49] Initialising resource sensor...
-[4 INFO main 49] Initialising random-walk...
-[4 INFO main 49] Initialising navigation...
-[4 INFO main 49] Initialising odometry...
-[4 INFO main 2029] --//-- Starting Experiment --//--
-[4 INFO main 2130] Idle.IDLE -> Scout.EXPLORE | Duration: 44.21
-[4 INFO main 46415] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 73120] Recruit.BUY -> Recruit.PLAN | Buy failed
-[4 WARNING main 73122] ('execution reverted: No resources for sale',)
-[4 INFO main 73297] Recruit.PLAN -> Recruit.BUY | Buy again
-[4 INFO main 76509] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 76599] Idle.IDLE -> Scout.EXPLORE | Duration: 40.95
-[4 INFO main 117553] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 147630] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 147721] Idle.IDLE -> Scout.EXPLORE | Duration: 42.38
-[4 INFO main 190191] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 220240] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 220334] Idle.IDLE -> Scout.EXPLORE | Duration: 42.43
-[4 INFO main 262829] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 292860] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 292965] Idle.IDLE -> Scout.EXPLORE | Duration: 45.32
-[4 INFO main 338329] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 368370] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 368473] Idle.IDLE -> Scout.EXPLORE | Duration: 43.20
-[4 INFO main 411698] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 441740] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 441846] Idle.IDLE -> Scout.EXPLORE | Duration: 41.79
-[4 INFO main 483657] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 513663] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 513765] Idle.IDLE -> Scout.EXPLORE | Duration: 42.29
-[4 INFO main 556140] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 586143] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 586244] Idle.IDLE -> Scout.EXPLORE | Duration: 41.77
-[4 INFO main 628115] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 658142] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 658236] Idle.IDLE -> Scout.EXPLORE | Duration: 38.17
-[4 INFO main 696507] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 726521] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 726621] Idle.IDLE -> Scout.EXPLORE | Duration: 39.95
-[4 INFO main 766633] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 796643] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 796745] Idle.IDLE -> Scout.EXPLORE | Duration: 43.88
-[4 INFO main 840706] Scout.EXPLORE -> Recruit.BUY | Found 0
-[4 INFO main 870712] Recruit.BUY -> Idle.IDLE | Buy expired
-[4 INFO main 870808] Idle.IDLE -> Scout.EXPLORE | Duration: 42.01
+[4 INFO main 42] Initialising Python Geth Console...
+[4 INFO main 48] Initialising peer buffer...
+[4 INFO main 48] Initialising resource buffer...
+[4 INFO main 48] Initialising TCP server...
+[4 INFO main 48] Initialising TCP server...
+[4 INFO main 48] Initialising RandB board...
+[4 INFO main 48] Initialising resource sensor...
+[4 INFO main 48] Initialising random-walk...
+[4 INFO main 48] Initialising navigation...
+[4 INFO main 48] Initialising odometry...
+[4 INFO main 2382] --//-- Starting Experiment --//--
+[4 INFO main 2486] Idle.IDLE -> Scout.EXPLORE | Duration: 38.50
+[4 INFO main 41048] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 71109] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 71217] Idle.IDLE -> Scout.EXPLORE | Duration: 42.46
+[4 INFO main 113770] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 143827] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 143927] Idle.IDLE -> Scout.EXPLORE | Duration: 39.28
+[4 INFO main 183302] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 213339] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 213440] Idle.IDLE -> Scout.EXPLORE | Duration: 44.07
+[4 INFO main 257512] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 287582] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 287672] Idle.IDLE -> Scout.EXPLORE | Duration: 42.06
+[4 INFO main 329740] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 359815] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 359915] Idle.IDLE -> Scout.EXPLORE | Duration: 42.10
+[4 INFO main 402076] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 432156] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 432245] Idle.IDLE -> Scout.EXPLORE | Duration: 40.53
+[4 INFO main 472824] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 502860] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 502971] Idle.IDLE -> Scout.EXPLORE | Duration: 38.77
+[4 INFO main 541825] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 571880] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 571983] Idle.IDLE -> Scout.EXPLORE | Duration: 41.29
+[4 INFO main 613334] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 643387] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 643491] Idle.IDLE -> Scout.EXPLORE | Duration: 42.09
+[4 INFO main 685646] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 715696] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 715804] Idle.IDLE -> Scout.EXPLORE | Duration: 40.84
+[4 INFO main 756659] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 786713] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 786814] Idle.IDLE -> Scout.EXPLORE | Duration: 41.30
+[4 INFO main 828173] Scout.EXPLORE -> Recruit.BUY | Found 0
+[4 INFO main 858211] Recruit.BUY -> Idle.IDLE | Buy expired
+[4 INFO main 858310] Idle.IDLE -> Scout.EXPLORE | Duration: 44.23

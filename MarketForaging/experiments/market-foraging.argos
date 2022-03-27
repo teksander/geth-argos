@@ -90,7 +90,7 @@
     <distribute>
       <position method="uniform" min="-.577,-.577,0" max=".577,.577,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="25" max_trials="15"> 
+      <entity quantity="0" max_trials="15"> 
         <e-puck id="bc" >
           <controller config="blockchain" />
         </e-puck>
@@ -100,7 +100,7 @@
     <distribute>
       <position method="uniform" min="-.577,-.577,0" max=".577,.577,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="0" max_trials="15" base_num="25"> 
+      <entity quantity="25" max_trials="15" base_num="0"> 
         <e-puck id="gr" >
           <controller config="greedy" />
         </e-puck>
