@@ -27,8 +27,8 @@ export CON1="${EXPERIMENTFOLDER}/controllers/mainloop.py"
 export CON2="${EXPERIMENTFOLDER}/controllers/mainloop_greedy.py"
 
 # [ARGOS_XML]
-export NUM1=0
-export NUM2=25
+export NUM1=20
+export NUM2=0
 export RABRANGE="0.3"
 export TPS=10
 export DENSITY=3
@@ -42,7 +42,7 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXRECRUITS=5
+export MAXRECRUITS=1
 
 # [OTHER]
 export SEED=350

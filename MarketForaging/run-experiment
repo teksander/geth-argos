@@ -1,7 +1,7 @@
 #!/bin/bash
 # Iterate over experimental settings and start experiments
 source experimentconfig.sh
-DATAFOLDER="$EXPERIMENTFOLDER/results/data/experiment_$1/"
+DATAFOLDER="$EXPERIMENTFOLDER/results/data"
 
 ##################################################################################
 ### EXAMPLE: config "NUMROBOTS" 10 
@@ -22,9 +22,13 @@ copy() {
 ### EXAMPLE: import "test116_patchy/20_blockchain1"
 import() {
 	# Collect the config from results
-	scp eksander@esme:$DATAFOLDER/experiment_${1}/001/experimentconfig.sh .
-	scp eksander@esme:$DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
-	scp eksander@esme:$DATAFOLDER/experiment_${1}/001/loop_function_params.py loop_functions/
+	SSHHOST="eksander@esme"
+	SSHSOCKET=~/.ssh/eksander@esme
+	ssh -M -f -N -o ControlPath=$SSHSOCKET $SSHHOST
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/experimentconfig.sh .
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/loop_function_params.py loop_functions/
+	ssh -S $SSHSOCKET -O exit $SSHHOST
 }
 
 ##################################################################################
@@ -45,7 +49,7 @@ run() {
 
 
 EXP=test118_patchy_single
-copy "test117_patchy_single/20_blockchain1"
+import "test117_patchy_single/20_blockchain1"
 config "REPS"8
 
 
