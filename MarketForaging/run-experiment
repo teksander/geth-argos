@@ -23,7 +23,8 @@ copy() {
 import() {
 	# Collect the config from results
 	SSHHOST="eksander@esme"
-	SSHSOCKET=~/.ssh/eksander@esme
+	SSHSOCKET=~/.ssh/$SSHHOST
+	
 	ssh -M -f -N -o ControlPath=$SSHSOCKET $SSHHOST
 	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/experimentconfig.sh .
 	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
@@ -48,9 +49,9 @@ run() {
 }
 
 
-EXP=test118_patchy_single
-import "test117_patchy_single/20_blockchain1"
-config "REPS"8
+EXP=test119_litter
+# import "test117_litter/20_blockchain1"
+config "REPS"6
 
 
 # Experiment parameter
