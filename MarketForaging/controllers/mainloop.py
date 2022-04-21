@@ -383,7 +383,7 @@ def controlstep():
         ###########################
         #### MAIN-MODULE STEPS ####
         ###########################
-
+        gethPeers_count = 0
         if clocks['buffer'].query(): 
 
             peer_IPs = dict()
@@ -428,7 +428,7 @@ def controlstep():
                 if nav.get_distance_to(market._pr) < 0.5*market.radius:           
                     nav.avoid(move = True)
                     
-                elif nav.get_distance_to(market._pr) < market.radius and len(peered) > 1:
+                elif nav.get_distance_to(market._pr) < market.radius and gethPeers_count > 1:
                     nav.avoid(move = True)
 
                 else:

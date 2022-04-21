@@ -6,4 +6,9 @@ DATAFOLDER="$EXPERIMENTFOLDER/results/data/"
 
 # From server in Alex's office to Alex's Intel NUC
 cd data
-tar -zc * | ssh eksander@esme "cat > $DATAFOLDER/data-import.tar.gz"
+
+for EXP in "$@"
+do
+    echo "Exporting experiment_$EXP"
+    tar -zc experiment_$EXP | ssh eksander@esme "cat > $DATAFOLDER/experiment_$EXP.tar.gz"
+done

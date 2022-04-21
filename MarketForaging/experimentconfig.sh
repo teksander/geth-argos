@@ -27,7 +27,7 @@ export CON1="${EXPERIMENTFOLDER}/controllers/mainloop.py"
 export CON2="${EXPERIMENTFOLDER}/controllers/mainloop_greedy.py"
 
 # [ARGOS_XML]
-export NUM1=20
+export NUM1=50
 export NUM2=0
 export RABRANGE="0.3"
 export TPS=10
