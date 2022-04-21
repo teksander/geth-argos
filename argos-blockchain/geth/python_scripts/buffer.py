@@ -208,6 +208,7 @@ class TCP_server2(object):
 				# reply to data
 				__clientsocket.send(self.data)
 
+
 	def getNew(self):
 		if self.__stop:
 			return None
@@ -219,24 +220,26 @@ class TCP_server2(object):
 		self.data = str(data).encode()    
 
 	def request(self, host, port):
-		""" This method is used to request data from a running TCP server """
-		# create the client socket
-		__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-		# set the connection timeout
-		__socket.settimeout(5)
-		# connect to hostname on the port
-		__socket.connect((host, port))                               
-		# Receive no more than 1024 bytes
-		msg = __socket.recv(1024)  
-		msg = msg.decode('ascii') 
+		msg = ""
 
-		if msg == '':
-			raise ValueError('Connection Refused')
+		try:
+			""" This method is used to request data from a running TCP server """
+			# create the client socket
+			__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+			# set the connection timeout
+			__socket.settimeout(5)
+			# connect to hostname on the port
+			__socket.connect((host, port))                               
+			# Receive no more than 1024 bytes
+			msg = __socket.recv(1024)  
+			msg = msg.decode('ascii') 
+			__socket.close()
 
-		__socket.close()   
+		except:
+			print('TCP connection failed')
+
 		return msg
 
-		return 
 
 	def start(self):
 		""" This method is called to start __hosting a TCP server """
@@ -298,20 +301,22 @@ def buffer():
 
 	for peer in peers:
 		if peers[peer] not in peered:
-
 			enode = tcp_enode.request(peers[peer], port) 
-			w3.geth.admin.addPeer(enode)
-			peered.add(peers[peer])
-			print('Added peer: %s|%s' % (peer, enode))
+
+			if 'enode' in enode:
+				w3.geth.admin.addPeer(enode)
+				peered.add(peers[peer])
+				print('Added peer: %s|%s' % (peer, enode))
 
 	temp = copy.copy(peered)
 
 	for peer in temp:
 		if peer not in peers.values():
 			enode = tcp.request(peer, port)
-			w3.provider.make_request("admin_removePeer",[enode])
-			peered.remove(peer)
-			print('Removed peer: %s|%s' % (peer, enode))
+			if 'enode' in enode:
+				w3.provider.make_request("admin_removePeer",[enode])
+				peered.remove(peer)
+				print('Removed peer: %s|%s' % (peer, enode))
 
 	# for peer in peers_geth:
 	# 	if peer not in peers.values():
