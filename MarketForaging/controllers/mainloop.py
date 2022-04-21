@@ -32,29 +32,18 @@ logtofile = False
 
 # /* Experiment Parameters */
 #######################################################################
-tcpPort = 5000 
-tcprPort = 6000 
 erbDist = 175
 erbtFreq = 10
 gsFreq = 20
 rwSpeed = controller_params['scout_speed']
 navSpeed = controller_params['recruit_speed']
 
-bufferRate = 0.5 
-peerSecurityRate = 1.5
-globalPeers = False
-ageLimit = 2
-
-arena_size = float(os.environ["ARENADIM"])
-step_size = 1/float(os.environ["TPS"])
-
 # /* Global Variables */
 #######################################################################
 global startFlag
 startFlag = False
 
-global peered, txList
-peered = set()
+global txList
 txList = []
 
 global submodules
@@ -66,22 +55,11 @@ counters = dict()
 logs = dict()
 txs = dict()
 
-clocks['share'] = Timer(1)
-clocks['buffer'] = Timer(bufferRate)
-clocks['search'] = Timer(rate = 5)
-clocks['collect_resources'] = Timer(1)
-clocks['peer_check'] = Timer(peerSecurityRate)
-clocks['balance_check'] = Timer(1.5)
+clocks['buffer'] = Timer(0.5)
 clocks['query_resources'] = Timer(1)
 clocks['block'] = Timer(2)
-clocks['attempt'] = Timer(7)
-clocks['pay_fuel'] = Timer(10)
 clocks['explore'] = Timer(1)
-clocks['homing'] = Timer(1)
-clocks['availiable'] = Timer(7)
 clocks['buy'] = Timer(controller_params['buy_duration'])
-clocks['double_check_tx_exists'] = Timer(5)
-clocks['wait_on_last'] = Timer(8)
 clocks['rs'] = Timer(0.02)
 
 
@@ -269,7 +247,7 @@ class Transaction(object):
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks, submodules, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, tcpr, rgb, estimatelogger
+    global clocks, submodules, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb, estimatelogger
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
@@ -321,14 +299,6 @@ def init():
     robot.log.info('Initialising resource buffer...')
     rb = ResourceBuffer()
 
-    # # /* Init TCP server for enode requests */
-    # robot.log.info('Initialising TCP server...')
-    # tcp = TCP_server(me.enode, '172.18.0.1', tcpPort+int(me.id), unlocked = True)
-
-    # /* Init TCP server for resource requests */
-    robot.log.info('Initialising TCP server...')
-    tcpr = TCP_server("None", 'localhost', tcprPort+int(me.id), unlocked = True)
-
     # /* Init E-RANDB __listening process and transmit function
     robot.log.info('Initialising RandB board...')
     erb = ERANDB(robot, erbDist, erbtFreq)
@@ -356,7 +326,7 @@ def init():
     fsm = FiniteStateMachine(robot, start = Idle.IDLE)
 
     # List of submodules --> iterate .start() to start all
-    submodules = [w3.geth.miner, tcpr, erb]
+    submodules = [w3.geth.miner, erb]
 
     txs['sell'] = Transaction(None)
     txs['buy']  = Transaction(None)
