@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # This is the main control loop running in each argos robot
-test
+
 # /* Import Packages */
 #######################################################################
 import random, math, copy
