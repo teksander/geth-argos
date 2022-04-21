@@ -18,8 +18,9 @@ DATE: 22/06/2021
 
 
 To-do-list:
-- (high) fix Event 
-- (high) Trigger experiment finish from criteria; restart automatically; iterate experimental parameters
+- (DONE) fix Event 
+- (DONE) Trigger experiment finish from criteria; restart automatically; iterate experimental parameters
+- (DONE) Move peering to docker
 - (medium) Make RPYC server hosted in docker containers (one web3.py instance per container)
 - (medium) Create "reset-geth.sh" which does not reinialize docker but rather reset geth folder and process in every container (if faster/more efficient)
 - (medium) Improve "stop_network.sh" since docker stop and docker rm is not working properly
