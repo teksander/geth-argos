@@ -20,43 +20,39 @@ from networkx.algorithms.shortest_paths.generic import shortest_path as get_main
 global tstart
 
 datadir = '/home/eksander/geth-argos/MarketForaging/results/data'
+plotdir = '/home/eksander/geth-argos/MarketForaging/results/plots/'
+
 def tic():
     global tstart
     tstart = time.time()
 def toc():
     print(time.time()-tstart)
     
-# def create_df(experiment, logfile):
-#     df_list = []
-#     csvfile_list = sorted(glob.glob('%s/experiment_%s/*/*/%s.csv' % (datadir, experiment, logfile)))
-
-#     for csvfile in csvfile_list:
-        
-#         df = pd.read_csv(csvfile, delimiter=" ")
-#         df['REP'] = csvfile.split('/')[-3]
-        
-# #         df['NROB'] = csvfile.split('/')[-2]
-# #         df = perform_corrections(df)
-#         df_list.append(df)
-        
-#     if df_list:
-#         full_df = pd.concat(df_list, ignore_index=True)
-#         return full_df
-#     else:
-#         return None
     
-def create_df(experiments, logfile, configs = 'all', configs_excl = None):
+def create_df(experiments, logfile, exclude_patterns = []):
+    
     
     df_list = []
     experiments = [experiments] if isinstance(experiments, str) else experiments
     
     for experiment in experiments:
-        if configs == 'all':
-            configs = sorted(glob.glob('%s/experiment_%s/*/' % (datadir, experiment)))
+        
+        # Make sure plot folder exists
+        path = '%s/experiment_%s' % (plotdir, experiment)
 
-        if configs_excl:
-            for config_excl in configs_excl:
-                configs = [x for x in configs if config_excl not in x]
+        # Check whether the specified path exists or not
+        isExist = os.path.exists(path)
+
+        if not isExist:
+          # Create a new directory because it does not exist 
+          os.makedirs(path)
+          print("The new plot directory is created!")
+        
+        configs = sorted(glob.glob('%s/experiment_%s/*/' % (datadir, experiment)))
+        
+        if exclude_patterns:
+            for exclude in exclude_patterns:
+                configs = [config for config in configs if exclude not in config]
 
         for config in configs:
             csvfile_list = sorted(glob.glob('%s/*/*/%s.csv' % (config, logfile)))

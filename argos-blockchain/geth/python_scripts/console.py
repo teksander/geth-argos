@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 from web3 import Web3, IPCProvider, WebsocketProvider
 from web3.middleware import geth_poa_middleware
-import os
-import sys
+
 import subprocess
 import json
 import time
 import logging
-import os
 
 logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
 logger = logging.getLogger(__name__)
@@ -97,6 +95,7 @@ def getEnodes():
 
 def getIds():
 		return [readEnode(enode) for enode in getEnodes('geth')]
+	
 	
 if __name__ == '__main__':
 	logger.setLevel(10)

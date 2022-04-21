@@ -19,7 +19,6 @@ def init_web3(robotID):
     # Connect to the RPYC which hosts web3.py (port 4xxx where xxx is robot ID)
     dockerIP = identifersExtract(robotID, 'IP')
     
-    #conn = rpyc.connect("localhost", 4000+int(robotID), config = {"allow_all_attrs" : True})
     conn = rpyc.connect(dockerIP, 4000, config = {"allow_all_attrs" : True})
     w3 = conn.root
 
@@ -82,8 +81,10 @@ def identifersExtract(robotID, query = 'IP'):
     containersFile = open(experimentFolder+'/identifiers.txt', 'r')
     for line in containersFile.readlines():
         if line.__contains__(namePrefix):
-            if query == 'IP':
+            if query == 'IP_DOCKER':
                 return line.split()[-1]
+            if query == 'IP':
+                return line.split()[-2]
             if query == 'ENODE':
                 return line.split()[1]
 

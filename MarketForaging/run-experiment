@@ -35,12 +35,16 @@ import() {
 ##################################################################################
 ### EXAMPLE: run "test116_patchy/20_blockchain1"
 run() {
+
+	# Configure experiment
+	. experimentconfig.sh
+
 	for REP in $(seq 1 ${REPS}); do
 
 		# Perform experiment
-		. starter --reset-geth --start-novis
+		. starter --reset-geth --start
 
-		# Collect logged data
+		# Collect data
 		if [ $# -eq 1 ]; then
 		    bash collect-logs ${1}
 		fi
@@ -49,52 +53,52 @@ run() {
 }
 
 
-EXP=test119_litter
-# import "test117_litter/20_blockchain1"
-config "REPS"6
+EXP=test120_hotspot
+copy "test120/25_blockchain5"
+# config "REPS" 1
 
 
-# Experiment parameter
-config "NUM1" 25
-config "NUM2" 0
-config "MAXRECRUITS" 1
-wait
-run    "${EXP}/25_blockchain1"
+# # Experiment parameter
+# config "NUM1" 25
+# config "NUM2" 0
+# config "MAXRECRUITS" 1
+# wait
+# run    "${EXP}/25_blockchain1"
 
-# Experiment parameter
-config "NUM1" 25
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/25_blockchain2"
+# # Experiment parameter
+# config "NUM1" 25
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/25_blockchain2"
 
-# Experiment parameter
-config "NUM1" 25
-config "NUM2" 0
-config "MAXRECRUITS" 3
-wait
-run    "${EXP}/25_blockchain3"
+# # Experiment parameter
+# config "NUM1" 25
+# config "NUM2" 0
+# config "MAXRECRUITS" 3
+# wait
+# run    "${EXP}/25_blockchain3"
 
-# Experiment parameter
-config "NUM1" 25
-config "NUM2" 0
-config "MAXRECRUITS" 4
-wait
-run    "${EXP}/25_blockchain4"
+# # Experiment parameter
+# config "NUM1" 25
+# config "NUM2" 0
+# config "MAXRECRUITS" 4
+# wait
+# run    "${EXP}/25_blockchain4"
 
-# Experiment parameter
-config "NUM1" 25
-config "NUM2" 0
-config "MAXRECRUITS" 5
-wait
-run    "${EXP}/25_blockchain5"
+# # Experiment parameter
+# config "NUM1" 25
+# config "NUM2" 0
+# config "MAXRECRUITS" 5
+# wait
+# run    "${EXP}/25_blockchain5"
 
 
-# Experiment parameters
-config "NUM1" 0
-config "NUM2" 25
-wait
-run    "${EXP}/25_greedy"
+# # Experiment parameters
+# config "NUM1" 0
+# config "NUM2" 25
+# wait
+# run    "${EXP}/25_greedy"
 
 ##########################################3
 

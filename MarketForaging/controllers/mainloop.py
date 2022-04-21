@@ -87,66 +87,7 @@ clocks['rs'] = Timer(0.02)
 
 # Store the position of the market
 market_js = {"x":0, "y":0, "radius":  market_params['radius'], "radius_dropoff": market_params['radius_dropoff']}
-market = Resource(market_js)
-
-def buffer(rate = bufferRate, ageLimit = ageLimit):
-    """ Control routine for robot-to-robot dynamic peering """
-    global peered
-
-    peers = erb.getNew()
-
-    for peer in peers:
-        if peer not in peered:
-            enode = tcp.request('localhost', tcpPort+int(peer)) 
-            # bufferlogger.info('Received enode: %s', enode)
-
-            w3.geth.admin.addPeer(enode)
-            peered.add(peer)
-            # bufferlogger.info('Added peer: %s, enode: %s', peer, enode)
-
-    temp = copy.copy(peered)
-
-    for peer in temp:
-        if peer not in peers:
-            enode = tcp.request('localhost', tcpPort+int(peer))
-            w3.geth.admin.removePeer(enode)
-            peered.remove(peer)
-            # robot.log.info('Removed peer: %s', peer)
-
-
-    # Double-check stale peers
-    if clocks['peer_check'].query():
-        gethPeers_enodes = getEnodes()
-        gethPeers_ids = getIds(gethPeers_enodes)
-        gethPeers_count = len(gethPeers_enodes)
-
-        if not peered:
-            for enode in gethPeers_enodes:
-                w3.geth.admin.removePeer(enode)
-
-        # else:
-        #     for ID in peered:
-        #         if ID not in gethPeers_ids:
-        #             enode = getEnodeById(ID, gethPeers_enodes)
-        #             print(ID)
-        #             # w3.geth.admin.addPeer(enode)
-
-
-         # Turn on LEDs according to geth Peers
-        if gethPeers_count == 0: 
-            rgb.setLED(rgb.all, 3* ['black'])
-        elif gethPeers_count == 1:
-            rgb.setLED(rgb.all, ['red', 'black', 'black'])
-        elif gethPeers_count == 2:
-            rgb.setLED(rgb.all, ['red', 'black', 'red'])
-        elif gethPeers_count > 2:
-            rgb.setLED(rgb.all, 3*['red'])
-
-
-# /* Initialize background daemon threads for the Main-Modules*/
-#######################################################################
-bufferTh = threading.Thread(target=buffer, args=())                                     
-
+market = Resource(market_js)                      
 
 class ResourceBuffer(object):
     """ Establish the resource buffer class 
@@ -257,30 +198,6 @@ class ResourceBuffer(object):
     def getResourceByValue(self, value):
         return self.buffer[self.getValues().index(value)]
 
-    # def getPCs(self):
-    #     # Algorithm for best resource decision making goes here
-    #     # return self.buffer[0]
-
-    #     # dists_to_market = self.getDistances(0,0) 
-    #     # return self.buffer[dists_to_market.index(min(dists_to_market))]
-    #     # my_x = robot.position.get_position()[0]
-    #     # my_y = robot.position.get_position()[1]
-
-    #     # print(len(self))
-    #     Qp = self.getUtilities()
-    #     Qc_m = [2*distance/arena_size for distance in self.getDistances(0,0)]
-    #     # Qc_r = [100*distance/arena_size * 0.3 for distance in self.getDistances(my_x,my_y)]
-    #     # print(Qp, Qc_r, Qc_m) res.price - 2*
-    #     Pc = [x-y for x, y in zip(Qp,Qc_m)]
-    #     return Pc
-
-    # def getBestResource(self):
-    #     if self.buffer:
-    #         Pc = self.getPCs()
-    #         self.best = self.buffer[Pc.index(max(Pc))]
-    #         return self.best 
-    #     else: 
-    #         return None
 
 txList = []
 class Transaction(object):
@@ -352,8 +269,9 @@ class Transaction(object):
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules
+    global clocks, submodules, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, tcpr, rgb, estimatelogger
     robotID = str(int(robot.variables.get_id()[2:])+1)
+    robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
     robot.variables.set_consensus(False) 
     robot.variables.set_attribute("newResource", "")
@@ -382,19 +300,13 @@ def init():
     header = ['COUNT']
     logs['resources'] = Logger(log_folder+name, header, 5, ID = robotID)
 
-    name   = 'buffer.csv'
-    header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-    logs['buffer'] = Logger(log_folder+name, header, 2, ID = robotID)
-   
     # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
     robot.log = logging.getLogger('main')
     estimatelogger = logging.getLogger('estimate')
-    bufferlogger = logging.getLogger('buffer')
 
     # List of logmodules --> specify submodule loglevel if desired
     logging.getLogger('main').setLevel(10)
     logging.getLogger('estimate').setLevel(50)
-    logging.getLogger('buffer').setLevel(50)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -403,19 +315,15 @@ def init():
     w3 = init_web3(robotID)
 
     # /* Init an instance of peer for this Pi-Puck */
-    me = Peer(robotID, w3.enode, w3.key)
-
-    # /* Init an instance of the buffer for peers  */
-    robot.log.info('Initialising peer buffer...')
-    pb = PeerBuffer(ageLimit)
+    me = Peer(robotID, robotIP, w3.enode, w3.key)
 
     # /* Init an instance of the buffer for resources  */
     robot.log.info('Initialising resource buffer...')
     rb = ResourceBuffer()
 
-    # /* Init TCP server for enode requests */
-    robot.log.info('Initialising TCP server...')
-    tcp = TCP_server(me.enode, 'localhost', tcpPort+int(me.id), unlocked = True)
+    # # /* Init TCP server for enode requests */
+    # robot.log.info('Initialising TCP server...')
+    # tcp = TCP_server(me.enode, '172.18.0.1', tcpPort+int(me.id), unlocked = True)
 
     # /* Init TCP server for resource requests */
     robot.log.info('Initialising TCP server...')
@@ -448,7 +356,7 @@ def init():
     fsm = FiniteStateMachine(robot, start = Idle.IDLE)
 
     # List of submodules --> iterate .start() to start all
-    submodules = [w3.geth.miner, tcp, tcpr, erb]
+    submodules = [w3.geth.miner, tcpr, erb]
 
     txs['sell'] = Transaction(None)
     txs['buy']  = Transaction(None)
@@ -458,10 +366,9 @@ def init():
 #########################################################################################################################
 
 def controlstep():
-    global clocks, counters, startFlag, startTime, bufferTh
+    global clocks, counters, startFlag, startTime
 
     if not startFlag:
-
         ##########################
         #### FIRST STEP ##########
         ##########################
@@ -476,6 +383,7 @@ def controlstep():
                 module.start()
             except:
                 robot.log.critical('Error Starting Module: %s', module)
+                sys.exit()
 
         for log in logs.values():
             log.start()
@@ -507,9 +415,27 @@ def controlstep():
         ###########################
 
         if clocks['buffer'].query(): 
-            if not bufferTh.is_alive():
-                bufferTh = threading.Thread(target=buffer)
-                bufferTh.start()
+
+            peer_IPs = dict()
+            peers = erb.getNew()
+            for peer in peers:
+                peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
+
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((me.ip, 9898))
+                s.sendall(str(peer_IPs).encode())
+                data = s.recv(1024)
+                gethPeers_count = int(data)
+
+             # Turn on LEDs according to geth Peers
+            if gethPeers_count == 0: 
+                rgb.setLED(rgb.all, 3* ['black'])
+            elif gethPeers_count == 1:
+                rgb.setLED(rgb.all, ['red', 'black', 'black'])
+            elif gethPeers_count == 2:
+                rgb.setLED(rgb.all, ['red', 'black', 'red'])
+            elif gethPeers_count > 2:
+                rgb.setLED(rgb.all, 3*['red'])
 
         ##############################
         #### STATE-MACHINE STEPS ####
@@ -730,7 +656,6 @@ def reset():
 def destroy():
     if startFlag:
         w3.geth.miner.stop()
-        bufferTh.join()
         for enode in getEnodes():
             w3.geth.admin.removePeer(enode)
 
@@ -761,71 +686,4 @@ def getIds(__enodes = None):
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
     else:
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
-
-
-# def START(modules = submodules, logs = logmodules):
-#     global startFlag, startTime
-#     startTime = time.time()
-
-#     robot.log.info('Starting Experiment')
-
-#     for log in logs:
-#         try:
-#             log.start()
-#         except:
-#             robot.log.critical('Error Starting Log: %s', log)
-
-#     startFlag = True 
-#     for module in modules:
-#         try:
-#             module.start()
-#         except:
-#             robot.log.critical('Error Starting Module: %s', module)
-
-# def STOP(modules = submodules, logs = logmodules):
-#     robot.log.info('Stopping Experiment')
-#     global startFlag
-
-#     robot.log.info('--/-- Stopping Main-modules --/--')
-#     startFlag = False
-
-#     robot.log.info('--/-- Stopping Sub-modules --/--')
-#     for submodule in modules:
-#         try:
-#             submodule.stop()
-#         except:
-#             robot.log.warning('Error stopping submodule')
-
-#     for log in logs:
-#         try:
-#             log.close()
-#         except:
-#             robot.log.warning('Error Closing Logfile')
-            
-#     if isbyz:
-#         pass
-#         robot.log.info('This Robot was BYZANTINE')
-
-#     txlog.start()
-    
-#     for txHash in txList:
-
-#         try:
-#             tx = w3.eth.getTransaction(txHash)
-#         except:
-#             txlog.log(['Lost'])
-#         else:
-#             try:
-#                 txRecpt = w3.eth.getTransactionReceipt(txHash)
-#                 mined = 'Yes' 
-#                 txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
-#             except:
-#                 mined = 'No' 
-#                 txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
-
-#     txlog.close()
-
-
-
-
 

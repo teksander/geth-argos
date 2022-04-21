@@ -75,8 +75,8 @@ class ERANDB(object):
 
         self.robot.epuck_range_and_bearing.set_data(self.tData)
 
-    def getNew(self):
 
+    def getNew(self):
         temp = self.newIds
         self.newIds = set()
         return temp

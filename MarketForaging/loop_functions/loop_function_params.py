@@ -34,31 +34,22 @@ resource_params['distribution'] = 'uniform'
 # 									'x_sg': 0.15 * generic_params['arena_size'], 
 # 									'y_sg': 0.15 * generic_params['arena_size']}]
 
-resource_params['radius']    = 0.05
+resource_params['radius']    = 0.08
 # resource_params['area_percent'] = 0.005 * (10/generic_params['num_robots'])
 # resource_params['radius']    = generic_params['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
 
 resource_params['quantity_min'] = 5
-resource_params['quantity_max'] = 10
+resource_params['quantity_max'] = 5
 resource_params['distance_min'] = 1.7 * market_params['radius_dropoff']
 resource_params['distance_max'] = 0.50 * generic_params['arena_size']   
-resource_params['abundancy']    = 0.02
+resource_params['abundancy']    = 0.03
 
 # Resource types
-# resource_params['qualities'] = {'red', 'green' , 'blue', 'yellow'}
-# resource_params['utility']   = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
+resource_params['qualities'] = {'red', 'green' , 'blue', 'yellow'}
+resource_params['utility']   = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
 # resource_params['frequency'] = {'red': 0.4, 'green': 0.3 , 'blue': 0.2, 'yellow': 0.1}
-# resource_params['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
+resource_params['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 # resource_params['frequency'] = {'red': 0.7, 'green': 0.1 , 'blue': 0.1, 'yellow': 0.1}
-
-# resource_params['qualities'] = {'red', 'blue'}
-# resource_params['utility']   = {'red': 2,  'blue': 6}
-# resource_params['frequency'] = {'red': 0.5,'blue': 0.5}
-
-resource_params['qualities'] = {'red'}
-resource_params['utility']   = {'red': 2}
-resource_params['frequency'] = {'red': 1}
-
 
 # Parameters for the economy
 # economy_params = dict()

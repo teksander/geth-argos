@@ -497,6 +497,9 @@ def controlstep():
         #### LOG-MODULE STEPS ####
         ##########################
 
+        # print(startTime-time.time())
+        # startTime = time.time()
+
         if logs['resources'].isReady():
             logs['resources'].log([len(rb)])
 

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Short script to upload data from experiments server to personal computer
+source ../experimentconfig.sh
+
+DATAFOLDER="$EXPERIMENTFOLDER/results/data/"
+
+# From server in Alex's office to Alex's Intel NUC
+tar cvzf export_data.tar.gz $DATAFOLDER/
+scp export_data.tar.gz eksander@esme:/$DATAFOLDER/

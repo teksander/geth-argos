@@ -10,6 +10,9 @@ import psutil
 import math
 import json
 from types import SimpleNamespace
+experimentFolder = os.environ["EXPERIMENTFOLDER"]
+sys.path.insert(1, experimentFolder)
+
 
 # The logs that go to console
 # logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -296,17 +299,18 @@ class TCP_server(object):
 class Peer(object):
     """ Establish the Peer class 
     """
-    def __init__(self, id__, enode = None, key = None):
+    def __init__(self, _id, _ip = None, enode = None, key = None):
         """ Constructor
-        :type id__: str
-        :param id__: id of the peer
+        :type _id: str
+        :param _id: id of the peer
         """
         # Add the known peer details
-        self.id = id__
-        self.ip = '172.27.1.' + id__
-        self.tStamp = time.time()
+        self.id = _id
+        self.ip = _ip
         self.enode = enode
         self.key = key
+        self.tStamp = time.time()
+
         # self.ageLimit = ageLimit
         self.isDead = False
         self.age = 0
@@ -614,3 +618,15 @@ class mydict(dict):
         if n == 0:
             return mydict([[key, round(self[key])] for key in self])
         return mydict([[key, round(self[key], n)] for key in self])
+
+def identifersExtract(robotID, query = 'IP'):
+    namePrefix = 'ethereum_eth.' + str(robotID) + '.'
+    containersFile = open(experimentFolder+'/identifiers.txt', 'r')
+    for line in containersFile.readlines():
+        if line.__contains__(namePrefix):
+            if query == 'IP_DOCKER':
+                return line.split()[-1]
+            if query == 'IP':
+                return line.split()[-2]
+            if query == 'ENODE':
+                return line.split()[1]

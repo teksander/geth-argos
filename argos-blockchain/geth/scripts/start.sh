@@ -19,11 +19,15 @@ geth $GETH_OPTS&
 # bash /root/exec_template.sh "/root/templates/unlockAccount.txt"
 # sleep 1
 
+
 echo "Removing previous log files"
 rm -rf root/logs/*
 
 echo "Starting analytics logging"
 python3 /root/python_scripts/analytics.py $SLOT&
+
+echo "Starting peering buffer"
+python3 /root/python_scripts/buffer.py&
 
 echo "Starting web3 wrapper hosting"
 python3 /root/python_scripts/web3wrapper_docker.py

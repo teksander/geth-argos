@@ -65,19 +65,23 @@ if [[ $1 == "--reset-geth" ]]; then
     ./reset-geth
 fi
 
+echo "+-----------------------------------------------------------+"
+echo "Generating identifiers file.."
+
+# Get IDs (temporary solution)
+seq 1 $NUMROBOTS > temp0.txt
+
 # Get containers
 docker ps --format '{{.Names}} {{.ID}}' > temp1.txt
 sort -o temp1.txt temp1.txt
 
-# Create a list of IDs (temporary solution)
-seq 1 $NUMROBOTS > ids.txt
-
 # Get IPs
 ./bash-all "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
+./bash-all "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "10.0.1" | grep -v ".255" > temp3.txt
 
-# Collect everything in a single file
-paste ids.txt temp1.txt temp2.txt > identifiers.txt
-rm temp1.txt temp2.txt ids.txt 
+# Collect into identifiers file
+paste temp0.txt temp1.txt temp2.txt temp3.txt > identifiers.txt
+rm temp0.txt temp1.txt temp2.txt temp3.txt
 
 echo "+-----------------------------------------------------------+"
 echo "Waiting web3 to respond..."
