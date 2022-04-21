@@ -53,15 +53,15 @@ run() {
 }
 
 
-EXP=test120_hotspot
+EXP=test120_scaling
 copy "test120/25_blockchain5"
-# config "REPS" 1
+config "REPS" 2
 
 
 # # Experiment parameter
 # config "NUM1" 25
 # config "NUM2" 0
-# config "MAXRECRUITS" 1
+# config "MAXRECRUITS" 2
 # wait
 # run    "${EXP}/25_blockchain1"
 
@@ -101,6 +101,62 @@ copy "test120/25_blockchain5"
 # run    "${EXP}/25_greedy"
 
 ##########################################3
+
+# Experiment parameter
+config "NUM1" 5
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/5_blockchain2"
+
+# Experiment parameter
+config "NUM1" 10
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/10_blockchain2"
+
+# Experiment parameter
+config "NUM1" 15
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/15_blockchain2"
+
+# Experiment parameter
+config "NUM1" 20
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/20_blockchain2"
+
+# Experiment parameter
+config "NUM1" 25
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/25_blockchain2"
+
+# Experiment parameter
+config "NUM1" 30
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/30_blockchain2"
+
+# Experiment parameter
+config "NUM1" 35
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/35_blockchain2"
+
+# Experiment parameter
+config "NUM1" 40
+config "NUM2" 0
+config "MAXRECRUITS" 2
+wait
+run    "${EXP}/40_blockchain2"
 
 # # Experiment parameter
 # config "NUM1" 20
