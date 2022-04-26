@@ -49,7 +49,6 @@ class TCP_server(object):
         __socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # get local machine name
         __host = socket.gethostbyname(self.ip)
-        print(__host)
         # bind to the port
         __socket.bind((__host, self.port))  
 
@@ -203,7 +202,10 @@ class TCP_server2(object):
 
 				# read the data
 				data = __clientsocket.recv(1024)
-				self.__received = eval(data)
+				if data:
+					self.__received = eval(data)
+				else:
+					self.__received = []
 
 				# reply to data
 				__clientsocket.send(self.data)
@@ -258,6 +260,7 @@ class TCP_server2(object):
 		""" This method is called before a clean exit """   
 		self.__stop = True
 		print('TCP is OFF') 
+
 
 def getEnodes():
     return [peer['enode'] for peer in w3.geth.admin.peers()]

@@ -1,3 +1,5 @@
+#!/bin/bash  
+
 # [PATHS]
 export MAINFOLDER="$HOME/geth-argos"
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
@@ -26,13 +28,12 @@ export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 export CON1="${EXPERIMENTFOLDER}/controllers/mainloop.py"
 export CON2="${EXPERIMENTFOLDER}/controllers/mainloop_greedy.py"
 
-# [ARGOS_XML]
-export NUM1=50
+# [ARGOS_PARAMS]
+export NUM1=6
 export NUM2=0
 export RABRANGE="0.3"
 export TPS=10
 export DENSITY=3
-
 export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
 export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
 export ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
@@ -42,13 +43,13 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXRECRUITS=3
+export MAXRECRUITS=2
 
 # [OTHER]
 export SEED=350
 export TIMELIMIT=15
 export SLEEPTIME=5
-export REPS=10
+export REPS=2
 
 
 

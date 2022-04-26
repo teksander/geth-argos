@@ -112,18 +112,7 @@ def toDict(dictToParse):
 
 if __name__ == '__main__':
 
-    # Start the RPYC server (1 per container)
+    # Start the RPYC server for this container
     server = ThreadedServer(Web3_Wrapper_Service(), port = 4000)
     server.start()
 
-
-# def exposed_blockFilter(self):
-#     return w3if.blockFilter()
-
-#     ############ FILTER WRAPPER #####################
-#     def blockFilter(self): 
-#         return self.bf.get_new_entries()
-
-    # class exposed_filters:
-    #     def exposed_blockFilter(self):
-    #         return w3if.blockFilter()

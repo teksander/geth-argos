@@ -30,8 +30,6 @@ def toc():
     
     
 def create_df(experiments, logfile, exclude_patterns = []):
-    
-    
     df_list = []
     experiments = [experiments] if isinstance(experiments, str) else experiments
     
@@ -71,6 +69,66 @@ def create_df(experiments, logfile, exclude_patterns = []):
     else:
         return None
 
+def create_df2(experiments, logfile, exclude_patterns = []):
+    df_list = []
+    experiments = [experiments] if isinstance(experiments, str) else experiments
+    
+    for experiment in experiments:
+        
+        # Make sure plot folder exists
+        path = '%s/experiment_%s' % (plotdir, experiment)
+
+        # Check whether the specified path exists or not
+        isExist = os.path.exists(path)
+
+        if not isExist:
+          # Create a new directory because it does not exist 
+          os.makedirs(path)
+          print("The new plot directory is created!")
+        
+        configs = sorted(glob.glob('%s/experiment_%s/*/' % (datadir, experiment)))
+        
+        if exclude_patterns:
+            for exclude in exclude_patterns:
+                configs = [config for config in configs if exclude not in config]
+
+        for config in configs:
+            csvfile_list = sorted(glob.glob('%s/*/*/%s.csv' % (config, logfile)))
+            
+            for csvfile in csvfile_list:
+                df = pd.read_csv(csvfile, delimiter=" ")
+                df['REP'] = csvfile.split('/')[-3]
+                df['EXP'] = experiment 
+                df['CFG'] = config.split('/')[-2]
+                df = perform_corrections(df)
+                df_list.append(df)
+        
+    if df_list:
+        full_df = pd.concat(df_list, ignore_index=True)
+        full_df.get_param = get_param_df
+        return full_df
+    else:
+        return None
+
+def get_param_df2(df, param_dict, param, alias = None):
+    df = df.groupby(['EXP','CFG','REP']).apply(lambda x: get_param2(x, x.name , param_dict, param, alias))
+    return df
+
+def get_param2(group, name, param_dict, param, alias):
+    exp = name[0]
+    cfg = name[1]
+    rep = name[2]
+    
+    configfile = '%s/experiment_%s/%s/%s/config.py' % (datadir, exp, cfg, rep)
+    exec(open(configfile).read(), globals())
+    param_dict = eval(param_dict)
+    if param in param_dict:
+        if alias:
+            group[alias] = param_dict[param]
+        else:
+            group[param] = param_dict[param]
+    return group
+
 def get_param_df(df, param_dict, param, alias = None):
     df = df.groupby(['EXP','REP']).apply(lambda x: get_param(x, x.name , param_dict, param, alias))
     return df
@@ -103,7 +161,7 @@ def perform_corrections(df):
     if 'MB' in df.columns:
         df['MB'] = df['MB']*10e-6
         
-    df['CONTROLLER'] = df['EXP'].str.split('/').str[-1].str[3:]
+    df['CONTROLLER'] = df['CFG'].str.split('_').str[-1]
     
     return df
 

@@ -87,7 +87,7 @@ while getopts ":n:t:s:l:" opt; do
     l ) # process option l
 			LOGS=${OPTARG}
       ;;
-    \? ) echo "Usage: ./tmux-all [-t] (list of robot IDs) [-n] (integer) [-s] (\"bash\" / \"python\" / \"geth\") [-l] (\"geth\" / \"monitor.log\" etc)"
+    \? ) echo "Usage: ./tmux-all [-t] \"list of robot IDs\" [-n] (integer) [-s] (\"bash\" / \"python\" / \"geth\") [-l] (\"geth\" / \"monitor.log\" etc)"
       ;;
 
   esac

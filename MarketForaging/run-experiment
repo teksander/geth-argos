@@ -53,8 +53,8 @@ run() {
 }
 
 
-EXP=test120_scaling
-copy "test120/25_blockchain5"
+EXP=test120
+copy "test120_concentrated/25_blockchain2"
 config "REPS" 2
 
 
@@ -102,61 +102,61 @@ config "REPS" 2
 
 ##########################################3
 
-# Experiment parameter
-config "NUM1" 5
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/5_blockchain2"
+# # Experiment parameter
+# config "NUM1" 5
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/5_blockchain2"
 
-# Experiment parameter
-config "NUM1" 10
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/10_blockchain2"
+# # Experiment parameter
+# config "NUM1" 10
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/10_blockchain2"
 
-# Experiment parameter
-config "NUM1" 15
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/15_blockchain2"
+# # Experiment parameter
+# config "NUM1" 15
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/15_blockchain2"
 
-# Experiment parameter
-config "NUM1" 20
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/20_blockchain2"
+# # Experiment parameter
+# config "NUM1" 20
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/20_blockchain2"
 
-# Experiment parameter
-config "NUM1" 25
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/25_blockchain2"
+# # Experiment parameter
+# config "NUM1" 25
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/25_blockchain2"
 
-# Experiment parameter
-config "NUM1" 30
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/30_blockchain2"
+# # Experiment parameter
+# config "NUM1" 30
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/30_blockchain2"
 
-# Experiment parameter
-config "NUM1" 35
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/35_blockchain2"
+# # Experiment parameter
+# config "NUM1" 35
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/35_blockchain2"
 
-# Experiment parameter
-config "NUM1" 40
-config "NUM2" 0
-config "MAXRECRUITS" 2
-wait
-run    "${EXP}/40_blockchain2"
+# # Experiment parameter
+# config "NUM1" 40
+# config "NUM2" 0
+# config "MAXRECRUITS" 2
+# wait
+# run    "${EXP}/40_blockchain2"
 
 # # Experiment parameter
 # config "NUM1" 20

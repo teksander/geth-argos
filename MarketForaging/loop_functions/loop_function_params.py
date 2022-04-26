@@ -34,12 +34,12 @@ resource_params['distribution'] = 'uniform'
 # 									'x_sg': 0.15 * generic_params['arena_size'], 
 # 									'y_sg': 0.15 * generic_params['arena_size']}]
 
-resource_params['radius']    = 0.08
+resource_params['radius']    = 0.18
 # resource_params['area_percent'] = 0.005 * (10/generic_params['num_robots'])
 # resource_params['radius']    = generic_params['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
 
-resource_params['quantity_min'] = 5
-resource_params['quantity_max'] = 5
+resource_params['quantity_min'] = 15
+resource_params['quantity_max'] = 15
 resource_params['distance_min'] = 1.7 * market_params['radius_dropoff']
 resource_params['distance_max'] = 0.50 * generic_params['arena_size']   
 resource_params['abundancy']    = 0.03

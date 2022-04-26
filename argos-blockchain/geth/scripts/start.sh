@@ -14,7 +14,6 @@ geth $GETH_OPTS&
 # bash /root/exec_template.sh "/root/templates/setEtherbase.txt"
 # sleep 1
 
-# bash /root/get_enode.sh
 
 # bash /root/exec_template.sh "/root/templates/unlockAccount.txt"
 # sleep 1

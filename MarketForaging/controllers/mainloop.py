@@ -5,7 +5,7 @@
 #######################################################################
 import random, math, copy
 import time, sys, os
-import logging, threading
+import logging
 from types import SimpleNamespace
 from collections import namedtuple
 

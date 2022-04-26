@@ -125,7 +125,7 @@ For these reasons, some researchers have adopted forms of direct communication. 
 \subsection{Applications of blockchain to swarm robotics}
 \label{sec:blockchain-applications}
 
-The concept of blockchain-based robot swarms was introduced in 2016~\cite{ferrer_blockchain_2016}. The author proposes that the integration of a blockchain could help address issues such as data integrity, consensus agreement, and secure communication in decentralized robot networks. In~\cite{StrCasDor2018:aamas,StrCasDor2020_frontiers}, the authors present a proof-of-concept (in simulation) showing how blockchain-based smart contracts can be exploited to neutralize the negative effect of Byzantine robots in a consensus problem. In~\cite{pacheco_ants_2020} the authors present the first implementation of a blockchain in a swarm of real robots using Ethereum's~\cite{buterin_2014_ethereum} \poa consensus, which is shown to be suitable to robot swarms given that it is energy efficient, scalable and robust to a reasonable degree of network partitioning.
+The concept of blockchain-based robot swarms was introduced in 2016~\cite{ferrer_blockchain_2016}. The author proposes that the integration of a blockchain could help address issues such as data integrity, consensus agreement, and secure communication in decentralized robot networks. In~\cite{StrCasDor2018_aamas,StrCasDor2020_frontiers}, the authors present a proof-of-concept (in simulation) showing how blockchain-based smart contracts can be exploited to neutralize the negative effect of Byzantine robots in a consensus problem. In~\cite{PacStrDor2020:ants} the authors present the first implementation of a blockchain in a swarm of real robots using Ethereum's~\cite{buterin_2014_ethereum} \poa consensus, which is shown to be suitable to robot swarms given that it is energy efficient, scalable and robust to a reasonable degree of network partitioning.
 
  Although these studies showcase the promise of smart contracts to achieve generic swarm-wide agreements, it is not yet clear if the network consensus delay is too large to allow a wider range of applications, particularly, real-time control. Some researchers avoid the question altogether by presenting some control architectures in which the blockchain is hosted outside of the swarms' network~\cite{outsidehosting}. This scheme is akin to using an external control element (albeit, a distributed one in this case), and does not grant the autonomy and fault-tolerance properties warranted in a robot swarm. In this work, we present and study a decentralized and autonomous blockchain-based robot swarm that exploits smart contracts for real-time coordination.
 
@@ -136,24 +136,24 @@ The concept of blockchain-based robot swarms was introduced in 2016~\cite{ferrer
 The goal of the swarm is to retrieve resources from the environment and deposit them at the nest site. Each experiment has a duration of $15$~minutes. When a resource is deposited at the nest, the \emph{total reward collected} is incremented according to the quality of the resource (see below). The \emph{scouting efficiency} is calculated offline as the ratio between the \emph{total reward collected} and the \emph{total distance travelled} by the robots while they are exploring the environment for resources. 
 
 \subsection{Description of the environment}
-\label{ssec:env}
+\label{subsec:env}
 
-The environment (Figure~$1$) consists of a square arena with a side length equal to $2.89$~meters in the experiments with $25$~robots ($3$~robots per square meter). The nest is a circle at the center of the arena with a diameter of $0.98$~meters. Robots deposit resources on the external annulus of the nest, while the interior is reserved for idling. The nest additionally has a beacon which broadcasts an homing signal, which allows robots to securely navigate back to the nest from any location. The remainder of the arena is covered by a variety of circles which represent resource \emph{patches}.
+The environment consists of a square arena with a side length equal to $2.89$~meters in the experiments with $25$~robots ($3$~robots per square meter). The nest is a circle at the center of the arena with a diameter of $0.98$~meters (Figures~\ref{fig:abundant}--\ref{fig:litter}). Robots deposit resources on the external annulus of the nest, while the interior is reserved for idling. The nest additionally has a beacon which broadcasts an homing signal, which allows robots to securely navigate back to the nest from any location. The remainder of the arena is covered by a variety of circles which represent resource \emph{patches}.
 
 Resource \emph{patches} are distributed in an annulus around the center of the arena, where the minimum distance is $0.83$~meters and the maximum distance corresponds to half the arena size. This is done to prevent patches from spawning too close to the nest, or too far, in the corners of the square arena. Each patch is a circular area that contains multiple \emph{resources} that the robots can scout and forage. After all resources in a patch are collected, a new identical patch is generated elsewhere.
 
 The \emph{resources} can have different qualities, and thus, different rewards when foraged by the robots: red (reward $2$), green (reward $4$), blue (reward $6$) and yellow (reward $8$). 
 The distribution of resources in the arena can be tuned by parameters in a configuration file. We consider $3$~different distributions:
 
-\vspace{-5mm}
+\vspace{-4mm}
 \subsubsection{Scattered distribution} 
 In the scattered distribution $3$\% of the environment floor area is covered with uniformly distributed patches. Each patch has a diameter of 12~cm and contains $10$~resources. 70\% of the patches are red, while there is 10\% of each green, blue and yellow.
 
-\vspace{-5mm}
+\vspace{-4mm}
 \subsubsection{Concentrated distribution}
 The concentrated distribution has the same environment floor area covered as the scattered distribution. However, each patch has a larger size of 30~cm and contains $15$~red or blue resource. 
 
-\vspace{-5mm}
+\vspace{-4mm}
 \subsubsection{Hotspot distribution} 
 In the hotspot distribution, again $5$\% of the environment floor area is covered with patches. however they are all concentrated on the first quadrant of the arena. Each patch has a diameter of 12~cm and contains $10$~red resources. 
 
@@ -180,12 +180,12 @@ In the hotspot distribution, again $5$\% of the environment floor area is covere
          \caption{Hotspot distribution}
          \label{fig:hotspot}
     \end{subfigure}
-    \hspace{2mm}
-    \begin{subfigure}[t]{0.475\textwidth}
-        \vspace{-55mm}
-        \label{fig:distributions}
-        \fillcaption{A render of the environment and three different distributions used in this experiment. The resource patches are colored circled with items inside (the resources). A gray background means that the patch has been added to the blockchain, and the black dots above represent the quantity of resource left as stated on the most recent block. The brown circle and annulus in the center are the nest and deposit area, respectively.}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \vspace{-35mm}
+        \fillcaption{Figure legend here}
     \end{subfigure}
+
 \end{figure}
 
 
@@ -198,8 +198,7 @@ In this way, the ARGoS robot controllers only interact with the client-side API 
 
 \subsection{Description of the blockchain}
  Ethereum~\cite{buterin_2014_ethereum}, launched in 2015, extended the original application of blockchains from decentralized financial ledgers to decentralized computing platforms. While financial ledger blockchains, such as Bitcoin~\cite{bitcoin_online}, allow participants to agree on the execution of financial transactions, participants in the Ethereum network can also agree on the execution of computers programs known as \emph{smart contracts}. Due to their decentralized nature, blockchains require a \emph{consensus protocol} in order to solve conflicts and agree on the same version of the blockchain. %In this section, we explain the concepts of consensus protocol and smart contract, and describe how they are used in our experiments.
- 
-\vspace{-5mm}
+
 \subsubsection{Consensus protocol}
 \label{sec:consensus-protocol}
 \Pow~\cite{bitcoin_online}---the original and most commonly used blockchain consensus protocol---requires the expenditure of computational resources in order to establish which blocks of information are added to the blockchain. For this reason, it is often regarded as counter-indicated for swarm robotics applications, which typically consider robots with limited capabilities and resources \cite{dorigo_swarm_2008}.
@@ -213,7 +212,6 @@ Every node in the network checks if the proposed blocks meet these conditions. I
 
 Blockchain forks can occur temporarily, for instance, when preferred sealers are unavailable in a partitioned network or when there is excessive communication delay. To increase the confidence that information is permanently added to the blockchain, nodes can wait for the cumulative difficulty to increase. Unreliable sealers (faulty robots for instance) can be voted out by majority vote, and new sealers may also be voted in. As such \poa is suitable for dynamic swarms, since robots can join and leave the swarm at anytime during the execution of the collective task.
 
-\vspace{-5mm}
 \subsubsection{Blockchain smart contract}
 \label{sec:smart-contract}
 
@@ -234,11 +232,10 @@ The agent used in the simulations is a model of the Pi-puck robot~\cite{millard_
 The Pi-puck model includes sensors and actuators required for this experiment: infrared sensors (used for obstacle avoidance); a \rab board (used for local peer discovery); a ground sensor (sensing of colored resource sites); and two motors (for locomotion). The real robot has no gripper or actuator to manipulate foraged resources, as such resource collection and depositing is performed virtually.
  
 \subsection{Description of the robot controller}
-The robots are controlled through a \emph{finite-state machine} composed of 6 states. Alongside the routine which corresponds to its state, the robots also perform a \emph{blockchain peer discovery} routine at the start of every simulation step.
+The robots are controlled through a \emph{finite-state machine} composed of 6 states. The robot starts in state\texttt{Idle.IDLE}, and at each simulation step it performs a routine according to its current state and verifies the transition conditions. Additionally, the \emph{blockchain peer discovery} is performed at the beginning of every simulation step, regardless of the robot state.
 
-\vspace{-5mm}
 \subsubsection{Finite state machine}
-\label{sec:finite-state-machine} The robot starts in state \texttt{Idle.IDLE}. At each simulation step it verifies state transition conditions and performs one a routine corresponding to its current state:
+\label{sec:finite-state-machine}
 \begin{itemize}
 \item \texttt{Idle.IDLE} - The robot waits for a fixed amount of time ($30$~seconds) and then transitions to \texttt{Scout.EXPLORE};
 \item \texttt{Idle.PLAN} - The robot queries \texttt{get\_resources() return list}. If the robot is enlisted as a recruit, it transitions to \texttt{Recruit.FORAGE}. Otherwise, the robot transitions to \texttt{Recruit.TRANSACT};
@@ -248,7 +245,6 @@ The robots are controlled through a \emph{finite-state machine} composed of 6 st
 \item \texttt{Recruit.FORAGE} - The robot navigates from the nest towards the direction of the resource and searches the neighbourhood for $10$~seconds or until a resource is found a collected. Afterwards, the robot returns to the nest and transitions to \texttt{Scout.TRANSACT}.
 \end{itemize}
 
-\vspace{-5mm}
 \subsubsection{Blockchain peer discovery}
 \label{sec:peer-discovery}
 The robots use the \rab board to broadcast their IP address (up to $30$~cm). If this communication is reciprocated, each robot sends its enode via TCP. The enode is a unique identifier that the robots use to add and remove peers using \texttt{geth}. After the short-range signal is lost, each robot deletes the peer from local memory and from the list of blockchain peers. 
@@ -258,109 +254,101 @@ Our blockchain peering scheme serves two purposes: 1)~to ensure that communicati
 \section{Results and Discussion}
 \label{sec:results-and-discussion}
 
-In general, our goal is to show that by deploying a blockchain we can optimize the behaviour of the swarm by aggregating information from the robots in a conflict-free manner, and leveraging this information to coordinate the robots' actions, while maintaining the important properties of a robot swarm: \emph{decentralization}, \emph{scalability} and \emph{adaptability}.
+In general, our goal is to show that by deploying a blockchain we can optimize the behaviour of the swarm by aggregating information from the robots in a conflict-free manner, and leveraging this information to coordinate the robots' actions, while maintaining the important properties of a robot swarm: \emph{decentralization}, \emph{adaptability} and \emph{scalability}.
 
-The blockchain allows robots to agree on the state of the environment and on a shared coordination strategy, without the need for delegated supervisors (in contrast with centralized or hybrid control). Instead, the blockchain enables a decentralized and democratic swarm, in which all robots contribute homogeneously to the decision-making process. Such a system is robust to network partitioning, and can thus be deployed in situations where a system that relies on information traveling to and from supervisors would fail (for example, in environments with limited or no communication infrastructure). 
+The blockchain allows robots to agree on the state of the environment and on a shared coordination strategy, without the need for delegated supervisors (in contrast with centralized or hybrid control). Instead, the blockchain enables a decentralized and democratic swarm, in which all robots contribute homogeneously to the decision-making process. Such a system is robust to network partitioning, and can thus adapt to situations where a system that relies on information traveling to and from supervisors would fail (for example, in environments with limited or no communication infrastructure). 
 
-The catch lies in the form of \emph{consensus latency}, i.e., the time it takes for messages to travel between robots and to be verified in this democratic process---and in the costs of \emph{data storage}, since each robot keeps a local copy of the blockchain database. These aspects raise scalability concerns in terms of communications and hardware requirements. In section~\ref{ssec:scalability} we discuss these concerns, and show that the approach is suitable to swarms of different sizes.
+The catch lies in the form of \emph{consensus latency}, i.e., the time it takes for messages to travel between robots and to be verified in this democratic process---and in \emph{data storage costs}, since each robot keeps a local copy of the blockchain database. These aspects raise scalability concerns in terms of communications and hardware requirements. In section~\ref{subsec:scalability} we discuss these concerns.
 
-Cooperation is not always an advantage~\cite{pitonakova_icr_2018}. Sharing information can lead the swarm to over-exploit already known resources and miss out by not exploring for better resources. It also leads to higher physical interference (due to the increase in robot collisions) and informational interference (due to the broadcasting of incorrect/outdated information). The role of our smart contract coordinator is to optimize the swarm performance (in terms of \emph{total reward collected} and \emph{energy efficiency}) by aggregating the latest known resource information from robot scouts, and assigning resource patches to robot recruits, thus minimizing the impact from both forms of interference. In section~\ref{ssec:adaptability} we show the performance results of a blockchain-coordinated robot swarm in comparison to a swarm of uncoordinated robots, in environments with different resource distributions. We also analyse how performance changes as the maximum number of foragers that the smart contract allows per patch increases.
+Cooperation is not always an advantage~\cite{pitonakova_icr_2018}. Sharing information can lead the swarm to over-exploit already known resources and miss out by not exploring for better resources. It also leads to higher physical interference (due to the increase in robot collisions) and informational interference (due to the broadcasting of incorrect/outdated information). The role of our smart contract coordinator is to optimize the foraging task (in terms of \emph{total reward collected} and \emph{energy efficiency}) by aggregating the latest known resource information from robot scouts, and allocating resources to robot recruits, thus minimizing the impact from both forms of interference. In section~\ref{subsec:performance} we show the performance results of a blockchain-coordinated robot swarm in comparison with an uncoordinated swarm, in environments with different resource distributions, and when the maximum number of recruits allowed by the smart contract increases.
 
-%In results section A, we compare two robot swarms in which the individual robots perform the same control routine, but with one key difference: one swarm does not use a blockchain and thus the robots forage resources based on their own scouting and local data. In contrast, the robots in the second swarm do not keep any information locally. Instead, they transact to store the resource information on the blockchain and perform foraging based on the information that they have added to the blockchain. 
+%In results section A, we compare two robot swarms in which the individual robots perform the same control routine, but with one key difference: one swarm does not use a blockchain and thus the robots forage resources based on their own scouting and local data. In contrast, the robots in the second swarm do not keep any information locally. Instead, they transact to store the resource information on the blockchain and perform foraging based on the information that they have added to the blockchain. In this fashion, we seek to draw conclusions regarding the aforementioned scalability concerns of a blockchain-controlled approach to swarm coordination.
 
 %In experiment B, we analyze the performance of a $20$~robot swarm performing the foraging task using blockchain coordinator control in the different resource distributions described in~\ref{subsec:env}. We expect that in some distributions the swarm will benefit more from the integration of blockchain supervision than in others.
 
 \subsection{Scalability}
-\label{ssec:scalability}
+\label{subsec:scalability}
 
 \subsubsection{Consensus latency}
 
- Figure~\ref{fig:block-histograms} (left) shows the \emph{Block Reception Time}, which is the difference between the timestamp at the moment a block is received by a robot and the timestamp of that blocks production (in other words, the time it took for a block to be disseminated from its producer to every other robot). Figure~\ref{fig:block-histograms} (right) shows the \emph{Block Production Time}, that is the difference of the timestamps between two consecutive blocks on the final version of the blockchain. The first metric is calculated online, while the second is calculated post-experiment.
+ Figure~\ref{fig:block-histograms} (top) shows the \emph{Block Reception Time}, which is the difference between the timestamp at the moment a robot receives a block, and the timestamp at the moment it is produced (in other words, the time it took for a block to be disseminated from its producer to every other node). Figure~\ref{fig:block-histograms} (bottom) shows the \emph{Block Production Time}, that is the difference of the timestamps between two consecutive blocks on the final version of the blockchain. Both these metrics are obtained offline and post-experiment.
  
 The \emph{block period} parameter sets the minimum required difference between the timestamps of two consecutive blocks (see section~\ref{sec:methods}), and thus has a big effect on the information delay introduced by the blockchain: if it is too high, it reduces the possibility to employ the shared knowledge to perform time-critical tasks. Conversely, if it is too low, it increases the frequency of block production which leads to~1) higher costs of communication, computation and data storage; and~2) increased rate of blockchain forks which contain redundant, or more dangerously, conflicting information.
- In figure~\ref{fig:block-histograms} (left) we observe that a majority of blocks are received within $2$~seconds. This observation justifies our choice of a block period $T_{block}=2s$, as there is a high chance that the previous block has been disseminated through the network before it is time to produce the next block.
+ 
+ In figure~\ref{fig:block-histograms} (top) we observe that a majority of blocks are received within $2$~seconds. This observation justifies our choice of a block period $T_{block}=2s$, as there is a high chance that the previous block has been disseminated through the network before it is time to produce the next block.
 
 \begin{figure}
   \centering
   \includegraphics{multi/time_elapsed_both.png}
-  \caption{Left: In 70\% of the cases, a disseminated block was received by a robot for the first time within a window of $2$~seconds, counting from the moment it was produced; and $100$\% of the blocks within $15$s. Bottom: With $T_{block}=2$s, the minimum and ideal production delay is $2$~seconds. An additional delay is introduced due to network delays (temporary unavailability of the preferred block producer, for instance). In our experiments, 90\% of the blocks were produced within $2$ to $3$~seconds, which means that the blockchain is working under nominal conditions throughout all experiments. Note: these plots are generated from the combined data of all experiments performed in this study}
+  \caption{Top: The time it took for every robot to receive each new block of information. In our experiments, 60\% of the blocks were consistently received in under $2$~seconds, which justifies the choice for a block period $T_{block}=2$s. Bottom: The time it took for a new block to be produced. With $T_{block}=2$s, the minimum and ideal production delay is $2$~seconds. An additional delay is introduced due to network delays (temporary unavailability of the preferred block producer, for instance). In our experiments, 90\% of the blocks were produced within $2$ to $3$~seconds, which means that the blockchain is working under nominal conditions throughout all experiments. Note: these plots are generated from the combined data of all experiments performed in this study}
   \label{fig:block-histograms}
 \end{figure}
 
-\vspace{-5mm}
-\subsubsection{Data storage}
+\subsubsection{Data storage costs}
 
 In previous research~\cite{pacheco_ants_2020,StrCasDor2018:aamas}, the block period was $15$~seconds. With a block period of $2$~seconds, we expect that the costs of storing the blockchain will be higher since the amount of data stored depends on the number of blocks created, and also on number of transactions executed by the robots. 
 
-Figure~\ref{fig:scal-storage} shows the size of the folder where the blockchain is stored. The data storage required increases linearly over the course of the experiment, and sublinearly with the number of robots in the swarm. At the end of the experiment, the occupied card storage is about $8$~MB (i.e., our experiment carried out on a $16$~GB SD could be performed $2000$~times before running out of storage space). Furthermore, the robots do not need to store the complete history of the blockchain, as it contains information which is no longer relevant for their operation. \cite{nishida_suppressing_2018} presents an approach to reducing the blockchain storage costs in robot swarms. The role of storing the complete blockchain can be distributed between robots, or externally sourced as connectivity becomes available, while the robots may leverage cryptography to check for database consistency.
+Figure~\ref{fig:data-storage} shows the size (in MB) of the folder where the blockchain is stored. The data storage required increases linearly over the course of the experiment, and sublinearly with the number of robots in the swarm. At the end of the experiment, the occupied card storage is about $8$~MB (i.e., our experiment carried out on a $16$~GB SD could be performed $2000$~times before running out of storage space). Furthermore, the robots do not need to store the complete history of the blockchain, as it contains information which is no longer relevant for their operation. \cite{nishida_suppressing_2018} presents an approach to reducing the blockchain storage costs in robot swarms. The role of storing the complete blockchain can be distributed between robots, or externally sourced as connectivity becomes available, while the robots may leverage cryptography to check for database consistency.
 
 In light of this, we do not expect memory to pose an scalability problem in a real deployment because: 1)~the cost is reasonable given current data storage technology; and 2)~blockchain cryptography can be leveraged to reduce the storage costs in robot swarms.
 
-\vspace{-5mm}
-\subsubsection{Performance}
-
-Figure~\ref{fig:scal-performance} shows that the swarm is capable of maintaining performance (the total reward collected increases at a $1$-to-$1$ ratio with the number of robots) as the environment size, number of robots and quantity of resources scale accordingly. When scaling the environment, we maintain the same quantity of robots per square meter of the arena (3 robots) as well as the quantity and quality of resource patches. 
-
 \begin{figure}
-    \centering
-    \begin{minipage}{.475\textwidth}
-        \centering
-        \includegraphics{test120_scaling/storage_bp_Robots_MB.png}
-        \captionof{figure}{The storage space required by the blockchain grows linearly with number of robots, at a rate of $1$~MB per $10$ additional robots.}
-        \label{fig:scal-storage}
-    \end{minipage}
-    \hfill
-    \centering
-    \begin{minipage}{.475\textwidth}
-        \centering
-        \includegraphics{test120_scaling/performance_bp_Robots_VALUE.png}
-        \captionof{figure}{The total reward collected increases approximately in a $1$-to-$1$ proportion with the number of robots in the swarm.} 
-        \label{fig:scal-performance}
+    \begin{minipage}[c]{0.5\textwidth}
+        \includegraphics{multi/local_memory.png}
+    \end{minipage}\hfill
+    \begin{minipage}[c]{0.48\textwidth}
+        \caption{The storage space occupied by the blockchain grows linearly over time. The lines in gray are the exact values over time; while the colored lines are linear regressions for three different swarm sizes over $20$~repetitions} 
+        \label{fig:data-storage}
     \end{minipage}
 \end{figure}
 
 
-\subsection{Adaptability}
-\label{ssec:adaptability}
+% \begin{figure}
+%   \centering
+%   \includegraphics{multi/local_memory.png}
+%   \caption{The storage space occupied by the blockchain grows linearly over time. The lines in gray are the exact values over time; while the colored lines are linear regressions for three different swarm sizes over $20$~repetitions} 
+%   \label{fig:data-storage}
+% \end{figure}
+
+
+%To analyze the impact on performance of the delay introduced by the blockchain on the swarm, we apply the same controller -- individualist controller.
+%\begin{figure}
+%  \centering
+%  \includegraphics{test116/value_bp_Robots.png}
+%  \caption{} 
+%  \label{fig:experiment3}
+%\end{figure}
+%\begin{figure}
+%  \centering
+%  \includegraphics{test116/efficiency_bp_Robots.png}
+%  \caption{} 
+%  \label{fig:experiment3}
+%\end{figure}
+
+\subsection{Performance}
+\label{subsec:performance}
 
 \subsubsection{Scattered distribution}
-\label{sssec:scattered}
-In this environment there is a large amount of patches uniformly spread on the map. In such case, individualist foragers tend to perform well~\cite{pitonakova_icr_2018,wilson_sociobiology_2000}, or even better than cooperating robots (when the benefits of cooperation do not overcome the negative effects interference). In Figure~\ref{fig:results} (left) the total reward collected saturates at $2$ foragers per patch, but is consistently higher than the non-collaborating swarm ('NA' in the x-axis). The scouting efficiency, is slightly higher but also has a high spread. This happens because cooperating robots, when lucky, will discover and share the location of higher quality patches and better allocate foragers to those resources.
+%In the abundant distribution $5$\% of the environment floor area is covered with uniformly distributed patches. Each patch has a diameter of 12~$cm$ and contains $8$~resources. 70\% of the patches are red, while there is 10\% of each green, blue and yellow.
 
-\vspace{-5mm}
-\subsubsection{Concentrated distribution}
-\label{sssec:concentrated}
-The blockchain-coordinated swarm is capable to retrieve $50$\% to $100$\% more reward, and be $2$~times more efficient in scouting for resources, as seen on Figure~\ref{fig:results} (middle). In this environment, the advantage of coordination is more pronounced since the patches last longer due to containing more resources, and are larger in size. As such, there is less interference and the performance increases on the cooperative swarm (up to $5$~foragers per patch).
-
-\vspace{-5mm}
-\subsubsection{Hotspot distribution}
-\label{sssec:hotspot}
-The blockchain-coordinated swarm is capable to retrieve more than double the reward and be $2$~-$5$~times more efficient during scouting, as seen on Figure~\ref{fig:results} (right). This occurs because the scouting robots which move in the direction of the hotspot are very successful, while others robots do not find any resources. The ability to aggregate and share information prevents unsuccessful robots from idling or wasting energy performing redundant exploration. Conversely, given the tight aggregation of resources, the foraging efficiency quickly drops as the number of recruits increases above $3$ due higher physical interference between robots. 
+The environment is considered abundant since it is relatively easy for the robots to independently discover resources. In such environments, individualist foragers can perform well enough~\cite{pitonakova_icr_2018,wilson_sociobiology_2000}, or even better if the benefits of cooperation do not overcome the damage from interference. In Figure~\ref{fig:abundant-value} the total reward collected saturates after $2$ recruits per patch, and begins to drop at $5$ recruits. Cooperating robots share the location of higher quality patches, and are thus capable of retrieving more reward with an increased scouting efficiency (Figure~\ref{fig:abundant-eff-exp}). On the other hand, as the number of recruits becomes too high (more than $2$ recruits) interference and lack of robots available for scouting start to harm the performance of the swarm.
 
 \begin{figure}
+\centering
+\begin{minipage}{.495\textwidth}
   \centering
-  \includegraphics{multi/value.png}
-  \vspace{-2mm}
-  \includegraphics{multi/eff.png}
-  \caption{Performance results for three distributions: Scattered (left), concentrated (middle) and hotspot (right). The top row shows the total reward collect by the swarm at the end of the experiment, and the bottom row the scouting efficiency (ratio of distance travelled while exploring the environment to reward collected). The uncoordinated robot swarm is represented with "NA" in the x-axis, since the maximum number of foragers is not defined.}
-  \label{fig:results}
+  \includegraphics{test117/value_bp_Recruits_VALUE.png}
+  \caption{A figure}
+  \label{fig:abundant-value}
+\end{minipage}
+\centering
+\begin{minipage}{.495\textwidth}
+  \centering
+  \includegraphics{test117/efficiency_bp_Recruits_SCOUT_DIST.png}
+  \caption{Another figure}
+  \label{fig:abundant-eff-exp}
+\end{minipage}
 \end{figure}
-
-\section{Conclusions and Future Work}
-\label{sec:conclusion}
-
-We showed that very simple rules contained in a decentralized smart contract coordinator can indeed be used to improve the performance of a robot swarm, while keeping reasonable data storage costs and manageable delay in the control loop. The study is limited in the sense that we do not fully explore the coordination potential of smart contracts: we use a static smart contract, which does not adapt its rules according to the quantity of patches that are present in the environment, nor according to the properties (quality, distance or quantity) of the resources they contain.
-
-In future work, we will extend the ability of the smart contract to introduce coordination rules which are not feasible in robot swarm systems that do not exploit a shared knowledge database. Optimal foraging theory, for instance, dictates that resources below a quality threshold should be ignored in order to improve the energetic balance of the swarm. It is also important to address the "oracle" problem: how can information provided by robots be validated before being permanently added to the blockchain. Blockchain projects have addressed the oracle problem using economic games, in which agents that provide veritably correct information are rewarded with cryptotokens.
-
-%The number of recruits per patch should also be regulated according to the properties of that patch (i.e., larger patches with more resources and better quality should have more recruits allocated to them).
-
-
-
-\bibliographystyle{splncs04}
-\bibliography{mybibliography}
-\end{document}
-
 
 %\begin{figure}
 % \begin{minipage}{.495\textwidth}
@@ -377,89 +365,26 @@ In future work, we will extend the ability of the smart contract to introduce co
 % \end{minipage}
 % \end{figure}
 
+\subsubsection{Hotspot distribution}
+%In the hotspot distribution $3$\% of the environment floor area is covered with patches following a normal distribution (0.25*1.825, 0.15*1.825) around a center point. Each patch has a diameter of 14~$cm$ and contains $8$~red berries. 
 
-% \begin{figure}
-%     \centering
-%     \begin{minipage}{.495\textwidth}
-%         \centering
-%         \includegraphics{test120/value_bp_Recruits_VALUE.png}
-%     \end{minipage}
-%     \vspace{-6mm}
-%     \centering
-%     \begin{minipage}{.495\textwidth}
-%         \centering
-%         \includegraphics{test120/efficiency_bp_Recruits_SCOUT_DIST.png}
-%     \end{minipage}
-%     \vspace{-6mm}
-% \centering
-% \begin{minipage}{.495\textwidth}
-%   \centering
-%   \includegraphics{test120_concentrated/value_bp_Recruits_VALUE.png}
-% \end{minipage}
-% \begin{minipage}{.495\textwidth}
-%   \centering
-%   \includegraphics{test120_concentrated/efficiency_bp_Recruits_SCOUT_DIST.png}
-% \end{minipage}
-% \centering
-% \begin{minipage}{.495\textwidth}
-%   \centering
-%   \includegraphics{test120_hotspot/value_bp_Recruits_VALUE.png}
-%   \label{fig:hotspot-value}
-% \end{minipage}
-% \begin{minipage}{.495\textwidth}
-%   \centering
-%   \includegraphics{test120_hotspot/efficiency_bp_Recruits_SCOUT_DIST.png}
-%   \label{fig:hotspot-eff-exp}
-% \end{minipage}
-%   \caption{Another figure}
-% \end{figure}
+The blockchain coordinated swarm is capable to retrieve more than double the reward (Figure~\ref{fig:hotspot-value}) and be $2$~-$5$~times more efficient during scouting (Figure~\ref{fig:hotspot-eff-exp}). This occurs because the scouting robots which move in the direction of the hotspot are very successful, while others robots do not find any resources. The ability to aggregate and share information prevents unsuccessful robots from idling or wasting energy performing redundant exploration. Conversely, given the tight aggregation of resources, the foraging efficiency quickly drops as the number of recruits increases due higher physical interference between robots. %(Figure~\ref{fig:hotspot-eff-for})
 
-
-% \begin{figure}
-% \centering
-% \begin{minipage}{.3\textwidth}
-%     \centering
-%     \includegraphics{test120/efficiency_bp_Recruits_SCOUT_DIST.png}
-% \end{minipage}
-% \begin{minipage}{.3\textwidth}
-%   \centering
-%   \includegraphics{test120_concentrated/efficiency_bp_Recruits_SCOUT_DIST.png}
-% \end{minipage}
-% \begin{minipage}{.3\textwidth}
-%   \centering
-%   \includegraphics{test120_hotspot/efficiency_bp_Recruits_SCOUT_DIST.png}
-% \end{minipage}
-
-% \begin{minipage}{.3\textwidth}
-%     \centering
-%     \includegraphics{test120/value_bp_Recruits_VALUE.png}
-% \end{minipage}
-% \begin{minipage}{.3\textwidth}
-%   \centering
-%   \includegraphics{test120_concentrated/value_bp_Recruits_VALUE.png}
-% \end{minipage}
-% \begin{minipage}{.3\textwidth}
-%   \centering
-%   \includegraphics{test120_hotspot/value_bp_Recruits_VALUE.png}
-% \end{minipage}
-% \end{figure}
-
-% \begin{figure}
-% \begin{minipage}{.495\textwidth}
-%   \centering
-%   \includegraphics{test117_scarce_big/value_bp_Recruits_DIST.png}
-%   \caption{A figure}
-%   \label{fig:scarce-dist}
-% \end{minipage}
-% \begin{minipage}{.495\textwidth}
-%   \centering
-%   \includegraphics{test117_scarce_big/efficiency_bp_Recruits_RECRUIT_DIST.png}
-%   \caption{A figure}
-%   \label{fig:scarce-eff-recruit}
-% \end{minipage}
-% \end{figure}
-
-
+\begin{figure}
+\centering
+\begin{minipage}{.495\textwidth}
+  \centering
+  \includegraphics{test117_patchy_single/value_bp_Recruits_VALUE.png}
+  \caption{}
+  \label{fig:hotspot-value}
+\end{minipage}
+\begin{minipage}{.495\textwidth}
+  \centering
+  \includegraphics{test117_patchy_single/efficiency_bp_Recruits_SCOUT_DIST.png}
+  \caption{Another figure}
+  \label{fig:hotspot-eff-exp}
+\end{minipage}
+\end{figure}
 
 %\begin{figure}
 % \begin{minipage}{.495\textwidth}
@@ -476,6 +401,41 @@ In future work, we will extend the ability of the smart contract to introduce co
 % \end{minipage}
 % \end{figure}
 
+\subsubsection{Scarce distribution}
+%In the scarce distribution $4$\% of the environment floor area is covered with uniformly distributed patches. Each patch has a diameter of 30~$cm$ and contains $15$~red berries. 
+
+The blockchain coordinated swarm is capable to retrieve $50$\% to $100$\% more reward (Figure~\ref{fig:scarce-value}) and be $2$~-$3$~times more efficient during scouting (Figure~\ref{fig:scarce-eff-scout}). In this environment, it is hard for the scouts to find resources due to relative scarcity, but it is easier for foragers as the patches are quite large and thus inferences do not show a big impact until $5$~recruits per patch. Coordination can be very valuable in such an environment.
+
+\begin{figure}
+\centering
+\begin{minipage}{.495\textwidth}
+  \centering
+  \includegraphics{test117_scarce_big/value_bp_Recruits_VALUE.png}
+  \caption{A figure}
+  \label{fig:scarce-value}
+\end{minipage}
+\begin{minipage}{.495\textwidth}
+  \centering
+  \includegraphics{test117_scarce_big/efficiency_bp_Recruits_SCOUT_DIST.png}
+  \caption{Another figure}
+  \label{fig:scarce-eff-scout}
+\end{minipage}
+\end{figure}
+
+% \begin{figure}
+% \begin{minipage}{.495\textwidth}
+%   \centering
+%   \includegraphics{test117_scarce_big/value_bp_Recruits_DIST.png}
+%   \caption{A figure}
+%   \label{fig:scarce-dist}
+% \end{minipage}
+% \begin{minipage}{.495\textwidth}
+%   \centering
+%   \includegraphics{test117_scarce_big/efficiency_bp_Recruits_RECRUIT_DIST.png}
+%   \caption{A figure}
+%   \label{fig:scarce-eff-recruit}
+% \end{minipage}
+% \end{figure}
 
 % \subsubsection{Litter distribution}
 % \todo{maybe remove litter -- or make it more similar to pitanokovas for comparison (15 per patch is too much for "litter")}
@@ -513,3 +473,18 @@ In future work, we will extend the ability of the smart contract to introduce co
 %   \label{fig:litter-eff-rec}
 % \end{minipage}
 % \end{figure}
+
+\section{Conclusions and Future Work}
+\label{sec:conclusion}
+
+We showed that very simple rules contained in a decentralized smart contract coordinator can indeed be used to improve the performance of a robot swarm, while keeping reasonable data storage costs and manageable delay in the control loop. The study is limited in the sense that we do not fully explore the coordination potential of smart contracts: we use a static smart contract, which does not adapt its rules according to the quantity of patches that are present in the environment, nor according to the properties (quality, distance or quantity) of the resources they contain.
+
+In future work, we will extend the ability of the smart contract to introduce coordination rules which are not feasible in robot swarm systems that do not exploit a shared knowledge database. Optimal foraging theory, for instance, dictates that resources below a quality threshold should be ignored in order to improve the energetic balance of the swarm. 
+
+%The number of recruits per patch should also be regulated according to the properties of that patch (i.e., larger patches with more resources and better quality should have more recruits allocated to them).
+
+
+
+\bibliographystyle{splncs04}
+\bibliography{mybibliography}
+\end{document}

@@ -1,2 +1,2 @@
-geth --exec $1 attach ~/.ethereum/devchain/geth.ipc 
+geth --exec $1 attach /root/.ethereum/devchain/geth.ipc
 
