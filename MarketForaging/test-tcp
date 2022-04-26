@@ -1,4 +1,4 @@
-
+#!/bin/bash
 ready=0
     for host in $(awk '{print $4}' identifiers.txt); do
         if echo -e '\x1dclose\x0d' | telnet $host $1 2>/dev/null | grep -q Connected ; then
