@@ -197,6 +197,7 @@ class TCP_server2(object):
 				break 
 
 			else:
+				try:
 				# establish a connection
 				__clientsocket, addr = __socket.accept()   
 
