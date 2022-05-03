@@ -93,9 +93,11 @@ def getBalance():
 def getEnodes():
 		return [peer.enode for peer in w3.geth.admin.peers()]
 
-def getIds():
-		return [readEnode(enode) for enode in getEnodes('geth')]
-	
+def getIps(__enodes = None):
+    if __enodes:
+        return [enode.split('@',2)[1].split(':',2)[0] for enode in __enodes]
+    else:
+        return [enode.split('@',2)[1].split(':',2)[0] for enode in getEnodes()]
 	
 if __name__ == '__main__':
 	logger.setLevel(10)

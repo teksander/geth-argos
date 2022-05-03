@@ -1,15 +1,14 @@
 import rpyc
 import logging
 import json
-import os
-import sys
 from hexbytes import HexBytes
+
+import sys, os
 experimentFolder = os.environ["EXPERIMENTFOLDER"]
 sys.path.insert(1, experimentFolder)
 
 # logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
 # logger = logging.getLogger(__name__)
-
 
 def init_web3(robotID):
 
@@ -24,6 +23,20 @@ def init_web3(robotID):
 
     return w3
 
+def init_peer_buffer(robotID):
+
+    # Get ID from argos
+    robotID = int(robotID)
+
+    # Connect to the RPYC which hosts web3.py (port 4xxx where xxx is robot ID)
+    dockerIP = identifersExtract(robotID, 'IP')
+    
+    conn = rpyc.connect(dockerIP, 4001, config = {"allow_all_attrs" : True})
+    pb = conn.root
+    sendPeers = rpyc.async_(pb.sendPeers)
+    getCount  = rpyc.async_(pb.getCount)
+
+    return pb, sendPeers, getCount
 
 # def init_web3(robotID):
 

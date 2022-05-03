@@ -13,9 +13,6 @@ bf = w3.eth.filter('latest')
 # Create an exposed wrapper for web3
 class Web3_Wrapper_Service(rpyc.Service):
 
-    # def on_connect(self):
-    #     print(self._conn)
-
     @property
     def exposed_key(self):
         return w3.eth.coinbase

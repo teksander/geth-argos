@@ -6,12 +6,12 @@ import socket
 import subprocess
 import os
 import logging
-import psutil
+# import psutil
 import math
 import json
 from types import SimpleNamespace
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder)
+# experimentFolder = os.environ["EXPERIMENTFOLDER"]
+# sys.path.insert(1, experimentFolder)
 
 
 # The logs that go to console
@@ -477,11 +477,11 @@ def readEnode(enode, output = 'id'):
     elif output == 'id':
         return ip_.split('.')[-1] 
 
-def getCPUPercent():
-    return psutil.cpu_percent()
+# def getCPUPercent():
+#     return psutil.cpu_percent()
 
-def getRAMPercent():
-    return psutil.virtual_memory().percent
+# def getRAMPercent():
+#     return psutil.virtual_memory().percent
 
 def getFolderSize(folder):
     # Return the size of a folder

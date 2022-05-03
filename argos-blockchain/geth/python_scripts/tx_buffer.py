@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
 			time.sleep(0.5)
 
-	update_th = threading.Thread(target=update_tasks)
-	update_th.start()
+	updateTh = threading.Thread(target=update_tasks)
+	updateTh.start()
 
 		# w3.eth.sendTransaction({'from': w3.key, 'to': w3.key, 'value':1})

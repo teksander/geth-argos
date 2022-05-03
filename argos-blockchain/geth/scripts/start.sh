@@ -25,11 +25,11 @@ rm -rf root/logs/*
 echo "Starting analytics logging"
 python3 /root/python_scripts/analytics.py $SLOT&
 
-echo "Starting peering buffer"
+echo "Starting peer buffer"
 python3 /root/python_scripts/buffer.py&
 
 echo "Starting web3 wrapper hosting"
-python3 /root/python_scripts/web3wrapper_docker.py
+python3 /root/python_scripts/console_rpyc.py
 
 # sleep 1
 

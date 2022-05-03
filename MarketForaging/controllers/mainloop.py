@@ -626,8 +626,8 @@ def reset():
 def destroy():
     if startFlag:
         w3.geth.miner.stop()
-        for enode in getEnodes():
-            w3.geth.admin.removePeer(enode)
+        # for enode in getEnodes():
+        #     w3.geth.admin.removePeer(enode)
 
     variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
     with open(variables_file, 'w+') as vf:
@@ -640,20 +640,5 @@ def destroy():
 #########################################################################################################################
 
 
-def getEnodes():
-    return [peer['enode'] for peer in w3.geth.admin.peers()]
 
-def getEnodeById(__id, gethEnodes = None):
-    if not gethEnodes:
-        gethEnodes = getEnodes() 
-
-    for enode in gethEnodes:
-        if readEnode(enode, output = 'id') == __id:
-            return enode
-
-def getIds(__enodes = None):
-    if __enodes:
-        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
-    else:
-        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
 
