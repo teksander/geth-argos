@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-import math
-import os
+import os, math
+
+# All parameters
+params = dict()
+
+# General Parameters
+params['environ'] = os.environ
 
 # General Parameters
 generic_params = dict()
-generic_params['arena_size'] = float(os.environ["ARENADIM"])
+generic_params['arena_size'] = float(os.environ["ARENADIMY"])
 generic_params['num_robots'] = int(os.environ["NUMROBOTS"])
 generic_params['time_limit'] = float(os.environ["TIMELIMIT"]) * 60
 generic_params['seed']       = 350 # None for randomgen
@@ -12,17 +17,35 @@ generic_params['seed']       = 350 # None for randomgen
 generic_params['tps'] = eval(os.environ["TPS"])
 generic_params['num_1'] = eval(os.environ["NUM1"])
 generic_params['num_2'] = eval(os.environ["NUM2"])
-generic_params['density'] = eval(os.environ["DENSITY"])
-generic_params['arena_dim'] = eval(os.environ["ARENADIM"])
+generic_params['arena_dim'] = eval(os.environ["ARENADIMY"])
 generic_params['rab_range'] = eval(os.environ["RABRANGE"])
 generic_params['block_period'] = eval(os.environ["BLOCKPERIOD"])
 generic_params['max_recruits'] = eval(os.environ["MAXRECRUITS"])
 
+params['generic'] = generic_params
+
 # Parameters for marketplace
 market_params = dict()
-market_params['position']       = 'center'
 market_params['radius']         = generic_params['arena_size'] * math.sqrt(0.03/math.pi)
 market_params['radius_dropoff'] = generic_params['arena_size'] * math.sqrt(0.09/math.pi)
+
+params['market'] = market_params
+
+params['market']['height']   = eval(params['environ']['ARENADIMY'])
+params['market']['width'] 	  = 0.5
+params['market']['position'] = [0, 0]
+
+params['quarry'] = dict()
+params['quarry']['height']   = eval(params['environ']['ARENADIMY'])
+params['quarry']['width'] 	 = 0.6
+params['quarry']['position'] = [-eval(params['environ']['ARENADIMX'])/2 + params['quarry']['width']/2, 0]
+
+
+params['csite'] = dict()
+params['csite']['height']   = eval(params['environ']['ARENADIMY'])
+params['csite']['width'] 	= 0.6
+params['csite']['position'] = [eval(params['environ']['ARENADIMX'])/2 - params['csite']['width']/2, 0]
+
 
 # Parameters for resources
 resource_params = dict()

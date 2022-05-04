@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import time
 from aenum import Enum, auto
-from aux import Timer
 
 class Idle(Enum):
     IDLE   = 1
@@ -16,6 +15,19 @@ class Recruit(Enum):
     FORAGE = 6
     HOMING = 7
     PLAN  = 8
+
+class QuarryWorker(Enum):
+    MINE      = 1
+    NAVIGATE  = 2
+    TRANSPORT = 3
+    SELL      = 4
+
+class Builder(Enum):
+    BUY       = 5
+    TRANSPORT = 6
+    NAVIGATE  = 7
+    BUILD     = 8
+
 
 class FiniteStateMachine(object):
 
@@ -57,10 +69,10 @@ class FiniteStateMachine(object):
         # Robot actions to perform on every transition
 
         if message != None:
-            self.robot.log.info("%s -> %s%s", self._currState, state, ' | '+message)
+            self.robot.log.info("%s -> %s%s", self._currState, state, ' | '+ message)
         
-        self.robot.variables.set_attribute("collectResource", "")
-        self.robot.variables.set_attribute("dropResource", "")
+        self.robot.variables.set_attribute("grabStone", "")
+        self.robot.variables.set_attribute("dropStone", "")
         self.robot.variables.set_attribute("state", str(state))
 
 

@@ -89,6 +89,49 @@ class Counter:
     def reset(self):
         self.count = 0
 
+class Accumulator:
+    def __init__(self, rate = 0, name = None):
+        self.name = name
+        self.rate = rate
+        self.value = 0
+        self.isLocked = False
+
+    def query(self, reset = True):
+        if self.remaining() < 0:
+            if reset:
+                self.reset()
+            return True
+        else:
+            return False
+
+    def remaining(self):
+        return self.rate - self.value
+
+    def set(self, rate):
+        if not self.isLocked:
+            self.rate = rate
+            self.value = 0
+        return self
+
+    def get(self):
+        return self.value
+        
+    def acc(self, quantity):
+        self.value += quantity
+
+    def reset(self):
+        if not self.isLocked:
+            self.value = 0
+        return self
+
+    def lock(self):
+        self.isLocked = True
+        return self
+
+    def unlock(self):
+        self.isLocked = False
+        return self
+
 
 
 class Timer:
@@ -447,7 +490,7 @@ class Logger(object):
         :type data: list
         """ 
         
-        if self.isReady():
+        if self.queryTimer():
             self.tStamp = time.time()
             try:
                 tString = str(round(self.tStamp-self.tStart, 3))
@@ -458,7 +501,7 @@ class Logger(object):
                 pass
                 logger.warning('Failed to log data to file')
 
-    def isReady(self):
+    def queryTimer(self):
         return time.time()-self.tStamp > self.rate
 
     def start(self):

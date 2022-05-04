@@ -85,18 +85,20 @@ class TCP_server(object):
 
 	def request(self, server_ip, port):
 		""" This method is used to request data from a running TCP server """
-		# create the client socket
-		__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-		# set the connection timeout
-		__socket.settimeout(5)
-		# connect to hostname on the port
-		__socket.connect((server_ip, port))                               
-		# Receive no more than 1024 bytes
-		msg = __socket.recv(1024)  
-		msg = msg.decode('ascii') 
+		try:
+			# create the client socket
+			__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+			# set the connection timeout
+			__socket.settimeout(5)
+			# connect to hostname on the port
+			__socket.connect((server_ip, port))                               
+			# Receive no more than 1024 bytes
+			msg = __socket.recv(1024)  
+			msg = msg.decode('ascii') 
 
-		if msg == '':
-			raise ValueError('Connection Refused')
+		except:
+			logger.warning('TCP request failed')
+			msg = ''
 
 		__socket.close()   
 		return msg

@@ -25,19 +25,24 @@ export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/resource_market.sol"
 export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
-export CON1="${EXPERIMENTFOLDER}/controllers/mainloop.py"
-export CON2="${EXPERIMENTFOLDER}/controllers/mainloop_greedy.py"
 
-# [ARGOS_PARAMS]
-export NUM1=6
+
+# [ARGOS]
+export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop.py"
+export NUM1=5
 export NUM2=0
 export RABRANGE="0.3"
-export TPS=10
-export DENSITY=3
+
+export ARENADIMX=4
+export ARENADIMY=2
+export ARENADIMXH=$(echo "scale=3 ; $ARENADIMX/2" | bc)
+export ARENADIMYH=$(echo "scale=3 ; $ARENADIMY/2" | bc)
+
+# export DENSITY=3
 export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
-export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
-export ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
-export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
+
+export STARTDIM=$(echo "scale=3 ; $ARENADIMY/5" | bc)
+export TPS=10
 
 # [GETH]
 export BLOCKPERIOD=2
@@ -48,7 +53,6 @@ export MAXRECRUITS=2
 # [OTHER]
 export SEED=350
 export TIMELIMIT=15
-export SLEEPTIME=5
 export REPS=2
 
 

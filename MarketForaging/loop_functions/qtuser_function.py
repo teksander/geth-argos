@@ -20,43 +20,47 @@ generic_params['show_rays'] = False
 
 # /* Global Variables */
 #######################################################################
-res_diam = 0.0125
-res_height = 0.05
-
 
 def init():
-	global item_list
+	global item_list, stone_list
 
-	# Create a list of random circles centered around (0,0)	
-	item_list = []
-	for i in range(0,100):
-		
-		r = (resource_params['radius'] - res_diam) * math.sqrt(random.random())
-		theta = 2 * math.pi * random.random()
+	# Create a list of random quarry stones
+	stone_list = []
+	for i in range(0,50):
+		dx = params['quarry']['width']/2
+		dy = params['quarry']['height']/2
+		x  = random.uniform(params['quarry']['position'][0]-dx, params['quarry']['position'][0]+dx)
+		y  = random.uniform(params['quarry']['position'][1]-dy, params['quarry']['position'][1]+dy)
 
-		item_list.append((r * math.cos(theta), r * math.sin(theta)))
-
+		stone_list.append((x, y))
 
 def DrawInWorld():
 
-	# Draw the Market
-	environment.qt_draw.circle([0, 0, 0.001],[], market_params['radius'], 'brown', True)
-	environment.qt_draw.circle([0, 0, 0.001],[], market_params['radius_dropoff'], 'brown', False)
+	# Draw the market
+	dx = params['market']['width']/2
+	dy = params['market']['height']/2
+	environment.qt_draw.polygon(params['market']['position']+[0.01],[], [[-dx,-dy],[-dx,dy],[dx,dy],[dx,-dy]], 'custom2', True)
 
-	# Draw resources carried by robots
+	# Draw the quarry
+	dx = params['quarry']['width']/2
+	dy = params['quarry']['height']/2
+	environment.qt_draw.polygon(params['quarry']['position']+[0.01],[], [[-dx,-dy],[-dx,dy],[dx,dy],[dx,-dy]], 'gray70', True)
+
+	# Draw the construction site
+	dx = params['csite']['width']/2
+	dy = params['csite']['height']/2
+	environment.qt_draw.polygon(params['csite']['position']+[0.01],[], [[-dx,-dy],[-dx,dy],[dx,dy],[dx,-dy]], 'custom', True)
+
+	# Draw stones
+	qtt = 30
+	for stone in stone_list[1:qtt]:
+		environment.qt_draw.box([stone[0], stone[1], 0.01], [], [0.04,0.06,0.08],'gray40')
+
+	# Draw stones carried by robots
 	with open(robot_file, 'r') as f:
 		for line in f:
 			robotID, x, y, quality = eval(line)
 			environment.qt_draw.cylinder([x, y, 0.10],[], res_diam, res_height, quality)
-
-	# Draw resource patches
-	with open(resource_file, 'r') as f:
-		for line in f:
-			res = json.loads(line, object_hook=lambda d: SimpleNamespace(**d))
-			environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, res.quality, False)
-			draw_items = min(30, res.quantity)
-			for i in range(0, draw_items):
-				environment.qt_draw.cylinder([res.x+item_list[i][0], res.y+item_list[i][1], 0.001],[], 0.0125, 0.05, res.quality)
 
 	# Draw rays
 	if generic_params['show_rays']:
@@ -66,34 +70,6 @@ def DrawInWorld():
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_target[0], pos[1] + vec_target[1] , 0.01], 'red', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
-
-	for i in range(1,generic_params['num_robots']+1):
-		with open(blockchainFolder+'/geth/logs/%s/scresources.txt' % i, 'r') as f:	
-			for line in f:
-				res = json.loads(line, object_hook=lambda d: SimpleNamespace(**d))
-				environment.qt_draw.circle([res.x, res.y, 0.001],[], resource_params['radius'], 'gray70', True)
-
-
-	resources = list()
-	counts = list()
-	for i in range(1,generic_params['num_robots']+1):
-		with open(blockchainFolder+'/geth/logs/%s/scresources.txt' % i, 'r') as f:	
-			for line in f:
-				if line:
-					res = json.loads(line, object_hook=lambda d: SimpleNamespace(**d))
-					if (res.x, res.y) not in [(ressc.x,ressc.y) for ressc in resources]:
-						counts.append(1)
-						resources.append(res)
-					else:
-						counts[[(ressc.x,ressc.y) for ressc in resources].index((res.x, res.y))] += 1
-
-	for res in resources:
-		frac = counts[resources.index(res)]/generic_params['num_robots']
-		environment.qt_draw.circle([res.x, res.y, 0.0005],[], res.radius, 'gray90', True)
-		environment.qt_draw.circle([res.x, res.y, 0.0015],[], frac*res.radius, 'gray80', True)
-		for i in range(res.quantity):
-			environment.qt_draw.circle([res.x+1.1*res.radius, res.y+res.radius-0.01*2*i-0.001, 0.001],[], 0.01, 'black', True)
-
 
 def destroy():
 	print('Closing the QT window')

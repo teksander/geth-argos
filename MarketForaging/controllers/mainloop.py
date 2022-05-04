@@ -247,44 +247,43 @@ class Transaction(object):
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks, submodules, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb, estimatelogger
-    robotID = str(int(robot.variables.get_id()[2:])+1)
+    global clocks, submodules, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb
+    robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifersExtract(robotID, 'IP')
-    robot.variables.set_attribute("id", str(robotID))
-    robot.variables.set_consensus(False) 
+    
     robot.variables.set_attribute("newResource", "")
     robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("collectResource", "")
     robot.variables.set_attribute("dropResource", "")
     robot.variables.set_attribute("hasResource", "")
     robot.variables.set_attribute("resourceCount", "0")
+    
+
+    robot.variables.set_attribute("id", robotID)
     robot.variables.set_attribute("state", "")
+    robot.variables.set_attribute("grabStone", "")
+    robot.variables.set_attribute("dropStone", "")
+    robot.variables.set_attribute("hasStone", "")
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
     log_folder = experimentFolder + '/logs/' + robotID + '/'
 
-    # Monitor logs (recorded to file)
+    # Monitor logs 
     monitor_file =  log_folder + 'monitor.log'
     os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
     logging.basicConfig(filename=monitor_file, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
-    
-    # Experiment data logs (recorded to file)
-    name   =  'odometry.csv'
-    header = ['DIST']
-    logs['odometry'] = Logger(log_folder+name, header, 10, ID = robotID)
-
-    name   = 'resource.csv'
-    header = ['COUNT']
-    logs['resources'] = Logger(log_folder+name, header, 5, ID = robotID)
-
-    # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
     robot.log = logging.getLogger('main')
-    estimatelogger = logging.getLogger('estimate')
+    robot.log.setLevel(10) 
 
-    # List of logmodules --> specify submodule loglevel if desired
-    logging.getLogger('main').setLevel(10)
-    logging.getLogger('estimate').setLevel(50)
+    # Experiment data logs 
+    header = ['DIST']
+    filename   =  'odometry.csv'
+    logs['odometry'] = Logger(log_folder+filename, header, 10, ID = robotID)
+
+    header = ['COUNT']
+    filename   = 'resource.csv'
+    logs['resources'] = Logger(log_folder+filename, header, 5, ID = robotID)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -336,7 +335,7 @@ def init():
 #########################################################################################################################
 
 def controlstep():
-    global clocks, counters, startFlag, startTime
+    global startFlag, startTime, clocks, counters
 
     if not startFlag:
         ##########################
@@ -374,10 +373,10 @@ def controlstep():
         #### LOG-MODULE STEPS ####
         ##########################
 
-        if logs['resources'].isReady():
+        if logs['resources'].queryTimer():
             logs['resources'].log([len(rb)])
 
-        if logs['odometry'].isReady():
+        if logs['odometry'].queryTimer():
             logs['odometry'].log([odo.getNew()])
 
         ###########################

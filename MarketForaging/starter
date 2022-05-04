@@ -2,6 +2,17 @@
 # Start an experiment
 source experimentconfig.sh
 
+# argos_configuration() {
+#     marker="/r/"
+
+#     grep -o -P '(?<=$marker).*(?=$marker)' $ARGOSTEMPLATE | while read -r match ; do
+#         if [[ ! -n "$match" ]]; then
+#             echo "Please add $match to experimentconfig.sh"
+#         fi
+#     done
+#    # sed -e "s|${marker}match${marker}|$match|g" $ARGOSTEMPLATE > $ARGOSFILE
+# }
+
 echo "+-----------------------------------------------------------+"
 echo "MAINFOLDER IS $MAINFOLDER"
 
@@ -9,8 +20,7 @@ echo "+-----------------------------------------------------------+"
 echo "Updating the ARGoS XML file"
 
 sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
-    -e "s|CON1|$CON1|g"\
-    -e "s|CON2|$CON2|g"\
+    -e "s|CONTROLLER|$CONTROLLER|g"\
     -e "s|NUM1|$NUM1|g"\
     -e "s|NUM2|$NUM2|g"\
     -e "s|STARTDIM|$STARTDIM|g"\
@@ -20,8 +30,10 @@ sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|EXPERIMENTFOLDER|$EXPERIMENTFOLDER|g"\
     -e "s|FLOORFILE|$FLOORFILE|g"\
     -e "s|ARGOSFOLDER|$ARGOSFOLDER|g"\
-    -e "s|ARENADIMH|$ARENADIMH|g"\
-    -e "s|ARENADIM|$ARENADIM|g"\
+    -e "s|ARENADIMXH|$ARENADIMXH|g"\
+    -e "s|ARENADIMYH|$ARENADIMYH|g"\
+    -e "s|ARENADIMX|$ARENADIMX|g"\
+    -e "s|ARENADIMY|$ARENADIMY|g"\
   $ARGOSTEMPLATE > $ARGOSFILE
 
 if [[ $1 == "--reset-geth" ]]; then
@@ -29,15 +41,17 @@ if [[ $1 == "--reset-geth" ]]; then
     echo "+-----------------------------------------------------------+"
     echo "Resetting Geth..."
     ./reset-geth
+
+    echo "+-----------------------------------------------------------+"
+    echo "Waiting web3 to respond..."
+
+    while [[ $ready != $NUMROBOTS ]]; do
+        . test-tcp 4000
+        sleep 0.5
+    done
 fi
 
-echo "+-----------------------------------------------------------+"
-echo "Waiting web3 to respond..."
 
-while [[ $ready != $NUMROBOTS ]]; do
-    . test-tcp 4000
-    sleep 0.5
-done
 echo "+-----------------------------------------------------------+"
 echo "Cleaning logs folder..."
 
