@@ -1,6 +1,6 @@
 #!/bin/bash
 # Short script to execute a CONSOLE command on docker containers
-# Assumes docker containers are running with name prefix ethereum_eth.
+# Assumes docker containers are running with name prefix ${SWARMNAME}_eth.
 # 1 argument executes on all containers
 # 2+ arguments executes the input robot IDs
 
@@ -8,8 +8,9 @@
 # -t list of robot IDs to bash (string, e.g. "1 2 3 4")
 # -s script to be executed     (string, bash, geth, python. Default: bash)
 
+source experimentconfig.sh
 
-NUM_ROB=$(docker ps | grep ethereum_eth. | wc -l) 
+NUM_ROB=$(docker ps | grep ${SWARMNAME}_eth. | wc -l) 
 TARGETS=($(seq 1 $NUM_ROB))
 SCRIPT=""
 
@@ -31,7 +32,7 @@ done
 
 bash_ALL(){
 for ID in "${TARGETS[@]}"; do
-    CT=$(docker ps -q -f name="ethereum_eth.${ID}\.")
+    CT=$(docker ps -q -f name="${SWARMNAME}_eth.${ID}\.")
     echo "----------------------- Robot $ID -----------------------"
     docker exec -it $CT ${1}
 done

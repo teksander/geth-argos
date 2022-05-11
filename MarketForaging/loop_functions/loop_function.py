@@ -12,20 +12,18 @@ sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
              os.environ['EXPERIMENTFOLDER']]
 
-from loop_function_params import *
-from helpers import *
+from controller_params import *
+from loop_params import *
+from loop_params import params as lp
+from loop_helpers import *
 from aux import Vector2D, Logger, getRAMPercent, getCPUPercent, mydict, Timer, Accumulator
 from groundsensor import Resource
-from controller_params import *
 
 random.seed(params['generic']['seed'])
 
 log_folder = params['environ']['EXPERIMENTFOLDER'] + '/logs/0/'
 os.makedirs(os.path.dirname(log_folder), exist_ok=True)   
 
-open(resource_file, 'w+').close()
-open(robot_file, 'w+').close()
-open(rays_file, 'w+').close()
 
 # /* Global Variables */
 #######################################################################
@@ -35,7 +33,9 @@ global startFlag, startTime
 startFlag = False
 startTime = time.time()
 
-global resource_list, resource_counter
+global stone_list, lot_list, resource_list, resource_counter
+stone_list = []
+lot_list = []
 resource_list = []
 resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
 position_previous = dict()
@@ -87,12 +87,31 @@ def init():
     logs['loop'] = Logger(filename, header, ID = '0')
     logs['loop'].start()
 
+    # Create a list of random quarry stones
+    for i in range(lp['stones']['quantity']):
+        dx = lp['quarry']['width']/2
+        dy = lp['quarry']['height']/2
+        x  = random.uniform(lp['quarry']['position'][0]-dx, lp['quarry']['position'][0]+dx)
+        y  = random.uniform(lp['quarry']['position'][1]-dy, lp['quarry']['position'][1]+dy)
+        stone_list.append(Stone(x, y))
 
-    # # Initialize robot parameters
+    # Create a list of construction site lots
+    spacing = int(lp['environ']["ARENADIMY"])/lp['lots']['quantity']
+    positions = [round(spacing*(x-0.5) - int(lp['environ']["ARENADIMY"])/2, 2)  for x in range(1,lp['lots']['quantity']+1)]
+    for i in range(lp['lots']['quantity']):
+        x  = lp['bsite']['position'][0]
+        y  = lp['bsite']['position'][1]+positions[i]
+        lot_list.append(Lot(x, y))
+
+    # Initialize robot parameters
     for robot in allrobots:
         print(robot.variables.get_all_attributes())
         position_previous[robot.variables.get_attribute("id")] = Vector2D(robot.position.get_position()[0:2]) 
 
+    # Record the lots to file
+    with open(lp['files']['lots'], 'w', buffering=1) as f:
+        for lot in lot_list:
+            f.write(lot._json+'\n')
             
 def pre_step():
     global startFlag, startTime, clocks, resource_counter
@@ -102,28 +121,40 @@ def pre_step():
 
     for robot in allrobots:
 
+        # Get the robot current position
+        position = robot.position.get_position()
+
         # Has robot stepped into market? 
-        if is_in_rectangle(robot.position.get_position(), \
-                            params['market']['position'], \
-                            params['market']['width'], \
-                            params['market']['height']):
+        if is_in_rectangle(position, \
+                            lp['market']['position'], \
+                            lp['market']['width'], \
+                            lp['market']['height']):
             robot.variables.set_attribute("at", "market")
 
-        elif is_in_rectangle(robot.position.get_position(), \
-                            params['quarry']['position'], \
-                            params['quarry']['width'], \
-                            params['quarry']['height']):
+        elif is_in_rectangle(position, \
+                            lp['quarry']['position'], \
+                            lp['quarry']['width'], \
+                            lp['quarry']['height']):
             robot.variables.set_attribute("at", "quarry")
 
-        elif is_in_rectangle(robot.position.get_position(), \
-                            params['csite']['position'], \
-                            params['csite']['width'], \
-                            params['csite']['height']):
-            robot.variables.set_attribute("at", "csite")
+        elif is_in_rectangle(position, \
+                            lp['bsite']['position'], \
+                            lp['bsite']['width'], \
+                            lp['bsite']['height']):
+            robot.variables.set_attribute("at", "bsite")
 
         else:
             robot.variables.set_attribute("at", "None")
-        
+
+        # Is the robot currently mining
+        if robot.variables.get_attribute("mining") == "True":
+            with open(lp['files']['stones'], 'r') as f:
+                for line in f:
+                    stone = json.loads(line, object_hook=lambda d: SimpleNamespace(**d))
+
+                    if is_in_rectangle(position, (stone.x,stone.y), 0.05, 0.05):
+                        robot.variables.set_attribute("hasStone", "True")
+
 
         # # Does the robot carry resource? YES -> Sell resource
         # resource_quality = robot.variables.get_attribute("hasResource")
@@ -142,21 +173,26 @@ def post_step():
     if not startFlag:
         startFlag = True
 
-    # Record the carried resourced to be drawn to a file
-    with open(robot_file, 'w', buffering=1) as f:
+    # Record the curent stones to file
+    with open(lp['files']['stones'], 'w', buffering=1) as f:
+        for stone in stone_list:
+            f.write(stone._json+'\n')
+
+    # Record the carried resources to file
+    with open(lp['files']['robots'], 'w', buffering=1) as f:
         for robot in allrobots:
-            if robot.variables.get_attribute("hasResource"):
+            if robot.variables.get_attribute("hasStone"):
                 robotID = str(int(robot.variables.get_id()[2:])+1)
                 x = str(robot.position.get_position()[0])
                 y = str(robot.position.get_position()[1])
-                f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("hasResource")) + '\n')
+                f.write(robotID + ', ' + x + ', ' + y + '\n')
 
     # Record the rays to be drawn for each robot
     for robot in allrobots:
         p = 'a'
         if robot.variables.get_attribute("id") == "1":
             p = 'w+'
-        with open(rays_file, p, buffering=1) as f:
+        with open(lp['files']['rays'], p, buffering=1) as f:
             f.write(robot.variables.get_attribute("rays"))
 
     # Record the distance each robot has travelled in the current step

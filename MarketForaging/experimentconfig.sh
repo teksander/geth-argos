@@ -44,6 +44,12 @@ export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
 export STARTDIM=$(echo "scale=3 ; $ARENADIMY/5" | bc)
 export TPS=10
 
+
+# [DOCKER]
+export SWARMNAME=robot
+# export LOOPNODE=true
+# export LOOPNAME=loop
+
 # [GETH]
 export BLOCKPERIOD=2
 

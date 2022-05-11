@@ -2,8 +2,7 @@
 import time
 from aenum import Enum, auto
 
-class Idle(Enum):
-    IDLE   = 1
+
 
 class Scout(Enum):
     SELL    = 2
@@ -16,17 +15,23 @@ class Recruit(Enum):
     HOMING = 7
     PLAN  = 8
 
-class QuarryWorker(Enum):
-    MINE      = 1
-    NAVIGATE  = 2
-    TRANSPORT = 3
-    SELL      = 4
+class Idle(Enum):
+    IDLE   = 1
 
-class Builder(Enum):
-    BUY       = 5
-    TRANSPORT = 6
-    NAVIGATE  = 7
-    BUILD     = 8
+class Quarry(Enum):
+    MINE      = 2
+    NAVIGATE  = 3
+    TRANSPORT = 4
+    SELL      = 5
+
+class Build(Enum):
+    BUY       = 6
+    TRANSPORT = 7
+    NAVIGATE  = 8
+    BUILD     = 9
+
+class Market(Enum):
+    SELL      = 10
 
 
 class FiniteStateMachine(object):

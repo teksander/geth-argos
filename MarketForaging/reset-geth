@@ -41,13 +41,16 @@ echo "Restarting the docker containers"
 
 
 ## Restart docker
-docker service scale ethereum_eth=0
+docker service scale ${SWARMNAME}_eth=0
 echo "Shuting down docker process..."
-bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
+bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS ${SWARMNAME}
 
 echo "Starting new docker process..."
 sudo systemctl restart docker.service
-bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
+
+echo "...for the swarm ${SWARMNAME}"
+bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS ${SWARMNAME}
+
 
 echo "+-----------------------------------------------------------+"
 echo "Creating the identifier file"

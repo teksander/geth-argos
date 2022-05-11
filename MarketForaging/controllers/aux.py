@@ -663,13 +663,13 @@ class mydict(dict):
         return mydict([[key, round(self[key], n)] for key in self])
 
 def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.' + str(robotID) + '.'
-    containersFile = open(experimentFolder+'/identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            if query == 'IP_DOCKER':
-                return line.split()[-1]
-            if query == 'IP':
-                return line.split()[-2]
-            if query == 'ENODE':
-                return line.split()[1]
+    namePrefix = '_eth.' + str(robotID) + '.'
+    with open(experimentFolder+'/identifiers.txt', 'r') as identifiersFile:
+        for line in identifiersFile.readlines():
+            if line.__contains__(namePrefix):
+                if query == 'IP':
+                    return line.split()[-1]
+                if query == 'DOCKER_IP':
+                    return line.split()[-2]
+                if query == 'ENODE':
+                    return line.split()[1]

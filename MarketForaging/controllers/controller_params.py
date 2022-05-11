@@ -3,6 +3,7 @@ import random, math
 import os
 
 controller_params = dict()
+controller_params['compass_noise']  = 15
 controller_params['scout_speed']    = 7
 controller_params['recruit_speed']  = 7
 controller_params['buy_duration']   = 30

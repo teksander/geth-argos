@@ -4,12 +4,14 @@
 # 1 argument executes on all containers
 # 2+ arguments executes the input robot IDs
 
-NUMROBOTS=$(docker ps | grep ethereum_eth. | wc -l)
+source experimentconfig.sh
+
+NUMROBOTS=$(docker ps | grep ${SWARMNAME}_eth. | wc -l)
 
 if [ "$#" -eq 1 ]; then
     for robotId  in $(seq 1 $NUMROBOTS)
     do
-        containerId=$(docker ps -q -f name="ethereum_eth.${robotId}\.")
+        containerId=$(docker ps -q -f name="${SWARMNAME}_eth.${robotId}\.")
         docker exec -it $containerId bash exec_cmd.sh $1
     done
 fi
@@ -17,7 +19,7 @@ fi
 if [ "$#" -gt 1 ]; then
     for robotId in "${@:2}"
     do
-        containerId=$(docker ps -q -f name="ethereum_eth.${robotId}\.")
+        containerId=$(docker ps -q -f name="${SWARMNAME}_eth.${robotId}\.")
 		docker exec -it $containerId bash exec_cmd.sh $1
     done
 fi

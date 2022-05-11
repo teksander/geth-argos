@@ -40,12 +40,19 @@ params['quarry']['height']   = eval(params['environ']['ARENADIMY'])
 params['quarry']['width'] 	 = 0.6
 params['quarry']['position'] = [-eval(params['environ']['ARENADIMX'])/2 + params['quarry']['width']/2, 0]
 
+params['bsite'] = dict()
+params['bsite']['height']   = eval(params['environ']['ARENADIMY'])
+params['bsite']['width'] 	= 0.6
+params['bsite']['position'] = [eval(params['environ']['ARENADIMX'])/2 - params['bsite']['width']/2, 0]
 
-params['csite'] = dict()
-params['csite']['height']   = eval(params['environ']['ARENADIMY'])
-params['csite']['width'] 	= 0.6
-params['csite']['position'] = [eval(params['environ']['ARENADIMX'])/2 - params['csite']['width']/2, 0]
 
+params['stones'] = dict()
+params['stones']['quantity'] = 30
+
+params['lots'] = dict()
+params['lots']['quantity'] = 4
+params['lots']['height']   = 0.3
+params['lots']['width']    = 0.3
 
 # Parameters for resources
 resource_params = dict()
@@ -74,13 +81,18 @@ resource_params['utility']   = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
 resource_params['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 # resource_params['frequency'] = {'red': 0.7, 'green': 0.1 , 'blue': 0.1, 'yellow': 0.1}
 
-# Parameters for the economy
-# economy_params = dict()
-# economy_params['fuel_cost'] = 0.1 # eth per second of exploration
+# Parameters for qtuser
+params['qt'] = dict()
+params['qt']['show_rays'] = True
 
-# Initialize the files which store QT_draw information 
-#(TO-DO: Find a better way to share draw info to qtuser_function.py)
-resource_file = 'loop_functions/resources.txt'
-robot_file = 'loop_functions/robots.txt'
-rays_file = 'loop_functions/rays.txt'
-scresources_file = 'loop_functions/scresources.txt'
+# Files that controller, loop and qtuser function use
+params['files'] = dict()
+params['files']['stones'] = 'loop_functions/stones.txt'
+params['files']['lots']  = 'loop_functions/lots.txt'
+params['files']['robots'] = 'loop_functions/robots.txt'
+params['files']['rays']  = 'loop_functions/rays.txt'
+
+
+## Parameters for the economy
+# params['eco'] = dict()
+# params['eco']['fuel_cost'] = 0.1 

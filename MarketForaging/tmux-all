@@ -2,7 +2,7 @@
 # Short script to open TMUX console with a pane for each robot or docker container
 # Assumptions:
 # - tmux is installed 
-# - docker is running containers with names "ethereum_eth.{ID}"
+# - docker is running containers with names "${SWARMNAME}_eth.{ID}"
 #
 # Options:
 # -t list of robot IDs to tmux (string, e.g. "1 2 3 4")
@@ -98,7 +98,7 @@ if [[ "$TARGETS" = "" ]]; then
 	ALL_CTS=()
 	for ID in $(seq 1 $NUMROBOTS); do
 		ALL_IDS+=(${ID})
-		ALL_CTS+=($(docker ps -q -f name="ethereum_eth.${ID}\."))
+		ALL_CTS+=($(docker ps -q -f name="${SWARMNAME}_eth.${ID}\."))
 	done
 
 else
@@ -106,7 +106,7 @@ else
 	ALL_CTS=()
 	for ID in $TARGETS; do
 		ALL_IDS+=(${ID})
-	  ALL_CTS+=($(docker ps -q -f name="ethereum_eth.${ID}\."))
+	  ALL_CTS+=($(docker ps -q -f name="${SWARMNAME}_eth.${ID}\."))
 	done
 	NUMROBOTS=${#ALL_IDS[@]}
 

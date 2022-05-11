@@ -2,10 +2,12 @@ import rpyc
 import logging
 import json
 from hexbytes import HexBytes
-
+from aux import identifersExtract
 import sys, os
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder)
+
+sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+             os.environ['EXPERIMENTFOLDER']]
 
 # logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
 # logger = logging.getLogger(__name__)
@@ -16,8 +18,8 @@ def init_web3(robotID):
     robotID = int(robotID)
 
     # Connect to the RPYC which hosts web3.py (port 4xxx where xxx is robot ID)
-    dockerIP = identifersExtract(robotID, 'IP')
-    
+    dockerIP = identifersExtract(robotID, 'DOCKER_IP')
+
     conn = rpyc.connect(dockerIP, 4000, config = {"allow_all_attrs" : True})
     w3 = conn.root
 
@@ -38,7 +40,42 @@ def init_peer_buffer(robotID):
 
     return pb, sendPeers, getCount
 
-# def init_web3(robotID):
+
+
+# def identifersExtract(robotID, query = 'IP'):
+#     namePrefix = '_eth.' + str(robotID) + '.'
+#     with open(experimentFolder+'/identifiers.txt', 'r') as identifiersFile:
+#         for line in identifiersFile.readlines():
+#             if line.__contains__(namePrefix):
+#                 if query == 'IP':
+#                     return line.split()[-1]
+#                 if query == 'ENODE':
+#                     return line.split()[1]
+
+if __name__=='__main__':
+
+    w3 = init_web3(robotID = 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # def init_web3(robotID):
 
 #     # Connect to the remove server which hosts the module web3.py
 #     dockerIP = identifersExtract(robotID, 'IP')
@@ -87,20 +124,3 @@ def init_peer_buffer(robotID):
 #     # logger.info('ENODE: %s', w3.enode)
 
 #     return w3
-
-
-def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.' + str(robotID) + '.'
-    containersFile = open(experimentFolder+'/identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            if query == 'IP_DOCKER':
-                return line.split()[-1]
-            if query == 'IP':
-                return line.split()[-2]
-            if query == 'ENODE':
-                return line.split()[1]
-
-if __name__=='__main__':
-
-    w3 = init_web3(robotID = 3)

@@ -363,7 +363,7 @@ class RandomWalk(object):
 
         elif (self.actual_direction == "ccw"):
             return -speed, speed
-
+            
 
     def avoid_vec_lua(self, left, right):
     # Obstacle avoidance; translated from Lua

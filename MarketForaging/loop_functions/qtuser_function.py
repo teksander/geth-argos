@@ -14,25 +14,16 @@ sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder+'/loop_functions')
 sys.path.insert(1, experimentFolder)
 
-from loop_function_params import *
+from loop_params import *
+from loop_params import params as lp
+from loop_helpers import *
 from controller_params import *
-generic_params['show_rays'] = False
 
 # /* Global Variables */
 #######################################################################
 
 def init():
-	global item_list, stone_list
-
-	# Create a list of random quarry stones
-	stone_list = []
-	for i in range(0,50):
-		dx = params['quarry']['width']/2
-		dy = params['quarry']['height']/2
-		x  = random.uniform(params['quarry']['position'][0]-dx, params['quarry']['position'][0]+dx)
-		y  = random.uniform(params['quarry']['position'][1]-dy, params['quarry']['position'][1]+dy)
-
-		stone_list.append((x, y))
+	pass
 
 def DrawInWorld():
 
@@ -47,24 +38,31 @@ def DrawInWorld():
 	environment.qt_draw.polygon(params['quarry']['position']+[0.01],[], [[-dx,-dy],[-dx,dy],[dx,dy],[dx,-dy]], 'gray70', True)
 
 	# Draw the construction site
-	dx = params['csite']['width']/2
-	dy = params['csite']['height']/2
-	environment.qt_draw.polygon(params['csite']['position']+[0.01],[], [[-dx,-dy],[-dx,dy],[dx,dy],[dx,-dy]], 'custom', True)
+	dx = params['bsite']['width']/2
+	dy = params['bsite']['height']/2
+	environment.qt_draw.polygon(params['bsite']['position']+[0.01],[], [[-dx,-dy],[-dx,dy],[dx,dy],[dx,-dy]], 'custom', True)
 
 	# Draw stones
-	qtt = 30
-	for stone in stone_list[1:qtt]:
-		environment.qt_draw.box([stone[0], stone[1], 0.01], [], [0.04,0.06,0.08],'gray40')
+	with open(lp['files']['stones'], 'r') as f:
+		for line in f:
+			stone = json.loads(line, object_hook=lambda d: SimpleNamespace(**d))
+			environment.qt_draw.box([stone.x, stone.y, 0.01], [], [0.04,0.06,0.08],'gray40')
+
+	# Draw lots
+	with open(lp['files']['lots'], 'r') as f:
+		for line in f:
+			lot = json.loads(line, object_hook=lambda d: SimpleNamespace(**d))
+			environment.qt_draw.box([lot.x, lot.y, 0.01], [], [params['lots']['height'], params['lots']['width'],0.01],'brown')
 
 	# Draw stones carried by robots
-	with open(robot_file, 'r') as f:
+	with open(lp['files']['robots'], 'r') as f:
 		for line in f:
-			robotID, x, y, quality = eval(line)
-			environment.qt_draw.cylinder([x, y, 0.10],[], res_diam, res_height, quality)
+			robotID, x, y = eval(line)
+			environment.qt_draw.box([x, y, 0.10], [], [0.04,0.06,0.08],'gray40')
 
 	# Draw rays
-	if generic_params['show_rays']:
-		with open(rays_file, 'r') as f:
+	if lp['qt']['show_rays']:
+		with open(lp['files']['rays'], 'r') as f:
 			for line in f:
 				robotID, pos, vec_target, vec_avoid, vec_desired = eval(line)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_target[0], pos[1] + vec_target[1] , 0.01], 'red', 0.15)
