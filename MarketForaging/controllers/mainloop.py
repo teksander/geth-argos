@@ -3,16 +3,14 @@
 
 # /* Import Packages */
 #######################################################################
-import random, math, copy
+import random, math
 import time, sys, os
-import logging, threading
+import logging
 from types import SimpleNamespace
-from collections import namedtuple
 
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder+'/controllers')
-sys.path.insert(1, experimentFolder+'/loop_functions')
-sys.path.insert(1, experimentFolder)
+sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+             os.environ['EXPERIMENTFOLDER']]
 
 from movement import RandomWalk, Navigate, Odometry
 from groundsensor import GroundSensor, ResourceVirtualSensor, Resource
@@ -22,39 +20,20 @@ from console import *
 from aux import *
 from statemachine import *
 
-from loop_function_params import *
-from controller_params import *
+from loop_params import params as lp
+from control_params import params as cp
 
 # /* Logging Levels for Console and File */
 #######################################################################
 loglevel = 10
 logtofile = False 
 
-# /* Experiment Parameters */
-#######################################################################
-tcpPort = 5000 
-tcprPort = 6000 
-erbDist = 175
-erbtFreq = 10
-gsFreq = 20
-rwSpeed = controller_params['scout_speed']
-navSpeed = controller_params['recruit_speed']
-
-bufferRate = 0.5 
-peerSecurityRate = 1.5
-globalPeers = False
-ageLimit = 2
-
-arena_size = float(os.environ["ARENADIM"])
-step_size = 1/float(os.environ["TPS"])
-
 # /* Global Variables */
 #######################################################################
 global startFlag
 startFlag = False
 
-global peered, txList
-peered = set()
+global txList
 txList = []
 
 global submodules
@@ -66,87 +45,17 @@ counters = dict()
 logs = dict()
 txs = dict()
 
-clocks['share'] = Timer(1)
-clocks['buffer'] = Timer(bufferRate)
-clocks['search'] = Timer(rate = 5)
-clocks['collect_resources'] = Timer(1)
-clocks['peer_check'] = Timer(peerSecurityRate)
-clocks['balance_check'] = Timer(1.5)
+clocks['buffer'] = Timer(0.5)
 clocks['query_resources'] = Timer(1)
 clocks['block'] = Timer(2)
-clocks['attempt'] = Timer(7)
-clocks['pay_fuel'] = Timer(10)
 clocks['explore'] = Timer(1)
-clocks['homing'] = Timer(1)
-clocks['availiable'] = Timer(7)
-clocks['buy'] = Timer(controller_params['buy_duration'])
-clocks['double_check_tx_exists'] = Timer(5)
-clocks['wait_on_last'] = Timer(8)
+clocks['buy'] = Timer(cp['buy_duration'])
 clocks['rs'] = Timer(0.02)
 
 
 # Store the position of the market
-market_js = {"x":0, "y":0, "radius":  market_params['radius'], "radius_dropoff": market_params['radius_dropoff']}
-market = Resource(market_js)
-
-def buffer(rate = bufferRate, ageLimit = ageLimit):
-    """ Control routine for robot-to-robot dynamic peering """
-    global peered
-
-    peers = erb.getNew()
-
-    for peer in peers:
-        if peer not in peered:
-            enode = tcp.request('localhost', tcpPort+int(peer)) 
-            # bufferlogger.info('Received enode: %s', enode)
-
-            w3.geth.admin.addPeer(enode)
-            peered.add(peer)
-            # bufferlogger.info('Added peer: %s, enode: %s', peer, enode)
-
-    temp = copy.copy(peered)
-
-    for peer in temp:
-        if peer not in peers:
-            enode = tcp.request('localhost', tcpPort+int(peer))
-            w3.geth.admin.removePeer(enode)
-            peered.remove(peer)
-            # robot.log.info('Removed peer: %s', peer)
-
-
-    # Double-check stale peers
-    if clocks['peer_check'].query():
-        gethPeers_enodes = getEnodes()
-        gethPeers_ids = getIds(gethPeers_enodes)
-        gethPeers_count = len(gethPeers_enodes)
-
-        if not peered:
-            for enode in gethPeers_enodes:
-                w3.geth.admin.removePeer(enode)
-
-        # else:
-        #     for ID in peered:
-        #         if ID not in gethPeers_ids:
-        #             enode = getEnodeById(ID, gethPeers_enodes)
-        #             print(ID)
-        #             # w3.geth.admin.addPeer(enode)
-
-
-         # Turn on LEDs according to geth Peers
-        if gethPeers_count == 0: 
-            rgb.setLED(rgb.all, 3* ['black'])
-        elif gethPeers_count == 1:
-            rgb.setLED(rgb.all, ['red', 'black', 'black'])
-        elif gethPeers_count == 2:
-            rgb.setLED(rgb.all, ['red', 'black', 'red'])
-        elif gethPeers_count > 2:
-            rgb.setLED(rgb.all, 3*['red'])
-
-
-# /* Initialize background daemon threads for the Main-Modules*/
-#######################################################################
-bufferTh = threading.Thread(target=buffer, args=())                                     
-
+market_js = {"x":0, "y":0, "radius":  lp['market']['radius'], "radius_dropoff": lp['dropzone']['radius']}
+market = Resource(market_js)                      
 
 class ResourceBuffer(object):
     """ Establish the resource buffer class 
@@ -257,30 +166,6 @@ class ResourceBuffer(object):
     def getResourceByValue(self, value):
         return self.buffer[self.getValues().index(value)]
 
-    # def getPCs(self):
-    #     # Algorithm for best resource decision making goes here
-    #     # return self.buffer[0]
-
-    #     # dists_to_market = self.getDistances(0,0) 
-    #     # return self.buffer[dists_to_market.index(min(dists_to_market))]
-    #     # my_x = robot.position.get_position()[0]
-    #     # my_y = robot.position.get_position()[1]
-
-    #     # print(len(self))
-    #     Qp = self.getUtilities()
-    #     Qc_m = [2*distance/arena_size for distance in self.getDistances(0,0)]
-    #     # Qc_r = [100*distance/arena_size * 0.3 for distance in self.getDistances(my_x,my_y)]
-    #     # print(Qp, Qc_r, Qc_m) res.price - 2*
-    #     Pc = [x-y for x, y in zip(Qp,Qc_m)]
-    #     return Pc
-
-    # def getBestResource(self):
-    #     if self.buffer:
-    #         Pc = self.getPCs()
-    #         self.best = self.buffer[Pc.index(max(Pc))]
-    #         return self.best 
-    #     else: 
-    #         return None
 
 txList = []
 class Transaction(object):
@@ -352,49 +237,43 @@ class Transaction(object):
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules
-    robotID = str(int(robot.variables.get_id()[2:])+1)
-    robot.variables.set_attribute("id", str(robotID))
-    robot.variables.set_consensus(False) 
+    global clocks, submodules, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb
+    robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
+    robotIP = identifersExtract(robotID, 'IP')
+    
     robot.variables.set_attribute("newResource", "")
     robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("collectResource", "")
     robot.variables.set_attribute("dropResource", "")
     robot.variables.set_attribute("hasResource", "")
     robot.variables.set_attribute("resourceCount", "0")
+    
+
+    robot.variables.set_attribute("id", robotID)
     robot.variables.set_attribute("state", "")
+    robot.variables.set_attribute("grabStone", "")
+    robot.variables.set_attribute("dropStone", "")
+    robot.variables.set_attribute("hasStone", "")
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
     log_folder = experimentFolder + '/logs/' + robotID + '/'
 
-    # Monitor logs (recorded to file)
+    # Monitor logs 
     monitor_file =  log_folder + 'monitor.log'
     os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
     logging.basicConfig(filename=monitor_file, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
-    
-    # Experiment data logs (recorded to file)
-    name   =  'odometry.csv'
-    header = ['DIST']
-    logs['odometry'] = Logger(log_folder+name, header, 10, ID = robotID)
-
-    name   = 'resource.csv'
-    header = ['COUNT']
-    logs['resources'] = Logger(log_folder+name, header, 5, ID = robotID)
-
-    name   = 'buffer.csv'
-    header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-    logs['buffer'] = Logger(log_folder+name, header, 2, ID = robotID)
-   
-    # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
     robot.log = logging.getLogger('main')
-    estimatelogger = logging.getLogger('estimate')
-    bufferlogger = logging.getLogger('buffer')
+    robot.log.setLevel(10) 
 
-    # List of logmodules --> specify submodule loglevel if desired
-    logging.getLogger('main').setLevel(10)
-    logging.getLogger('estimate').setLevel(50)
-    logging.getLogger('buffer').setLevel(50)
+    # Experiment data logs 
+    header = ['DIST']
+    filename   =  'odometry.csv'
+    logs['odometry'] = Logger(log_folder+filename, header, 10, ID = robotID)
+
+    header = ['COUNT']
+    filename   = 'resource.csv'
+    logs['resources'] = Logger(log_folder+filename, header, 5, ID = robotID)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -403,27 +282,15 @@ def init():
     w3 = init_web3(robotID)
 
     # /* Init an instance of peer for this Pi-Puck */
-    me = Peer(robotID, w3.enode, w3.key)
-
-    # /* Init an instance of the buffer for peers  */
-    robot.log.info('Initialising peer buffer...')
-    pb = PeerBuffer(ageLimit)
+    me = Peer(robotID, robotIP, w3.enode, w3.key)
 
     # /* Init an instance of the buffer for resources  */
     robot.log.info('Initialising resource buffer...')
     rb = ResourceBuffer()
 
-    # /* Init TCP server for enode requests */
-    robot.log.info('Initialising TCP server...')
-    tcp = TCP_server(me.enode, 'localhost', tcpPort+int(me.id), unlocked = True)
-
-    # /* Init TCP server for resource requests */
-    robot.log.info('Initialising TCP server...')
-    tcpr = TCP_server("None", 'localhost', tcprPort+int(me.id), unlocked = True)
-
     # /* Init E-RANDB __listening process and transmit function
     robot.log.info('Initialising RandB board...')
-    erb = ERANDB(robot, erbDist, erbtFreq)
+    erb = ERANDB(robot, cp['erbDist'], cp['erbtFreq'])
 
     #/* Init Resource-Sensors */
     robot.log.info('Initialising resource sensor...')
@@ -431,11 +298,11 @@ def init():
 
     # /* Init Random-Walk, __walking process */
     robot.log.info('Initialising random-walk...')
-    rw = RandomWalk(robot, rwSpeed)
+    rw = RandomWalk(robot, cp['scout_speed'])
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising navigation...')
-    nav = Navigate(robot, navSpeed)
+    nav = Navigate(robot, cp['recruit_speed'])
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising odometry...')
@@ -448,7 +315,7 @@ def init():
     fsm = FiniteStateMachine(robot, start = Idle.IDLE)
 
     # List of submodules --> iterate .start() to start all
-    submodules = [w3.geth.miner, tcp, tcpr, erb]
+    submodules = [w3.geth.miner, erb]
 
     txs['sell'] = Transaction(None)
     txs['buy']  = Transaction(None)
@@ -458,10 +325,9 @@ def init():
 #########################################################################################################################
 
 def controlstep():
-    global clocks, counters, startFlag, startTime, bufferTh
+    global startFlag, startTime, clocks, counters
 
     if not startFlag:
-
         ##########################
         #### FIRST STEP ##########
         ##########################
@@ -476,6 +342,7 @@ def controlstep():
                 module.start()
             except:
                 robot.log.critical('Error Starting Module: %s', module)
+                sys.exit()
 
         for log in logs.values():
             log.start()
@@ -496,20 +363,38 @@ def controlstep():
         #### LOG-MODULE STEPS ####
         ##########################
 
-        if logs['resources'].isReady():
+        if logs['resources'].queryTimer():
             logs['resources'].log([len(rb)])
 
-        if logs['odometry'].isReady():
+        if logs['odometry'].queryTimer():
             logs['odometry'].log([odo.getNew()])
 
         ###########################
         #### MAIN-MODULE STEPS ####
         ###########################
-
+        gethPeers_count = 0
         if clocks['buffer'].query(): 
-            if not bufferTh.is_alive():
-                bufferTh = threading.Thread(target=buffer)
-                bufferTh.start()
+
+            peer_IPs = dict()
+            peers = erb.getNew()
+            for peer in peers:
+                peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
+
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((me.ip, 9898))
+                s.sendall(str(peer_IPs).encode())
+                data = s.recv(1024)
+                gethPeers_count = int(data)
+
+             # Turn on LEDs according to geth Peers
+            if gethPeers_count == 0: 
+                rgb.setLED(rgb.all, 3* ['black'])
+            elif gethPeers_count == 1:
+                rgb.setLED(rgb.all, ['red', 'black', 'black'])
+            elif gethPeers_count == 2:
+                rgb.setLED(rgb.all, ['red', 'black', 'red'])
+            elif gethPeers_count > 2:
+                rgb.setLED(rgb.all, 3*['red'])
 
         ##############################
         #### STATE-MACHINE STEPS ####
@@ -532,7 +417,7 @@ def controlstep():
                 if nav.get_distance_to(market._pr) < 0.5*market.radius:           
                     nav.avoid(move = True)
                     
-                elif nav.get_distance_to(market._pr) < market.radius and len(peered) > 1:
+                elif nav.get_distance_to(market._pr) < market.radius and gethPeers_count > 1:
                     nav.avoid(move = True)
 
                 else:
@@ -554,7 +439,7 @@ def controlstep():
         if fsm.query(Idle.IDLE):
 
             # State transition: Scout.EXPLORE
-            explore_duration = random.gauss(controller_params['explore_mu'], controller_params['explore_sg'])
+            explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
             clocks['explore'].set(explore_duration)
             fsm.setState(Scout.EXPLORE, message = "Duration: %.2f" % explore_duration)
 
@@ -730,9 +615,8 @@ def reset():
 def destroy():
     if startFlag:
         w3.geth.miner.stop()
-        bufferTh.join()
-        for enode in getEnodes():
-            w3.geth.admin.removePeer(enode)
+        # for enode in getEnodes():
+        #     w3.geth.admin.removePeer(enode)
 
     variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
     with open(variables_file, 'w+') as vf:
@@ -743,88 +627,6 @@ def destroy():
 #########################################################################################################################
 #########################################################################################################################
 #########################################################################################################################
-
-
-def getEnodes():
-    return [peer['enode'] for peer in w3.geth.admin.peers()]
-
-def getEnodeById(__id, gethEnodes = None):
-    if not gethEnodes:
-        gethEnodes = getEnodes() 
-
-    for enode in gethEnodes:
-        if readEnode(enode, output = 'id') == __id:
-            return enode
-
-def getIds(__enodes = None):
-    if __enodes:
-        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
-    else:
-        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
-
-
-# def START(modules = submodules, logs = logmodules):
-#     global startFlag, startTime
-#     startTime = time.time()
-
-#     robot.log.info('Starting Experiment')
-
-#     for log in logs:
-#         try:
-#             log.start()
-#         except:
-#             robot.log.critical('Error Starting Log: %s', log)
-
-#     startFlag = True 
-#     for module in modules:
-#         try:
-#             module.start()
-#         except:
-#             robot.log.critical('Error Starting Module: %s', module)
-
-# def STOP(modules = submodules, logs = logmodules):
-#     robot.log.info('Stopping Experiment')
-#     global startFlag
-
-#     robot.log.info('--/-- Stopping Main-modules --/--')
-#     startFlag = False
-
-#     robot.log.info('--/-- Stopping Sub-modules --/--')
-#     for submodule in modules:
-#         try:
-#             submodule.stop()
-#         except:
-#             robot.log.warning('Error stopping submodule')
-
-#     for log in logs:
-#         try:
-#             log.close()
-#         except:
-#             robot.log.warning('Error Closing Logfile')
-            
-#     if isbyz:
-#         pass
-#         robot.log.info('This Robot was BYZANTINE')
-
-#     txlog.start()
-    
-#     for txHash in txList:
-
-#         try:
-#             tx = w3.eth.getTransaction(txHash)
-#         except:
-#             txlog.log(['Lost'])
-#         else:
-#             try:
-#                 txRecpt = w3.eth.getTransactionReceipt(txHash)
-#                 mined = 'Yes' 
-#                 txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
-#             except:
-#                 mined = 'No' 
-#                 txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
-
-#     txlog.close()
-
 
 
 

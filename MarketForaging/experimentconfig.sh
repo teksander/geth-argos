@@ -33,7 +33,7 @@ export NUM1=5
 export NUM2=0
 export RABRANGE="0.3"
 
-export ARENADIMX=4
+export ARENADIMX=2
 export ARENADIMY=2
 export ARENADIMXH=$(echo "scale=3 ; $ARENADIMX/2" | bc)
 export ARENADIMYH=$(echo "scale=3 ; $ARENADIMY/2" | bc)

@@ -42,19 +42,19 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="4, 2, 1" center="0,0,0.5">
+  <arena size="2, 2, 1" center="0,0,0.5">
     <floor id="f" source="image" path="/home/eksander/geth-argos/MarketForaging/experiments/floors/market.png" />
-    <box id="wall_north" size="4,0.06,0.1" movable="false">
+    <box id="wall_north" size="2,0.06,0.1" movable="false">
       <body position="0,1.000,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="4,0.06,0.1" movable="false">
+    <box id="wall_south" size="2,0.06,0.1" movable="false">
       <body position="0,-1.000,0" orientation="0,0,0" />
     </box>
     <box id="wall_east" size="0.06,2,0.1" movable="false">
-      <body position="2.000,0,0" orientation="0,0,0" />
+      <body position="1.000,0,0" orientation="0,0,0" />
     </box>
     <box id="wall_west" size="0.06,2,0.1" movable="false">
-      <body position="-2.000,0,0" orientation="0,0,0" />
+      <body position="-1.000,0,0" orientation="0,0,0" />
     </box>
 
     <distribute>

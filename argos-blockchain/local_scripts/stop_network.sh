@@ -1,6 +1,6 @@
-docker service rm ethereum_eth
+docker service rm ${SWARMNAME}_eth
 sleep 1
-docker stack rm ethereum
+docker stack rm ${SWARMNAME}
 sleep 1
 
 if docker ps | grep -q "Up"

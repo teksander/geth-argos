@@ -12,17 +12,17 @@ source global_config_blockchain.sh
 
 # Start Ethereum network using Docker 
 cd ${DOCKERBASE}
-docker stack rm ethereum >/dev/null 2>&1
+docker stack rm ${SWARMNAME} >/dev/null 2>&1
 
 rm -f ${DOCKERBASE}/geth/my_enode.enode
 
 sleep 1
 
-docker stack deploy -c ./docker-compose.yml ethereum
+docker stack deploy -c ./docker-compose.yml ${SWARMNAME}
 
 # sleep 5
 
-docker service scale ethereum_eth=$N
+docker service scale ${SWARMNAME}_eth=$N
 
 # sleep 5
 
