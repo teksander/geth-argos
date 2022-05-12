@@ -145,7 +145,7 @@ def buffer(rate = bufferRate, ageLimit = ageLimit):
 
 # /* Initialize background daemon threads for the Main-Modules*/
 #######################################################################
-bufferTh = threading.Thread(target=buffer, args=())                                     
+# bufferTh = threading.Thread(target=buffer, args=())                                     
 
 
 class ResourceBuffer(object):
@@ -459,7 +459,7 @@ def init():
 #########################################################################################################################
 
 def controlstep():
-    global clocks, counters, startFlag, startTime, bufferTh
+    global clocks, counters, startFlag, startTime
 
     if not startFlag:
 
@@ -510,10 +510,10 @@ def controlstep():
         #### MAIN-MODULE STEPS ####
         ###########################
 
-        if clocks['buffer'].query(): 
-            if not bufferTh.is_alive():
-                bufferTh = threading.Thread(target=buffer)
-                bufferTh.start()
+        # if clocks['buffer'].query(): 
+        #     if not bufferTh.is_alive():
+        #         bufferTh = threading.Thread(target=buffer)
+        #         bufferTh.start()
 
         ##############################
         #### STATE-MACHINE STEPS ####
@@ -708,9 +708,9 @@ def reset():
 def destroy():
     if startFlag:
         w3.geth.miner.stop()
-        bufferTh.join()
-        for enode in getEnodes():
-            w3.geth.admin.removePeer(enode)
+        # bufferTh.join()
+        # for enode in getEnodes():
+        #     w3.geth.admin.removePeer(enode)
 
     variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
     with open(variables_file, 'w+') as vf:

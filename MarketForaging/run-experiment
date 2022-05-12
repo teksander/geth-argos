@@ -42,7 +42,7 @@ run() {
 	for REP in $(seq 1 ${REPS}); do
 
 		# Perform experiment
-		. starter --reset-geth --start
+		. starter --reset-geth --start-novis
 
 		# Collect data
 		if [ $# -eq 1 ]; then
@@ -53,10 +53,9 @@ run() {
 }
 
 
-EXP=test120
-copy "test120_concentrated/25_blockchain2"
+EXP=test120_scaling
+copy "test120_scaling/25_blockchain2"
 config "REPS" 2
-
 
 # # Experiment parameter
 # config "NUM1" 25
@@ -136,6 +135,36 @@ config "REPS" 2
 # config "MAXRECRUITS" 2
 # wait
 # run    "${EXP}/25_blockchain2"
+
+# Experiment parameter
+config "NUM1" 0
+config "NUM2" 5
+wait
+run    "${EXP}/5_greedy"
+
+# Experiment parameter
+config "NUM1" 0
+config "NUM2" 10
+wait
+run    "${EXP}/10_greedy"
+
+# Experiment parameter
+config "NUM1" 0
+config "NUM2" 15
+wait
+run    "${EXP}/15_greedy"
+
+# Experiment parameter
+config "NUM1" 0
+config "NUM2" 20
+wait
+run    "${EXP}/20_greedy"
+
+# Experiment parameter
+config "NUM1" 0
+config "NUM2" 25
+wait
+run    "${EXP}/25_greedy"
 
 # # Experiment parameter
 # config "NUM1" 30
