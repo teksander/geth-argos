@@ -65,7 +65,7 @@ class Resource(object):
     """ Establish the resource class 
     """
     def __init__(self, resource_js):
-        # Required resource attrs: x, y, radius
+        # Required resource attrs: x, y, radius, quantity, quality, utility
 
         if isinstance(resource_js, dict):
             resource_dict = resource_js

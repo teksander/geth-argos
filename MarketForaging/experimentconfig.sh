@@ -33,16 +33,21 @@ export NUM1=5
 export NUM2=0
 export RABRANGE="0.3"
 
-export ARENADIMX=4
-export ARENADIMY=2
+export ARENADIMX=3
+export ARENADIMY=3
 export ARENADIMXH=$(echo "scale=3 ; $ARENADIMX/2" | bc)
 export ARENADIMYH=$(echo "scale=3 ; $ARENADIMY/2" | bc)
 
-# export DENSITY=3
 export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
 
 export STARTDIM=$(echo "scale=3 ; $ARENADIMY/5" | bc)
 export TPS=10
+
+
+# [DOCKER]
+export SWARMNAME=robot
+# export LOOPNODE=true
+# export LOOPNAME=loop
 
 # [GETH]
 export BLOCKPERIOD=2

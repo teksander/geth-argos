@@ -7,12 +7,10 @@ import random, math, copy
 import time, sys, os
 import logging
 from types import SimpleNamespace
-from collections import namedtuple
 
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder+'/controllers')
-sys.path.insert(1, experimentFolder+'/loop_functions')
-sys.path.insert(1, experimentFolder)
+sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+             os.environ['EXPERIMENTFOLDER']]
 
 from movement import RandomWalk, Navigate, Odometry
 from groundsensor import GroundSensor, ResourceVirtualSensor, Resource
@@ -22,7 +20,7 @@ from console import *
 from aux import *
 from statemachine import *
 
-from loop_function_params import *
+from loop_function_params import params as lp
 from controller_params import *
 
 # /* Logging Levels for Console and File */
@@ -64,7 +62,7 @@ clocks['rs'] = Timer(0.02)
 
 
 # Store the position of the market
-market_js = {"x":0, "y":0, "radius":  market_params['radius'], "radius_dropoff": market_params['radius_dropoff']}
+market_js = {"x":0, "y":0, "radius":  lp['market']['radius'], "radius_dropoff": lp['dropzone']['radius']}
 market = Resource(market_js)                      
 
 class ResourceBuffer(object):

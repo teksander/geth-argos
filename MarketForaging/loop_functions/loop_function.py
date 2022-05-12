@@ -12,15 +12,17 @@ sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
              os.environ['EXPERIMENTFOLDER']]
 
-from loop_function_params import *
-from helpers import *
+
 from aux import Vector2D, Logger, getRAMPercent, getCPUPercent, mydict, Timer, Accumulator
 from groundsensor import Resource
 from controller_params import *
+from loop_function_params import params as lp
+from helpers import *
 
-random.seed(params['generic']['seed'])
+# /* Files */
+#######################################################################
 
-log_folder = params['environ']['EXPERIMENTFOLDER'] + '/logs/0/'
+log_folder = lp['environ']['EXPERIMENTFOLDER'] + '/logs/0/'
 os.makedirs(os.path.dirname(log_folder), exist_ok=True)   
 
 open(resource_file, 'w+').close()
@@ -30,9 +32,13 @@ open(rays_file, 'w+').close()
 # /* Global Variables */
 #######################################################################
 
-# Other inits
-global startFlag, startTime
+# Initialize the seed
+if lp['generic']['seed']:
+    random.seed(lp['generic']['seed'])
+
+global startFlag, startTime, stopFlag
 startFlag = False
+stopFlag = False
 startTime = time.time()
 
 global resource_list, resource_counter
@@ -40,40 +46,64 @@ resource_list = []
 resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
 position_previous = dict()
 
-# Store the position of the market
-market_js = {"x":0, "y":0, "radius":  market_params['radius'], "radius_dropoff": market_params['radius_dropoff']}
-market = Resource(market_js)
-
 # Initialize RAM and CPU usage
 global RAM, CPU
 RAM = getRAMPercent()
 CPU = getCPUPercent()
 
-
 # Initialize timers/accumulators/logs:
 global clocks, accums, logs
-clocks = dict()
-clocks['update_status'] = Timer(10)
+clocks = logs = accums = dict()
 
-accums = dict()
+clocks['update_status'] = Timer(10)
 accums['distance'] = Accumulator()
 accums['distance_forage'] = Accumulator()
 accums['distance_explore'] = Accumulator()
 
-logs = dict()
 
-if 'all_radius' in resource_params and 'all_counts' in resource_params:
-    radii = resource_params['all_radius']
-    counts = resource_params['all_counts']
-else:
-    # Calculate the number and radius of resources to generate
-    frequency = mydict(resource_params['frequency'])
-    areas = frequency * resource_params['abundancy'] * generic_params['arena_size']**2
-    counts = (areas/(resource_params['radius']**2*math.pi)).round(0)
-    single_areas = mydict({k: areas[k]/counts[k] for k in areas if counts[k] != 0})
-    single_areas.update({k: 0 for k in areas if counts[k] == 0})
-    radii = (single_areas/math.pi).root(2).round(2)
+def generate_resource(n = 1, qualities = None, max_attempts = 50):
+    
+    for i in range(n):
+        attempts = 0
 
+        while True:
+            attempts += 1
+            if attempts == max_attempts:
+                print("Max attempts reached")
+                stopFlag = True
+                break
+
+            # Generate a new resource position (uniform)
+            x = round(random.uniform(-float(lp.environ["ARENADIMX"])/2, float(lp.environ["ARENADIMX"])), 2)
+            y = round(random.uniform(-float(lp.environ["ARENADIMY"])/2, float(lp.environ["ARENADIMY"])/2), 2)
+            
+            # Generate quantity of resource and quality
+            quantity = random.randint(resource_params['quantity_min'], resource_params['quantity_max'])
+            quality  = qualities[i]
+            utility  = params['patches']['utilities'][quality]
+            radius   = params['patches']['radius']
+            
+            # Discard if resource overlaps with sides of arena
+            if abs(x)+radius > float(lp.environ["ARENADIMX"])/2 or abs(y)+radius > float(lp.environ["ARENADIMY"])/2:
+                pass
+
+            # Discard if resource overlaps with other resources
+            elif any([is_in_circle((res.x, res.y), (x,y), res.radius+radius) for res in resource_list]):
+                pass
+
+            # Discard if resource overlaps with minimum area
+            elif is_in_circle((0, 0), (x,y), params['patches']['dist_min']+radius):
+                pass
+
+            # Discard if resource overlaps with maximum area
+            elif not is_in_circle((0, 0), (x,y), params['patches']['dist_max']-radius):
+                pass
+
+            else:
+                break
+
+        # Append new resource to the global list of resources
+        resource_list.append(Resource(x, y, radius, quantity, quality))
 
 def init():
 
@@ -87,12 +117,14 @@ def init():
     logs['loop'] = Logger(filename, header, ID = '0')
     logs['loop'].start()
 
-
-    # # Initialize robot parameters
+    # Initialize robot parameters
     for robot in allrobots:
         print(robot.variables.get_all_attributes())
         position_previous[robot.variables.get_attribute("id")] = Vector2D(robot.position.get_position()[0:2]) 
 
+    # Initialize resource locations
+    for quality, count in params['patches']['counts'].items():
+        generate_resource(count, qualities = count*[quality])
             
 def pre_step():
     global startFlag, startTime, clocks, resource_counter
@@ -101,28 +133,48 @@ def pre_step():
         startTime = time.time()
 
     for robot in allrobots:
+        robot.variables.set_attribute("newResource", "")
+        robot_position = robot.position.get_position()
 
-        # Has robot stepped into market? 
-        if is_in_rectangle(robot.position.get_position(), \
-                            params['market']['position'], \
-                            params['market']['width'], \
-                            params['market']['height']):
-            robot.variables.set_attribute("at", "market")
+        # Has robot stepped into resource? YES -> Update virtual sensor
+        for res in resource_list:
+            if is_in_circle(robot_position, (res.x, res.y), res.radius):
 
-        elif is_in_rectangle(robot.position.get_position(), \
-                            params['quarry']['position'], \
-                            params['quarry']['width'], \
-                            params['quarry']['height']):
-            robot.variables.set_attribute("at", "quarry")
+                # Does the robot not carry resource and is Forager? YES -> Pickup resource
+                if not robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("collectResource"):
 
-        elif is_in_rectangle(robot.position.get_position(), \
-                            params['csite']['position'], \
-                            params['csite']['width'], \
-                            params['csite']['height']):
-            robot.variables.set_attribute("at", "csite")
+                        robot.variables.set_attribute("hasResource", res.quality)
+                        res.quantity -= 1
 
-        else:
-            robot.variables.set_attribute("at", "None")
+                        # Has resource expired? YES -> Generate new
+                        if res.quantity <= 0:
+                            resource_list.remove(res)
+                            generate_resource(1, [res.quality])
+                            
+                # Update virtual sensor
+                robot.variables.set_attribute("newResource", res._json())
+
+
+        # Has robot stepped into market drop area? YES
+        if is_in_circle(robot_position, \
+                            params['dropzone']['position'], \
+                            params['dropzone']['radius']):
+        
+            # Does the robot carry resource? YES -> Sell resource
+            resource_quality = robot.variables.get_attribute("hasResource")
+            if resource_quality and robot.variables.get_attribute("dropResource"):      
+                resource_counter[resource_quality] += 1  
+
+                robot.variables.set_attribute("hasResource", "")
+                robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
+                # print('Robot sold resource! Count='+robot.variables.get_attribute("resourceCount"))
+
+                looplog.log([distance_accumul]
+                          + [distance_accumul_forage]
+                          + [distance_accumul_explore]
+                          + [str(value) for value in resource_counter.values()] 
+                          + [sum(resource_counter.values())] 
+                          + [sum([resource_counter[x]*resource_params['utility'][x] for x in resource_params['utility']])])
         
 
         # # Does the robot carry resource? YES -> Sell resource
@@ -151,13 +203,10 @@ def post_step():
                 y = str(robot.position.get_position()[1])
                 f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("hasResource")) + '\n')
 
-    # Record the rays to be drawn for each robot
-    for robot in allrobots:
-        p = 'a'
-        if robot.variables.get_attribute("id") == "1":
-            p = 'w+'
-        with open(rays_file, p, buffering=1) as f:
-            f.write(robot.variables.get_attribute("rays"))
+    # # Record the rays to be drawn for each robot
+    # with open(rays_file, 'w', buffering=1) as f:
+    #     for robot in allrobots:
+    #         f.write(robot.variables.get_attribute("rays"))
 
     # Record the distance each robot has travelled in the current step
         position_current = Vector2D(robot.position.get_position()[0:2])              
@@ -186,12 +235,12 @@ def post_step():
 
 def is_experiment_finished():
   
-    finished = time.time() - startTime > generic_params['time_limit']
+    stopFlag = stopFlag or time.time() - startTime > generic_params['time_limit']
 
-    if finished:
+    if stopFlag:
         print("Experiment has finished")
 
-    return finished
+    return stopFlag
 
 def reset():
     pass
