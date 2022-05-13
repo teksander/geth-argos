@@ -6,13 +6,11 @@
 import random, math, copy
 import time, sys, os
 import logging
-from types import SimpleNamespace
-from collections import namedtuple
 
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder+'/controllers')
-sys.path.insert(1, experimentFolder+'/loop_functions')
-sys.path.insert(1, experimentFolder)
+experimentFolder = os.environ['EXPERIMENTFOLDER']
+sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+             os.environ['EXPERIMENTFOLDER']]
 
 from movement import RandomWalk, Navigate, Odometry
 from groundsensor import GroundSensor, ResourceVirtualSensor, Resource
@@ -22,7 +20,6 @@ from console import *
 from aux import *
 from statemachine import *
 
-from loop_params import *
 from loop_params import params as lp
 from control_params import params as cp
 
@@ -30,14 +27,6 @@ from control_params import params as cp
 #######################################################################
 loglevel = 10
 logtofile = False 
-
-# /* Controller Parameters */
-#######################################################################
-erbDist   = cp['erbDist'] 
-erbtFreq  = cp['erbtFreq'] 
-gsFreq    = cp['gsFreq']
-rwSpeed   = cp['scout_speed']
-navSpeed  = cp['recruit_speed']
 
 # /* Global Variables */
 #######################################################################
@@ -51,10 +40,7 @@ global submodules
 submodules = []
 
 global clocks, counters, logs, txs
-clocks = dict()
-counters = dict()
-logs = dict()
-txs = dict()
+clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
 clocks['buffer'] = Timer(0.5)
 clocks['query_resources'] = Timer(1)
@@ -176,8 +162,9 @@ class ResourceBuffer(object):
     def getResourceByValue(self, value):
         return self.buffer[self.getValues().index(value)]
 
+    def setCurrent(self, current):
+        self.current = current
 
-txList = []
 class Transaction(object):
 
     def __init__(self, txHash, name = "", query_latency = 2):
@@ -244,7 +231,7 @@ class Transaction(object):
             self.tx = None
 
 ####################################################################################################################################################################################
-#### INIT STEP #####################################################################################################################################################################
+#### INITIAL STEP ##################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
     global clocks,counters, logs, submodules, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb
@@ -262,12 +249,14 @@ def init():
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
     log_folder = experimentFolder + '/logs/' + robotID + '/'
-
+     
     # Monitor logs (recorded to file)
-    monitor_file =  log_folder + 'monitor.log'
-    os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
-    logging.basicConfig(filename=monitor_file, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
-    
+    name =  'monitor.log'
+    os.makedirs(os.path.dirname(log_folder+name), exist_ok=True) 
+    logging.basicConfig(filename=log_folder+name, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
+    robot.log = logging.getLogger('main')
+    robot.log.setLevel(loglevel)
+
     # Experiment data logs (recorded to file)
     name   =  'odometry.csv'
     header = ['DIST']
@@ -277,11 +266,6 @@ def init():
     header = ['COUNT']
     logs['resources'] = Logger(log_folder+name, header, 5, ID = robotID)
 
-    # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    robot.log = logging.getLogger('main')
-
-    # List of logmodules --> specify submodule loglevel if desired
-    logging.getLogger('main').setLevel(10)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -289,7 +273,6 @@ def init():
     robot.log.info('Initialising Python Geth Console...')
     w3 = init_web3(robotID)
 
-    print(robotIP)
     # /* Init an instance of peer for this Pi-Puck */
     me = Peer(robotID, robotIP, w3.enode, w3.key)
 
@@ -297,9 +280,13 @@ def init():
     robot.log.info('Initialising resource buffer...')
     rb = ResourceBuffer()
 
+    # /* Init a TCP server __hosting resources  */
+    robot.log.info('Initialising resource buffer...')
+    tcp = TCP_server("", 'localhost', 1000+int(me.id))
+
     # /* Init E-RANDB __listening process and transmit function
     robot.log.info('Initialising RandB board...')
-    erb = ERANDB(robot, erbDist, erbtFreq)
+    erb = ERANDB(robot, cp['erbDist'] , cp['erbtFreq'] )
 
     #/* Init Resource-Sensors */
     robot.log.info('Initialising resource sensor...')
@@ -307,11 +294,11 @@ def init():
 
     # /* Init Random-Walk, __walking process */
     robot.log.info('Initialising random-walk...')
-    rw = RandomWalk(robot, rwSpeed)
+    rw = RandomWalk(robot, cp['scout_speed'])
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising navigation...')
-    nav = Navigate(robot, navSpeed)
+    nav = Navigate(robot, cp['recruit_speed'])
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising odometry...')
@@ -324,7 +311,7 @@ def init():
     fsm = FiniteStateMachine(robot, start = Idle.IDLE)
 
     # List of submodules --> iterate .start() to start all
-    submodules = [w3.geth.miner, erb]
+    submodules = [w3.geth.miner, erb, tcp]
 
     txs['sell'] = Transaction(None)
     txs['buy']  = Transaction(None)
@@ -334,7 +321,7 @@ def init():
 #########################################################################################################################
 
 def controlstep():
-    global clocks, counters, startFlag, startTime
+    global startFlag, startTime
 
     if not startFlag:
         ##########################
@@ -434,17 +421,29 @@ def controlstep():
             return arrived
 
         def sensing():
-            # Sense environment for resources
+            # Sense environment for patches
+
             if clocks['rs'].query(): 
                 resource = rs.getNew()
                 if resource:
                     rb.addResource(resource)
                     return resource
 
+        def listening():
+            # Listen for peers broadcasting patches
+
+            for data in erb.getData():
+                if data[1] != 0:
+                    peer_ID  = data[0]
+                    resource = Resource(tcp.request('localhost', 1000+int(peer_ID)))
+
+                    rb.addResource(resource)
+
+
         #########################################################################################################
-        #### Idle.IDLE
+        #### Neutral.IDLE
         #########################################################################################################
-        if fsm.query(Idle.IDLE):
+        if fsm.query(Neutral.IDLE):
 
             # State transition: Scout.EXPLORE
             explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
@@ -463,17 +462,42 @@ def controlstep():
             # Look for resources
             sensing()
 
-            # Transition state
+            # Look for broadcasters
+            listening()
+
+            # Sucess exploration: BROADCAST or FORAGE
+            if rb.buffer:
+                rb.setCurrent = rb.buffer[-1]
+                fsm.setState(Scout.BROADCAST, message = "Broadcasting %s" % len(rb))
+
+            # Fail exploration: HOMING
             if clocks['explore'].query(reset = False):
+                fsm.setState(Scout.HOMING, message = "Failed scouting trip"):
 
-                # Sucess exploration: Sell
-                if rb.buffer:
-                    fsm.setState(Scout.SELL, message = "Found %s" % len(rb))
 
-                # Unsucess exploration: Buy
-                else:
-                    clocks['buy'].reset()
-                    fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
+        #########################################################################################################
+        #### Scout.BROADCAST
+        #########################################################################################################
+
+        elif fsm.query(Scout.BROADCAST):
+            
+            if nav.get_distance_to(rb.current._p) < 1.5 * rb.current.radius:           
+                nav.avoid(move = True)
+                arrived = True
+            else:
+                nav.navigate_with_obstacle_avoidance(rb.current._p)
+                arrived = False
+
+            if arrived:
+                erb.setData(rb.current.utility, index=1)
+                tcp.setData(rb.current._json)
+
+        #########################################################################################################
+        #### Scout.HOMING
+        #########################################################################################################
+
+        elif fsm.query(Scout.HOMING):
+            homing()
 
 
         #########################################################################################################
@@ -581,7 +605,7 @@ def controlstep():
                 resource = sensing()
 
                 # Found the resource? YES -> Collect
-                if resource and resource._pos == rb.best._pos:
+                if resource and resource._p == rb.best._p:
                     robot.variables.set_attribute("collectResource", "True")
                     robot.log.info('Collect: %s', resource._desc)        
 
@@ -614,7 +638,7 @@ def controlstep():
                     fsm.setState(Scout.SELL, message = None)
 
 #########################################################################################################################
-#### RESET-DESTROY STEPS ################################################################################################
+#### RESET/DESTROY STEP #################################################################################################
 #########################################################################################################################
 
 def reset():

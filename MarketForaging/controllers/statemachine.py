@@ -3,13 +3,17 @@ import time
 from aenum import Enum, auto
 from aux import Timer
 
+class Neutral(Enum):
+    IDLE   = 10
+
 class Idle(Enum):
     IDLE   = 1
 
 class Scout(Enum):
-    SELL    = 2
-    EXPLORE = 3
-    HOMING  = 4
+    BROADCAST= 9
+    SELL     = 2
+    EXPLORE  = 3
+    HOMING   = 4
 
 class Recruit(Enum):
     BUY    = 5

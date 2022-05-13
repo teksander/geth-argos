@@ -278,8 +278,8 @@ class TCP_server(object):
         msg = __socket.recv(1024)  
         msg = msg.decode('ascii') 
 
-        if msg == '':
-            raise ValueError('Connection Refused')
+        # if msg == '':
+        #     raise ValueError('Connection Refused')
 
         __socket.close()   
         return msg

@@ -20,14 +20,32 @@ contract MarketForaging {
   resource[] public resources;
   resource[] public resources_depleted;
   address[max_recruits] public recruits_empty;
-  mapping(address => uint) public balances;
+  // mapping(address => uint) public balances;
 
 
-  function sellResource(uint _utility) public {
-    balances[msg.sender] += _utility;
-  } 
+  // function sellResource(uint _utility) public {
+  //   balances[msg.sender] += _utility;
+  // } 
 
-  function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility, bool sellResource) public {
+  function getResources() public view returns (resource[] memory){
+    return resources;
+  }
+
+  function getMyResource() public view returns (string memory){
+
+    for (uint i=0; i < resources.length; i++) {
+
+      for (uint j=0; j < max_recruits; j++) {
+
+        if (resources[i].recruits[j] == msg.sender) { 
+           return resources[i].json; 
+        }
+      }
+    }
+    return "";    
+  }
+
+  function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility) public {
     bool unique = true;
     bool depleted = false;
 
@@ -114,22 +132,3 @@ contract MarketForaging {
 }
 
 
-
-
-  function getResources() public view returns (resource[] memory){
-    return resources;
-  }
-
-  function getMyResource() public view returns (string memory){
-
-    for (uint i=0; i < resources.length; i++) {
-
-      for (uint j=0; j < max_recruits; j++) {
-
-        if (resources[i].recruits[j] == msg.sender) { 
-           return resources[i].json; 
-        }
-      }
-    }
-    return "";    
-  }
