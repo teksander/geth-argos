@@ -15,7 +15,6 @@ from groundsensor import Resource
 
 from control_params import params as cp
 from loop_params import params as lp
-from loop_params import *
 from loop_helpers import *
 
 random.seed(lp['generic']['seed'])

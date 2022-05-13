@@ -659,7 +659,7 @@ class mydict(dict):
 
 def identifersExtract(robotID, query = 'IP'):
 
-    identifier = os.environ['CONTAINERBASE'] + str(robotID) + '.'
+    identifier = os.environ['CONTAINERBASE'] + '.' + str(robotID) + '.'
 
     with open(os.environ['EXPERIMENTFOLDER']+'/identifiers.txt', 'r') as identifiersFile:
         for line in identifiersFile.readlines():

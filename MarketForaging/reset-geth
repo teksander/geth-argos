@@ -41,7 +41,7 @@ echo "Restarting the docker containers"
 
 
 ## Restart docker
-docker service scale ethereum_eth=0
+docker service scale ${CONTAINERBASE}=0
 echo "Shuting down docker process..."
 bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
 

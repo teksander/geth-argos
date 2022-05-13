@@ -24,7 +24,7 @@ export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.x.argos"
 
 # [DOCKER]
 export SWARMNAME=ethereum
-export CONTAINERBASE=${SWARMNAME}_eth.
+export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
 export CON1="${EXPERIMENTFOLDER}/controllers/mainloop.py"

@@ -17,8 +17,8 @@ new_rep=$(printf "%03d\n" $(($last_rep+1)))
 # Collect experiment configuration into /logs/
 python3 collect-config.py
 cp experimentconfig.sh $LOGSFOLDER
-cp $EXPERIMENTFOLDER/loop_functions/loop_function_params.py $LOGSFOLDER
-cp $EXPERIMENTFOLDER/controllers/controller_params.py $LOGSFOLDER
+cp $EXPERIMENTFOLDER/loop_functions/loop_params.py $LOGSFOLDER
+cp $EXPERIMENTFOLDER/controllers/control_params.py $LOGSFOLDER
 
 # Collect geth related logs from docker folder into /logs/
 for ID in $(seq 1 $NUMROBOTS); do
