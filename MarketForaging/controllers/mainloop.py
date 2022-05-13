@@ -251,7 +251,6 @@ def init():
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
-    robot.variables.set_consensus(False) 
     robot.variables.set_attribute("newResource", "")
     robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("collectResource", "")
