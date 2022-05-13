@@ -33,11 +33,11 @@ logtofile = False
 
 # /* Controller Parameters */
 #######################################################################
-erbDist = cp['erbDist'] 
-erbtFreq = cp['erbtFreq'] 
-gsFreq = cp['gsFreq']
-rwSpeed = cp['scout_speed']
-navSpeed = cp['recruit_speed']
+erbDist   = cp['erbDist'] 
+erbtFreq  = cp['erbtFreq'] 
+gsFreq    = cp['gsFreq']
+rwSpeed   = cp['scout_speed']
+navSpeed  = cp['recruit_speed']
 
 # /* Global Variables */
 #######################################################################
@@ -247,7 +247,7 @@ class Transaction(object):
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks, submodules, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb, estimatelogger
+    global clocks,counters, logs, submodules, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
@@ -279,11 +279,9 @@ def init():
 
     # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
     robot.log = logging.getLogger('main')
-    estimatelogger = logging.getLogger('estimate')
 
     # List of logmodules --> specify submodule loglevel if desired
     logging.getLogger('main').setLevel(10)
-    logging.getLogger('estimate').setLevel(50)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -411,8 +409,6 @@ def controlstep():
         #### STATE-MACHINE STEPS ####
         ##############################
 
-        # Routines to be used in state machine steps:
-
         def homing(to_drop = False):
             # Navigate to the market
 
@@ -438,6 +434,7 @@ def controlstep():
             return arrived
 
         def sensing():
+            # Sense environment for resources
             if clocks['rs'].query(): 
                 resource = rs.getNew()
                 if resource:
@@ -494,7 +491,7 @@ def controlstep():
             # Sell resource information  
             if rb.buffer:
                 resource = rb.buffer.pop(-1)
-                sellHash = w3.sc.functions.addResource(*resource._calldata).transact()
+                sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
                 txs['sell'] = Transaction(sellHash)
                 robot.log.info('Selling: %s', resource._desc)
 

@@ -31,9 +31,9 @@ resource_list = []
 resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
 position_previous = dict()
 
-if 'all_radius' in lp['patches'] and 'all_counts' in lp['patches']:
-    radii = lp['patches']['all_radius']
-    counts = lp['patches']['all_counts']
+if 'radii' and 'counts' in lp['patches']:
+    radii  = lp['patches']['radii']
+    counts = lp['patches']['counts']
 else:
     # Calculate the number and radius of resources to generate
     frequency = mydict(lp['patches']['frequency'])
@@ -98,7 +98,7 @@ def generate_resource(n = 1, qualities = None, max_attempts = 50):
             #     radius = round(random.gauss(lp['patches']['radius'], lp['patches']['radius_sigma']),2)
 
             # Generate quantity of resource and quality
-            quantity = random.randint(lp['patches']['quantity_min'], lp['patches']['quantity_max'])
+            quantity = random.randint(lp['patches']['qtty_min'], lp['patches']['qtty_max'])
 
             if not qualities:
                 quality = random.choices(list(lp['patches']['frequency']), weights=lp['patches']['frequency'].values())[0]
@@ -121,11 +121,11 @@ def generate_resource(n = 1, qualities = None, max_attempts = 50):
                 overlap = True
 
             # Discard if resource overlaps with minimum area
-            if is_in_circle((0, 0), (x,y), lp['patches']['distance_min']+radius):
+            if is_in_circle((0, 0), (x,y), lp['patches']['dist_min']+radius):
                 overlap = True
 
             # Discard if resource overlaps with maximum area
-            if not is_in_circle((0, 0), (x,y), lp['patches']['distance_max']-radius):
+            if not is_in_circle((0, 0), (x,y), lp['patches']['dist_max']-radius):
                 overlap = True
 
         # Append new resource to the global list of resources

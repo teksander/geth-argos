@@ -42,8 +42,8 @@ def init():
 def DrawInWorld():
 
 	# Draw the Market
-	environment.qt_draw.circle([0, 0, 0.001],[], market.radius, 'brown', True)
-	environment.qt_draw.circle([0, 0, 0.001],[], cache.radius, 'brown', False)
+	environment.qt_draw.circle([market.x, market.y, 0.001],[], market.radius, 'custom2', True)
+	environment.qt_draw.circle([cache.x, cache.y, 0.001],[], cache.radius, 'custom2', False)
 
 	# Draw resources carried by robots
 	with open(lp['files']['robots'], 'r') as f:
@@ -73,7 +73,7 @@ def DrawInWorld():
 		with open(lp['environ']['DOCKERFOLDER']+'/geth/logs/%s/scresources.txt' % i, 'r') as f:	
 			for line in f:
 				res = Resource(line)
-				environment.qt_draw.circle([res.x, res.y, 0.001],[], lp['patches']['radius'], 'gray70', True)
+				environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, 'gray70', True)
 
 
 	resources = list()

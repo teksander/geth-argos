@@ -38,25 +38,33 @@ params['cache']['radius']  = params['generic']['arena_size'] * math.sqrt(0.09/ma
 params['patches'] = dict()
 params['patches']['distribution'] = 'uniform' 
 # params['patches']['distribution'] = 'patchy'
-# params['patches']['hotspots']      = [{'x_mu': 0.25 * generic_params['arena_size'], 
-# 									'y_mu': 0.25 * generic_params['arena_size'], 
-# 									'x_sg': 0.15 * generic_params['arena_size'], 
-# 									'y_sg': 0.15 * generic_params['arena_size']}]
+# params['patches']['hotspots']      = [{'x_mu': 0.25 * params['generic']['arena_size'], 
+# 									     'y_mu': 0.25 * params['generic']['arena_size'], 
+# 									     'x_sg': 0.15 * params['generic']['arena_size'], 
+# 									     'y_sg': 0.15 * params['generic']['arena_size']}]
 
-params['patches']['radius']    = 0.08
-# params['patches']['area_percent'] = 0.005 * (10/generic_params['num_robots'])
-# params['patches']['radius']    = params['generic']['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
-
-params['patches']['quantity_min'] = 5
-params['patches']['quantity_max'] = 5
-params['patches']['distance_min'] = 1.7 * params['cache']['radius'] 
-params['patches']['distance_max'] = 0.50 * params['generic']['arena_size']   
-params['patches']['abundancy']    = 0.03
+params['patches']['radius'] = 0.1
+params['patches']['qtty_min'] = 5
+params['patches']['qtty_max'] = 5
+params['patches']['dist_min'] = 1.5 * params['cache']['radius'] 
+params['patches']['dist_max'] = 0.5 * params['generic']['arena_size']   
 
 params['patches']['qualities'] = {'red', 'green' , 'blue', 'yellow'}
 params['patches']['utility']   = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
-params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 
+# params['patches']['area_percent'] = 0.005 * (10/generic_params['num_robots'])
+# params['patches']['radius']    = params['generic']['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
+
+# params['patches']['radius']    = params['generic']['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
+# params['patches']['abundancy']    = 0.03
+# params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
+
+
+params['patches']['counts'] = {'red': 1, 'green': 1 , 'blue': 1, 'yellow': 1}
+params['patches']['radii']  = {'red':    params['patches']['radius'], 
+							  'green':  params['patches']['radius'] , 
+							  'blue':   params['patches']['radius'], 
+							  'yellow': params['patches']['radius']}
 
 # Parameters for the economy
 # economy_params = dict()
@@ -64,7 +72,6 @@ params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'ye
 
 # Initialize the files which store QT_draw information 
 params['files'] = dict()
-params['files']['resources'] = 'loop_functions/resources.txt'
-params['files']['robots'] = 'loop_functions/robots.txt'
-params['files']['rays'] = 'loop_functions/rays.txt'
-params['files']['scresources'] = 'loop_functions/scresources.txt'
+params['files']['resources']   = 'loop_functions/resources.txt'
+params['files']['robots']      = 'loop_functions/robots.txt'
+params['files']['rays']        = 'loop_functions/rays.txt'
