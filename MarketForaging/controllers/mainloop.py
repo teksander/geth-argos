@@ -22,21 +22,22 @@ from console import *
 from aux import *
 from statemachine import *
 
-from loop_function_params import *
-from controller_params import *
+from loop_params import *
+from loop_params import params as lp
+from control_params import params as cp
 
 # /* Logging Levels for Console and File */
 #######################################################################
 loglevel = 10
 logtofile = False 
 
-# /* Experiment Parameters */
+# /* Controller Parameters */
 #######################################################################
-erbDist = 175
-erbtFreq = 10
-gsFreq = 20
-rwSpeed = controller_params['scout_speed']
-navSpeed = controller_params['recruit_speed']
+erbDist = cp['erbDist'] 
+erbtFreq = cp['erbtFreq'] 
+gsFreq = cp['gsFreq']
+rwSpeed = cp['scout_speed']
+navSpeed = cp['recruit_speed']
 
 # /* Global Variables */
 #######################################################################
@@ -59,13 +60,12 @@ clocks['buffer'] = Timer(0.5)
 clocks['query_resources'] = Timer(1)
 clocks['block'] = Timer(2)
 clocks['explore'] = Timer(1)
-clocks['buy'] = Timer(controller_params['buy_duration'])
+clocks['buy'] = Timer(cp['buy_duration'])
 clocks['rs'] = Timer(0.02)
 
-
-# Store the position of the market
-market_js = {"x":0, "y":0, "radius":  market_params['radius'], "radius_dropoff": market_params['radius_dropoff']}
-market = Resource(market_js)                      
+# Store the position of the market and cache
+market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
+cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['radius']})
 
 class ResourceBuffer(object):
     """ Establish the resource buffer class 
@@ -251,7 +251,6 @@ def init():
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
-    robot.variables.set_consensus(False) 
     robot.variables.set_attribute("newResource", "")
     robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("collectResource", "")
@@ -292,6 +291,7 @@ def init():
     robot.log.info('Initialising Python Geth Console...')
     w3 = init_web3(robotID)
 
+    print(robotIP)
     # /* Init an instance of peer for this Pi-Puck */
     me = Peer(robotID, robotIP, w3.enode, w3.key)
 
@@ -374,10 +374,10 @@ def controlstep():
         #### LOG-MODULE STEPS ####
         ##########################
 
-        if logs['resources'].isReady():
+        if logs['resources'].query():
             logs['resources'].log([len(rb)])
 
-        if logs['odometry'].isReady():
+        if logs['odometry'].query():
             logs['odometry'].log([odo.getNew()])
 
         ###########################
@@ -419,7 +419,7 @@ def controlstep():
             arrived = True
 
             if to_drop:
-                if nav.get_distance_to((0,0)) < market.radius + 0.5* (market.radius_dropoff - market.radius):
+                if nav.get_distance_to((0,0)) < market.radius + 0.5* (cache.radius - market.radius):
                     nav.avoid(move = True)
                 else:
                     nav.navigate_with_obstacle_avoidance(market._pr)
@@ -450,7 +450,7 @@ def controlstep():
         if fsm.query(Idle.IDLE):
 
             # State transition: Scout.EXPLORE
-            explore_duration = random.gauss(controller_params['explore_mu'], controller_params['explore_sg'])
+            explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
             clocks['explore'].set(explore_duration)
             fsm.setState(Scout.EXPLORE, message = "Duration: %.2f" % explore_duration)
 

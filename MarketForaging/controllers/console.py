@@ -7,6 +7,7 @@ from hexbytes import HexBytes
 experimentFolder = os.environ["EXPERIMENTFOLDER"]
 sys.path.insert(1, experimentFolder)
 
+from aux import identifersExtract
 # logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
 # logger = logging.getLogger(__name__)
 
@@ -75,18 +76,6 @@ def init_web3(robotID):
 
 #     return w3
 
-
-def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.' + str(robotID) + '.'
-    containersFile = open(experimentFolder+'/identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            if query == 'IP_DOCKER':
-                return line.split()[-1]
-            if query == 'IP':
-                return line.split()[-2]
-            if query == 'ENODE':
-                return line.split()[1]
 
 if __name__=='__main__':
 

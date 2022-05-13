@@ -38,6 +38,7 @@ while [[ $ready != $NUMROBOTS ]]; do
     . test-tcp 4000
     sleep 0.5
 done
+
 echo "+-----------------------------------------------------------+"
 echo "Cleaning logs folder..."
 

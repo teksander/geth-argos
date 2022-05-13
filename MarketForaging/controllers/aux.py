@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
-import time
-import sys
-import threading
-import socket
-import subprocess
-import os
-import logging
-import psutil
+import time, sys, os
 import math
-import json
-from types import SimpleNamespace
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder)
+import threading, psutil
+import logging
+import socket
 
+sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+             os.environ['EXPERIMENTFOLDER']]
 
 # The logs that go to console
 # logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -88,6 +83,49 @@ class Counter:
 
     def reset(self):
         self.count = 0
+
+class Accumulator:
+    def __init__(self, rate = 0, name = None):
+        self.name = name
+        self.rate = rate
+        self.value = 0
+        self.isLocked = False
+
+    def query(self, reset = True):
+        if self.remaining() < 0:
+            if reset:
+                self.reset()
+            return True
+        else:
+            return False
+
+    def remaining(self):
+        return self.rate - self.value
+
+    def set(self, rate):
+        if not self.isLocked:
+            self.rate = rate
+            self.value = 0
+        return self
+
+    def get(self):
+        return self.value
+        
+    def acc(self, quantity):
+        self.value += quantity
+
+    def reset(self):
+        if not self.isLocked:
+            self.value = 0
+        return self
+
+    def lock(self):
+        self.isLocked = True
+        return self
+
+    def unlock(self):
+        self.isLocked = False
+        return self
 
 
 
@@ -447,7 +485,7 @@ class Logger(object):
         :type data: list
         """ 
         
-        if self.isReady():
+        if self.query():
             self.tStamp = time.time()
             try:
                 tString = str(round(self.tStamp-self.tStart, 3))
@@ -458,7 +496,7 @@ class Logger(object):
                 pass
                 logger.warning('Failed to log data to file')
 
-    def isReady(self):
+    def query(self):
         return time.time()-self.tStamp > self.rate
 
     def start(self):
@@ -620,13 +658,15 @@ class mydict(dict):
         return mydict([[key, round(self[key], n)] for key in self])
 
 def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.' + str(robotID) + '.'
-    containersFile = open(experimentFolder+'/identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            if query == 'IP_DOCKER':
-                return line.split()[-1]
-            if query == 'IP':
-                return line.split()[-2]
-            if query == 'ENODE':
-                return line.split()[1]
+
+    identifier = os.environ['CONTAINERBASE'] + str(robotID) + '.'
+
+    with open(os.environ['EXPERIMENTFOLDER']+'/identifiers.txt', 'r') as identifiersFile:
+        for line in identifiersFile.readlines():
+            if line.__contains__(identifier):
+                if query == 'IP':
+                    return line.split()[-2]
+                if query == 'IP_DOCKER':
+                    return line.split()[-1]
+                if query == 'ENODE':
+                    return line.split()[1]

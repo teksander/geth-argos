@@ -6,13 +6,13 @@ echo "+-----------------------------------------------------------+"
 echo "Updating the Smart Contract"
 
 sed -e "s|MAXRECRUITS|$MAXRECRUITS|g"\
-  $SCFILE > $SCTEMPLATE
+  $SCTEMPLATE > $SCFILE
 
 echo "+-----------------------------------------------------------+"
 echo "Compiling the Smart Contract"
 
 # Compile smart contract
-solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCTEMPLATE
+solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCFILE
 cp -r "${EXPERIMENTFOLDER}/scs/build/." "${DOCKERFOLDER}/geth/deployed_contract/"
 
 BINDATA=`cat ${CONTRACTBIN}`
@@ -60,7 +60,7 @@ docker ps --format '{{.Names}} {{.ID}}' > temp1.txt
 sort -o temp1.txt temp1.txt
 # Get IPs
 ./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
-./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "10.0.1" | grep -v ".255" > temp3.txt
+./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "10.0.3" | grep -v ".255" > temp3.txt
 # Save to identifiers file
 paste temp0.txt temp1.txt temp2.txt temp3.txt > identifiers.txt
 rm temp0.txt temp1.txt temp2.txt temp3.txt
