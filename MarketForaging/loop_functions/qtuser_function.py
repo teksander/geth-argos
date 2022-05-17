@@ -45,14 +45,9 @@ def DrawInWorld():
 	environment.qt_draw.circle([market.x, market.y, 0.001],[], market.radius, 'custom2', True)
 	environment.qt_draw.circle([cache.x, cache.y, 0.001],[], cache.radius, 'custom2', False)
 
-	# Draw resources carried by robots
-	with open(lp['files']['robots'], 'r') as f:
-		for line in f:
-			robotID, x, y, quality = eval(line)
-			environment.qt_draw.cylinder([x, y, 0.10],[], res_diam, res_height, quality)
 
 	# Draw resource patches
-	with open(lp['files']['resources'], 'r') as f:
+	with open(lp['files']['patches'], 'r') as f:
 		for line in f:
 			res = Resource(line)
 			environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, res.quality, False)
@@ -60,6 +55,20 @@ def DrawInWorld():
 			for i in range(0, draw_items):
 				environment.qt_draw.cylinder([res.x+item_list[i][0], res.y+item_list[i][1], 0.001],[], 0.0125, 0.05, res.quality)
 
+	# Draw resources carried by robots
+	with open(lp['files']['robots'], 'r') as f:
+		for line in f:
+			robotID, x, y, quality = eval(line)
+			environment.qt_draw.cylinder([x, y, 0.10],[], res_diam, res_height, quality)
+
+	# Draw broadcast areas of the robots
+	with open(lp['files']['bcers'], 'r') as f:
+		for line in f:
+			robotID, x, y, res = eval(line)
+			res = Resource(res)
+			environment.qt_draw.circle([x, y, 0.001],[], float(os.environ['RABRANGE']), 'std', True)
+			environment.qt_draw.ray([x, y , 0.01],[res.x, res.y , 0.01], 'black', 0.15)
+				
 	# Draw rays
 	if lp['generic']['show_rays']:
 		with open(lp['files']['rays'], 'r') as f:

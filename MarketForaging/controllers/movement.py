@@ -4,8 +4,6 @@ import time
 import logging
 from aux import Vector2D
 
-rays_file = 'rays.txt'
-
 class Odometry(object):
     """ Set up a Navigation loop on a background thread
     The __navigating() method will be started and it will run in the background
@@ -145,15 +143,7 @@ class Navigate(object):
         # The desired vector (we only care about direction)
         D =  (T + A)
 
-        # Change to global coordinates for the plotting
-        self.robot.variables.set_attribute("rays", self._id 
-                                            + ', ' + repr(self.position) 
-                                            + ', ' + repr(T.rotate(self.orientation)) 
-                                            + ', ' + repr(A.rotate(self.orientation))
-                                            + ', ' + repr(D.rotate(self.orientation)) 
-                                            +'\n')
-
-
+        self.update_rays(T,A,D)
 
         dotProduct = 0
         # The target angle is behind the robot, we just rotate, no forward motion
@@ -184,6 +174,16 @@ class Navigate(object):
 
         # Store the distance to arrive at target
         self.__distance_to_target = abs(vec_target)
+
+    def update_rays(self, T, A, D):
+        # Change to global coordinates for the plotting
+
+        self.robot.variables.set_attribute("rays", self._id 
+                                            + ', ' + repr(self.position) 
+                                            + ', ' + repr(T.rotate(self.orientation)) 
+                                            + ', ' + repr(A.rotate(self.orientation))
+                                            + ', ' + repr(D.rotate(self.orientation)) 
+                                            +'\n')
 
     def avoid(self, left = 0, right = 0, move = False):
         obstacle = False

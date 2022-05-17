@@ -233,7 +233,7 @@ class TCP_server(object):
         # bind to the port
         __socket.bind((__host, self.port))  
 
-        logger.info('TCP Server OK')  
+        logger.debug('TCP Server OK')  
 
         while True:
             try:
@@ -278,8 +278,8 @@ class TCP_server(object):
         msg = __socket.recv(1024)  
         msg = msg.decode('ascii') 
 
-        if msg == '':
-            raise ValueError('Connection Refused')
+        # if msg == '':
+        #     raise ValueError('Connection Refused')
 
         __socket.close()   
         return msg

@@ -81,8 +81,9 @@ class Resource(object):
         theta = 2 * math.pi * random.random()
         self._xr = self.x + r * math.cos(theta)
         self._yr = self.y + r * math.sin(theta)
+        
         self._pr = (self._xr, self._yr)
-        self._pos  = (self.x, self.y)
+        self._p  = (self.x, self.y)
 
         # Introduce the timestamp
         self._timeStamp = time.time()

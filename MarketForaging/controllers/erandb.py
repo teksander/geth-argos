@@ -1,30 +1,7 @@
 #!/usr/bin/env python3
-import sys
-import time
+import sys, time
 import logging
-from aux import PeerBuffer
 
-class neighbor(object):
-    """ Establish the neighbor class 
-    """
-    def __init__(self, _id, _range, _bearing):
-        self.id = _id
-        self.range = _range
-        self.bearing = _bearing
-    
-    def resetAge(self):
-        """ This method resets the timestamp of the robot meeting """ 
-        self.tStamp = time.time()
-
-    def kill(self):
-        """ This method sets a flag which identifies aged out peers """
-        self.isDead = True
-
-    def setTimeout(self, timeout = 10):
-        """ This method resets the timestamp of the robot timing out """ 
-        self.trials = 0
-        self.timeout = timeout
-        self.timeoutStamp = time.time()
 
 class ERANDB(object):
     """ Set up erandb transmitter on a background thread
