@@ -27,7 +27,7 @@ contract MarketForaging {
     balances[msg.sender] += _utility;
   } 
 
-  function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility, bool sellResource) public {
+  function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility) public {
     bool unique = true;
     bool depleted = false;
 
@@ -111,10 +111,6 @@ contract MarketForaging {
       resources[res_index].recruits[rec_index] = msg.sender;
     }
   }
-}
-
-
-
 
   function getResources() public view returns (resource[] memory){
     return resources;
@@ -133,3 +129,8 @@ contract MarketForaging {
     }
     return "";    
   }
+
+
+  
+}
+
