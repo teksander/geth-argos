@@ -17,38 +17,26 @@ contract MarketForaging {
     uint block;
   }   
  
- resource[] public resources;
- resource[] public resources_depleted;
- address[max_recruits] public recruits_empty;
+  resource[] public resources;
+  resource[] public resources_depleted;
+  address[max_recruits] public recruits_empty;
+  mapping(address => uint) public balances;
 
-  function getResources() public view returns (resource[] memory){
-    return resources;
-  }
 
-  function getMyResource() public view returns (string memory){
+  function sellResource(uint _utility) public {
+    balances[msg.sender] += _utility;
+  } 
 
-    for (uint i=0; i < resources.length; i++) {
-
-      for (uint j=0; j < max_recruits; j++) {
-
-        if (resources[i].recruits[j] == msg.sender) { 
-           return resources[i].json; 
-        }
-      }
-    }
-    return "";    
-  }
-
-  function addResource(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility) public {
+  function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility) public {
     bool unique = true;
     bool depleted = false;
 
-    // Is resource unique
+    // If patch is not unique
     for (uint i=0; i < resources.length; i++) {
       if (_x == resources[i].x && _y == resources[i].y ) {
         unique = false;
 
-        // Update resource information
+        // Update patch information
         if (_qtty <= resources[i].qtty) {
           resources[i].counter += 1;
           resources[i].json     = _json;
@@ -56,7 +44,7 @@ contract MarketForaging {
           resources[i].block    = block.number;
         }
 
-        // Remove resource if quantity is 0
+        // Remove patch if quantity is 0
         if (resources[i].qtty < 1) {
           resources_depleted.push(resources[i]);
           resources[i] = resources[resources.length - 1];
@@ -66,7 +54,7 @@ contract MarketForaging {
       }
     } 
 
-    // Is resource depleted
+    // Is patch depleted
     for (uint i=0; i < resources_depleted.length; i++) {
       if (_x == resources_depleted[i].x && _y == resources_depleted[i].y ) {
         depleted = true;
@@ -74,12 +62,12 @@ contract MarketForaging {
       }
     }
 
-    // If resource is unique
+    // If patch is unique
     if (unique && !depleted) {
       // Append the new resource to the list
       resources.push(resource(msg.sender, recruits_empty, 0, _json, _x, _y, _qtty, _qlty, _utility, block.number));
-      // resources[resources.length-1].recruits[0] = msg.sender;
     }
+
   } 
 
   function buyResource() public {
@@ -123,4 +111,26 @@ contract MarketForaging {
       resources[res_index].recruits[rec_index] = msg.sender;
     }
   }
+
+  function getResources() public view returns (resource[] memory){
+    return resources;
+  }
+
+  function getMyResource() public view returns (string memory){
+
+    for (uint i=0; i < resources.length; i++) {
+
+      for (uint j=0; j < max_recruits; j++) {
+
+        if (resources[i].recruits[j] == msg.sender) { 
+           return resources[i].json; 
+        }
+      }
+    }
+    return "";    
+  }
+
+
+  
 }
+
