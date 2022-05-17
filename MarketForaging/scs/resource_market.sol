@@ -27,7 +27,7 @@ contract MarketForaging {
   //   balances[msg.sender] += _utility;
   // } 
 
-    function getResources() public view returns (resource[] memory){
+  function getResources() public view returns (resource[] memory){
     return resources;
   }
 

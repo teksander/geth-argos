@@ -199,7 +199,7 @@ def post_step():
 
 
     # Record the resources to be drawn to a file
-    with open(lp['files']['resources'], 'w', buffering=1) as f:
+    with open(lp['files']['patches'], 'w', buffering=1) as f:
         for res in resource_list:
             f.write(res._json+'\n')
 
@@ -212,6 +212,17 @@ def post_step():
                 y = str(robot.position.get_position()[1])
                 f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("hasResource")) + '\n')
 
+    # Record the broadcast area to be drawn for each robot
+    with open(lp['files']['bcers'], 'w', buffering=1) as f:
+        for robot in allrobots:
+            if robot.variables.get_attribute("state") == "Scout.BROADCAST":
+                robotID = str(int(robot.variables.get_id()[2:])+1)
+                x = str(robot.position.get_position()[0])
+                y = str(robot.position.get_position()[1])
+                f.write(', '.join([robotID, x, y, repr(robot.variables.get_attribute("broadcasting")),'\n']))
+                # f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("broadcasting"))  + '\n')
+     
+
     # Record the rays to be drawn for each robot
     for robot in allrobots:
         p = 'a'
@@ -219,6 +230,7 @@ def post_step():
             p = 'w+'
         with open(lp['files']['rays'], p, buffering=1) as f:
             f.write(robot.variables.get_attribute("rays"))
+
 
     # Record the distance each robot has travelled in the current step
         position_current = Vector2D(robot.position.get_position()[0:2])              

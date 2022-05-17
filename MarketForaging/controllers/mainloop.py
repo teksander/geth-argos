@@ -245,6 +245,7 @@ def init():
     robot.variables.set_attribute("hasResource", "")
     robot.variables.set_attribute("resourceCount", "0")
     robot.variables.set_attribute("state", "")
+    robot.variables.set_attribute("broadcasting", "")
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
@@ -281,8 +282,8 @@ def init():
     rb = ResourceBuffer()
 
     # /* Init a TCP server __hosting resources  */
-    robot.log.info('Initialising resource buffer...')
-    tcp = TCP_server("", 'localhost', 1000+int(me.id))
+    robot.log.info('Initialising resource sharing via TCP...')
+    tcp = TCP_server("", 'localhost', cp['tcpr_port']+int(me.id), unlocked = True)
 
     # /* Init E-RANDB __listening process and transmit function
     robot.log.info('Initialising RandB board...')
@@ -308,7 +309,7 @@ def init():
     rgb = RGBLEDs(robot)
 
     # /* Init Finite-State-Machine */
-    fsm = FiniteStateMachine(robot, start = Idle.IDLE)
+    fsm = FiniteStateMachine(robot, start = Neutral.IDLE)
 
     # List of submodules --> iterate .start() to start all
     submodules = [w3.geth.miner, erb, tcp]
@@ -347,54 +348,34 @@ def controlstep():
             clock.reset()
 
     else:
-
-        ##########################
-        #### SUB-MODULE STEPS ####
-        ##########################
-
-        for module in [erb, rs, odo]:
-            module.step()
-
-        ##########################
-        #### LOG-MODULE STEPS ####
-        ##########################
-
-        if logs['resources'].query():
-            logs['resources'].log([len(rb)])
-
-        if logs['odometry'].query():
-            logs['odometry'].log([odo.getNew()])
-
         ###########################
-        #### MAIN-MODULE STEPS ####
+        ######## ROUTINES ########
         ###########################
-        gethPeers_count = 0
-        if clocks['buffer'].query(): 
 
-            peer_IPs = dict()
-            peers = erb.getNew()
-            for peer in peers:
-                peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
+        def peering():
+            geth_peer_count = 0
+            if clocks['buffer'].query(): 
 
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((me.ip, 9898))
-                s.sendall(str(peer_IPs).encode())
-                data = s.recv(1024)
-                gethPeers_count = int(data)
+                peer_IPs = dict()
+                peers = erb.getNew()
+                for peer in peers:
+                    peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
 
-             # Turn on LEDs according to geth Peers
-            if gethPeers_count == 0: 
-                rgb.setLED(rgb.all, 3* ['black'])
-            elif gethPeers_count == 1:
-                rgb.setLED(rgb.all, ['red', 'black', 'black'])
-            elif gethPeers_count == 2:
-                rgb.setLED(rgb.all, ['red', 'black', 'red'])
-            elif gethPeers_count > 2:
-                rgb.setLED(rgb.all, 3*['red'])
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((me.ip, 9898))
+                    s.sendall(str(peer_IPs).encode())
+                    data = s.recv(1024)
+                    geth_peer_count = int(data)
 
-        ##############################
-        #### STATE-MACHINE STEPS ####
-        ##############################
+                 # Turn on LEDs according to geth Peers
+                if geth_peer_count == 0: 
+                    rgb.setLED(rgb.all, 3* ['black'])
+                elif geth_peer_count == 1:
+                    rgb.setLED(rgb.all, ['red', 'black', 'black'])
+                elif geth_peer_count == 2:
+                    rgb.setLED(rgb.all, ['red', 'black', 'red'])
+                elif geth_peer_count > 2:
+                    rgb.setLED(rgb.all, 3*['red'])
 
         def homing(to_drop = False):
             # Navigate to the market
@@ -411,8 +392,8 @@ def controlstep():
                 if nav.get_distance_to(market._pr) < 0.5*market.radius:           
                     nav.avoid(move = True)
                     
-                elif nav.get_distance_to(market._pr) < market.radius and gethPeers_count > 1:
-                    nav.avoid(move = True)
+                # elif nav.get_distance_to(market._pr) < market.radius and gethPeers_count > 1:
+                #     nav.avoid(move = True)
 
                 else:
                     nav.navigate_with_obstacle_avoidance(market._pr)
@@ -435,10 +416,36 @@ def controlstep():
             for data in erb.getData():
                 if data[1] != 0:
                     peer_ID  = data[0]
-                    resource = Resource(tcp.request('localhost', 1000+int(peer_ID)))
+                    resource = Resource(tcp.request('localhost', cp['tcpr_port']+int(peer_ID)))
 
                     rb.addResource(resource)
+                    return resource
 
+        ##########################
+        #### SUB-MODULE STEP #####
+        ##########################
+
+        for module in [erb, rs, odo]:
+            module.step()
+
+        ##########################
+        #### LOG-MODULE STEP #####
+        ##########################
+
+        if logs['resources'].query():
+            logs['resources'].log([len(rb)])
+
+        if logs['odometry'].query():
+            logs['odometry'].log([odo.getNew()])
+
+        ##########################
+        #### MAIN-MODULE STEP ####
+        ##########################
+        # peering()
+
+        ##########################
+        ### STATE-MACHINE STEP ###
+        ##########################
 
         #########################################################################################################
         #### Neutral.IDLE
@@ -460,19 +467,24 @@ def controlstep():
             rw.step()
 
             # Look for resources
-            sensing()
+            res_sense  = sensing()
 
             # Look for broadcasters
-            listening()
+            res_listen = listening()
 
             # Sucess exploration: BROADCAST or FORAGE
-            if rb.buffer:
-                rb.setCurrent = rb.buffer[-1]
-                fsm.setState(Scout.BROADCAST, message = "Broadcasting %s" % len(rb))
+            if res_sense:
+                rb.setCurrent(res_sense)
+                robot.variables.set_attribute("broadcasting", res_sense._json)
+                fsm.setState(Scout.BROADCAST, message = "Broadcasting: %s" % res_sense._desc)
+
+            if res_listen:
+                rb.setCurrent(res_listen)
+                fsm.setState(Recruit.FORAGE, message = "Foraging: %s" % res_listen._desc)
 
             # Fail exploration: HOMING
             if clocks['explore'].query(reset = False):
-                fsm.setState(Scout.HOMING, message = "Failed scouting trip"):
+                fsm.setState(Neutral.HOMING, message = "Failed scouting trip")
 
 
         #########################################################################################################
@@ -493,12 +505,52 @@ def controlstep():
                 tcp.setData(rb.current._json)
 
         #########################################################################################################
+        #### Recruit.FORAGE
+        #########################################################################################################
+        elif fsm.query(Recruit.FORAGE):
+
+
+            # Resource virtual sensor
+            resource = sensing()
+
+            if resource:
+                robot.variables.set_attribute("collectResource", "True")
+
+            # # Found the resource? YES -> Collect
+            # if resource and resource._p == rb.current._p:
+            #     robot.variables.set_attribute("collectResource", "True")
+            #     robot.log.info('Collect: %s', resource._desc)        
+
+            # Collected resource? NO -> Navigate to resource site
+            if not robot.variables.get_attribute("hasResource"):
+                nav.navigate_with_obstacle_avoidance(rb.current._pr)
+
+            # Collected resource? YES -> Go to market
+            else:
+                fsm.setState(Recruit.HOMING)
+
+
+        #########################################################################################################
         #### Scout.HOMING
         #########################################################################################################
 
-        elif fsm.query(Scout.HOMING):
+        elif fsm.query(Neutral.HOMING):
             homing()
 
+        #########################################################################################################
+        #### Recruit.HOMING
+        #########################################################################################################
+        elif fsm.query(Recruit.HOMING):
+
+            # Navigate home
+            arrived = homing(to_drop = True)
+
+            if arrived:
+                robot.variables.set_attribute("dropResource", "True")
+                if not robot.variables.get_attribute("hasResource"):
+                    robot.variables.set_attribute("dropResource", "")
+                    robot.log.info('Dropped: %s', rb.current._desc)  
+                    fsm.setState(Recruit.FORAGE, message = None)
 
         #########################################################################################################
         #### Scout.SELL
@@ -590,52 +642,6 @@ def controlstep():
             else:
                 fsm.setState(Recruit.BUY, message = "Buy again")
 
-        #########################################################################################################
-        #### Recruit.FORAGE
-        #########################################################################################################
-        elif fsm.query(Recruit.FORAGE):
-
-            if clocks['block'].query():
-                # Update foraging resource
-                fsm.setState(Recruit.PLAN, message = None)
-
-            else:
-
-                # Resource virtual sensor
-                resource = sensing()
-
-                # Found the resource? YES -> Collect
-                if resource and resource._p == rb.best._p:
-                    robot.variables.set_attribute("collectResource", "True")
-                    robot.log.info('Collect: %s', resource._desc)        
-
-                # Collected resource? NO -> Navigate to resource site
-                if not robot.variables.get_attribute("hasResource"):
-                    nav.navigate_with_obstacle_avoidance(rb.best._pr)
-
-                    if nav.get_distance_to(rb.best._pr) < 0.1*rb.best.radius:
-                        rb.best.quantity = 0
-                        fsm.setState(Scout.SELL, message = 'Failed foraging trip')
-
-                # Collected resource? YES -> Go to market
-                else:
-                    fsm.setState(Recruit.HOMING)
-
-
-        #########################################################################################################
-        #### Recruit.HOMING
-        #########################################################################################################
-        elif fsm.query(Recruit.HOMING):
-
-            # Navigate home
-            arrived = homing(to_drop = True)
-
-            if arrived:
-                robot.variables.set_attribute("dropResource", "True")
-                if not robot.variables.get_attribute("hasResource"):
-                    robot.variables.set_attribute("dropResource", "")
-                    robot.log.info('Dropped: %s', rb.best._desc)  
-                    fsm.setState(Scout.SELL, message = None)
 
 #########################################################################################################################
 #### RESET/DESTROY STEP #################################################################################################

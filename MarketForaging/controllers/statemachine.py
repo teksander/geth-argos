@@ -5,6 +5,7 @@ from aux import Timer
 
 class Neutral(Enum):
     IDLE   = 10
+    HOMING   = 11
 
 class Idle(Enum):
     IDLE   = 1

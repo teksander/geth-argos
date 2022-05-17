@@ -26,13 +26,13 @@ params['generic']['max_recruits'] = eval(os.environ["MAXRECRUITS"])
 params['market'] = dict()
 params['market']['x'] = 0
 params['market']['y'] = 0
-params['market']['radius'] = params['generic']['arena_size'] * math.sqrt(0.03/math.pi)
+params['market']['radius'] = params['generic']['arena_size'] * math.sqrt(0.05/math.pi)
 
 # Parameters for cache
 params['cache'] = dict()
 params['cache']['x'] = 0
 params['cache']['y'] = 0
-params['cache']['radius']  = params['generic']['arena_size'] * math.sqrt(0.09/math.pi)
+params['cache']['radius']  = params['generic']['arena_size'] * math.sqrt(0.10/math.pi)
 
 
 params['patches'] = dict()
@@ -62,9 +62,9 @@ params['patches']['utility']   = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
 
 params['patches']['counts'] = {'red': 1, 'green': 1 , 'blue': 1, 'yellow': 1}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
-							  'green':  params['patches']['radius'] , 
-							  'blue':   params['patches']['radius'], 
-							  'yellow': params['patches']['radius']}
+							   'green':  params['patches']['radius'] , 
+							   'blue':   params['patches']['radius'], 
+							   'yellow': params['patches']['radius']}
 
 # Parameters for the economy
 # economy_params = dict()
@@ -72,6 +72,7 @@ params['patches']['radii']  = {'red':    params['patches']['radius'],
 
 # Initialize the files which store QT_draw information 
 params['files'] = dict()
-params['files']['resources']   = 'loop_functions/resources.txt'
-params['files']['robots']      = 'loop_functions/robots.txt'
-params['files']['rays']        = 'loop_functions/rays.txt'
+params['files']['patches'] = 'loop_functions/patches.txt'
+params['files']['robots']  = 'loop_functions/robots.txt'
+params['files']['bcers']     = 'loop_functions/bcers.txt'
+params['files']['rays']    = 'loop_functions/rays.txt'

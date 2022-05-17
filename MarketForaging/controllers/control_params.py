@@ -12,3 +12,5 @@ params['explore_sg']     = 2
 params['gsFreq']     = 20
 params['erbtFreq']   = 10
 params['erbDist']    = 175
+
+params['tcpr_port'] = 56000
