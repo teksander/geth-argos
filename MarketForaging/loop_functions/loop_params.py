@@ -74,5 +74,4 @@ params['patches']['radii']  = {'red':    params['patches']['radius'],
 params['files'] = dict()
 params['files']['patches'] = 'loop_functions/patches.txt'
 params['files']['robots']  = 'loop_functions/robots.txt'
-params['files']['bcers']     = 'loop_functions/bcers.txt'
 params['files']['rays']    = 'loop_functions/rays.txt'

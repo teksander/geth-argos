@@ -60,14 +60,6 @@ def DrawInWorld():
 		for line in f:
 			robotID, x, y, quality = eval(line)
 			environment.qt_draw.cylinder([x, y, 0.10],[], res_diam, res_height, quality)
-
-	# Draw broadcast areas of the robots
-	with open(lp['files']['bcers'], 'r') as f:
-		for line in f:
-			robotID, x, y, res = eval(line)
-			res = Resource(res)
-			environment.qt_draw.circle([x, y, 0.001],[], float(os.environ['RABRANGE']), 'std', True)
-			environment.qt_draw.ray([x, y , 0.01],[res.x, res.y , 0.01], 'black', 0.15)
 				
 	# Draw rays
 	if lp['generic']['show_rays']:

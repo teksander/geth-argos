@@ -212,17 +212,6 @@ def post_step():
                 y = str(robot.position.get_position()[1])
                 f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("hasResource")) + '\n')
 
-    # Record the broadcast area to be drawn for each robot
-    with open(lp['files']['bcers'], 'w', buffering=1) as f:
-        for robot in allrobots:
-            if robot.variables.get_attribute("state") == "Scout.BROADCAST":
-                robotID = str(int(robot.variables.get_id()[2:])+1)
-                x = str(robot.position.get_position()[0])
-                y = str(robot.position.get_position()[1])
-                f.write(', '.join([robotID, x, y, repr(robot.variables.get_attribute("broadcasting")),'\n']))
-                # f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("broadcasting"))  + '\n')
-     
-
     # Record the rays to be drawn for each robot
     for robot in allrobots:
         p = 'a'

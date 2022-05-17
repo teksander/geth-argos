@@ -6,13 +6,11 @@
 import random, math, copy
 import time, sys, os
 import logging
-from types import SimpleNamespace
-from collections import namedtuple
 
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder+'/controllers')
-sys.path.insert(1, experimentFolder+'/loop_functions')
-sys.path.insert(1, experimentFolder)
+experimentFolder = os.environ['EXPERIMENTFOLDER']
+sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+             os.environ['EXPERIMENTFOLDER']]
 
 from movement import RandomWalk, Navigate, Odometry
 from groundsensor import GroundSensor, ResourceVirtualSensor, Resource
@@ -22,7 +20,6 @@ from console import *
 from aux import *
 from statemachine import *
 
-from loop_params import *
 from loop_params import params as lp
 from control_params import params as cp
 
@@ -31,17 +28,9 @@ from control_params import params as cp
 loglevel = 10
 logtofile = False 
 
-# /* Controller Parameters */
-#######################################################################
-erbDist   = cp['erbDist'] 
-erbtFreq  = cp['erbtFreq'] 
-gsFreq    = cp['gsFreq']
-rwSpeed   = cp['scout_speed']
-navSpeed  = cp['recruit_speed']
-
 # /* Global Variables */
 #######################################################################
-global startFlag
+global startFlag, geth_peer_count
 startFlag = False
 
 global txList
@@ -51,10 +40,7 @@ global submodules
 submodules = []
 
 global clocks, counters, logs, txs
-clocks = dict()
-counters = dict()
-logs = dict()
-txs = dict()
+clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
 clocks['buffer'] = Timer(0.5)
 clocks['query_resources'] = Timer(1)
@@ -264,10 +250,12 @@ def init():
     log_folder = experimentFolder + '/logs/' + robotID + '/'
 
     # Monitor logs (recorded to file)
-    monitor_file =  log_folder + 'monitor.log'
-    os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
-    logging.basicConfig(filename=monitor_file, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
-    
+    name =  'monitor.log'
+    os.makedirs(os.path.dirname(log_folder+name), exist_ok=True) 
+    logging.basicConfig(filename=log_folder+name, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
+    robot.log = logging.getLogger('main')
+    robot.log.setLevel(loglevel)
+
     # Experiment data logs (recorded to file)
     name   =  'odometry.csv'
     header = ['DIST']
@@ -277,11 +265,6 @@ def init():
     header = ['COUNT']
     logs['resources'] = Logger(log_folder+name, header, 5, ID = robotID)
 
-    # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    robot.log = logging.getLogger('main')
-
-    # List of logmodules --> specify submodule loglevel if desired
-    logging.getLogger('main').setLevel(10)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -299,7 +282,7 @@ def init():
 
     # /* Init E-RANDB __listening process and transmit function
     robot.log.info('Initialising RandB board...')
-    erb = ERANDB(robot, erbDist, erbtFreq)
+    erb = ERANDB(robot, cp['erbDist'] , cp['erbtFreq'])
 
     #/* Init Resource-Sensors */
     robot.log.info('Initialising resource sensor...')
@@ -307,11 +290,11 @@ def init():
 
     # /* Init Random-Walk, __walking process */
     robot.log.info('Initialising random-walk...')
-    rw = RandomWalk(robot, rwSpeed)
+    rw = RandomWalk(robot, cp['scout_speed'])
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising navigation...')
-    nav = Navigate(robot, navSpeed)
+    nav = Navigate(robot, cp['recruit_speed'])
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising odometry...')
@@ -361,53 +344,35 @@ def controlstep():
 
     else:
 
-        ##########################
-        #### SUB-MODULE STEPS ####
-        ##########################
-
-        for module in [erb, rs, odo]:
-            module.step()
-
-        ##########################
-        #### LOG-MODULE STEPS ####
-        ##########################
-
-        if logs['resources'].query():
-            logs['resources'].log([len(rb)])
-
-        if logs['odometry'].query():
-            logs['odometry'].log([odo.getNew()])
-
         ###########################
-        #### MAIN-MODULE STEPS ####
+        ######## ROUTINES ########
         ###########################
-        gethPeers_count = 0
-        if clocks['buffer'].query(): 
 
-            peer_IPs = dict()
-            peers = erb.getNew()
-            for peer in peers:
-                peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
+        def peering():
+            global geth_peer_count
+            geth_peer_count = 0
+            if clocks['buffer'].query(): 
 
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((me.ip, 9898))
-                s.sendall(str(peer_IPs).encode())
-                data = s.recv(1024)
-                gethPeers_count = int(data)
+                peer_IPs = dict()
+                peers = erb.getNew()
+                for peer in peers:
+                    peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
 
-             # Turn on LEDs according to geth Peers
-            if gethPeers_count == 0: 
-                rgb.setLED(rgb.all, 3* ['black'])
-            elif gethPeers_count == 1:
-                rgb.setLED(rgb.all, ['red', 'black', 'black'])
-            elif gethPeers_count == 2:
-                rgb.setLED(rgb.all, ['red', 'black', 'red'])
-            elif gethPeers_count > 2:
-                rgb.setLED(rgb.all, 3*['red'])
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((me.ip, 9898))
+                    s.sendall(str(peer_IPs).encode())
+                    data = s.recv(1024)
+                    geth_peer_count = int(data)
 
-        ##############################
-        #### STATE-MACHINE STEPS ####
-        ##############################
+                 # Turn on LEDs according to geth Peers
+                if geth_peer_count == 0: 
+                    rgb.setLED(rgb.all, 3* ['black'])
+                elif geth_peer_count == 1:
+                    rgb.setLED(rgb.all, ['red', 'black', 'black'])
+                elif geth_peer_count == 2:
+                    rgb.setLED(rgb.all, ['red', 'black', 'red'])
+                elif geth_peer_count > 2:
+                    rgb.setLED(rgb.all, 3*['red'])
 
         def homing(to_drop = False):
             # Navigate to the market
@@ -424,7 +389,7 @@ def controlstep():
                 if nav.get_distance_to(market._pr) < 0.5*market.radius:           
                     nav.avoid(move = True)
                     
-                elif nav.get_distance_to(market._pr) < market.radius and gethPeers_count > 1:
+                elif nav.get_distance_to(market._pr) < market.radius and geth_peer_count > 1:
                     nav.avoid(move = True)
 
                 else:
@@ -440,6 +405,29 @@ def controlstep():
                 if resource:
                     rb.addResource(resource)
                     return resource
+
+        ##########################
+        ###### MODULE STEPS ######
+        ##########################
+
+        for module in [erb, rs, odo]:
+            module.step()
+
+        if logs['resources'].query():
+            logs['resources'].log([len(rb)])
+
+        if logs['odometry'].query():
+            logs['odometry'].log([odo.getNew()])
+
+        ###########################
+        ####### EVERY STEP  #######
+        ###########################
+
+        peering()
+
+        ##############################
+        ##### STATE-MACHINE STEP #####
+        ##############################
 
         #########################################################################################################
         #### Idle.IDLE
@@ -581,7 +569,7 @@ def controlstep():
                 resource = sensing()
 
                 # Found the resource? YES -> Collect
-                if resource and resource._pos == rb.best._pos:
+                if resource and resource._p == rb.best._p:
                     robot.variables.set_attribute("collectResource", "True")
                     robot.log.info('Collect: %s', resource._desc)        
 
