@@ -2,7 +2,9 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant max_recruits = 2;
+  uint constant max_recruits     = 2;
+  uint256 constant forager_share = 70;
+  uint256 constant scout_share   = 30;
 
     struct resource {
     address scout;
@@ -24,24 +26,46 @@ contract MarketForaging {
 
 
   function sellResource(uint _utility) public {
-    balances[msg.sender] += _utility;
+    balances[msg.sender] += 100*_utility;
   } 
 
   function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility) public {
-    bool unique = true;
-    bool depleted = false;
-
+    
     // If patch is not unique
+    bool unique = true;
     for (uint i=0; i < resources.length; i++) {
       if (_x == resources[i].x && _y == resources[i].y ) {
         unique = false;
 
-        // Update patch information
+
         if (_qtty <= resources[i].qtty) {
+
+          uint reward = (resources[i].qtty - _qtty) * resources[i].utility * 100;
+          uint forager_reward = reward * forager_share / 100;
+          uint scout_reward   = reward * scout_share / 100;
+
+          // Reward the scout
+          balances[resources[i].scout] += scout_reward;
+
+          // Reward the foragers
+          uint forager_count = 0;
+          for (uint j=0; j < max_recruits; j++) { 
+            forager_count += 1;
+            if (resources[i].recruits[j] == address(0)){
+              break;
+            }
+          }
+        
+          for (uint j=0; j < max_recruits; j++) { 
+            balances[resources[i].recruits[j]] += forager_reward / forager_count;
+          }
+
+          // Update patch information
           resources[i].counter += 1;
           resources[i].json     = _json;
           resources[i].qtty     = _qtty;
           resources[i].block    = block.number;
+  
         }
 
         // Remove patch if quantity is 0
@@ -55,6 +79,7 @@ contract MarketForaging {
     } 
 
     // Is patch depleted
+    bool depleted = false;
     for (uint i=0; i < resources_depleted.length; i++) {
       if (_x == resources_depleted[i].x && _y == resources_depleted[i].y ) {
         depleted = true;
@@ -129,8 +154,6 @@ contract MarketForaging {
     }
     return "";    
   }
-
-
   
 }
 

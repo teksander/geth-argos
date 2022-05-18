@@ -197,6 +197,8 @@ def post_step():
     global startFlag, clocks, accums, resource_counter
     global RAM, CPU
 
+    if not startFlag:
+        startFlag = True
 
     # Record the resources to be drawn to a file
     with open(lp['files']['patches'], 'w', buffering=1) as f:

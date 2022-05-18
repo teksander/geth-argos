@@ -6,6 +6,8 @@ echo "+-----------------------------------------------------------+"
 echo "Updating the Smart Contract"
 
 sed -e "s|MAXRECRUITS|$MAXRECRUITS|g"\
+    -e "s|FORAGERSHARE|$FORAGERSHARE|g"\
+    -e "s|SCOUTSHARE|$SCOUTSHARE|g"\
   $SCTEMPLATE > $SCFILE
 
 echo "+-----------------------------------------------------------+"
