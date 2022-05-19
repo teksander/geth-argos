@@ -29,7 +29,7 @@ contract MarketForaging {
     balances[msg.sender] += 100*_utility;
   } 
 
-  function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility, bool collab) public {
+  function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility) public {
     
     // If patch is not unique
     bool unique = true;
