@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 contract MarketForaging {
 
   uint constant max_recruits     = 2;
-  uint256 constant forager_share = 70;
+  uint256 constant forager_share = 100-30;
   uint256 constant scout_share   = 30;
 
     struct resource {

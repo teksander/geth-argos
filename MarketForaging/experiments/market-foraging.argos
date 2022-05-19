@@ -17,7 +17,7 @@
   <controllers>
 
    
-    <python_controller id="blockchain" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
+    <python_controller id="collab" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
       <!-- Normal actuator/sensor configuration follows -->
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
@@ -34,7 +34,7 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="/home/eksander/geth-argos/MarketForaging/controllers/mainloop.py"
+      <params script="/home/eksander/geth-argos/MarketForaging/controllers/main_collab.py"
       timeRate="1" />
     </python_controller>
 
@@ -55,7 +55,7 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="/home/eksander/geth-argos/MarketForaging/controllers/mainloop_greedy.py"
+      <params script="/home/eksander/geth-argos/MarketForaging/controllers/main_greedy.py"
       timeRate="1" />
     </python_controller>
 
@@ -72,35 +72,35 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="1.290, 1.290, 1" center="0,0,0.5">
+  <arena size="1.825, 1.825, 1" center="0,0,0.5">
  <floor id="f" source="image" path="/home/eksander/geth-argos/MarketForaging/experiments/floors/market.png" />
-    <box id="wall_north" size="1.290,0.06,0.1" movable="false">
-      <body position="0,.645,0" orientation="0,0,0" />
+    <box id="wall_north" size="1.825,0.06,0.1" movable="false">
+      <body position="0,.912,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="1.290,0.06,0.1" movable="false">
-      <body position="0,-.645,0" orientation="0,0,0" />
+    <box id="wall_south" size="1.825,0.06,0.1" movable="false">
+      <body position="0,-.912,0" orientation="0,0,0" />
     </box>
-    <box id="wall_east" size="0.06,1.290,0.1" movable="false">
-      <body position=".645,0,0" orientation="0,0,0" />
+    <box id="wall_east" size="0.06,1.825,0.1" movable="false">
+      <body position=".912,0,0" orientation="0,0,0" />
     </box>
-    <box id="wall_west" size="0.06,1.290,0.1" movable="false">
-      <body position="-.645,0,0" orientation="0,0,0" />
+    <box id="wall_west" size="0.06,1.825,0.1" movable="false">
+      <body position="-.912,0,0" orientation="0,0,0" />
     </box>
 
     <distribute>
-      <position method="uniform" min="-.258,-.258,0" max=".258,.258,0" /> 
+      <position method="uniform" min="-.365,-.365,0" max=".365,.365,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="5" max_trials="15"> 
+      <entity quantity="8" max_trials="15"> 
         <e-puck id="bc" >
-          <controller config="blockchain" />
+          <controller config="collab" />
         </e-puck>
       </entity> 
     </distribute>
 
     <distribute>
-      <position method="uniform" min="-.258,-.258,0" max=".258,.258,0" /> 
+      <position method="uniform" min="-.365,-.365,0" max=".365,.365,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="0" max_trials="15" base_num="5"> 
+      <entity quantity="2" max_trials="15" base_num="8"> 
         <e-puck id="gr" >
           <controller config="greedy" />
         </e-puck>

@@ -6,7 +6,6 @@ export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/MarketForaging"
 export BLOCKCHAINPATH="$HOMEFOLDER/eth_data_para/data"
 
-
 # [FILES]
 export CONTRACTNAME="MarketForaging"
 export GENESISNAME="genesis_poa"
@@ -27,10 +26,12 @@ export SWARMNAME=ethereum
 export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
-export CON1="${EXPERIMENTFOLDER}/controllers/mainloop.py"
-export CON2="${EXPERIMENTFOLDER}/controllers/mainloop_greedy.py"
-export NUM1=5
-export NUM2=0
+export NUM1=8
+export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
+
+export NUM2=2
+export CON2="${EXPERIMENTFOLDER}/controllers/main_greedy.py"
+
 export RABRANGE="0.3"
 export TPS=10
 export DENSITY=3

@@ -5,14 +5,12 @@
 #######################################################################
 import random, math, copy
 import time, sys, os
-import logging, threading
-from types import SimpleNamespace
-from collections import namedtuple
+import logging
 
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder+'/controllers')
-sys.path.insert(1, experimentFolder+'/loop_functions')
-sys.path.insert(1, experimentFolder)
+experimentFolder = os.environ['EXPERIMENTFOLDER']
+sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+             os.environ['EXPERIMENTFOLDER']]
 
 from movement import RandomWalk, Navigate, Odometry
 from groundsensor import GroundSensor, ResourceVirtualSensor, Resource
@@ -22,131 +20,38 @@ from console import *
 from aux import *
 from statemachine import *
 
-from loop_function_params import *
-from controller_params import *
+from loop_params import params as lp
+from control_params import params as cp
 
 # /* Logging Levels for Console and File */
 #######################################################################
 loglevel = 10
 logtofile = False 
 
-# /* Experiment Parameters */
-#######################################################################
-tcpPort = 5000 
-tcprPort = 6000 
-erbDist = 175
-erbtFreq = 10
-gsFreq = 20
-rwSpeed = controller_params['scout_speed']
-navSpeed = controller_params['recruit_speed']
-
-bufferRate = 0.5 
-peerSecurityRate = 1.5
-globalPeers = False
-ageLimit = 2
-
-arena_size = float(os.environ["ARENADIM"])
-step_size = 1/float(os.environ["TPS"])
-
 # /* Global Variables */
 #######################################################################
-global startFlag
+global startFlag, geth_peer_count
 startFlag = False
 
-global peered, txList
-peered = set()
+global txList
 txList = []
 
 global submodules
 submodules = []
 
 global clocks, counters, logs, txs
-clocks = dict()
-counters = dict()
-logs = dict()
-txs = dict()
+clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
-clocks['share'] = Timer(1)
-clocks['buffer'] = Timer(bufferRate)
-clocks['search'] = Timer(rate = 5)
-clocks['collect_resources'] = Timer(1)
-clocks['peer_check'] = Timer(peerSecurityRate)
-clocks['balance_check'] = Timer(1.5)
+clocks['buffer'] = Timer(0.5)
 clocks['query_resources'] = Timer(1)
 clocks['block'] = Timer(2)
-clocks['attempt'] = Timer(7)
-clocks['pay_fuel'] = Timer(10)
 clocks['explore'] = Timer(1)
-clocks['homing'] = Timer(1)
-clocks['availiable'] = Timer(7)
-clocks['buy'] = Timer(controller_params['buy_duration'])
-clocks['double_check_tx_exists'] = Timer(5)
-clocks['wait_on_last'] = Timer(8)
+clocks['buy'] = Timer(cp['buy_duration'])
 clocks['rs'] = Timer(0.02)
 
-
-# Store the position of the market
-market_js = {"x":0, "y":0, "radius":  market_params['radius'], "radius_dropoff": market_params['radius_dropoff']}
-market = Resource(market_js)
-
-def buffer(rate = bufferRate, ageLimit = ageLimit):
-    """ Control routine for robot-to-robot dynamic peering """
-    global peered
-
-    peers = erb.getNew()
-
-    for peer in peers:
-        if peer not in peered:
-            enode = tcp.request('localhost', tcpPort+int(peer)) 
-            # bufferlogger.info('Received enode: %s', enode)
-
-            w3.geth.admin.addPeer(enode)
-            peered.add(peer)
-            # bufferlogger.info('Added peer: %s, enode: %s', peer, enode)
-
-    temp = copy.copy(peered)
-
-    for peer in temp:
-        if peer not in peers:
-            enode = tcp.request('localhost', tcpPort+int(peer))
-            w3.geth.admin.removePeer(enode)
-            peered.remove(peer)
-            # robot.log.info('Removed peer: %s', peer)
-
-
-    # Double-check stale peers
-    if clocks['peer_check'].query():
-        gethPeers_enodes = getEnodes()
-        gethPeers_ids = getIds(gethPeers_enodes)
-        gethPeers_count = len(gethPeers_enodes)
-
-        if not peered:
-            for enode in gethPeers_enodes:
-                w3.geth.admin.removePeer(enode)
-
-        # else:
-        #     for ID in peered:
-        #         if ID not in gethPeers_ids:
-        #             enode = getEnodeById(ID, gethPeers_enodes)
-        #             print(ID)
-        #             # w3.geth.admin.addPeer(enode)
-
-
-         # Turn on LEDs according to geth Peers
-        if gethPeers_count == 0: 
-            rgb.setLED(rgb.all, 3* ['black'])
-        elif gethPeers_count == 1:
-            rgb.setLED(rgb.all, ['red', 'black', 'black'])
-        elif gethPeers_count == 2:
-            rgb.setLED(rgb.all, ['red', 'black', 'red'])
-        elif gethPeers_count > 2:
-            rgb.setLED(rgb.all, 3*['red'])
-
-
-# /* Initialize background daemon threads for the Main-Modules*/
-#######################################################################
-# bufferTh = threading.Thread(target=buffer, args=())                                     
-
+# Store the position of the market and cache
+market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
+cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['radius']})
 
 class ResourceBuffer(object):
     """ Establish the resource buffer class 
@@ -225,7 +130,7 @@ class ResourceBuffer(object):
         return [res.quantity*res.utility for res in self.buffer]
 
     def getUtilities(self):
-        return [res.utility for res in self.buffer if res.quantity > 0]
+        return [res.utility for res in self.buffer]
 
     def getQuantities(self):
         return [res.age for res in self.buffer]
@@ -254,33 +159,9 @@ class ResourceBuffer(object):
     def getResourceByQuality(self, quality):
         return self.buffer[self.getQualities().index(quality)]
 
-    def getResourceByUtility(self, utility):
-        return self.buffer[self.getUtilities().index(utility)]
+    def getResourceByValue(self, value):
+        return self.buffer[self.getValues().index(value)]
 
-    # def getPCs(self):
-    #     # Algorithm for best resource decision making goes here
-    #     # return self.buffer[0]
-
-    #     # dists_to_market = self.getDistances(0,0) 
-    #     # return self.buffer[dists_to_market.index(min(dists_to_market))]
-    #     # my_x = robot.position.get_position()[0]
-    #     # my_y = robot.position.get_position()[1]
-
-    #     # print(len(self))
-    #     Qp = self.getUtilities()
-    #     Qc_m = [2*distance/arena_size for distance in self.getDistances(0,0)]
-    #     # Qc_r = [100*distance/arena_size * 0.3 for distance in self.getDistances(my_x,my_y)]
-    #     # print(Qp, Qc_r, Qc_m) res.price - 2*
-    #     Pc = [x-y for x, y in zip(Qp,Qc_m)]
-    #     return Pc
-
-    def getBestResource(self):
-        utils = self.getUtilities()
-        if self.buffer and utils:
-            self.best = self.buffer[utils.index(max(utils))]
-            return self.best 
-        else: 
-            return None
 
 txList = []
 class Transaction(object):
@@ -352,10 +233,10 @@ class Transaction(object):
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules
+    global clocks,counters, logs, submodules, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb
     robotID = str(int(robot.variables.get_id()[2:])+1)
+    robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
-    robot.variables.set_consensus(False) 
     robot.variables.set_attribute("newResource", "")
     robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("collectResource", "")
@@ -369,10 +250,12 @@ def init():
     log_folder = experimentFolder + '/logs/' + robotID + '/'
 
     # Monitor logs (recorded to file)
-    monitor_file =  log_folder + 'monitor.log'
-    os.makedirs(os.path.dirname(monitor_file), exist_ok=True)    
-    logging.basicConfig(filename=monitor_file, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
-    
+    name =  'monitor.log'
+    os.makedirs(os.path.dirname(log_folder+name), exist_ok=True) 
+    logging.basicConfig(filename=log_folder+name, filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
+    robot.log = logging.getLogger('main')
+    robot.log.setLevel(loglevel)
+
     # Experiment data logs (recorded to file)
     name   =  'odometry.csv'
     header = ['DIST']
@@ -382,19 +265,6 @@ def init():
     header = ['COUNT']
     logs['resources'] = Logger(log_folder+name, header, 5, ID = robotID)
 
-    name   = 'buffer.csv'
-    header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-    logs['buffer'] = Logger(log_folder+name, header, 2, ID = robotID)
-   
-    # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    robot.log = logging.getLogger('main')
-    estimatelogger = logging.getLogger('estimate')
-    bufferlogger = logging.getLogger('buffer')
-
-    # List of logmodules --> specify submodule loglevel if desired
-    logging.getLogger('main').setLevel(10)
-    logging.getLogger('estimate').setLevel(50)
-    logging.getLogger('buffer').setLevel(50)
 
     # /* Initialize Sub-modules */
     #######################################################################
@@ -402,28 +272,17 @@ def init():
     robot.log.info('Initialising Python Geth Console...')
     w3 = init_web3(robotID)
 
+    print(robotIP)
     # /* Init an instance of peer for this Pi-Puck */
-    me = Peer(robotID, w3.enode, w3.key)
-
-    # /* Init an instance of the buffer for peers  */
-    robot.log.info('Initialising peer buffer...')
-    pb = PeerBuffer(ageLimit)
+    me = Peer(robotID, robotIP, w3.enode, w3.key)
 
     # /* Init an instance of the buffer for resources  */
     robot.log.info('Initialising resource buffer...')
     rb = ResourceBuffer()
 
-    # /* Init TCP server for enode requests */
-    robot.log.info('Initialising TCP server...')
-    tcp = TCP_server(me.enode, 'localhost', tcpPort+int(me.id), unlocked = True)
-
-    # /* Init TCP server for resource requests */
-    robot.log.info('Initialising TCP server...')
-    tcpr = TCP_server("None", 'localhost', tcprPort+int(me.id), unlocked = True)
-
     # /* Init E-RANDB __listening process and transmit function
     robot.log.info('Initialising RandB board...')
-    erb = ERANDB(robot, erbDist, erbtFreq)
+    erb = ERANDB(robot, cp['erbDist'] , cp['erbtFreq'])
 
     #/* Init Resource-Sensors */
     robot.log.info('Initialising resource sensor...')
@@ -431,11 +290,11 @@ def init():
 
     # /* Init Random-Walk, __walking process */
     robot.log.info('Initialising random-walk...')
-    rw = RandomWalk(robot, rwSpeed)
+    rw = RandomWalk(robot, cp['scout_speed'])
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising navigation...')
-    nav = Navigate(robot, navSpeed)
+    nav = Navigate(robot, cp['recruit_speed'])
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising odometry...')
@@ -448,11 +307,10 @@ def init():
     fsm = FiniteStateMachine(robot, start = Idle.IDLE)
 
     # List of submodules --> iterate .start() to start all
-    submodules = [w3.geth.miner, tcp, tcpr, erb]
+    submodules = [w3.geth.miner, erb]
 
     txs['sell'] = Transaction(None)
     txs['buy']  = Transaction(None)
-
 
 #########################################################################################################################
 #### CONTROL STEP #######################################################################################################
@@ -462,7 +320,6 @@ def controlstep():
     global clocks, counters, startFlag, startTime
 
     if not startFlag:
-
         ##########################
         #### FIRST STEP ##########
         ##########################
@@ -477,6 +334,7 @@ def controlstep():
                 module.start()
             except:
                 robot.log.critical('Error Starting Module: %s', module)
+                sys.exit()
 
         for log in logs.values():
             log.start()
@@ -486,63 +344,90 @@ def controlstep():
 
     else:
 
-        ##########################
-        #### SUB-MODULE STEPS ####
-        ##########################
-
-        for module in [erb, rs, odo]:
-            module.step()
-
-        ##########################
-        #### LOG-MODULE STEPS ####
-        ##########################
-
-        # print(startTime-time.time())
-        # startTime = time.time()
-
-        if logs['resources'].isReady():
-            logs['resources'].log([len(rb)])
-
-        if logs['odometry'].isReady():
-            logs['odometry'].log([odo.getNew()])
-
         ###########################
-        #### MAIN-MODULE STEPS ####
+        ######## ROUTINES ########
         ###########################
 
-        # if clocks['buffer'].query(): 
-        #     if not bufferTh.is_alive():
-        #         bufferTh = threading.Thread(target=buffer)
-        #         bufferTh.start()
+        def peering():
+            global geth_peer_count
+            geth_peer_count = 0
+            if clocks['buffer'].query(): 
 
-        ##############################
-        #### STATE-MACHINE STEPS ####
-        ##############################
+                peer_IPs = dict()
+                peers = erb.getNew()
+                for peer in peers:
+                    peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
 
-        # Routines to be used in state machine steps:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((me.ip, 9898))
+                    s.sendall(str(peer_IPs).encode())
+                    data = s.recv(1024)
+                    geth_peer_count = int(data)
 
-        def homing():
+                 # Turn on LEDs according to geth Peers
+                if geth_peer_count == 0: 
+                    rgb.setLED(rgb.all, 3* ['black'])
+                elif geth_peer_count == 1:
+                    rgb.setLED(rgb.all, ['red', 'black', 'black'])
+                elif geth_peer_count == 2:
+                    rgb.setLED(rgb.all, ['red', 'black', 'red'])
+                elif geth_peer_count > 2:
+                    rgb.setLED(rgb.all, 3*['red'])
+
+        def homing(to_drop = False):
             # Navigate to the market
 
             arrived = True
-            if nav.get_distance_to(market._pr) < 0.5*market.radius:           
-                nav.avoid(move = True)
-                
-            elif nav.get_distance_to(market._pr) < market.radius and len(peered) > 1:
-                nav.avoid(move = True)
 
+            if to_drop:
+                if nav.get_distance_to((0,0)) < market.radius + 0.5* (cache.radius - market.radius):
+                    nav.avoid(move = True)
+                else:
+                    nav.navigate_with_obstacle_avoidance(market._pr)
+                    arrived = False
             else:
-                nav.navigate_with_obstacle_avoidance(market._pr)
-                arrived = False
+                if nav.get_distance_to(market._pr) < 0.5*market.radius:           
+                    nav.avoid(move = True)
+                    
+                elif nav.get_distance_to(market._pr) < market.radius and geth_peer_count > 1:
+                    nav.avoid(move = True)
+
+                else:
+                    nav.navigate_with_obstacle_avoidance(market._pr)
+                    arrived = False
 
             return arrived
 
         def sensing():
+            # Sense environment for resources
             if clocks['rs'].query(): 
                 resource = rs.getNew()
                 if resource:
                     rb.addResource(resource)
                     return resource
+
+        ##########################
+        ###### MODULE STEPS ######
+        ##########################
+
+        for module in [erb, rs, odo]:
+            module.step()
+
+        if logs['resources'].query():
+            logs['resources'].log([len(rb)])
+
+        if logs['odometry'].query():
+            logs['odometry'].log([odo.getNew()])
+
+        ###########################
+        ####### EVERY STEP  #######
+        ###########################
+
+        peering()
+
+        ##############################
+        ##### STATE-MACHINE STEP #####
+        ##############################
 
         #########################################################################################################
         #### Idle.IDLE
@@ -550,7 +435,7 @@ def controlstep():
         if fsm.query(Idle.IDLE):
 
             # State transition: Scout.EXPLORE
-            explore_duration = random.gauss(controller_params['explore_mu'], controller_params['explore_sg'])
+            explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
             clocks['explore'].set(explore_duration)
             fsm.setState(Scout.EXPLORE, message = "Duration: %.2f" % explore_duration)
 
@@ -586,31 +471,30 @@ def controlstep():
         elif fsm.query(Scout.SELL):
 
             # Navigate to market
-            arrived = homing()
+            if fsm.query(Recruit.HOMING, previous = True):
+                homing(to_drop = True)
+            else:
+                homing()
 
-            if arrived:
-                rb.getBestResource()
-                fsm.setState(Recruit.FORAGE, message = "Exploration success")
+            # Sell resource information  
+            if rb.buffer:
+                resource = rb.buffer.pop(-1)
+                sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
+                txs['sell'] = Transaction(sellHash)
+                robot.log.info('Selling: %s', resource._desc)
 
-            # # Sell resource information  
-            # if rb.buffer:
-            #     resource = rb.buffer.pop(-1)
-            #     sellHash = w3.sc.functions.addResource(*resource._calldata).transact()
-            #     txs['sell'] = Transaction(sellHash)
-            #     robot.log.info('Selling: %s', resource._desc)
+            # Transition state  
+            else:
+                if txs['sell'].query(3):
+                    txs['sell'] = Transaction(None)
+                    fsm.setState(Recruit.PLAN, message = "Sell success")
 
-            # # Transition state  
-            # else:
-            #     if txs['sell'].query(3):
-            #         txs['sell'] = Transaction(None)
-            #         fsm.setState(Recruit.PLAN, message = "Sell success")
+                elif txs['sell'].fail == True:    
+                    txs['sell'] = Transaction(None)
+                    fsm.setState(Recruit.PLAN, message = "Sell failed")
 
-            #     elif txs['sell'].fail == True:    
-            #         txs['sell'] = Transaction(None)
-            #         fsm.setState(Recruit.PLAN, message = "Sell failed")
-
-            #     elif txs['sell'].hash == None:
-            #         fsm.setState(Recruit.PLAN, message = "None to sell")
+                elif txs['sell'].hash == None:
+                    fsm.setState(Recruit.PLAN, message = "None to sell")
 
 
         #########################################################################################################
@@ -651,31 +535,55 @@ def controlstep():
             if clocks['buy'].query():
                 fsm.setState(Idle.IDLE, message = "Buy expired")
 
+        #########################################################################################################
+        #### Recruit.PLAN  
+        ######################################################################################################### 
+
+        elif fsm.query(Recruit.PLAN):
+
+            resource = w3.sc.functions.getMyResource().call()
+
+            if resource:
+                rb.addResource(resource, update_best = True)
+
+                if fsm.getPreviousState() == Recruit.FORAGE:
+                    fsm.setState(Recruit.FORAGE, message = None)
+                else:
+                    fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._desc)
+
+            else:
+                fsm.setState(Recruit.BUY, message = "Buy again")
 
         #########################################################################################################
         #### Recruit.FORAGE
         #########################################################################################################
         elif fsm.query(Recruit.FORAGE):
 
-            # Resource virtual sensor
-            resource = sensing()
+            if clocks['block'].query():
+                # Update foraging resource
+                fsm.setState(Recruit.PLAN, message = None)
 
-            # Found the resource? YES -> Collect
-            if resource and resource._pos == rb.best._pos:
-                robot.variables.set_attribute("collectResource", "True")
-                robot.log.info('Collect: %s', resource._desc)        
-
-            # Collected resource? NO -> Navigate to resource site
-            if not robot.variables.get_attribute("hasResource"):
-                nav.navigate_with_obstacle_avoidance(rb.best._pr)
-
-                if nav.get_distance_to(rb.best._pr) < 0.1*rb.best.radius:
-                    rb.best.quantity = 0
-                    fsm.setState(Scout.SELL, message = 'Failed foraging trip')
-
-            # Collected resource? YES -> Go to market
             else:
-                fsm.setState(Recruit.HOMING)
+
+                # Resource virtual sensor
+                resource = sensing()
+
+                # Found the resource? YES -> Collect
+                if resource and resource._p == rb.best._p:
+                    robot.variables.set_attribute("collectResource", "True")
+                    robot.log.info('Collect: %s', resource._desc)        
+
+                # Collected resource? NO -> Navigate to resource site
+                if not robot.variables.get_attribute("hasResource"):
+                    nav.navigate_with_obstacle_avoidance(rb.best._pr)
+
+                    if nav.get_distance_to(rb.best._pr) < 0.1*rb.best.radius:
+                        rb.best.quantity = 0
+                        fsm.setState(Scout.SELL, message = 'Failed foraging trip')
+
+                # Collected resource? YES -> Go to market
+                else:
+                    fsm.setState(Recruit.HOMING)
 
 
         #########################################################################################################
@@ -683,13 +591,8 @@ def controlstep():
         #########################################################################################################
         elif fsm.query(Recruit.HOMING):
 
-            arrived = False
-            if nav.get_distance_to((0,0)) < market.radius + 0.5* (market.radius_dropoff - market.radius):
-                nav.avoid(move = True)
-                arrived = True
-
-            else:
-                nav.navigate_with_obstacle_avoidance(market._pr)
+            # Navigate home
+            arrived = homing(to_drop = True)
 
             if arrived:
                 robot.variables.set_attribute("dropResource", "True")
@@ -708,9 +611,8 @@ def reset():
 def destroy():
     if startFlag:
         w3.geth.miner.stop()
-        # bufferTh.join()
-        # for enode in getEnodes():
-        #     w3.geth.admin.removePeer(enode)
+        for enode in getEnodes():
+            w3.geth.admin.removePeer(enode)
 
     variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
     with open(variables_file, 'w+') as vf:
@@ -739,71 +641,4 @@ def getIds(__enodes = None):
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
     else:
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
-
-
-# def START(modules = submodules, logs = logmodules):
-#     global startFlag, startTime
-#     startTime = time.time()
-
-#     robot.log.info('Starting Experiment')
-
-#     for log in logs:
-#         try:
-#             log.start()
-#         except:
-#             robot.log.critical('Error Starting Log: %s', log)
-
-#     startFlag = True 
-#     for module in modules:
-#         try:
-#             module.start()
-#         except:
-#             robot.log.critical('Error Starting Module: %s', module)
-
-# def STOP(modules = submodules, logs = logmodules):
-#     robot.log.info('Stopping Experiment')
-#     global startFlag
-
-#     robot.log.info('--/-- Stopping Main-modules --/--')
-#     startFlag = False
-
-#     robot.log.info('--/-- Stopping Sub-modules --/--')
-#     for submodule in modules:
-#         try:
-#             submodule.stop()
-#         except:
-#             robot.log.warning('Error stopping submodule')
-
-#     for log in logs:
-#         try:
-#             log.close()
-#         except:
-#             robot.log.warning('Error Closing Logfile')
-            
-#     if isbyz:
-#         pass
-#         robot.log.info('This Robot was BYZANTINE')
-
-#     txlog.start()
-    
-#     for txHash in txList:
-
-#         try:
-#             tx = w3.eth.getTransaction(txHash)
-#         except:
-#             txlog.log(['Lost'])
-#         else:
-#             try:
-#                 txRecpt = w3.eth.getTransactionReceipt(txHash)
-#                 mined = 'Yes' 
-#                 txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
-#             except:
-#                 mined = 'No' 
-#                 txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
-
-#     txlog.close()
-
-
-
-
 

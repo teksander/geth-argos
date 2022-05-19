@@ -17,7 +17,7 @@
   <controllers>
 
    
-    <python_controller id="blockchain" library="ARGOSFOLDER/build/libpy_controller_interface.so">
+    <python_controller id="collab" library="ARGOSFOLDER/build/libpy_controller_interface.so">
       <!-- Normal actuator/sensor configuration follows -->
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
@@ -92,7 +92,7 @@
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
       <entity quantity="NUM1" max_trials="15"> 
         <e-puck id="bc" >
-          <controller config="blockchain" />
+          <controller config="collab" />
         </e-puck>
       </entity> 
     </distribute>
