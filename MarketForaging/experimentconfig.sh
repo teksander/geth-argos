@@ -26,10 +26,10 @@ export SWARMNAME=ethereum
 export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
-export NUM1=8
+export NUM1=7
 export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
 
-export NUM2=2
+export NUM2=0
 export CON2="${EXPERIMENTFOLDER}/controllers/main_greedy.py"
 
 export RABRANGE="0.3"
@@ -45,9 +45,11 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXRECRUITS=2
-export SCOUTSHARE=30
-export FORAGERSHARE=100-SCOUTSHARE
+export MAXSTAKERS=5
+export MAXWORKERS=2
+
+export STAKERSHARE=30
+export WORKERSHARE=$(echo 100-$STAKERSHARE | bc)
 
 
 # [OTHER]

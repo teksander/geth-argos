@@ -56,12 +56,13 @@ CPU = getCPUPercent()
 
 # Initialize timers/accumulators/logs:
 global clocks, accums, logs
-clocks = accums = logs = dict()
+clocks, accums, logs = dict(), dict(), dict()
 
 clocks['update_status'] = Timer(10)
 accums['distance'] = Accumulator()
 accums['distance_forage'] = Accumulator()
 accums['distance_explore'] = Accumulator()
+accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots'])]
 
 # Store the position of the market and cache
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
@@ -137,14 +138,19 @@ def generate_resource(n = 1, qualities = None, max_attempts = 50):
 def init():
 
     header = ['TPS', 'RAM', 'CPU']
-    filename = log_folder + 'status.csv'  
-    logs['status'] = Logger(filename, header, ID = '0')
+    file   = 'status.csv'  
+    logs['status'] = Logger(log_folder+file, header, ID = '0')
     logs['status'].start()
 
     header = ['DIST', 'RECRUIT_DIST', 'SCOUT_DIST']+list(resource_counter) + ['TOTAL', 'VALUE']
-    filename = log_folder + 'loop_function.csv'
-    logs['loop'] = Logger(filename, header, ID = '0')
+    file   = 'loop_function.csv'
+    logs['loop'] = Logger(log_folder+file, header, ID = '0')
     logs['loop'].start()
+
+    header = [str(robotID) for robotID in range(1, lp['generic']['num_robots']+1)]
+    file   = 'collection.csv'
+    logs['collection'] = Logger(log_folder+file, header, rate = 1, ID = '0')
+    logs['collection'].start()
 
     for robot in allrobots:
         print(robot.variables.get_all_attributes())
@@ -182,12 +188,14 @@ def pre_step():
                 robot.variables.set_attribute("newResource", res._json)
 
         # Has robot stepped into market drop area? YES
-        if is_in_circle(robot.position.get_position(), (market.x, market.y), cache.radius):
+        if is_in_circle(robot.position.get_position(), (cache.x, cache.y), cache.radius):
 
             # Does the robot carry resource? YES -> Sell resource
             resource_quality = robot.variables.get_attribute("hasResource")
             if resource_quality and robot.variables.get_attribute("dropResource"):      
                 resource_counter[resource_quality] += 1  
+
+                accums['collection'][int(robot.variables.get_attribute("id"))-1].acc(lp['patches']['utility'][resource_quality])
 
                 robot.variables.set_attribute("hasResource", "")
                 robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
@@ -247,6 +255,8 @@ def post_step():
               + [str(value) for value in resource_counter.values()] 
               + [sum(resource_counter.values())] 
               + [sum([resource_counter[x]*lp['patches']['utility'][x] for x in lp['patches']['utility']])])
+
+    logs['collection'].log([accum.value for accum in accums['collection']])
 
 
 def is_experiment_finished():

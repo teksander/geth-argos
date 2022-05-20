@@ -100,12 +100,12 @@ class Resource(object):
 
     @property
     def _calldata(self):
-        return (str(self._json), 
-                int(self.x * 100), 
+        return (int(self.x * 100), 
                 int(self.y * 100), 
-                int(self.quantity), 
+                int(self.quantity),
+                int(self.utility), 
                 str(self.quality), 
-                int(self.utility))
+                str(self._json))
 
 class ResourceVirtualSensor(object):
     """ Set up a ground-sensor data acquisition loop on a background thread

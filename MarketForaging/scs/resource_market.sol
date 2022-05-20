@@ -2,34 +2,47 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant max_recruits     = 2;
-  uint256 constant forager_share = 100-30;
-  uint256 constant scout_share   = 30;
+  uint constant max_workers = 2;
+  uint constant max_stakers = 5;
 
-    struct resource {
+  uint constant worker_share = 70;
+  uint constant staker_share = 30;
+  
+
+  // uint constant max_workers = 2;
+  // uint constant max_stakers = 5;
+
+  // uint constant worker_share = 70;
+  // uint constant staker_share = 30;
+
+
+  struct resource {
     address scout;
-    address[max_recruits] recruits;
-    uint counter;
-    string json;
+    address[max_workers] workers;
+    address[max_stakers] stakers;
+    uint[max_stakers] stakes;
+    uint stake;
+    uint block;
+
     int x;
     int y;
     uint qtty;
+    uint util;
     string qlty;
-    uint utility;
-    uint block;
+    string json;
   }   
  
   resource[] public resources;
   resource[] public resources_depleted;
-  address[max_recruits] public recruits_empty;
+
+  address[max_workers] public workers_empty;
+  address[max_stakers] public stakers_empty;
+  uint[max_stakers] public stakes_empty;
+
   mapping(address => uint) public balances;
 
 
-  function sellResource(uint _utility) public {
-    balances[msg.sender] += 100*_utility;
-  } 
-
-  function updatePatch(string memory _json, int _x, int _y, uint _qtty, string memory _qlty, uint _utility) public {
+  function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json, uint my_stake) public {
     
     // If patch is not unique
     bool unique = true;
@@ -37,35 +50,51 @@ contract MarketForaging {
       if (_x == resources[i].x && _y == resources[i].y ) {
         unique = false;
 
-
         if (_qtty <= resources[i].qtty) {
 
-          uint reward = (resources[i].qtty - _qtty) * resources[i].utility * 100;
-          uint forager_reward = reward * forager_share / 100;
-          uint scout_reward   = reward * scout_share / 100;
+          uint reward = (resources[i].qtty - _qtty) * resources[i].util * 100;
+          uint worker_reward = reward * worker_share / 100;
+          uint staker_reward = reward * staker_share / 100;
 
-          // Reward the scout
-          balances[resources[i].scout] += scout_reward;
+          // Reward the stakers
+          uint staker_count = 0;
+          for (uint j=0; j < max_stakers; j++) { 
+            if (resources[i].stakers[j] != address(0)){
+              staker_count += 1;
+            }
+          }
 
-          // Reward the foragers
-          uint forager_count = 0;
-          for (uint j=0; j < max_recruits; j++) { 
-            forager_count += 1;
-            if (resources[i].recruits[j] == address(0)){
-              break;
+          for (uint j=0; j < staker_count; j++) { 
+            balances[resources[i].stakers[j]] += staker_reward * (resources[i].stakes[j] / resources[i].stake);
+          }
+
+          // Reward the workers
+          uint worker_count = 0;
+          for (uint j=0; j < max_workers; j++) { 
+            if (resources[i].workers[j] != address(0)){
+              worker_count += 1;
             }
           }
         
-          for (uint j=0; j < max_recruits; j++) { 
-            balances[resources[i].recruits[j]] += forager_reward / forager_count;
+          for (uint j=0; j < worker_count; j++) { 
+            balances[resources[i].workers[j]] += worker_reward / worker_count;
           }
 
           // Update patch information
-          resources[i].counter += 1;
-          resources[i].json     = _json;
-          resources[i].qtty     = _qtty;
           resources[i].block    = block.number;
-  
+          resources[i].qtty     = _qtty;
+          resources[i].json     = _json;
+
+          // Update the stake
+          uint jj = findStakerSpot(i, msg.sender);
+          
+          if (jj < 999  && my_stake < balances[msg.sender]) {
+            resources[i].stakers[jj] = msg.sender;
+            resources[i].stakes[jj]  = my_stake * 100;
+            resources[i].stake     += my_stake * 100;
+            // balances[msg.sender] -= my_stake * 100;
+          }
+
         }
 
         // Remove patch if quantity is 0
@@ -89,34 +118,83 @@ contract MarketForaging {
 
     // If patch is unique
     if (unique && !depleted) {
-      // Append the new resource to the list
-      resources.push(resource(msg.sender, recruits_empty, 0, _json, _x, _y, _qtty, _qlty, _utility, block.number));
+
+      // Append the new resource to the lists
+      resources.push(resource({
+                                scout: msg.sender,
+                                workers: workers_empty,
+                                stakers: stakers_empty,
+                                stakes:  stakes_empty,
+                                stake:   0,
+                                block: block.number,
+                                x: _x, 
+                                y: _y, 
+                                qtty: _qtty, 
+                                util: _util,
+                                qlty: _qlty, 
+                                json: _json
+                              }));
+
+      // Update the stake
+      if (my_stake < balances[msg.sender]) {
+        resources[resources.length - 1].stakers[0]   = msg.sender;
+        resources[resources.length - 1].stakes[0]   += my_stake * 100;
+        resources[resources.length - 1].stake += my_stake * 100;
+        balances[msg.sender] -= my_stake * 100;
+      }
+    }
+  }
+
+  function findStakerSpot(uint resource_index, address staker) internal view returns (uint) {
+
+    for (uint j=0; j < max_stakers; j++) { 
+      if (resources[resource_index].stakers[j] == staker) {
+        return j;      
+      }
     }
 
-  } 
+    for (uint j=0; j < max_stakers; j++) { 
+      if (resources[resource_index].stakers[j] == address(0)) {
+        return j;      
+      }
+    }
 
-  function buyResource() public {
+    return 1000;
+  }
 
-    // Buy resource with maximum utility
+  function findWorker(uint resource_index, address worker) internal view returns (uint) {
+
+    for (uint j=0; j < max_workers; j++) { 
+      if (resources[resource_index].workers[j] == worker) {
+        return j;      
+      }
+    }
+    return 1000;
+  }
+
+
+  function assignPatch() public {
+
+    // Buy resource with maximum util * reliability
     uint res_index = 0;
     uint rec_index = 0;
-    uint max_utility = 0;
+    uint max_util = 0;
   
     bool is_recruit = false;
     uint my_res_index = 0;
     uint my_rec_index = 0;
 
     for (uint i=0; i < resources.length; i++) {
-      for (uint j=0; j < max_recruits; j++) {
+      for (uint j=0; j < max_workers; j++) {
 
-        if (resources[i].recruits[j] == msg.sender) {
+        if (resources[i].workers[j] == msg.sender) {
           is_recruit = true;
           my_res_index = i;
           my_rec_index = j;
         } 
         
-        if (resources[i].recruits[j] == address(0) && resources[i].utility > max_utility) {
-          max_utility = resources[i].utility;
+        if (resources[i].workers[j] == address(0) && resources[i].util > max_util) {
+          max_util = resources[i].util;
           res_index = i;
           rec_index = j;
         }
@@ -124,16 +202,16 @@ contract MarketForaging {
       }    
     }
 
-    require(max_utility > 0, "No resources for sale");
+    require(max_util > 0, "No resources for sale");
 
-    if (is_recruit && resources[my_res_index].utility < max_utility) {
-      resources[my_res_index].recruits[my_rec_index] = address(0);
+    if (is_recruit && resources[my_res_index].util < max_util) {
+      resources[my_res_index].workers[my_rec_index] = address(0);
       is_recruit = false;
     }
 
     // Update resource recruit
     if (!is_recruit) {
-      resources[res_index].recruits[rec_index] = msg.sender;
+      resources[res_index].workers[rec_index] = msg.sender;
     }
   }
 
@@ -145,15 +223,18 @@ contract MarketForaging {
 
     for (uint i=0; i < resources.length; i++) {
 
-      for (uint j=0; j < max_recruits; j++) {
+      for (uint j=0; j < max_workers; j++) {
 
-        if (resources[i].recruits[j] == msg.sender) { 
+        if (resources[i].workers[j] == msg.sender) { 
            return resources[i].json; 
         }
       }
     }
     return "";    
   }
-  
+
+  function registerRobot() public {
+    balances[msg.sender] = 1000;
+  } 
 }
 

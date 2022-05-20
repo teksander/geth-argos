@@ -342,6 +342,8 @@ def controlstep():
         for clock in clocks.values():
             clock.reset()
 
+        w3.sc.functions.registerRobot().transact()
+
     else:
 
         ###########################
@@ -479,7 +481,8 @@ def controlstep():
             # Sell resource information  
             if rb.buffer:
                 resource = rb.buffer.pop(-1)
-                sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
+                stake    = (int(resource.utility/2),)
+                sellHash = w3.sc.functions.updatePatch(*resource._calldata + stake).transact()
                 txs['sell'] = Transaction(sellHash)
                 robot.log.info('Selling: %s', resource._desc)
 
@@ -523,7 +526,7 @@ def controlstep():
 
                     if availiable:
                         try:
-                            txBuy = w3.sc.functions.buyResource().transact()
+                            txBuy = w3.sc.functions.assignPatch().transact()
                             txs['buy'] = Transaction(txBuy)
                             robot.log.info('Bought')     
 

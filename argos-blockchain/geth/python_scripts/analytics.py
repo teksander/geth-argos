@@ -62,7 +62,8 @@ def getFolderSize(folder):
             total_size += getFolderSize(itempath)
     return total_size
 
-
+global clocks, counters, logs, txs
+clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
 def scHandle():
     """ Interact with SC when new blocks are synchronized """
@@ -82,21 +83,21 @@ def scHandle():
     newRound = w3.call('isNewRound')
     consensus = w3.call('isConverged')
 
-    sclog.log([blockNr, balance, ubi, payout, robotCount, mean, voteCount, voteOkCount, myVoteCounter,myVoteOkCounter, newRound, consensus])
+    logs['sc'].log([blockNr, balance, ubi, payout, robotCount, mean, voteCount, voteOkCount, myVoteCounter,myVoteOkCounter, newRound, consensus])
 
 
 if __name__ == '__main__':
 
-    wsAddr = 'localhost'
     w3 = init_web3()
     sc = registerSC(w3)
     bf = w3.eth.filter('latest')
 
     robotID = sys.argv[1]
+
     logfolder = '/root/logs/%s/' % robotID
+    os.system("rm -rf " + logfolder)
 
     scresourcesfile = logfolder + 'scresources.txt'
-    os.system("rm -rf " + logfolder)
     os.makedirs(os.path.dirname(scresourcesfile), exist_ok=True)
     os.system("touch " + scresourcesfile)
 
@@ -104,27 +105,27 @@ if __name__ == '__main__':
     os.makedirs(os.path.dirname(screcruitsfile), exist_ok=True)
     os.system("touch " + screcruitsfile)
 
-    header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
-    logfile = logfolder + 'block.csv'
-    blocklog = Logger(logfile, header, ID=robotID)
 
-    header = ['BLOCK', 'BALANCE', '#RESOURCES']
-    logfile = logfolder + 'sc.csv'     
-    sclog = Logger(logfile, header, ID=robotID)
+    # Experiment data logs (recorded to file)
+    name          = 'block.csv'
+    header        = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
+    logs['block'] = Logger(logfolder+name, header, ID=robotID)
 
-    header = ['#BLOCKS']
-    logfile = logfolder + 'sync.csv' 
-    synclog = Logger(logfile, header, ID=robotID)
+    name        = 'sc.csv'  
+    header      = ['BLOCK', 'BALANCE', '#RESOURCES']   
+    logs['sc']  = Logger(logfolder+name, header, ID=robotID)
 
-    header = ['MB']
-    logfile = logfolder + 'extra.csv'
-    extralog = Logger(logfile, header, 10, ID=robotID)
+    name         = 'sync.csv' 
+    header       = ['#BLOCKS']
+    logs['sync'] = Logger(logfolder+name, header, ID=robotID)
+    
+    name          = 'extra.csv'
+    header        = ['MB']
+    logs['extra'] = Logger(logfolder+name, header, 10, ID=robotID)
 
-    logs = [blocklog, sclog, synclog, extralog]
-
-    # header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
+    # header       = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
     # log_filename = log_folder + 'tx.csv'     
-    # txlog = Logger(log_filename, header)
+    # logs['tx']   = Logger(log_filename, header)
 
     startFlag = False
     mining = False
@@ -135,19 +136,25 @@ if __name__ == '__main__':
             mining = w3.eth.mining
 
         if mining or startFlag:
+
             # Actions to perform on the first step
             if not startFlag:
-                
-                for log in logs:
-                    log.start()
                 startFlag = True
 
+                for log in logs.values():
+                    log.start()
+
+            # Actions to perform continuously
             else:
+
+                if logs['extra'].isReady():
+                    logs['extra'].log([getFolderSize('/root/.ethereum/devchain/geth/chaindata')])
+
                 newBlocks = bf.get_new_entries()
                 if newBlocks:
 
                     resources = sc.functions.getResources().call()
-                    json_list = [x[3] for x in resources]
+                    json_list = [x[11] for x in resources]
                     recruits_list = [repr(x[1]) for x in resources]
 
                     with open(scresourcesfile, 'w+', buffering=1) as f:
@@ -158,10 +165,10 @@ if __name__ == '__main__':
                         for recruits in recruits_list:
                             f.write(recruits+'\n')
 
-                    synclog.log([len(newBlocks)])
+                    logs['sync'].log([len(newBlocks)])
 
-                    sclog.log([w3.eth.blockNumber, 
-                               round(w3.fromWei(w3.eth.getBalance(w3.key), 'ether'), 2),
+                    logs['sc'].log([w3.eth.blockNumber, 
+                               sc.functions.balances(w3.key).call(),
                                len(resources) 
                                ])
 
@@ -170,7 +177,7 @@ if __name__ == '__main__':
                         
                         block = w3.eth.getBlock(blockHex)
 
-                        blocklog.log([time.time()-block['timestamp'], 
+                        logs['block'].log([time.time()-block['timestamp'], 
                                     block['timestamp'], 
                                     block['number'], 
                                     block['hash'].hex(), 
@@ -182,13 +189,7 @@ if __name__ == '__main__':
                                     len(block['uncles'])
                                     ])
 
-
-                if extralog.isReady():
-                    extralog.log([getFolderSize('/root/.ethereum/devchain/geth/chaindata')])
-        else:
-            time.sleep(0.5)
-
-        time.sleep(0.5)
+        time.sleep(0.1)
 
 
 

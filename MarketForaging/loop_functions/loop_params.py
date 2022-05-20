@@ -19,7 +19,7 @@ params['generic']['density'] = eval(os.environ["DENSITY"])
 params['generic']['arena_dim'] = eval(os.environ["ARENADIM"])
 params['generic']['rab_range'] = eval(os.environ["RABRANGE"])
 params['generic']['block_period'] = eval(os.environ["BLOCKPERIOD"])
-params['generic']['max_recruits'] = eval(os.environ["MAXRECRUITS"])
+params['generic']['max_workers'] = eval(os.environ["MAXWORKERS"])
 
 
 # Parameters for marketplace
