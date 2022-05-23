@@ -108,7 +108,7 @@ if __name__ == '__main__':
     logfile = logfolder + 'block.csv'
     blocklog = Logger(logfile, header, ID=robotID)
 
-    header = ['BLOCK', 'BALANCE', '#RESOURCES']
+    header = ['BLOCK', 'BALANCE']
     logfile = logfolder + 'sc.csv'     
     sclog = Logger(logfile, header, ID=robotID)
 
@@ -146,23 +146,22 @@ if __name__ == '__main__':
                 newBlocks = bf.get_new_entries()
                 if newBlocks:
 
-                    resources = sc.functions.getResources().call()
-                    json_list = [x[3] for x in resources]
-                    recruits_list = [repr(x[1]) for x in resources]
+                    # resources = sc.functions.getResources().call()
+                    # json_list = [x[3] for x in resources]
+                    # recruits_list = [repr(x[1]) for x in resources]
 
-                    with open(scresourcesfile, 'w+', buffering=1) as f:
-                        for json in json_list:
-                            f.write(json+'\n')
+                    # with open(scresourcesfile, 'w+', buffering=1) as f:
+                    #     for json in json_list:
+                    #         f.write(json+'\n')
 
-                    with open(screcruitsfile, 'w+', buffering=1) as f:
-                        for recruits in recruits_list:
-                            f.write(recruits+'\n')
+                    # with open(screcruitsfile, 'w+', buffering=1) as f:
+                    #     for recruits in recruits_list:
+                    #         f.write(recruits+'\n')
 
                     synclog.log([len(newBlocks)])
 
                     sclog.log([w3.eth.blockNumber, 
-                               round(w3.fromWei(w3.eth.getBalance(w3.key), 'ether'), 2),
-                               len(resources) 
+                               round(w3.fromWei(w3.eth.getBalance(w3.key), 'ether'), 2) 
                                ])
 
                     # 1) Log relevant block details 

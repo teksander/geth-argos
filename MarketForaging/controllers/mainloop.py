@@ -168,9 +168,12 @@ class ResourceBuffer(object):
 class Transaction(object):
 
     def __init__(self, txHash, name = "", query_latency = 2):
-        self.name      = name
-        self.tx        = None
-        self.hash      = txHash
+        self.name  = name
+        self.tx    = None
+        self.hash  = txHash
+        self.sent  = False
+        if txHash:
+            self.sent  = True
         self.receipt   = None
         self.fail      = False
         self.block     = w3.eth.blockNumber()
@@ -441,7 +444,7 @@ def controlstep():
         ##########################
         #### MAIN-MODULE STEP ####
         ##########################
-        # peering()
+        peering()
 
         ##########################
         ### STATE-MACHINE STEP ###
@@ -456,6 +459,13 @@ def controlstep():
             explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
             clocks['explore'].set(explore_duration)
             fsm.setState(Scout.EXPLORE, message = "Duration: %.2f" % explore_duration)
+
+        #########################################################################################################
+        #### Neutral.HOMING
+        #########################################################################################################
+
+        elif fsm.query(Neutral.HOMING):
+            homing()
 
         #########################################################################################################
         #### Scout.EXPLORE
@@ -504,11 +514,17 @@ def controlstep():
                 erb.setData(rb.current.utility, index=1)
                 tcp.setData(rb.current._json)
 
+            if rb.current.quantity == 0:
+                rb.current = None
+                erb.setData(0, index=1)
+                tcp.setData("")
+                fsm.setState(Neutral.HOMING, message = "Resource depleted")
+
+
         #########################################################################################################
         #### Recruit.FORAGE
         #########################################################################################################
         elif fsm.query(Recruit.FORAGE):
-
 
             # Resource virtual sensor
             resource = sensing()
@@ -530,12 +546,6 @@ def controlstep():
                 fsm.setState(Recruit.HOMING)
 
 
-        #########################################################################################################
-        #### Scout.HOMING
-        #########################################################################################################
-
-        elif fsm.query(Neutral.HOMING):
-            homing()
 
         #########################################################################################################
         #### Recruit.HOMING
@@ -546,11 +556,24 @@ def controlstep():
             arrived = homing(to_drop = True)
 
             if arrived:
-                robot.variables.set_attribute("dropResource", "True")
-                if not robot.variables.get_attribute("hasResource"):
-                    robot.variables.set_attribute("dropResource", "")
-                    robot.log.info('Dropped: %s', rb.current._desc)  
-                    fsm.setState(Recruit.FORAGE, message = None)
+
+                # Send the sell transaction
+                if not txs['sell'].sent:
+                    sellHash = w3.sc.functions.sellResource(rb.current.utility).transact()
+                    txs['sell'] = Transaction(sellHash)
+                    robot.log.info('Sell: %s', rb.current._desc)
+
+                # Await payment
+                if txs['sell'].query(2):
+                    txs['sell'] = Transaction(None)
+                    robot.variables.set_attribute("dropResource", "True")
+                    robot.log.info('Drop: %s', rb.current._desc)  
+
+            if not robot.variables.get_attribute("hasResource"):
+                robot.variables.set_attribute("dropResource", "")
+                fsm.setState(Recruit.FORAGE, message = "Foraging: %s" % rb.current._desc)
+
+
 
         #########################################################################################################
         #### Scout.SELL

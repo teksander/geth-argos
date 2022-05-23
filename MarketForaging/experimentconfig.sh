@@ -29,7 +29,7 @@ export CONTAINERBASE=${SWARMNAME}_eth
 # [ARGOS]
 export CON1="${EXPERIMENTFOLDER}/controllers/mainloop.py"
 export CON2="${EXPERIMENTFOLDER}/controllers/mainloop_greedy.py"
-export NUM1=5
+export NUM1=10
 export NUM2=0
 export RABRANGE="0.3"
 export TPS=10
