@@ -43,9 +43,9 @@ params['patches']['distribution'] = 'uniform'
 # 									     'x_sg': 0.15 * params['generic']['arena_size'], 
 # 									     'y_sg': 0.15 * params['generic']['arena_size']}]
 
-params['patches']['radius'] = 0.1
-params['patches']['qtty_min'] = 5
-params['patches']['qtty_max'] = 5
+params['patches']['radius'] = 0.05
+params['patches']['qtty_min'] = 10
+params['patches']['qtty_max'] = 10
 params['patches']['dist_min'] = 1.5 * params['cache']['radius'] 
 params['patches']['dist_max'] = 0.5 * params['generic']['arena_size']   
 
@@ -60,7 +60,7 @@ params['patches']['utility']   = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
 # params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 
 
-params['patches']['counts'] = {'red': 1, 'green': 1 , 'blue': 1, 'yellow': 1}
+params['patches']['counts'] = {'red': 3, 'green': 3 , 'blue': 3, 'yellow': 3}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
 							   'green':  params['patches']['radius'] , 
 							   'blue':   params['patches']['radius'], 

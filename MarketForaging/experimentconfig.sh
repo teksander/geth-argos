@@ -26,7 +26,7 @@ export SWARMNAME=ethereum
 export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
-export NUM1=7
+export NUM1=10
 export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
 
 export NUM2=0
@@ -45,7 +45,7 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXSTAKERS=5
+export MAXSTAKERS=10
 export MAXWORKERS=2
 
 export STAKERSHARE=30
@@ -56,7 +56,7 @@ export WORKERSHARE=$(echo 100-$STAKERSHARE | bc)
 export SEED=350
 export TIMELIMIT=15
 export SLEEPTIME=5
-export REPS=2
+export REPS=5
 
 
 

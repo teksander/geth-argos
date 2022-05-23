@@ -90,16 +90,27 @@ contract MarketForaging {
           
           if (jj < 999  && my_stake < balances[msg.sender]) {
             resources[i].stakers[jj] = msg.sender;
-            resources[i].stakes[jj]  = my_stake * 100;
-            resources[i].stake     += my_stake * 100;
-            // balances[msg.sender] -= my_stake * 100;
+            resources[i].stakes[jj] += my_stake * 100;
+            resources[i].stake      += my_stake * 100;
+            balances[msg.sender]    -= my_stake * 100;
           }
 
         }
 
-        // Remove patch if quantity is 0
+        // If resource quantity is 0
         if (resources[i].qtty < 1) {
+
+          // Store in depleted patch array
           resources_depleted.push(resources[i]);
+
+          // Refund all stakers
+          for (uint j=0; j < max_stakers; j++) { 
+            if (resources[i].stakers[j] != address(0)) {
+              balances[resources[i].stakers[j]] += resources[i].stakes[j];
+              resources[i].stakes[j] = 0;  
+            }
+          }
+          // Remove depleted patch
           resources[i] = resources[resources.length - 1];
           resources.pop();
         }
@@ -111,8 +122,7 @@ contract MarketForaging {
     bool depleted = false;
     for (uint i=0; i < resources_depleted.length; i++) {
       if (_x == resources_depleted[i].x && _y == resources_depleted[i].y ) {
-        depleted = true;
-        break;
+        depleted = true;  
       }
     }
 
@@ -139,7 +149,7 @@ contract MarketForaging {
       if (my_stake < balances[msg.sender]) {
         resources[resources.length - 1].stakers[0]   = msg.sender;
         resources[resources.length - 1].stakes[0]   += my_stake * 100;
-        resources[resources.length - 1].stake += my_stake * 100;
+        resources[resources.length - 1].stake       += my_stake * 100;
         balances[msg.sender] -= my_stake * 100;
       }
     }
@@ -178,7 +188,7 @@ contract MarketForaging {
     // Buy resource with maximum util * reliability
     uint res_index = 0;
     uint rec_index = 0;
-    uint max_util = 0;
+    uint max_stake = 0;
   
     bool is_recruit = false;
     uint my_res_index = 0;
@@ -193,8 +203,8 @@ contract MarketForaging {
           my_rec_index = j;
         } 
         
-        if (resources[i].workers[j] == address(0) && resources[i].util > max_util) {
-          max_util = resources[i].util;
+        if (resources[i].workers[j] == address(0) && resources[i].stake > max_stake) {
+          max_stake = resources[i].stake;
           res_index = i;
           rec_index = j;
         }
@@ -202,9 +212,9 @@ contract MarketForaging {
       }    
     }
 
-    require(max_util > 0, "No resources for sale");
+    require(max_stake > 0, "No resources for sale");
 
-    if (is_recruit && resources[my_res_index].util < max_util) {
+    if (is_recruit && resources[my_res_index].stake < max_stake) {
       resources[my_res_index].workers[my_rec_index] = address(0);
       is_recruit = false;
     }

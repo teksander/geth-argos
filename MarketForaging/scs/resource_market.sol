@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 contract MarketForaging {
 
   uint constant max_workers = 2;
-  uint constant max_stakers = 5;
+  uint constant max_stakers = 10;
 
   uint constant worker_share = 70;
   uint constant staker_share = 30;
@@ -91,15 +91,26 @@ contract MarketForaging {
           if (jj < 999  && my_stake < balances[msg.sender]) {
             resources[i].stakers[jj] = msg.sender;
             resources[i].stakes[jj]  = my_stake * 100;
-            resources[i].stake     += my_stake * 100;
-            // balances[msg.sender] -= my_stake * 100;
+            resources[i].stake      += my_stake * 100;
+            balances[msg.sender] -= my_stake * 100;
           }
 
         }
 
-        // Remove patch if quantity is 0
+        // If resource quantity is 0
         if (resources[i].qtty < 1) {
+
+          // Store in depleted patch array
           resources_depleted.push(resources[i]);
+
+          // Refund all stakers
+          for (uint j=0; j < max_stakers; j++) { 
+            if (resources[i].stakers[j] != address(0)) {
+              balances[resources[i].stakers[j]] += resources[i].stakes[j];
+              resources[i].stakes[j] = 0;  
+            }
+          }
+          // Remove depleted patch
           resources[i] = resources[resources.length - 1];
           resources.pop();
         }
@@ -111,8 +122,7 @@ contract MarketForaging {
     bool depleted = false;
     for (uint i=0; i < resources_depleted.length; i++) {
       if (_x == resources_depleted[i].x && _y == resources_depleted[i].y ) {
-        depleted = true;
-        break;
+        depleted = true;  
       }
     }
 
