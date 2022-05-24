@@ -1,23 +1,9 @@
 #!/usr/bin/env python3
 import time, sys, os
 import math
-import threading, psutil
 import logging
 import socket
-from multiprocessing.connection import Listener, Client
-
-sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
-             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
-             os.environ['EXPERIMENTFOLDER']]
-
-# The logs that go to console
-# logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
-
-# # The logs that go to a file (include debugging logs)
-# fh = logging.FileHandler('logs/main.log','w')
-# fh.setFormatter(logging.Formatter(logsFormat))
-# fh.setLevel(10)
-# logging.getLogger('').addHandler(fh)
+from threading, multiprocessing.connection import Listener, Client
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +189,7 @@ class TCP_mp(object):
 
     def __init__(self, data, host, port):
         """ Constructor
-        :type data: str
+        :type data: any
         :param data: Data to be sent back upon request
         :type host: str
         :param host: IP address to host TCP server at
@@ -215,39 +201,32 @@ class TCP_mp(object):
         self.host = host
         self.port = port  
 
-        self.__received = None                            
-        self.__stop = False
+        self.running  = False
+        self.received = []
+        self.__stop   = False
 
         logger.info('TCP-Server OK')
 
     def __hosting(self):
         """ This method runs in the background until program is closed """ 
 
-        # setup the listener
+        # Setup the listener
         listener = Listener((self.host, self.port))
 
-        # # set important options
-        # __socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # # bind to the port
-        # __socket.bind((self.host, self.port))
-        # # listen on the port
-        # __socket.listen()
-
-        print('TCP Server OK')  
+        print('TCP server OK')  
 
         while True:
+
             __conn = listener.accept()
+            __conn.send(self.data)
 
             if self.__stop:
                 __conn.close()
                 break 
-
-            else:
-                __conn.send(self.data) 
-
+                
     def request(self, host = None, port = None):
         """ This method is used to request data from a running TCP server """
-        
+
         msg = ""
         if not host:
             host = self.host
@@ -265,33 +244,36 @@ class TCP_mp(object):
         return msg
 
     def getNew(self):
-        if self.__stop:
-            return None
-            print('TCP is OFF')
+        if self.running:
+            temp = self.received
+            self.received = []
+            return temp
         else:
-            return self.__received
+            print('TCP server is OFF')
+            return []
 
     def setData(self, data):
         self.data = data   
 
-
     def start(self):
         """ This method is called to start __hosting a TCP server """
-        if self.__stop:
-            print('TCP Server already ON')  
 
-        else:
+        if not self.running:
             # Initialize background daemon thread
             thread = threading.Thread(target=self.__hosting, args=())
             thread.daemon = True 
 
             # Start the execution                         
             thread.start()   
+            self.running = True
+        else:
+            print('TCP server already ON')  
 
     def stop(self):
         """ This method is called before a clean exit """   
-        self.__stop = True
-        print('TCP is OFF') 
+        self.__stop  = True
+        self.running = False
+        print('TCP server is OFF') 
 
 class TCP_server(object):
     """ Set up TCP_server on a background thread
@@ -613,23 +595,6 @@ def readEnode(enode, output = 'id'):
     elif output == 'id':
         return ip_.split('.')[-1] 
 
-def getCPUPercent():
-    return psutil.cpu_percent()
-
-def getRAMPercent():
-    return psutil.virtual_memory().percent
-
-def getFolderSize(folder):
-    # Return the size of a folder
-    total_size = os.path.getsize(folder)
-    for item in os.listdir(folder):
-        itempath = os.path.join(folder, item)
-        if os.path.isfile(itempath):
-            total_size += os.path.getsize(itempath)
-        elif os.path.isdir(itempath):
-            total_size += getFolderSize(itempath)
-    return total_size
-
 class Vector2D:
     """A two-dimensional vector with Cartesian coordinates."""
 
@@ -769,3 +734,14 @@ def identifersExtract(robotID, query = 'IP'):
                     return line.split()[-1]
                 if query == 'ENODE':
                     return line.split()[1]
+
+def getFolderSize(folder):
+    # Return the size of a folder
+    total_size = os.path.getsize(folder)
+    for item in os.listdir(folder):
+        itempath = os.path.join(folder, item)
+        if os.path.isfile(itempath):
+            total_size += os.path.getsize(itempath)
+        elif os.path.isdir(itempath):
+            total_size += getFolderSize(itempath)
+    return total_size

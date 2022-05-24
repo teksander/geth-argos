@@ -429,6 +429,9 @@ def controlstep():
         ###########################
 
         peering()
+        tt = time.time()
+        tcp_sc.request()
+        print(time.time()-tt)
 
         ##############################
         ##### STATE-MACHINE STEP #####

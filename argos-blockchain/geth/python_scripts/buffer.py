@@ -6,7 +6,8 @@ import subprocess
 from console import *
 import threading
 import copy
-from multiprocessing.connection import Listener, Client
+
+from aux import TCP_mp
 
 w3 = init_web3()
 sc = registerSC(w3)
@@ -261,104 +262,6 @@ class TCP_server2(object):
 		""" This method is called before a clean exit """   
 		self.__stop = True
 		print('TCP is OFF') 
-
-class TCP_mp(object):
-	""" Set up TCP_server on a background thread
-	The __hosting() method will be started and it will run in the background
-	until the application exits.
-	"""
-
-	def __init__(self, data, host, port):
-		""" Constructor
-		:type data: str
-		:param data: Data to be sent back upon request
-		:type host: str
-		:param host: IP address to host TCP server at
-		:type port: int
-		:param port: TCP listening port for enodes
-		"""
-		
-		self.data = data
-		self.host = host
-		self.port = port  
-
-		self.__received = None                            
-		self.__stop = False
-
-		logger.info('TCP-Server OK')
-
-	def __hosting(self):
-		""" This method runs in the background until program is closed """ 
-
-		# setup the listener
-		listener = Listener((self.host, self.port))
-
-		# # set important options
-		# __socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		# # bind to the port
-		# __socket.bind((self.host, self.port))
-		# # listen on the port
-		# __socket.listen()
-
-		print('TCP Server OK')  
-
-		while True:
-			__conn = listener.accept()
-
-			if self.__stop:
-				__conn.close()
-				break 
-
-			else:
-				__conn.send(self.data) 
-
-	def request(self, host = None, port = None):
-		""" This method is used to request data from a running TCP server """
-		msg = ""
-		if not host:
-			host = self.host
-		if not port:
-			port = self.port
-
-		try:
-			__conn = Client((host, port))
-			msg = __conn.recv()
-			__conn.close()
-
-		except:
-			print('TCP connection failed')
-
-		return msg
-
-	def getNew(self):
-		if self.__stop:
-			return None
-			print('TCP is OFF')
-		else:
-			return self.__received
-
-	def setData(self, data):
-		self.data = data   
-
-
-	def start(self):
-		""" This method is called to start __hosting a TCP server """
-		if self.__stop:
-			print('TCP Server already ON')  
-
-		else:
-			# Initialize background daemon thread
-			thread = threading.Thread(target=self.__hosting, args=())
-			thread.daemon = True 
-
-			# Start the execution                         
-			thread.start()   
-
-	def stop(self):
-		""" This method is called before a clean exit """   
-		self.__stop = True
-		print('TCP is OFF') 
-
 
 
 def getEnodes():

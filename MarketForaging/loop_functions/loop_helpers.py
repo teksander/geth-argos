@@ -3,7 +3,7 @@
 # /* Import Packages */
 #######################################################################
 import random, math
-import sys, os
+import sys, os, psutil
 
 sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
@@ -33,3 +33,9 @@ def is_in_rectangle(point, center, width, height):
         return True 
     else:
         return False
+
+def getCPUPercent():
+    return psutil.cpu_percent()
+
+def getRAMPercent():
+    return psutil.virtual_memory().percent

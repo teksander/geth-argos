@@ -1,66 +1,8 @@
 #!/usr/bin/env python3
-import time
-import os
-import sys
-# import psutil
+import time, os, sys
+
+from aux import Logger, getFolderSize
 from console import *
-
-class Logger(object):
-    """ Logging Class to Record Data to a File
-    """
-    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None):
-
-        os.makedirs(os.path.dirname(logfile), exist_ok=True)
-
-        self.file = open(logfile, 'w+', buffering = buffering)
-        self.rate = rate
-        self.tStamp = 0
-        self.tStart = 0
-        self.latest = time.time()
-        pHeader = ' '.join([str(x) for x in header])
-        self.file.write('{} {} {}\n'.format('ID', 'TIME', pHeader))
-        
-        if ID:
-            self.id = ID
-        else:
-            self.id = open("/boot/pi-puck_id", "r").read().strip()
-
-    def log(self, data):
-        """ Method to log row of data
-        :param data: row of data to log
-        :type data: list
-        """ 
-        
-        if self.isReady():
-            self.tStamp = time.time()
-            try:
-                tString = str(round(self.tStamp-self.tStart, 3))
-                pData = ' '.join([str(x) for x in data])
-                self.file.write('{} {} {}\n'.format(self.id, tString, pData))
-                self.latest = self.tStamp
-            except:
-                pass
-                logger.warning('Failed to log data to file')
-
-    def isReady(self):
-        return time.time()-self.tStamp > self.rate
-
-    def start(self):
-        self.tStart = time.time()
-
-    def close(self):
-        self.file.close()
-
-def getFolderSize(folder):
-    # Return the size of a folder
-    total_size = os.path.getsize(folder)
-    for item in os.listdir(folder):
-        itempath = os.path.join(folder, item)
-        if os.path.isfile(itempath):
-            total_size += os.path.getsize(itempath)
-        elif os.path.isdir(itempath):
-            total_size += getFolderSize(itempath)
-    return total_size
 
 global clocks, counters, logs, txs
 clocks, counters, logs, txs = dict(), dict(), dict(), dict()

@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
-import time
-import sys
-import threading
-import socket
-import subprocess
-import os
-import logging
-import psutil
+import time, sys, os
 import math
-import json
-from types import SimpleNamespace
-experimentFolder = os.environ["EXPERIMENTFOLDER"]
-sys.path.insert(1, experimentFolder)
+import threading
+import logging
+import socket
+from multiprocessing.connection import Listener, Client
 
+# sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+#              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+#              os.environ['EXPERIMENTFOLDER']]
 
 # The logs that go to console
 # logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -89,6 +85,49 @@ class Counter:
     def reset(self):
         self.count = 0
 
+class Accumulator:
+    def __init__(self, rate = 0, name = None):
+        self.name = name
+        self.rate = rate
+        self.value = 0
+        self.isLocked = False
+
+    def query(self, reset = True):
+        if self.remaining() < 0:
+            if reset:
+                self.reset()
+            return True
+        else:
+            return False
+
+    def remaining(self):
+        return self.rate - self.value
+
+    def set(self, rate):
+        if not self.isLocked:
+            self.rate = rate
+            self.value = 0
+        return self
+
+    def get(self):
+        return self.value
+        
+    def acc(self, quantity):
+        self.value += quantity
+
+    def reset(self):
+        if not self.isLocked:
+            self.value = 0
+        return self
+
+    def lock(self):
+        self.isLocked = True
+        return self
+
+    def unlock(self):
+        self.isLocked = False
+        return self
+
 
 
 class Timer:
@@ -156,6 +195,100 @@ class TicToc(object):
             # logger.warning('{} Pendulum too Slow. Elapsed: {}'.format(self.name,dtime))
             pass
 
+class TCP_mp(object):
+    """ Set up TCP_server on a background thread
+    The __hosting() method will be started and it will run in the background
+    until the application exits.
+    """
+
+    def __init__(self, data, host, port):
+        """ Constructor
+        :type data: any
+        :param data: Data to be sent back upon request
+        :type host: str
+        :param host: IP address to host TCP server at
+        :type port: int
+        :param port: TCP listening port for enodes
+        """
+        
+        self.data = data
+        self.host = host
+        self.port = port  
+
+        self.running  = False
+        self.received = []
+        self.__stop   = False
+
+        logger.info('TCP-Server OK')
+
+    def __hosting(self):
+        """ This method runs in the background until program is closed """ 
+
+        # Setup the listener
+        listener = Listener((self.host, self.port))
+
+        print('TCP server OK')  
+
+        while True:
+
+            __conn = listener.accept()
+            __conn.send(self.data)
+
+            if self.__stop:
+                __conn.close()
+                break 
+                
+    def request(self, host = None, port = None):
+        """ This method is used to request data from a running TCP server """
+
+        msg = ""
+        if not host:
+            host = self.host
+        if not port:
+            port = self.port
+            
+        try:
+            __conn = Client((host, port))
+            msg = __conn.recv()
+            __conn.close()
+
+        except:
+            print('TCP connection failed')
+
+        return msg
+
+    def getNew(self):
+        if self.running:
+            temp = self.received
+            self.received = []
+            return temp
+        else:
+            print('TCP server is OFF')
+            return []
+
+    def setData(self, data):
+        self.data = data   
+
+    def start(self):
+        """ This method is called to start __hosting a TCP server """
+
+        if not self.running:
+            # Initialize background daemon thread
+            thread = threading.Thread(target=self.__hosting, args=())
+            thread.daemon = True 
+
+            # Start the execution                         
+            thread.start()   
+            self.running = True
+        else:
+            print('TCP server already ON')  
+
+    def stop(self):
+        """ This method is called before a clean exit """   
+        self.__stop  = True
+        self.running = False
+        print('TCP server is OFF') 
+
 class TCP_server(object):
     """ Set up TCP_server on a background thread
     The __hosting() method will be started and it will run in the background
@@ -192,11 +325,10 @@ class TCP_server(object):
         __socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # get local machine name
         __host = socket.gethostbyname(self.ip)
-        print(__host)
         # bind to the port
         __socket.bind((__host, self.port))  
 
-        logger.info('TCP Server OK')  
+        logger.debug('TCP Server OK')  
 
         while True:
             try:
@@ -241,8 +373,8 @@ class TCP_server(object):
         msg = __socket.recv(1024)  
         msg = msg.decode('ascii') 
 
-        if msg == '':
-            raise ValueError('Connection Refused')
+        # if msg == '':
+        #     raise ValueError('Connection Refused')
 
         __socket.close()   
         return msg
@@ -429,6 +561,8 @@ class Logger(object):
     """
     def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None):
 
+        os.makedirs(os.path.dirname(logfile), exist_ok=True)
+
         self.file = open(logfile, 'w+', buffering = buffering)
         self.rate = rate
         self.tStamp = 0
@@ -448,7 +582,7 @@ class Logger(object):
         :type data: list
         """ 
         
-        if self.isReady():
+        if self.query():
             self.tStamp = time.time()
             try:
                 tString = str(round(self.tStamp-self.tStart, 3))
@@ -459,7 +593,7 @@ class Logger(object):
                 pass
                 logger.warning('Failed to log data to file')
 
-    def isReady(self):
+    def query(self):
         return time.time()-self.tStamp > self.rate
 
     def start(self):
@@ -476,23 +610,6 @@ def readEnode(enode, output = 'id'):
         return ip_
     elif output == 'id':
         return ip_.split('.')[-1] 
-
-def getCPUPercent():
-    return psutil.cpu_percent()
-
-def getRAMPercent():
-    return psutil.virtual_memory().percent
-
-def getFolderSize(folder):
-    # Return the size of a folder
-    total_size = os.path.getsize(folder)
-    for item in os.listdir(folder):
-        itempath = os.path.join(folder, item)
-        if os.path.isfile(itempath):
-            total_size += os.path.getsize(itempath)
-        elif os.path.isdir(itempath):
-            total_size += getFolderSize(itempath)
-    return total_size
 
 class Vector2D:
     """A two-dimensional vector with Cartesian coordinates."""
@@ -621,11 +738,26 @@ class mydict(dict):
         return mydict([[key, round(self[key], n)] for key in self])
 
 def identifersExtract(robotID, query = 'IP'):
-    namePrefix = 'ethereum_eth.' + str(robotID) + '.'
-    containersFile = open(experimentFolder+'/identifiers.txt', 'r')
-    for line in containersFile.readlines():
-        if line.__contains__(namePrefix):
-            if query == 'IP':
-                return line.split()[-1]
-            if query == 'ENODE':
-                return line.split()[1]
+
+    identifier = os.environ['CONTAINERBASE'] + '.' + str(robotID) + '.'
+
+    with open(os.environ['EXPERIMENTFOLDER']+'/identifiers.txt', 'r') as identifiersFile:
+        for line in identifiersFile.readlines():
+            if line.__contains__(identifier):
+                if query == 'IP':
+                    return line.split()[-2]
+                if query == 'IP_DOCKER':
+                    return line.split()[-1]
+                if query == 'ENODE':
+                    return line.split()[1]
+
+def getFolderSize(folder):
+    # Return the size of a folder
+    total_size = os.path.getsize(folder)
+    for item in os.listdir(folder):
+        itempath = os.path.join(folder, item)
+        if os.path.isfile(itempath):
+            total_size += os.path.getsize(itempath)
+        elif os.path.isdir(itempath):
+            total_size += getFolderSize(itempath)
+    return total_size

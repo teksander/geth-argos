@@ -10,7 +10,7 @@ sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
              os.environ['EXPERIMENTFOLDER']]
 
-from aux import Vector2D, Logger, Timer, Accumulator, getRAMPercent, getCPUPercent, mydict
+from aux import Vector2D, Logger, Timer, Accumulator, mydict
 from groundsensor import Resource
 
 from control_params import params as cp
