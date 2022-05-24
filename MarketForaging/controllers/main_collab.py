@@ -233,7 +233,7 @@ class Transaction(object):
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks,counters, logs, submodules, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb
+    global clocks,counters, logs, submodules, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp_sc, rgb
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
@@ -272,7 +272,6 @@ def init():
     robot.log.info('Initialising Python Geth Console...')
     w3 = init_web3(robotID)
 
-    print(robotIP)
     # /* Init an instance of peer for this Pi-Puck */
     me = Peer(robotID, robotIP, w3.enode, w3.key)
 
@@ -287,6 +286,10 @@ def init():
     #/* Init Resource-Sensors */
     robot.log.info('Initialising resource sensor...')
     rs = ResourceVirtualSensor(robot)
+    
+    #/* Init SC resource TCP query */
+    robot.log.info('Initialising TCP resources...')
+    tcp_sc = TCP_mp('', me.ip, 9899)
 
     # /* Init Random-Walk, __walking process */
     robot.log.info('Initialising random-walk...')

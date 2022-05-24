@@ -45,7 +45,6 @@ def DrawInWorld():
 	environment.qt_draw.circle([market.x, market.y, 0.001],[], market.radius, 'custom2', True)
 	environment.qt_draw.circle([cache.x, cache.y, 0.001],[], cache.radius, 'custom2', False)
 
-
 	# Draw resource patches
 	with open(lp['files']['patches'], 'r') as f:
 		for line in f:
@@ -70,12 +69,16 @@ def DrawInWorld():
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
 
+	# Draw patches which are on SC
 	for i in range(1,lp['generic']['num_robots']+1):
 		with open(lp['environ']['DOCKERFOLDER']+'/geth/logs/%s/scresources.txt' % i, 'r') as f:	
 			for line in f:
-				res = Resource(line)
+				res = Resource(line.rsplit(' ', 2)[0])
 				environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, 'gray70', True)
 
+				stake = int(line.rsplit(' ', 2)[1])
+				stake_total = int(line.rsplit(' ', 2)[2])
+				environment.qt_draw.cylinder([res.x+1.1*res.radius, res.y+1.1*res.radius, 0.001],[], 0.015, stake/stake_total , 'gray30')
 
 	resources = list()
 	counts = list()
@@ -83,7 +86,7 @@ def DrawInWorld():
 		with open(lp['environ']['DOCKERFOLDER']+'/geth/logs/%s/scresources.txt' % i, 'r') as f:	
 			for line in f:
 				if line:
-					res = Resource(line)
+					res = Resource(line.rsplit(' ', 2)[0])
 					if (res.x, res.y) not in [(ressc.x,ressc.y) for ressc in resources]:
 						counts.append(1)
 						resources.append(res)
@@ -94,8 +97,8 @@ def DrawInWorld():
 		frac = counts[resources.index(res)]/lp['generic']['num_robots']
 		environment.qt_draw.circle([res.x, res.y, 0.0005],[], res.radius, 'gray90', True)
 		environment.qt_draw.circle([res.x, res.y, 0.0015],[], frac*res.radius, 'gray80', True)
-		for i in range(res.quantity):
-			environment.qt_draw.circle([res.x+1.1*res.radius, res.y+res.radius-0.01*2*i-0.001, 0.001],[], 0.01, 'black', True)
+		# for i in range(res.quantity):
+		# 	environment.qt_draw.circle([res.x+1.1*res.radius, res.y+res.radius-0.01*2*i-0.001, 0.001],[], 0.01, 'black', True)
 
 
 def destroy():

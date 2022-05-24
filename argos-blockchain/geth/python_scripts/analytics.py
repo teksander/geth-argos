@@ -153,13 +153,15 @@ if __name__ == '__main__':
                 newBlocks = bf.get_new_entries()
                 if newBlocks:
 
-                    resources = sc.functions.getResources().call()
-                    json_list = [x[11] for x in resources]
+                    resources  = sc.functions.getResources().call()
+                    json_list  = [x[11] for x in resources]
+                    stake_list = [x[4] for x in resources]
+                    stake_total= sum(stake_list)
                     recruits_list = [repr(x[1]) for x in resources]
 
                     with open(scresourcesfile, 'w+', buffering=1) as f:
-                        for json in json_list:
-                            f.write(json+'\n')
+                        for i in range(len(resources)):
+                            f.write('%s %s %s\n' % (json_list[i], stake_list[i], stake_total))
 
                     with open(screcruitsfile, 'w+', buffering=1) as f:
                         for recruits in recruits_list:
