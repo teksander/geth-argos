@@ -2,7 +2,8 @@
 import math, random, time
 import logging
 import json
-from types import SimpleNamespace
+
+from aux import Vector2D
 
 class GroundSensor(object):
     """ Set up a ground-sensor data acquisition loop on a background thread
@@ -76,14 +77,19 @@ class Resource(object):
         for attr in resource_dict:
             setattr(self, attr, resource_dict[attr])
 
+        # Fix the number of decimals
+        self.x = round(self.x, 2)
+        self.y = round(self.y, 2)
+
         # Introduce the measurement error
-        r = self.radius * math.sqrt(random.random()) * 0.7
+        r = self.radius * math.sqrt(random.random()) * 0
         theta = 2 * math.pi * random.random()
         self._xr = self.x + r * math.cos(theta)
         self._yr = self.y + r * math.sin(theta)
         
         self._pr = (self._xr, self._yr)
         self._p  = (self.x, self.y)
+        self._pv  = Vector2D(self.x, self.y)
 
         # Introduce the timestamp
         self._timeStamp = time.time()
@@ -102,6 +108,7 @@ class Resource(object):
     def _calldata(self):
         return (int(self.x * 100), 
                 int(self.y * 100), 
+                int(self.radius * 100), 
                 int(self.quantity),
                 int(self.utility), 
                 str(self.quality), 
@@ -121,7 +128,6 @@ class ResourceVirtualSensor(object):
         self.freq = freq
         self.last = time.time()
         self.resource = None
-
 
     def step(self):
 

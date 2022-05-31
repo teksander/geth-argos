@@ -4,40 +4,137 @@ import time
 import logging
 from aux import Vector2D
 
-class Odometry(object):
-    """ Set up a Navigation loop on a background thread
-    The __navigating() method will be started and it will run in the background
-    until the application exits.
+class GPS(object):
+    """ GPS-based positioning sensor
     """
 
     def __init__(self, robot):
         """ Constructor
+        """
+        # Robot class
+        self.robot = robot
+
+    def getOrientation(self, degrees = False):
+
+        if degrees:
+            return math.degrees(self.robot.position.get_orientation())
+        else:
+            return self.robot.position.get_orientation()
+
+    def getPosition(self):
+        return Vector2D(self.robot.position.get_position()) 
+
+
+
+class Odometry(object):
+    """ Odometry-based positioning sensor
+    """
+
+    def __init__(self, robot, bias = 0):
+        """ Constructor
         :type range: int
         :param enode: Random-Walk speed (tip: 500)
         """
-
+        # Robot class
         self.robot = robot
-        self._id = str(int(robot.variables.get_id()[2:])+1)
+
+        # Fixed Parameters
+        self.L = 0.053          # Distance between wheels
+        self.R = 0.0205         # Wheel radius
 
         # Internal variables 
-        self.__position = Vector2D(self.robot.position.get_position()[0:2])  
-        self.__distance_accumul = 0
-        self.__distance_traveled = 0
+        self.pos = Vector2D(self.robot.position.get_position())  
+        self.ori = self.robot.position.get_orientation()
 
-    def step(self):          
+    def step(self):       
 
-        position = Vector2D(self.robot.position.get_position()[0:2])
+        # Read odometry sensor
+        dleft, dright = self.robot.differential_steering.get_distances() 
+        dleft, dright = dleft * 0.01, dright * 0.01
 
-        self.__distance_traveled = (position - self.__position).length
-        self.__distance_accumul += self.__distance_traveled
-        self.__position = position
+        # If going straight
+        if abs(dleft-dright) < 1e-6:
+            dt = 0
+            dx = 0.5*(dleft+dright) * math.cos(self.ori) 
+            dy = 0.5*(dleft+dright) * math.sin(self.ori) 
 
-    def getNew(self, reset = False):
-        return self.__distance_accumul
+        # If rotating or curving
+        else:
+            dr  = (dleft+dright)/(2*(dright-dleft)) * self.L
 
-    def getDiff(self):
-        return self.__distance_traveled
+            dt = (dright - dleft) / self.L 
+            dx =  dr * math.sin(dt+self.ori) - dr * math.sin(self.ori)
+            dy = -dr * math.cos(dt+self.ori) + dr * math.cos(self.ori)
 
+        # Update position and orientation estimates
+        self.ori  = (self.ori + dt) % math.pi
+        self.pos += Vector2D(dx,dy)
+
+    def setOrientation(self, orientation = 0):
+        self.ori = orientation
+
+    def setPosition(self, position = [0,0]):
+        self.pos = position
+
+    def getOrientation(self):
+        return self.ori
+
+    def getPosition(self):
+        return self.pos
+
+class OdoCompass(object):
+    """ Odometry-based positioning sensor with compass
+    """
+
+    def __init__(self, robot, bias = 0, variance = 0):
+        """ Constructor
+        :type range: int
+        :param enode: Random-Walk speed (tip: 500)
+        """
+        # Robot class
+        self.robot = robot
+
+        # Fixed Parameters
+        self.L = 0.053          # Distance between wheels
+        self.R = 0.0205         # Wheel radius
+
+        # Internal variables 
+        self.pos = Vector2D(self.robot.position.get_position())  
+        self.ori = self.robot.position.get_orientation()
+
+    def step(self):       
+
+        # Read odometry sensor 
+        dl, dr = self.robot.differential_steering.get_distances()
+        dl, dr = dl * 0.01, dr * 0.01
+
+        # Read compass sensor
+        dt = self.robot.position.get_orientation() - self.ori
+
+        # Add noise to readings
+        dl += random.gauss(0, 0.01)
+        dr += random.gauss(0, 0.01)
+        dt += random.gauss(0, math.radians(0))
+
+        # Calculate delta in position
+        dx = (dl+dr)/2 * math.cos(self.ori + dt/2) 
+        dy = (dl+dr)/2 * math.sin(self.ori + dt/2) 
+
+        # Update position and orientation estimates
+        self.ori += dt 
+        self.pos += Vector2D(dx,dy)
+
+    def setOrientation(self):
+        self.ori = self.robot.position.get_orientation()
+
+    def setPosition(self):
+        self.pos = Vector2D(self.robot.position.get_position())
+
+    def getOrientation(self):
+        return self.ori
+
+    def getPosition(self):
+        return self.pos
 
 class Navigate(object):
     """ Set up a Navigation loop on a background thread

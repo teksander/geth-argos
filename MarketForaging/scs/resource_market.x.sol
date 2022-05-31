@@ -26,6 +26,7 @@ contract MarketForaging {
 
     int x;
     int y;
+    uint radius;
     uint qtty;
     uint util;
     string qlty;
@@ -41,13 +42,31 @@ contract MarketForaging {
 
   mapping(address => uint) public balances;
 
+  function abs(int x) private pure returns (uint) {
+      return uint(x >= 0 ? x : -x);
+  }
 
-  function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json, uint my_stake) public {
+  function is_in_circle(int point_x, int point_y, int center_x, int center_y, uint radius) private pure returns (bool) {
+
+    uint dx = abs(point_x-center_x);
+    uint dy = abs(point_y-center_y);
+
+    if (dx**2 + dy**2 <= radius**2) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+
+  function updatePatch(int _x, int _y, uint _radius, uint _qtty, uint _util, string memory _qlty, string memory _json, uint my_stake) public {
     
     // If patch is not unique
     bool unique = true;
     for (uint i=0; i < resources.length; i++) {
-      if (_x == resources[i].x && _y == resources[i].y ) {
+      // if (_x == resources[i].x && _y == resources[i].y) {
+      if (is_in_circle(_x, _y, resources[i].x, resources[i].y, resources[i].radius)) {
         unique = false;
 
         if (_qtty <= resources[i].qtty) {
@@ -139,6 +158,7 @@ contract MarketForaging {
                                 block: block.number,
                                 x: _x, 
                                 y: _y, 
+                                radius: _radius, 
                                 qtty: _qtty, 
                                 util: _util,
                                 qlty: _qlty, 
@@ -244,7 +264,7 @@ contract MarketForaging {
   }
 
   function registerRobot() public {
-    balances[msg.sender] = 1000;
+    balances[msg.sender] = 100000;
   } 
 }
 

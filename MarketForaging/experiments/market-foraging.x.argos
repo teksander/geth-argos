@@ -21,15 +21,15 @@
       <!-- Normal actuator/sensor configuration follows -->
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
-        <epuck_wheels implementation="default" />
+        <epuck_wheels implementation="default" noise_std_dev="0"/>
         <epuck_range_and_bearing implementation="medium" range="RABRANGE"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />
         <epuck_proximity implementation="default" show_rays="false" />
         <epuck_ground implementation="rot_z_only" />
-        <differential_steering implementation="default" bias_stddev="2" />
         <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
+        <differential_steering implementation="default"/>
       </sensors>
       <!-- No required configuration -->
       
@@ -49,7 +49,6 @@
         <positioning implementation="default" />
         <epuck_proximity implementation="default" show_rays="false" />
         <epuck_ground implementation="rot_z_only" />
-        <differential_steering implementation="default" />
         <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="false"/>
       </sensors>
       <!-- No required configuration -->

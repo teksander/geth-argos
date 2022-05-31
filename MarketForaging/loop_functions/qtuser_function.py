@@ -16,6 +16,7 @@ from loop_params import *
 from loop_params import params as lp
 from control_params import *
 lp['generic']['show_rays'] = False
+lp['generic']['show_pos'] = True
 
 # /* Global Variables */
 #######################################################################
@@ -68,17 +69,29 @@ def DrawInWorld():
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_target[0], pos[1] + vec_target[1] , 0.01], 'red', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
+	
+	# Draw the odometry position error
+	if lp['generic']['show_pos']:
+		with open(lp['files']['position'], 'r') as f:
+			for line in f:
+				gps_pos, odo_pos = eval(line)
+				gps_pos, odo_pos = list(gps_pos)+[0.01], list(odo_pos)+[0.01]
+				environment.qt_draw.ray(gps_pos, odo_pos, 'red', 0.15)
+
 
 	# Draw patches which are on SC
 	for i in range(1,lp['generic']['num_robots']+1):
 		with open(lp['environ']['DOCKERFOLDER']+'/geth/logs/%s/scresources.txt' % i, 'r') as f:	
 			for line in f:
 				res = Resource(line.rsplit(' ', 2)[0])
-				environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, 'gray70', True)
 
+				## Draw a gray resource area
+				# environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, 'gray70', True)
+
+				## Draw a gray stake cylinder
 				stake = int(line.rsplit(' ', 2)[1])
 				stake_total = int(line.rsplit(' ', 2)[2])
-				environment.qt_draw.cylinder([res.x+1.1*res.radius, res.y+1.1*res.radius, 0.001],[], 0.015, stake/stake_total , 'gray30')
+				environment.qt_draw.cylinder([res.x, res.y, 0.001],[], 0.015, stake/stake_total , 'gray30')
 
 	resources = list()
 	counts = list()
@@ -93,10 +106,11 @@ def DrawInWorld():
 					else:
 						counts[[(ressc.x,ressc.y) for ressc in resources].index((res.x, res.y))] += 1
 
-	for res in resources:
-		frac = counts[resources.index(res)]/lp['generic']['num_robots']
-		environment.qt_draw.circle([res.x, res.y, 0.0005],[], res.radius, 'gray90', True)
-		environment.qt_draw.circle([res.x, res.y, 0.0015],[], frac*res.radius, 'gray80', True)
+	# Draw SC patch quantities and consensus
+	# for res in resources:
+	# 	frac = counts[resources.index(res)]/lp['generic']['num_robots']
+	# 	environment.qt_draw.circle([res.x, res.y, 0.0005],[], res.radius, 'gray90', True)
+	# 	environment.qt_draw.circle([res.x, res.y, 0.0015],[], frac*res.radius, 'gray80', True)
 		# for i in range(res.quantity):
 		# 	environment.qt_draw.circle([res.x+1.1*res.radius, res.y+res.radius-0.01*2*i-0.001, 0.001],[], 0.01, 'black', True)
 

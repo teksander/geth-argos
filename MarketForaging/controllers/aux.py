@@ -2,8 +2,8 @@
 import time, sys, os
 import math
 import logging
-import socket
-from threading, multiprocessing.connection import Listener, Client
+import socket, threading
+from multiprocessing.connection import Listener, Client
 
 logger = logging.getLogger(__name__)
 
@@ -181,6 +181,7 @@ class TicToc(object):
             # logger.warning('{} Pendulum too Slow. Elapsed: {}'.format(self.name,dtime))
             pass
 
+
 class TCP_mp(object):
     """ Set up TCP_server on a background thread
     The __hosting() method will be started and it will run in the background
@@ -218,24 +219,33 @@ class TCP_mp(object):
         while True:
 
             __conn = listener.accept()
-            __conn.send(self.data)
+
+            # __call  = __conn.recv(1024)
+            __call = 'getMyResource'
+            __conn.send(self.data[__call])
+
 
             if self.__stop:
                 __conn.close()
                 break 
                 
-    def request(self, host = None, port = None):
+    def request(self, data = None, host = None, port = None):
         """ This method is used to request data from a running TCP server """
 
         msg = ""
+        if not data:
+            data = self.data
         if not host:
             host = self.host
         if not port:
             port = self.port
-            
+  
         try:
             __conn = Client((host, port))
+            __conn.send(data)
+
             msg = __conn.recv()
+            
             __conn.close()
 
         except:
@@ -681,6 +691,9 @@ class Vector2D:
     def __abs__(self):
         """Absolute value (magnitude) of the vector."""
         return math.sqrt(self.x**2 + self.y**2)
+    def __round__(self, decimals):
+        """Round the vector2D x and y"""
+        return Vector2D(round(self.x, decimals), round(self.x, decimals))
 
     def rotate(self, angle):
         return Vector2D(self.length, self.angle + angle, polar = True)

@@ -89,14 +89,14 @@ if __name__ == '__main__':
             # Actions to perform continuously
             else:
 
-                if logs['extra'].isReady():
+                if logs['extra'].query():
                     logs['extra'].log([getFolderSize('/root/.ethereum/devchain/geth/chaindata')])
 
                 newBlocks = bf.get_new_entries()
                 if newBlocks:
 
                     resources  = sc.functions.getResources().call()
-                    json_list  = [x[11] for x in resources]
+                    json_list  = [x[12] for x in resources]
                     stake_list = [x[4] for x in resources]
                     stake_total= sum(stake_list)
                     recruits_list = [repr(x[1]) for x in resources]

@@ -230,26 +230,34 @@ class TCP_mp(object):
         print('TCP server OK')  
 
         while True:
-
-            __conn = listener.accept()
-            __conn.send(self.data)
+            try:
+                __conn = listener.accept()
+                __call  = __conn.recv()
+                __conn.send(self.data[__call])
+            except Exception as e:
+                print('Connection error')
 
             if self.__stop:
                 __conn.close()
                 break 
                 
-    def request(self, host = None, port = None):
+    def request(self, data = None, host = None, port = None):
         """ This method is used to request data from a running TCP server """
 
         msg = ""
+        if not data:
+            data = self.data
         if not host:
             host = self.host
         if not port:
             port = self.port
-            
+  
         try:
             __conn = Client((host, port))
+            __conn.send(data)
+
             msg = __conn.recv()
+            
             __conn.close()
 
         except:
@@ -363,12 +371,16 @@ class TCP_server(object):
 
     def request(self, server_ip, port):
         """ This method is used to request data from a running TCP server """
+
         # create the client socket
         __socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+
         # set the connection timeout
         __socket.settimeout(5)
+
         # connect to hostname on the port
-        __socket.connect((server_ip, port))                               
+        __socket.connect((server_ip, port))   
+
         # Receive no more than 1024 bytes
         msg = __socket.recv(1024)  
         msg = msg.decode('ascii') 

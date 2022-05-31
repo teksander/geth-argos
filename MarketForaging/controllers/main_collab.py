@@ -12,13 +12,14 @@ sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
              os.environ['EXPERIMENTFOLDER']]
 
-from movement import RandomWalk, Navigate, Odometry
+from movement import RandomWalk, Navigate, Odometry, OdoCompass, GPS
 from groundsensor import GroundSensor, ResourceVirtualSensor, Resource
 from erandb import ERANDB
 from rgbleds import RGBLEDs
 from console import *
 from aux import *
 from statemachine import *
+from loop_helpers import is_in_circle
 
 from loop_params import params as lp
 from control_params import params as cp
@@ -119,7 +120,13 @@ class ResourceBuffer(object):
         else:
             return self.buffer.sort(key=lambda x: x.utility, reverse=True)
 
-
+    # if not self.is_in_circle(new_res.x, new_res.y):
+    # def is_in_circle(self,x, y):
+    #     for res in self.buffer:
+    #         if is_in_circle((x,y), (res.x, res.y), res.radius): 
+    #             return True
+    #     return False
+        
     def getCount(self):
         return self.__len__()
 
@@ -233,7 +240,7 @@ class Transaction(object):
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
 def init():
-    global clocks,counters, logs, submodules, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp_sc, rgb
+    global clocks,counters, logs, submodules, me, rw, nav, odo, gps, rb, w3, fsm, rs, erb, tcp_sc, rgb
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
@@ -289,7 +296,7 @@ def init():
     
     #/* Init SC resource TCP query */
     robot.log.info('Initialising TCP resources...')
-    tcp_sc = TCP_mp('', me.ip, 9899)
+    tcp_sc = TCP_mp('getResources', me.ip, 9899)
 
     # /* Init Random-Walk, __walking process */
     robot.log.info('Initialising random-walk...')
@@ -299,9 +306,13 @@ def init():
     robot.log.info('Initialising navigation...')
     nav = Navigate(robot, cp['recruit_speed'])
 
-    # /* Init Navigation, __navigate process */
+    # /* Init odometry sensor */
     robot.log.info('Initialising odometry...')
-    odo = Odometry(robot)
+    odo = OdoCompass(robot)
+
+    # /* Init GPS sensor */
+    robot.log.info('Initialising gps...')
+    gps = GPS(robot)
 
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
@@ -318,9 +329,10 @@ def init():
 #########################################################################################################################
 #### CONTROL STEP #######################################################################################################
 #########################################################################################################################
-
+global pos
+pos = [0,0]
 def controlstep():
-    global clocks, counters, startFlag, startTime
+    global pos, clocks, counters, startFlag, startTime
 
     if not startFlag:
         ##########################
@@ -403,13 +415,28 @@ def controlstep():
 
             return arrived
 
-        def sensing():
+        def sensing(global_pos = False):
+
             # Sense environment for resources
             if clocks['rs'].query(): 
-                resource = rs.getNew()
-                if resource:
-                    rb.addResource(resource)
-                    return resource
+                res = rs.getNew()
+
+                if res:
+                    if global_pos:
+                        # Use resource with GPS coordinates
+                        rb.addResource(res)
+
+                    else:
+                        # Add odometry error to resource coordinates
+                        error = odo.getPosition() - gps.getPosition()
+                        res.x += error.x
+                        res.y += error.y
+
+                        # use resource with odo coordinates
+                        rb.addResource(Resource(res._json))
+
+                    return res
+
 
         ##########################
         ###### MODULE STEPS ######
@@ -421,21 +448,28 @@ def controlstep():
         if logs['resources'].query():
             logs['resources'].log([len(rb)])
 
-        if logs['odometry'].query():
-            logs['odometry'].log([odo.getNew()])
+        # if logs['odometry'].query():
+        #     logs['odometry'].log([odo.getNew()])
 
-        ###########################
-        ####### EVERY STEP  #######
-        ###########################
-
-        peering()
-        tt = time.time()
-        tcp_sc.request()
-        print(time.time()-tt)
+        if me.id == '1':
+            with open(lp['files']['position'], 'w+') as f:
+                f.write('%s, %s \n' % (repr(Vector2D(robot.position.get_position())), repr(odo.getPosition())))
+        else:
+            with open(lp['files']['position'], 'a') as f:
+                f.write('%s, %s \n' % (repr(Vector2D(robot.position.get_position())), repr(odo.getPosition())))
 
         ##############################
         ##### STATE-MACHINE STEP #####
         ##############################
+
+        #########################################################################################################
+        #### Any.STATE
+        #########################################################################################################
+
+        peering()
+
+        if robot.variables.get_attribute("at") == "cache":
+            odo.setPosition()
 
         #########################################################################################################
         #### Idle.IDLE
@@ -488,6 +522,7 @@ def controlstep():
             if rb.buffer:
                 resource = rb.buffer.pop(-1)
                 stake    = (int(resource.utility/2),)
+                print(resource._calldata)
                 sellHash = w3.sc.functions.updatePatch(*resource._calldata + stake).transact()
                 txs['sell'] = Transaction(sellHash)
                 robot.log.info('Selling: %s', resource._desc)
@@ -527,7 +562,7 @@ def controlstep():
 
                 if clocks['block'].query():
 
-                    resources  = w3.sc.functions.getResources().call()
+                    resources  = tcp_sc.request(data = 'getResources')
                     availiable = [res for res in resources if 0 in [eval(x) for x in res[1]]]
 
                     if availiable:
@@ -550,7 +585,7 @@ def controlstep():
 
         elif fsm.query(Recruit.PLAN):
 
-            resource = w3.sc.functions.getMyResource().call()
+            resource = tcp_sc.request(data = 'getMyResource')
 
             if resource:
                 rb.addResource(resource, update_best = True)

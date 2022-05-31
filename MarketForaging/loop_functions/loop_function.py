@@ -168,6 +168,7 @@ def pre_step():
     
     for robot in allrobots:
         robot.variables.set_attribute("newResource", "")
+        robot.variables.set_attribute("at", "")
         
         # Has robot stepped into resource? YES -> Update virtual sensor
         for res in resource_list:
@@ -189,6 +190,7 @@ def pre_step():
 
         # Has robot stepped into market drop area? YES
         if is_in_circle(robot.position.get_position(), (cache.x, cache.y), cache.radius):
+            robot.variables.set_attribute("at", "cache")
 
             # Does the robot carry resource? YES -> Sell resource
             resource_quality = robot.variables.get_attribute("hasResource")
