@@ -130,7 +130,7 @@ def generate_resource(n = 1, qualities = None, max_attempts = 50):
                 overlap = True
 
         # Append new resource to the global list of resources
-        resource_list.append(Resource({'x':x, 'y':y, 'radius':radius, 'quantity':quantity, 'quality':quality, 'utility':lp['patches']['utility'][quality]}))
+        resource_list.append(Resource({'id':i, 'x':x, 'y':y, 'radius':radius, 'quantity':quantity, 'quality':quality, 'utility':lp['patches']['utility'][quality]}))
 
         # print('Created Resource: ' + resource_list[-1]._json)
 

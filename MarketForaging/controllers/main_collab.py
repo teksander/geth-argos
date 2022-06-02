@@ -80,14 +80,18 @@ class ResourceBuffer(object):
             new_res = Resource(new_res)
 
         # Is in the buffer? NO -> Add to buffer
-        if (new_res.x, new_res.y) not in self.getLocations():
+        # if (new_res.x, new_res.y) not in self.getLocations():
+
+        res = self.getResourceByCircle(new_res._pv)
+
+        if not res:
             res = new_res
             self.buffer.append(res)
             robot.log.info("Added: %s; Total: %s " % (res._desc, len(self)))
 
         # Is in the buffer? YES -> Update buffer
         else:
-            res = self.getResourceByLocation((new_res.x, new_res.y))
+            
 
             # if new_res.quantity < res.quantity or new_res._timeStamp > res._timeStamp:
             if new_res.quantity < res.quantity:
@@ -96,7 +100,7 @@ class ResourceBuffer(object):
                 robot.log.info("Updated resource: %s" % self.getJSON(res))
 
         if update_best:
-            self.best = self.getResourceByLocation((new_res.x, new_res.y))
+            self.best = res
 
         return res
 
@@ -120,13 +124,13 @@ class ResourceBuffer(object):
         else:
             return self.buffer.sort(key=lambda x: x.utility, reverse=True)
 
-    # if not self.is_in_circle(new_res.x, new_res.y):
-    # def is_in_circle(self,x, y):
-    #     for res in self.buffer:
-    #         if is_in_circle((x,y), (res.x, res.y), res.radius): 
-    #             return True
-    #     return False
-        
+
+    def getResourceByCircle(self, center):
+        for res in self.buffer:
+            if is_in_circle((center.x,center.y), (res.x, res.y), res.radius): 
+                return res
+        return None
+
     def getCount(self):
         return self.__len__()
 
@@ -423,16 +427,16 @@ def controlstep():
 
                 if res:
                     if global_pos:
-                        # Use resource with GPS coordinates
+                        # Add resource with gps coordinates
                         rb.addResource(res)
 
                     else:
-                        # Add odometry error to resource coordinates
+                        # Add error to coordinates
                         error = odo.getPosition() - gps.getPosition()
                         res.x += error.x
                         res.y += error.y
 
-                        # use resource with odo coordinates
+                        # Add resource with odo coordinates
                         rb.addResource(Resource(res._json))
 
                     return res
