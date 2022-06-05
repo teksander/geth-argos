@@ -7,9 +7,10 @@ class Idle(Enum):
     IDLE   = 1
 
 class Scout(Enum):
-    SELL    = 2
-    EXPLORE = 3
-    HOMING  = 4
+    SELL      = 2
+    EXPLORE   = 3
+    HOMING    = 4
+    BROADCAST = 9
 
 class Recruit(Enum):
     BUY    = 5
@@ -25,6 +26,7 @@ class FiniteStateMachine(object):
         self._currState = start
         self._accumTime = dict()
         self._startTime = time.time()
+        self._passAlong = None
 
     def getPreviousState(self):
         return self._prevState
@@ -34,6 +36,13 @@ class FiniteStateMachine(object):
 
     def getTimers(self):
         return self._accumTime
+
+    def setPass(self, pass_variable):
+        self._passAlong = pass_variable
+
+    def getPass(self, pass_variable):
+        return self._passAlong
+        
 
     def setState(self, state, message = ""):
 

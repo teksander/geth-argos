@@ -491,19 +491,17 @@ def controlstep():
             rw.step()
 
             # Look for resources
-            sensing()
+            res = sensing()
 
-            # Transition state
-            if clocks['explore'].query(reset = False):
+            # Sucess exploration: Sell
+            if res:
+                fsm.setPass(res)
+                fsm.setState(Scout.SELL, message = "Found %s" % len(rb))
 
-                # Sucess exploration: Sell
-                if rb.buffer:
-                    fsm.setState(Scout.SELL, message = "Found %s" % len(rb))
-
-                # Unsucess exploration: Buy
-                else:
-                    clocks['buy'].reset()
-                    fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
+            # Unsucess exploration: Buy
+            elif clocks['explore'].query(reset = False):       
+                clocks['buy'].reset()
+                fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
 
 
         #########################################################################################################
@@ -519,8 +517,8 @@ def controlstep():
                 homing()
 
             # Sell resource information  
-            if rb.buffer:
-                resource = rb.buffer.pop(-1)
+            res = fsm.getPass()
+            if res:
                 stake    = (int(resource.utility/2),)
                 print(resource._calldata)
                 sellHash = w3.sc.functions.updatePatch(*resource._calldata + stake).transact()
@@ -539,6 +537,44 @@ def controlstep():
 
                 elif txs['sell'].hash == None:
                     fsm.setState(Recruit.PLAN, message = "None to sell")
+
+        #########################################################################################################
+        #### Scout.BROADCAST
+        #########################################################################################################
+
+
+        #########################################################################################################
+        #### Recruit.PLAN  
+        ######################################################################################################### 
+
+        elif fsm.query(Recruit.PLAN):
+            # This is when the robot performs decision making
+
+            sc_ress   = tcp_sc.request(data = 'getResources')
+            my_scout  = [res if me.key == res[0] for res in sc_ress]
+            my_forage = [res if me.key in res[1] for res in sc_ress][0]
+
+            # # Is there still exploration time
+            # if clocks['explore'].query(reset = False):  
+
+            # Am I scout for a resource
+            if my_scout:
+                res = Resource(my_scout[0][-1])
+                res = fsm.setPass(res)
+                fsm.setState(Scout.BROADCAST, message = 'Broadcasting: %s' % res._desc)
+
+            # # Am I forager for a resource
+            # if my_forage:
+
+            # if my_res:
+
+            #     if fsm.getPreviousState() == Recruit.FORAGE:
+            #         fsm.setState(Recruit.FORAGE, message = None)
+            #     else:
+            #         fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._desc)
+
+            # else:
+            #     fsm.setState(Recruit.BUY, message = "Buy again")
 
 
         #########################################################################################################
@@ -579,24 +615,6 @@ def controlstep():
             if clocks['buy'].query():
                 fsm.setState(Idle.IDLE, message = "Buy expired")
 
-        #########################################################################################################
-        #### Recruit.PLAN  
-        ######################################################################################################### 
-
-        elif fsm.query(Recruit.PLAN):
-
-            resource = tcp_sc.request(data = 'getMyResource')
-
-            if resource:
-                rb.addResource(resource, update_best = True)
-
-                if fsm.getPreviousState() == Recruit.FORAGE:
-                    fsm.setState(Recruit.FORAGE, message = None)
-                else:
-                    fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._desc)
-
-            else:
-                fsm.setState(Recruit.BUY, message = "Buy again")
 
         #########################################################################################################
         #### Recruit.FORAGE
