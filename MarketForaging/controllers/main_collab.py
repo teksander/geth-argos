@@ -521,9 +521,7 @@ def controlstep():
             # Sell resource information  
             if rb.buffer:
                 resource = rb.buffer.pop(-1)
-                stake    = (int(resource.utility/2),)
-                print(resource._calldata)
-                sellHash = w3.sc.functions.updatePatch(*resource._calldata + stake).transact()
+                sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
                 txs['sell'] = Transaction(sellHash)
                 robot.log.info('Selling: %s', resource._desc)
 

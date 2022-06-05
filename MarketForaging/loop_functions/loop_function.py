@@ -63,6 +63,8 @@ accums['distance'] = Accumulator()
 accums['distance_forage'] = Accumulator()
 accums['distance_explore'] = Accumulator()
 accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots'])]
+clocks['forage']     = [Timer() for i in range(lp['generic']['num_robots'])]
+clocks['regen']      = dict()
 
 # Store the position of the market and cache
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
@@ -132,6 +134,8 @@ def generate_resource(n = 1, qualities = None, max_attempts = 50):
         # Append new resource to the global list of resources
         resource_list.append(Resource({'x':x, 'y':y, 'radius':radius, 'quantity':quantity, 'quality':quality, 'utility':lp['patches']['utility'][quality]}))
 
+        clocks['regen'][resource_list[-1]] = Timer(lp['patches']['regen_rate'][resource_list[-1].quality])
+
         # print('Created Resource: ' + resource_list[-1]._json)
 
 
@@ -143,7 +147,7 @@ def init():
     logs['status'].start()
 
     header = ['DIST', 'RECRUIT_DIST', 'SCOUT_DIST']+list(resource_counter) + ['TOTAL', 'VALUE']
-    file   = 'loop_function.csv'
+    file   = 'loop_function.csv's
     logs['loop'] = Logger(log_folder+file, header, ID = '0')
     logs['loop'].start()
 
@@ -154,6 +158,7 @@ def init():
 
     for robot in allrobots:
         print(robot.variables.get_all_attributes())
+        robot.id = int(robot.variables.get_attribute("id"))-1
         position_previous[robot.variables.get_attribute("id")] = Vector2D(robot.position.get_position()[0:2]) 
 
     for quality, count in counts.items():
@@ -166,6 +171,11 @@ def pre_step():
     if not startFlag:
         startTime = time.time()
     
+    # Resource regeneration
+    for res in resource_list:
+        if clocks['regen'][res].query():
+            res.quantity += 1
+
     for robot in allrobots:
         robot.variables.set_attribute("newResource", "")
         robot.variables.set_attribute("at", "")
@@ -174,19 +184,22 @@ def pre_step():
         for res in resource_list:
             if is_in_circle(robot.position.get_position(), (res.x, res.y), res.radius):
 
-                # Does the robot not carry resource and is Forager? YES -> Pickup resource
-                if not robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("collectResource"):
+                # Update robot virtual sensor
+                robot.variables.set_attribute("newResource", res._json)
+
+                # Robot does not carry resource and is Forager? YES -> Pickup resource
+                if not robot.variables.get_attribute("hasResource") \
+                   and robot.variables.get_attribute("collectResource"):
 
                         robot.variables.set_attribute("hasResource", res.quality)
                         res.quantity -= 1
 
-                        # Has resource expired? YES -> Generate new
+                        # Resource expired? YES -> Generate new
                         if res.quantity <= 0:
                             resource_list.remove(res)
                             generate_resource(1, [res.quality])
                             
-                # Update virtual sensor
-                robot.variables.set_attribute("newResource", res._json)
+
 
         # Has robot stepped into market drop area? YES
         if is_in_circle(robot.position.get_position(), (cache.x, cache.y), cache.radius):
@@ -197,7 +210,7 @@ def pre_step():
             if resource_quality and robot.variables.get_attribute("dropResource"):      
                 resource_counter[resource_quality] += 1  
 
-                accums['collection'][int(robot.variables.get_attribute("id"))-1].acc(lp['patches']['utility'][resource_quality])
+                accums['collection'][robot.id].acc(lp['patches']['utility'][resource_quality])
 
                 robot.variables.set_attribute("hasResource", "")
                 robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
@@ -209,6 +222,7 @@ def post_step():
 
     if not startFlag:
         startFlag = True
+
 
     # Record the resources to be drawn to a file
     with open(lp['files']['patches'], 'w', buffering=1) as f:

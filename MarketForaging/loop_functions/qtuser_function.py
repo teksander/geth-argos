@@ -85,13 +85,13 @@ def DrawInWorld():
 			for line in f:
 				res = Resource(line.rsplit(' ', 2)[0])
 
-				## Draw a gray resource area
-				# environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, 'gray70', True)
+				# Draw a gray resource area
+				environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, 'gray70', True)
 
-				## Draw a gray stake cylinder
-				stake = int(line.rsplit(' ', 2)[1])
-				stake_total = int(line.rsplit(' ', 2)[2])
-				environment.qt_draw.cylinder([res.x, res.y, 0.001],[], 0.015, stake/stake_total , 'gray30')
+				# ## Draw a gray stake cylinder
+				# stake = int(line.rsplit(' ', 2)[1])
+				# stake_total = int(line.rsplit(' ', 2)[2])
+				# environment.qt_draw.cylinder([res.x, res.y, 0.001],[], 0.015, stake/stake_total , 'gray30')
 
 	resources = list()
 	counts = list()
@@ -106,13 +106,13 @@ def DrawInWorld():
 					else:
 						counts[[(ressc.x,ressc.y) for ressc in resources].index((res.x, res.y))] += 1
 
-	# Draw SC patch quantities and consensus
-	# for res in resources:
-	# 	frac = counts[resources.index(res)]/lp['generic']['num_robots']
-	# 	environment.qt_draw.circle([res.x, res.y, 0.0005],[], res.radius, 'gray90', True)
-	# 	environment.qt_draw.circle([res.x, res.y, 0.0015],[], frac*res.radius, 'gray80', True)
-		# for i in range(res.quantity):
-		# 	environment.qt_draw.circle([res.x+1.1*res.radius, res.y+res.radius-0.01*2*i-0.001, 0.001],[], 0.01, 'black', True)
+	Draw SC patch quantities and consensus
+	for res in resources:
+		frac = counts[resources.index(res)]/lp['generic']['num_robots']
+		environment.qt_draw.circle([res.x, res.y, 0.0005],[], res.radius, 'gray90', True)
+		environment.qt_draw.circle([res.x, res.y, 0.0015],[], frac*res.radius, 'gray80', True)
+		for i in range(res.quantity):
+			environment.qt_draw.circle([res.x+1.1*res.radius, res.y+res.radius-0.01*2*i-0.001, 0.001],[], 0.01, 'black', True)
 
 
 def destroy():

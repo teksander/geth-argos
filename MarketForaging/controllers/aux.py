@@ -117,7 +117,7 @@ class Accumulator:
 
 
 class Timer:
-    def __init__(self, rate, name = None):
+    def __init__(self, rate = 0, name = None):
         self.name = name
         self.rate = rate
         self.time = time.time()
@@ -134,10 +134,11 @@ class Timer:
     def remaining(self):
         return self.rate - (time.time() - self.time)
 
-    def set(self, rate):
+    def set(self, rate, reset = True):
         if not self.isLocked:
             self.rate = rate
-            self.time = time.time()
+            if reset:
+                self.reset()
         return self
 
     def reset(self):

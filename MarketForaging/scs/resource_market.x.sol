@@ -65,8 +65,8 @@ contract MarketForaging {
     // If patch is not unique
     bool unique = true;
     for (uint i=0; i < resources.length; i++) {
-      // if (_x == resources[i].x && _y == resources[i].y) {
-      if (is_in_circle(_x, _y, resources[i].x, resources[i].y, resources[i].radius)) {
+      if (_x == resources[i].x && _y == resources[i].y) {
+      // if (is_in_circle(_x, _y, resources[i].x, resources[i].y, resources[i].radius)) {
         unique = false;
 
         if (_qtty <= resources[i].qtty) {

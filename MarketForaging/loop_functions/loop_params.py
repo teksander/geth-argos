@@ -49,8 +49,10 @@ params['patches']['qtty_max'] = 50
 params['patches']['dist_min'] = 1.5 * params['cache']['radius'] 
 params['patches']['dist_max'] = 0.5 * params['generic']['arena_size']   
 
-params['patches']['qualities'] = {'red', 'green' , 'blue', 'yellow'}
-params['patches']['utility']   = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
+params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
+params['patches']['forage_rate'] = {'red': 5, 'green':  10, 'blue': 15, 'yellow': 20}
+params['patches']['regen_rate']  = {'red': 10, 'green':  20, 'blue': 30, 'yellow': 40}
+params['patches']['utility']     = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
 
 # params['patches']['area_percent'] = 0.005 * (10/generic_params['num_robots'])
 # params['patches']['radius']    = params['generic']['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
