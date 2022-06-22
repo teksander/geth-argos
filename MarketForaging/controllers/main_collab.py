@@ -49,6 +49,7 @@ clocks['block'] = Timer(2)
 clocks['explore'] = Timer(1)
 clocks['buy'] = Timer(cp['buy_duration'])
 clocks['rs'] = Timer(0.02)
+clocks['forage'] = Timer(0)
 
 # Store the position of the market and cache
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
@@ -357,7 +358,7 @@ def controlstep():
         for clock in clocks.values():
             clock.reset()
 
-        w3.sc.functions.registerRobot().transact()
+        # w3.sc.functions.registerRobot().transact()
 
     else:
 
@@ -415,7 +416,7 @@ def controlstep():
 
             return arrived
 
-        def sensing(global_pos = False):
+        def sensing(global_pos = True):
 
             # Sense environment for resources
             if clocks['rs'].query(): 
@@ -453,10 +454,10 @@ def controlstep():
 
         if me.id == '1':
             with open(lp['files']['position'], 'w+') as f:
-                f.write('%s, %s \n' % (repr(Vector2D(robot.position.get_position())), repr(odo.getPosition())))
+                f.write('%s, %s \n' % (repr(gps.getPosition()), repr(odo.getPosition())))
         else:
             with open(lp['files']['position'], 'a') as f:
-                f.write('%s, %s \n' % (repr(Vector2D(robot.position.get_position())), repr(odo.getPosition())))
+                f.write('%s, %s \n' % (repr(gps.getPosition()), repr(odo.getPosition())))
 
         ##############################
         ##### STATE-MACHINE STEP #####
@@ -521,6 +522,7 @@ def controlstep():
             # Sell resource information  
             if rb.buffer:
                 resource = rb.buffer.pop(-1)
+                print(resource._calldata)
                 sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
                 txs['sell'] = Transaction(sellHash)
                 robot.log.info('Selling: %s', resource._desc)
@@ -583,6 +585,36 @@ def controlstep():
 
         elif fsm.query(Recruit.PLAN):
 
+            # Index map
+            _scout   = 0
+            _workers = 1
+            _stakers = 2
+            _stakes  = 3
+            _stake   = 4
+            _lastT   = 5
+            _meanT   = 6
+            _count   = 7
+            _x       = 8
+            _y       = 9
+            _qtty    = 10
+            _util    = 11
+            _qlty    = 12
+            _json    = 13
+
+            # sc_resources = tcp_sc.request(data = 'getResources')
+
+            # # Foraging decision making
+            # resources   = [Resource(res[_json]) for res in sc_resources]
+            # costs       = [res[_meantT] for res in sc_resources]   # Times
+            # rewards     = [res[_util]   for res in sc_resources]   # Utilities
+            # ideal_costs = [100*res._pv.distance_to(market._pv)/cp['recruit_speed'] for res in resources]
+
+            # rpms = [y/x for x,y in zip(costs, rewards)]
+            # ideal_rpms = [y/x for x,y in zip(ideal_costs, rewards)]
+
+            # cost_change = 1
+
+
             resource = tcp_sc.request(data = 'getMyResource')
 
             if resource:
@@ -610,18 +642,23 @@ def controlstep():
                 # Resource virtual sensor
                 resource = sensing()
 
-                # Found the resource? YES -> Collect
+                # Found the resource? YES -> Forage
                 if resource and resource._p == rb.best._p:
-                    robot.variables.set_attribute("collectResource", "True")
-                    robot.log.info('Collect: %s', resource._desc)        
+                    clocks['forage'].set(lp['patches']['forage_rate'][rb.best.quality])
+                    clocks['forage'].lock()
+
+                    if clocks['forage'].query():
+                        robot.variables.set_attribute("collectResource", "True")
+                        clocks['forage'].unlock()
+                        robot.log.info('Collect: %s', resource._desc)        
 
                 # Collected resource? NO -> Navigate to resource site
                 if not robot.variables.get_attribute("hasResource"):
                     nav.navigate_with_obstacle_avoidance(rb.best._pr)
 
-                    if nav.get_distance_to(rb.best._pr) < 0.1*rb.best.radius:
-                        rb.best.quantity = 0
-                        fsm.setState(Scout.SELL, message = 'Failed foraging trip')
+                    # if nav.get_distance_to(rb.best._pr) < 0.1*rb.best.radius:
+                    #     rb.best.quantity = 0
+                    #     fsm.setState(Scout.SELL, message = 'Failed foraging trip')
 
                 # Collected resource? YES -> Go to market
                 else:

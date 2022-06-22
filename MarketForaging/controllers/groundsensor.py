@@ -107,8 +107,7 @@ class Resource(object):
     @property
     def _calldata(self):
         return (int(self.x * 100), 
-                int(self.y * 100), 
-                int(self.radius * 100), 
+                int(self.y * 100),  
                 int(self.quantity),
                 int(self.utility), 
                 str(self.quality), 

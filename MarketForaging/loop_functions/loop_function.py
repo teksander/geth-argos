@@ -147,7 +147,7 @@ def init():
     logs['status'].start()
 
     header = ['DIST', 'RECRUIT_DIST', 'SCOUT_DIST']+list(resource_counter) + ['TOTAL', 'VALUE']
-    file   = 'loop_function.csv's
+    file   = 'loop_function.csv'
     logs['loop'] = Logger(log_folder+file, header, ID = '0')
     logs['loop'].start()
 
@@ -173,7 +173,7 @@ def pre_step():
     
     # Resource regeneration
     for res in resource_list:
-        if clocks['regen'][res].query():
+        if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
             res.quantity += 1
 
     for robot in allrobots:

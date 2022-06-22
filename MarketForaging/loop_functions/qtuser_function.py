@@ -70,13 +70,13 @@ def DrawInWorld():
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
 	
-	# Draw the odometry position error
-	if lp['generic']['show_pos']:
-		with open(lp['files']['position'], 'r') as f:
-			for line in f:
-				gps_pos, odo_pos = eval(line)
-				gps_pos, odo_pos = list(gps_pos)+[0.01], list(odo_pos)+[0.01]
-				environment.qt_draw.ray(gps_pos, odo_pos, 'red', 0.15)
+	# # Draw the odometry position error
+	# if lp['generic']['show_pos']:
+	# 	with open(lp['files']['position'], 'r') as f:
+	# 		for line in f:
+	# 			gps_pos, odo_pos = eval(line)
+	# 			gps_pos, odo_pos = list(gps_pos)+[0.01], list(odo_pos)+[0.01]
+	# 			environment.qt_draw.ray(gps_pos, odo_pos, 'red', 0.15)
 
 
 	# Draw patches which are on SC
@@ -106,7 +106,7 @@ def DrawInWorld():
 					else:
 						counts[[(ressc.x,ressc.y) for ressc in resources].index((res.x, res.y))] += 1
 
-	Draw SC patch quantities and consensus
+	# Draw SC patch quantities and consensus
 	for res in resources:
 		frac = counts[resources.index(res)]/lp['generic']['num_robots']
 		environment.qt_draw.circle([res.x, res.y, 0.0005],[], res.radius, 'gray90', True)

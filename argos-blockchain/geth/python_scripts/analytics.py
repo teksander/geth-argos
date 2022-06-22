@@ -96,7 +96,7 @@ if __name__ == '__main__':
                 if newBlocks:
 
                     resources  = sc.functions.getResources().call()
-                    json_list  = [x[12] for x in resources]
+                    json_list  = [x[14] for x in resources]
                     stake_list = [x[4] for x in resources]
                     stake_total= sum(stake_list)
                     recruits_list = [repr(x[1]) for x in resources]

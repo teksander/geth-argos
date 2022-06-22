@@ -5,33 +5,28 @@ contract MarketForaging {
   uint constant max_workers = MAXWORKERS;
   uint constant max_stakers = MAXSTAKERS;
 
-  uint constant worker_share = WORKERSHARE;
-  uint constant staker_share = STAKERSHARE;
-  
 
-  // uint constant max_workers = 2;
-  // uint constant max_stakers = 5;
-
-  // uint constant worker_share = 70;
-  // uint constant staker_share = 30;
-
-
-  struct resource {
+    struct resource {
     address scout;
     address[max_workers] workers;
     address[max_stakers] stakers;
     uint[max_stakers] stakes;
     uint stake;
-    uint block;
+
+    // For average time cost calculations
+    uint lastT;
+    uint meanT;
+    uint bestT;
+    uint count;
 
     int x;
     int y;
-    uint radius;
     uint qtty;
     uint util;
     string qlty;
-    string json;
-  }   
+    string json; 
+  } 
+
  
   resource[] public resources;
   resource[] public resources_depleted;
@@ -42,94 +37,44 @@ contract MarketForaging {
 
   mapping(address => uint) public balances;
 
-  function abs(int x) private pure returns (uint) {
-      return uint(x >= 0 ? x : -x);
+  function updateMean(uint old_mean, uint new_value, uint N) private pure returns (uint) {
+    return (old_mean*N + new_value) / (N+1);
   }
 
-  function is_in_circle(int point_x, int point_y, int center_x, int center_y, uint radius) private pure returns (bool) {
-
-    uint dx = abs(point_x-center_x);
-    uint dy = abs(point_y-center_y);
-
-    if (dx**2 + dy**2 <= radius**2) {
-      return true;
-    }
-    else {
-      return false;
-    }
+  function max(uint256 a, uint256 b) private pure returns (uint256) {
+    return a >= b ? a : b;
   }
 
+  function min(uint256 a, uint256 b) private pure returns (uint256) {
+    return a < b ? a : b;
+  }
 
-  function updatePatch(int _x, int _y, uint _radius, uint _qtty, uint _util, string memory _qlty, string memory _json, uint my_stake) public {
-    
-    // If patch is not unique
+  function sellResource(uint _util) public {
+    balances[msg.sender] += _util;
+  } 
+
+  function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
     bool unique = true;
+    bool depleted = false;
+
+    // If patch is not unique
     for (uint i=0; i < resources.length; i++) {
-      if (_x == resources[i].x && _y == resources[i].y) {
-      // if (is_in_circle(_x, _y, resources[i].x, resources[i].y, resources[i].radius)) {
+      if (_x == resources[i].x && _y == resources[i].y ) {
         unique = false;
 
-        if (_qtty <= resources[i].qtty) {
+        // Update patch information
+        resources[i].meanT  = updateMean(resources[i].meanT, block.timestamp-resources[i].lastT, resources[i].count);
+        resources[i].bestT  = min(resources[i].bestT, block.timestamp-resources[i].lastT);
+        resources[i].lastT  = block.timestamp;
 
-          uint reward = (resources[i].qtty - _qtty) * resources[i].util * 100;
-          uint worker_reward = reward * worker_share / 100;
-          uint staker_reward = reward * staker_share / 100;
+        resources[i].count += 1;
+      
+        resources[i].json   = _json;
+        resources[i].qtty   = _qtty;
 
-          // Reward the stakers
-          uint staker_count = 0;
-          for (uint j=0; j < max_stakers; j++) { 
-            if (resources[i].stakers[j] != address(0)){
-              staker_count += 1;
-            }
-          }
-
-          for (uint j=0; j < staker_count; j++) { 
-            balances[resources[i].stakers[j]] += staker_reward * (resources[i].stakes[j] / resources[i].stake);
-          }
-
-          // Reward the workers
-          uint worker_count = 0;
-          for (uint j=0; j < max_workers; j++) { 
-            if (resources[i].workers[j] != address(0)){
-              worker_count += 1;
-            }
-          }
-        
-          for (uint j=0; j < worker_count; j++) { 
-            balances[resources[i].workers[j]] += worker_reward / worker_count;
-          }
-
-          // Update patch information
-          resources[i].block    = block.number;
-          resources[i].qtty     = _qtty;
-          resources[i].json     = _json;
-
-          // Update the stake
-          uint jj = findStakerSpot(i, msg.sender);
-          
-          if (jj < 999  && my_stake < balances[msg.sender]) {
-            resources[i].stakers[jj] = msg.sender;
-            resources[i].stakes[jj] += my_stake * 100;
-            resources[i].stake      += my_stake * 100;
-            balances[msg.sender]    -= my_stake * 100;
-          }
-
-        }
-
-        // If resource quantity is 0
+        // Remove patch if quantity is 0
         if (resources[i].qtty < 1) {
-
-          // Store in depleted patch array
           resources_depleted.push(resources[i]);
-
-          // Refund all stakers
-          for (uint j=0; j < max_stakers; j++) { 
-            if (resources[i].stakers[j] != address(0)) {
-              balances[resources[i].stakers[j]] += resources[i].stakes[j];
-              resources[i].stakes[j] = 0;  
-            }
-          }
-          // Remove depleted patch
           resources[i] = resources[resources.length - 1];
           resources.pop();
         }
@@ -138,77 +83,43 @@ contract MarketForaging {
     } 
 
     // Is patch depleted
-    bool depleted = false;
     for (uint i=0; i < resources_depleted.length; i++) {
       if (_x == resources_depleted[i].x && _y == resources_depleted[i].y ) {
-        depleted = true;  
+        depleted = true;
+        break;
       }
     }
 
     // If patch is unique
     if (unique && !depleted) {
-
-      // Append the new resource to the lists
-      resources.push(resource({
+      // Append the new resource to the list
+            resources.push(resource({
                                 scout: msg.sender,
                                 workers: workers_empty,
                                 stakers: stakers_empty,
                                 stakes:  stakes_empty,
                                 stake:   0,
-                                block: block.number,
+                                lastT:   block.timestamp,
+                                meanT:   0,
+                                bestT:   9999999999,
+                                count:   0,
                                 x: _x, 
                                 y: _y, 
-                                radius: _radius, 
                                 qtty: _qtty, 
                                 util: _util,
                                 qlty: _qlty, 
                                 json: _json
                               }));
-
-      // Update the stake
-      if (my_stake < balances[msg.sender]) {
-        resources[resources.length - 1].stakers[0]   = msg.sender;
-        resources[resources.length - 1].stakes[0]   += my_stake * 100;
-        resources[resources.length - 1].stake       += my_stake * 100;
-        balances[msg.sender] -= my_stake * 100;
-      }
-    }
-  }
-
-  function findStakerSpot(uint resource_index, address staker) internal view returns (uint) {
-
-    for (uint j=0; j < max_stakers; j++) { 
-      if (resources[resource_index].stakers[j] == staker) {
-        return j;      
-      }
     }
 
-    for (uint j=0; j < max_stakers; j++) { 
-      if (resources[resource_index].stakers[j] == address(0)) {
-        return j;      
-      }
-    }
-
-    return 1000;
-  }
-
-  function findWorker(uint resource_index, address worker) internal view returns (uint) {
-
-    for (uint j=0; j < max_workers; j++) { 
-      if (resources[resource_index].workers[j] == worker) {
-        return j;      
-      }
-    }
-    return 1000;
-  }
-
+  } 
 
   function assignPatch() public {
 
-    // Buy resource with maximum util * reliability
+    // Buy resource with maximum util
     uint res_index = 0;
     uint rec_index = 0;
-    uint max_stake = 0;
+    uint max_util = 0;
   
     bool is_recruit = false;
     uint my_res_index = 0;
@@ -223,8 +134,8 @@ contract MarketForaging {
           my_rec_index = j;
         } 
         
-        if (resources[i].workers[j] == address(0) && resources[i].stake > max_stake) {
-          max_stake = resources[i].stake;
+        if (resources[i].workers[j] == address(0) && resources[i].util > max_util) {
+          max_util = resources[i].util;
           res_index = i;
           rec_index = j;
         }
@@ -232,9 +143,9 @@ contract MarketForaging {
       }    
     }
 
-    require(max_stake > 0, "No resources for sale");
+    require(max_util > 0, "No resources for sale");
 
-    if (is_recruit && resources[my_res_index].stake < max_stake) {
+    if (is_recruit && resources[my_res_index].util < max_util) {
       resources[my_res_index].workers[my_rec_index] = address(0);
       is_recruit = false;
     }
@@ -244,6 +155,26 @@ contract MarketForaging {
       resources[res_index].workers[rec_index] = msg.sender;
     }
   }
+
+  // function foragePatch(int _x, int _y) public {
+
+
+  //   // Robot can only forage one patch
+  //   require(bytes(getMyResource()).length > 0, "Already recruit!");
+
+  //   for (uint i=0; i < resources.length; i++) {
+  //     if (_x == resources[i].x && _y == resources[i].y ) {
+
+  //       for (uint j=0; j < max_workers; j++) {
+          
+  //         if (resources[i].workers[j] == address(0)) {
+  //           resources[i].workers[j] = msg.sender;
+  //         }
+  //       }    
+  //     }
+  //   }
+  // }
+
 
   function getResources() public view returns (resource[] memory){
     return resources;
@@ -263,8 +194,7 @@ contract MarketForaging {
     return "";    
   }
 
-  function registerRobot() public {
-    balances[msg.sender] = 100000;
-  } 
+
+  
 }
 
