@@ -9,6 +9,7 @@ sed -e "s|MAXSTAKERS|$MAXSTAKERS|g"\
     -e "s|MAXWORKERS|$MAXWORKERS|g"\
     -e "s|STAKERSHARE|$STAKERSHARE|g"\
     -e "s|WORKERSHARE|$WORKERSHARE|g"\
+    -e "s|EPSILON|$EPSILON|g"\
   $SCTEMPLATE > $SCFILE
 
 echo "+-----------------------------------------------------------+"

@@ -9,23 +9,15 @@ clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
 def scHandle():
     """ Interact with SC when new blocks are synchronized """
-    global ubi, payout, newRound, balance
 
-    # 2) Log relevant smart contract details
-    blockNr = w3.blockNumber()
-    balance = w3.getBalance()
-    ubi = w3.call('askForUBI')
-    payout = w3.call('askForPayout')
-    robotCount = w3.call('robotCount')
-    mean = w3.call('getMean')
-    voteCount = w3.call('getVoteCount') 
-    voteOkCount = w3.call('getVoteOkCount') 
-    myVoteCounter = None
-    myVoteOkCounter = None
-    newRound = w3.call('isNewRound')
-    consensus = w3.call('isConverged')
+    resources   = sc.functions.getPatches().call()
+    json_list   = [x[5] for x in resources]
+    
+    with open(scresourcesfile, 'w+', buffering=1) as f:
+        for i in range(len(resources)):
+            f.write('%s %s %s\n' % (json_list[i], 0, 0))
 
-    logs['sc'].log([blockNr, balance, ubi, payout, robotCount, mean, voteCount, voteOkCount, myVoteCounter,myVoteOkCounter, newRound, consensus])
+    logs['sc'].log([w3.eth.blockNumber, 0, len(resources)])
 
 
 if __name__ == '__main__':
@@ -95,26 +87,9 @@ if __name__ == '__main__':
                 newBlocks = bf.get_new_entries()
                 if newBlocks:
 
-                    resources  = sc.functions.getResources().call()
-                    json_list  = [x[14] for x in resources]
-                    stake_list = [x[4] for x in resources]
-                    stake_total= sum(stake_list)
-                    recruits_list = [repr(x[1]) for x in resources]
-
-                    with open(scresourcesfile, 'w+', buffering=1) as f:
-                        for i in range(len(resources)):
-                            f.write('%s %s %s\n' % (json_list[i], stake_list[i], stake_total))
-
-                    with open(screcruitsfile, 'w+', buffering=1) as f:
-                        for recruits in recruits_list:
-                            f.write(recruits+'\n')
+                    scHandle()
 
                     logs['sync'].log([len(newBlocks)])
-
-                    logs['sc'].log([w3.eth.blockNumber, 
-                               sc.functions.balances(w3.key).call(),
-                               len(resources) 
-                               ])
 
                     # 1) Log relevant block details 
                     for blockHex in newBlocks:

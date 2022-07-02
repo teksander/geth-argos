@@ -15,8 +15,8 @@ export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
 export CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
 export CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
 
-export SCFILE="${EXPERIMENTFOLDER}/scs/resource_market.sol" 
-export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/resource_market.x.sol" 
+export SCFILE="${EXPERIMENTFOLDER}/scs/resource_market_egreedy.sol" 
+export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/resource_market_egreedy.x.sol" 
 
 export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.x.argos"
@@ -32,10 +32,10 @@ export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
 export NUM2=0
 export CON2="${EXPERIMENTFOLDER}/controllers/main_greedy.py"
 
-export RABRANGE="0.3"
+export RABRANGE="0.4"
 export WHEELNOISE="0"
 export TPS=10
-export DENSITY=3
+export DENSITY="1.5"
 
 export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
 export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
@@ -47,8 +47,8 @@ export BLOCKPERIOD=2
 
 # [SC]
 export MAXSTAKERS=10
-export MAXWORKERS=$(echo $NUMROBOTS)
-
+export MAXWORKERS=$NUMROBOTS
+export EPSILON=70
 export STAKERSHARE=30
 export WORKERSHARE=$(echo 100-$STAKERSHARE | bc)
 

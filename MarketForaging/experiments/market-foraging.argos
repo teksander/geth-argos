@@ -22,7 +22,7 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" noise_std_dev="0"/>
-        <epuck_range_and_bearing implementation="medium" range="0.3"/>
+        <epuck_range_and_bearing implementation="medium" range="0.4"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />
@@ -43,7 +43,7 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-        <epuck_range_and_bearing implementation="medium" range="0.3"/>
+        <epuck_range_and_bearing implementation="medium" range="0.4"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />
@@ -71,23 +71,23 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="1.527, 1.527, 1" center="0,0,0.5">
+  <arena size="2.160, 2.160, 1" center="0,0,0.5">
  <floor id="f" source="image" path="/home/eksander/geth-argos/MarketForaging/experiments/floors/market.png" />
-    <box id="wall_north" size="1.527,0.06,0.1" movable="false">
-      <body position="0,.763,0" orientation="0,0,0" />
+    <box id="wall_north" size="2.160,0.06,0.1" movable="false">
+      <body position="0,1.080,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="1.527,0.06,0.1" movable="false">
-      <body position="0,-.763,0" orientation="0,0,0" />
+    <box id="wall_south" size="2.160,0.06,0.1" movable="false">
+      <body position="0,-1.080,0" orientation="0,0,0" />
     </box>
-    <box id="wall_east" size="0.06,1.527,0.1" movable="false">
-      <body position=".763,0,0" orientation="0,0,0" />
+    <box id="wall_east" size="0.06,2.160,0.1" movable="false">
+      <body position="1.080,0,0" orientation="0,0,0" />
     </box>
-    <box id="wall_west" size="0.06,1.527,0.1" movable="false">
-      <body position="-.763,0,0" orientation="0,0,0" />
+    <box id="wall_west" size="0.06,2.160,0.1" movable="false">
+      <body position="-1.080,0,0" orientation="0,0,0" />
     </box>
 
     <distribute>
-      <position method="uniform" min="-.305,-.305,0" max=".305,.305,0" /> 
+      <position method="uniform" min="-.432,-.432,0" max=".432,.432,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
       <entity quantity="7" max_trials="15"> 
         <e-puck id="bc" >
@@ -97,7 +97,7 @@
     </distribute>
 
     <distribute>
-      <position method="uniform" min="-.305,-.305,0" max=".305,.305,0" /> 
+      <position method="uniform" min="-.432,-.432,0" max=".432,.432,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
       <entity quantity="0" max_trials="15" base_num="7"> 
         <e-puck id="gr" >

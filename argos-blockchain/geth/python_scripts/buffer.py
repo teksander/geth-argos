@@ -13,7 +13,7 @@ w3 = init_web3()
 sc = registerSC(w3)
 bf = w3.eth.filter('latest')
 
-##### CLEAN THIS SHIT UP ALREADY ###
+##### CLEAN IT UP ALREADY ###
 
 class TCP_server2(object):
 	""" Set up TCP_server on a background thread
@@ -203,7 +203,7 @@ if __name__ == '__main__':
 	tcp.start()   
 ################################################################################################################
 
-	data = sc.functions.getResources().call() 
+	data = sc.functions.getPatches().call() 
 	port = 9899    
 
 ################################################################################################################
@@ -223,9 +223,9 @@ if __name__ == '__main__':
 			buffer()
 			tcp.setData(len(peers_geth))
 
-		resources  = sc.functions.getResources().call()
-		myResource = sc.functions.getMyResource().call()
-		tcp_resources.setData({'getResources':resources, 'getMyResource':myResource})
+		resources  = sc.functions.getPatches().call()
+		myResource = sc.functions.getMyPatch().call()
+		tcp_resources.setData({'getPatches':resources, 'getMyPatch':myResource})
 
 		time.sleep(0.5)
 

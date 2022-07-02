@@ -55,6 +55,18 @@ clocks['forage'] = Timer(0)
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
 cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['radius']})
 
+# Index map
+_x       = 0
+_y       = 1
+_qtty    = 2
+_util    = 3
+_qlty    = 4
+_json    = 5
+_id      = 6
+_lastT   = 7
+_meanQ   = 8
+_count   = 9
+
 class ResourceBuffer(object):
     """ Establish the resource buffer class 
     """
@@ -297,7 +309,7 @@ def init():
     
     #/* Init SC resource TCP query */
     robot.log.info('Initialising TCP resources...')
-    tcp_sc = TCP_mp('getResources', me.ip, 9899)
+    tcp_sc = TCP_mp('getPatches', me.ip, 9899)
 
     # /* Init Random-Walk, __walking process */
     robot.log.info('Initialising random-walk...')
@@ -358,7 +370,7 @@ def controlstep():
         for clock in clocks.values():
             clock.reset()
 
-        # w3.sc.functions.registerRobot().transact()
+        w3.sc.functions.registerRobot().transact()
 
     else:
 
@@ -477,10 +489,34 @@ def controlstep():
         #########################################################################################################
         if fsm.query(Idle.IDLE):
 
-            # State transition: Scout.EXPLORE
-            explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
-            clocks['explore'].set(explore_duration)
-            fsm.setState(Scout.EXPLORE, message = "Duration: %.2f" % explore_duration)
+            fsm.setState(Recruit.PLAN, message = "Planning")
+
+        #########################################################################################################
+        #### Recruit.PLAN  
+        ######################################################################################################### 
+
+        elif fsm.query(Recruit.PLAN):
+
+            resource = tcp_sc.request(data = 'getMyPatch')
+
+            if resource:
+                rb.addResource(resource, update_best = True)
+
+                if fsm.getPreviousState() == Recruit.FORAGE:
+                    fsm.setState(Recruit.FORAGE, message = None)
+                else:
+                    fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._desc)
+
+            else:
+
+                if fsm.getPreviousState() == Scout.EXPLORE:
+                    fsm.setState(Scout.EXPLORE, message = None)
+
+                else:
+                    explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
+                    clocks['explore'].set(explore_duration)
+                    fsm.setState(Scout.EXPLORE, message = 'Exploring: %ss' % explore_duration)
+
 
         #########################################################################################################
         #### Scout.EXPLORE
@@ -488,23 +524,30 @@ def controlstep():
 
         elif fsm.query(Scout.EXPLORE):
 
-            # Perform a random-walk 
-            rw.step()
+            if clocks['block'].query():
 
-            # Look for resources
-            sensing()
+                # Make sure I am still explorer
+                fsm.setState(Recruit.PLAN, message = None)
 
-            # Transition state
-            if clocks['explore'].query(reset = False):
+            else:
 
-                # Sucess exploration: Sell
-                if rb.buffer:
-                    fsm.setState(Scout.SELL, message = "Found %s" % len(rb))
+                # Perform a random-walk 
+                rw.step()
 
-                # Unsucess exploration: Buy
-                else:
-                    clocks['buy'].reset()
-                    fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
+                # Look for resources
+                sensing()
+
+                # Transition state
+                if clocks['explore'].query(reset = False):
+
+                    # Sucess exploration: Sell
+                    if rb.buffer:
+                        fsm.setState(Scout.SELL, message = "Found %s" % len(rb))
+
+                    # Unsucess exploration: Buy
+                    else:
+                        clocks['buy'].reset()
+                        fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
 
 
         #########################################################################################################
@@ -561,72 +604,20 @@ def controlstep():
             elif txs['buy'].hash == None:
 
                 if clocks['block'].query():
+                    try:
+                        txBuy = w3.sc.functions.assignPatch().transact()
+                        txs['buy'] = Transaction(txBuy)
+                        robot.log.info('Bought')     
 
-                    resources  = tcp_sc.request(data = 'getResources')
-                    availiable = [res for res in resources if 0 in [eval(x) for x in res[1]]]
-
-                    if availiable:
-                        try:
-                            txBuy = w3.sc.functions.assignPatch().transact()
-                            txs['buy'] = Transaction(txBuy)
-                            robot.log.info('Bought')     
-
-                        except Exception as e:
-                            fsm.setState(Recruit.PLAN, message = "Buy failed")
-                            txs['buy'] = Transaction(None)
-                            robot.log.warning(e.args)
+                    except Exception as e:
+                        fsm.setState(Recruit.PLAN, message = "Buy failed")
+                        txs['buy'] = Transaction(None)
+                        robot.log.warning(e.args)
                             
             if clocks['buy'].query():
                 fsm.setState(Idle.IDLE, message = "Buy expired")
 
-        #########################################################################################################
-        #### Recruit.PLAN  
-        ######################################################################################################### 
 
-        elif fsm.query(Recruit.PLAN):
-
-            # Index map
-            _scout   = 0
-            _workers = 1
-            _stakers = 2
-            _stakes  = 3
-            _stake   = 4
-            _lastT   = 5
-            _meanT   = 6
-            _count   = 7
-            _x       = 8
-            _y       = 9
-            _qtty    = 10
-            _util    = 11
-            _qlty    = 12
-            _json    = 13
-
-            # sc_resources = tcp_sc.request(data = 'getResources')
-
-            # # Foraging decision making
-            # resources   = [Resource(res[_json]) for res in sc_resources]
-            # costs       = [res[_meantT] for res in sc_resources]   # Times
-            # rewards     = [res[_util]   for res in sc_resources]   # Utilities
-            # ideal_costs = [100*res._pv.distance_to(market._pv)/cp['recruit_speed'] for res in resources]
-
-            # rpms = [y/x for x,y in zip(costs, rewards)]
-            # ideal_rpms = [y/x for x,y in zip(ideal_costs, rewards)]
-
-            # cost_change = 1
-
-
-            resource = tcp_sc.request(data = 'getMyResource')
-
-            if resource:
-                rb.addResource(resource, update_best = True)
-
-                if fsm.getPreviousState() == Recruit.FORAGE:
-                    fsm.setState(Recruit.FORAGE, message = None)
-                else:
-                    fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._desc)
-
-            else:
-                fsm.setState(Recruit.BUY, message = "Buy again")
 
         #########################################################################################################
         #### Recruit.FORAGE
