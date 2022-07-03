@@ -18,6 +18,7 @@ rm -f ${DOCKERBASE}/geth/my_enode.enode
 
 sleep 1
 
+
 docker stack deploy -c ./docker-compose.yml ethereum
 
 # sleep 5
