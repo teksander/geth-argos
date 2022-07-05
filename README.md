@@ -4,7 +4,7 @@
 ==                                   ==
 =======================================
 
-This Branch is used to onchain malicious/faulty robot detection experiments.
+This Branch is made for onchain malicious/faulty robot detection experiments.
 
 Derived from MarketForaging experiments by Hanqing Zhao <hzhao@cim.mcgill.ca>
 
