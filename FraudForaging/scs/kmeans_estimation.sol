@@ -17,6 +17,7 @@ contract ForagingPtManagement{
         uint category; //0:non food, 1:food
         uint cluster;
         address sender;
+        uint uncertainty;
     }
 
     struct Cluster{
@@ -27,6 +28,7 @@ contract ForagingPtManagement{
         uint num_rep; //Number of reported points that supports this cluster
         uint256 total_credit; //Sum of deposited credit
         uint256 total_credit_food; //Sum of deposited credit that report this point as food
+        uint256 total_uncertainty; //Total reported uncertainty
     }
 
     struct clusterInfo{
@@ -55,13 +57,13 @@ contract ForagingPtManagement{
         }
       }
 
-    function reportNewPt(int256 x, int256 y, uint category, uint256 amount) public payable{
+    function reportNewPt(int256 x, int256 y, uint category, uint256 amount, uint256 uncertainty) public payable{
         require(msg.value == amount);
         // Assign point a cluster
         info.foundCluster=0;
         if (category==1 && clusterList.length == 0){
-            clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount));
-            pointList.push(Point(x,y,amount, category, 0, msg.sender));
+            clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount, uncertainty));
+            pointList.push(Point(x,y,amount, category, 0, msg.sender, uncertainty));
         }
         else{
             // Search for closest unverified cluster
@@ -94,6 +96,7 @@ contract ForagingPtManagement{
 
                 clusterList[info.minClusterIdx].num_rep+=1;
                 clusterList[info.minClusterIdx].total_credit+=amount;
+                clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
                 if (category==1){
                     clusterList[info.minClusterIdx].total_credit_food+=amount;
                 }
@@ -101,7 +104,7 @@ contract ForagingPtManagement{
                 clusterList[info.minClusterIdx].x = info.x;
                 clusterList[info.minClusterIdx].y = info.y;
                 //ADD CORRESPONDING POINT
-                pointList.push(Point(x,y,amount, category, info.minClusterIdx, msg.sender));
+                pointList.push(Point(x,y,amount, category, info.minClusterIdx, msg.sender, uncertainty));
 
 
                 //If cluster receives enough samples, verified.
@@ -132,8 +135,8 @@ contract ForagingPtManagement{
             }
             else if (category==1 && info.foundCluster==0){
                 //if point reports a food source position and  belongs to nothing, create new cluster
-                clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount));
-                pointList.push(Point(x,y,amount, category, clusterList.length-1, msg.sender));
+                clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount, uncertainty));
+                pointList.push(Point(x,y,amount, category, clusterList.length-1, msg.sender, uncertainty));
             }
             else{
                 //Do nothing and transfer back, if anything else

@@ -135,8 +135,8 @@ contract ForagingPtManagement{
             }
             else if (category==1 && info.foundCluster==0){
                 //if point reports a food source position and  belongs to nothing, create new cluster
-                clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount));
-                pointList.push(Point(x,y,amount, category, clusterList.length-1, msg.sender));
+                clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount, uncertainty));
+                pointList.push(Point(x,y,amount, category, clusterList.length-1, msg.sender, uncertainty));
             }
             else{
                 //Do nothing and transfer back, if anything else
