@@ -143,7 +143,7 @@ class Transaction(object):
             self.tx = None
 
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify
+    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, residual_list
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifersExtract(robotID, 'IP')
 
@@ -211,7 +211,7 @@ def init():
 
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify
+    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list
 
     if not startFlag:
         ##########################
@@ -301,16 +301,24 @@ def controlstep():
                 arrived = False
             return arrived
 
-        def sensing():
-            if clocks['gs'].query():
-                ground_color = gs.getNew()
-                return ground_color
-            else:
-                return -1
-
         def getDirectionVector():
             ori= robot.position.get_orientation()
             return [math.cos(ori), math.sin(ori)]
+
+        def posUncertaintyEst():
+            directVec = getDirectionVector()
+            nav.kf.predict(directVec)
+            odo.step()
+            noisy_pos = odo.getNew()
+            nav.kf.update(noisy_pos)
+            pos_state = nav.kf.x
+            # modulo of the residual as the uncertainty measure
+            if len(residual_list) > 10:
+                residual_list.pop(0)
+            residual_list.append(nav.kf.get_residual_modulo())
+            myUncertainty = sum(residual_list) / len(residual_list)
+            return pos_state, myUncertainty
+
         #########################################################################################################
         #### Idle.IDLE
         #########################################################################################################
@@ -349,17 +357,7 @@ def controlstep():
             rw.step()
 
             #estimate position
-            directVec = getDirectionVector()
-            nav.kf.predict(directVec)
-            odo.step()
-            noisy_pos = odo.getNew()
-            nav.kf.update(noisy_pos)
-            pos_state = nav.kf.x
-            #modulo of the residual as the uncertainty measure
-            if len(residual_list)>10:
-                residual_list.pop(0)
-            residual_list.append(nav.kf.get_residual_modulo())
-            myUncertainty = sum(residual_list) / len(residual_list)
+            pos_state, myUncertainty = posUncertaintyEst()
             #If encountered food source:
             if txs['report'].query(3):
                 txs['report'] = Transaction(None)
@@ -377,13 +375,11 @@ def controlstep():
                 fsm.setState(Verify.Homing, message="Homing")
         elif fsm.query(Verify.DriveTo):
             # estimate position
-            directVec = getDirectionVector()
-            nav.kf.predict(directVec)
-            odo.step()
-            noisy_pos = odo.getNew()
-            nav.kf.update(noisy_pos)
+            pos_state, myUncertainty = posUncertaintyEst()
+
             #execute driving cmd
             arrived = going(pos_to_verify)
+
             if arrived:
                 sourceFlag = 0
                 if robot.variables.get_attribute("at")=='source':
@@ -398,8 +394,17 @@ def controlstep():
                 txs['report'] = Transaction(transactHash)
                 fsm.setState(Verify.Homing, message="Homing")
         elif fsm.query(Verify.Homing):
+            # Query smart contract
+            if clocks['query_sc'].query():
+                source_list = w3.sc.functions.getSourceList().call()
+                if len(source_list) > 0:
+                    print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
+                for cluster in source_list:
+                    if cluster[3] == 0:  # exists cluster needs verification
+                        fsm.setState(Verify.DriveTo, message="Go to unverified source")
+                        pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
+                        pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
             arrived = homing()
-
             if arrived:
                 fsm.setState(Scout.Query, message="Homing")
 
