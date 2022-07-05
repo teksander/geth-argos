@@ -60,7 +60,7 @@
     <distribute>
       <position method="uniform" min="-.40,-.40,0" max=".40,.40,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="5" max_trials="15" base_num="1"> 
+      <entity quantity="10" max_trials="15" base_num="1"> 
         <e-puck id="bc">
           <controller config="blockchain" />
         </e-puck>

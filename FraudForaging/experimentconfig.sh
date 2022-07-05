@@ -29,7 +29,7 @@ export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
 # [ARGOS]
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"
-export NUM1=5
+export NUM1=10
 export NUM2=0
 export RABRANGE="0.3"
 

@@ -189,7 +189,7 @@ def init():
 
     # /* Init Navigation, __navigate process */
     robot.log.info('Initialising odometry...')
-    odo = NoisyOdometry(robot, 0.0005*int(robotID))
+    odo = NoisyOdometry(robot, 0.0001*int(robotID))
 
     # /* Init Ground-Sensors, __mapping process and vote function */
     robot.log.info('Initialising ground-sensors...')
@@ -294,7 +294,7 @@ def controlstep():
 
             arrived = True
 
-            if nav.get_distance_to((target[0], target[1]), use_kf_obs=True) < params['source']['radius']:
+            if nav.get_distance_to((target[0], target[1]), use_kf_obs=True) < params['source']['radius']/10:
                 nav.avoid(move=True)
             else:
                 nav.navigate_with_obstacle_avoidance(target, use_kf_obs=True)
@@ -322,6 +322,13 @@ def controlstep():
         #########################################################################################################
         #### Idle.IDLE
         #########################################################################################################
+        #Transaction check every step
+        if txs['report'].query(3):
+            txs['report'] = Transaction(None)
+            fsm.setState(Verify.Homing, message="Report success")
+        elif txs['report'].fail == True:
+            txs['report'] = Transaction(None)
+
         if fsm.query(Idle.IDLE):
             # State transition: Scout.EXPLORE
             explore_duration = random.gauss(controller_params['explore_mu'], controller_params['explore_sg'])
@@ -347,12 +354,14 @@ def controlstep():
             # Query smart contract
             if clocks['query_sc'].query():
                 source_list = w3.sc.functions.getSourceList().call()
-                if len(source_list)>0:
+                clusterInfo = w3.sc.functions.getClusterInfo().call()
+                if len(source_list) > 0:
                     print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
+                    print('Robot ', robot.variables.get_id(), ' cluster info get: ', clusterInfo)
                 for cluster in source_list:
                     if cluster[3] == 0: #exists cluster needs verification
                         fsm.setState(Verify.DriveTo, message="Go to unverified source")
-                        pos_to_verify[0] = float(cluster[0])/DECIMAL_FACTOR
+                        pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
                         pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
             rw.step()
 
@@ -384,7 +393,7 @@ def controlstep():
                 sourceFlag = 0
                 if robot.variables.get_attribute("at")=='source':
                     sourceFlag =1
-                ticketPrice = 1 # TODO: calcualte ticket price
+                ticketPrice = 1 # TODO: calculate ticket price
                 transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
                                                            int(pos_state[1][0] * DECIMAL_FACTOR), sourceFlag,
                                                            w3.toWei(ticketPrice, 'ether'),
@@ -397,8 +406,10 @@ def controlstep():
             # Query smart contract
             if clocks['query_sc'].query():
                 source_list = w3.sc.functions.getSourceList().call()
+                clusterInfo = w3.sc.functions.getClusterInfo().call()
                 if len(source_list) > 0:
                     print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
+                    print('Robot ', robot.variables.get_id(), ' cluster info get: ', clusterInfo)
                 for cluster in source_list:
                     if cluster[3] == 0:  # exists cluster needs verification
                         fsm.setState(Verify.DriveTo, message="Go to unverified source")

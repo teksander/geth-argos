@@ -61,6 +61,7 @@ contract ForagingPtManagement{
         require(msg.value == amount);
         // Assign point a cluster
         info.foundCluster=0;
+        info.minDistance = 1e10;
         if (category==1 && clusterList.length == 0){
             clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount, uncertainty));
             pointList.push(Point(x,y,amount, category, 0, msg.sender, uncertainty));
@@ -72,7 +73,7 @@ contract ForagingPtManagement{
                 clusterList[i].life-=1;
                 if (clusterList[i].verified==1 && clusterList[i].life<=0){
                     // verified cluster where credit is already redistributed
-                    clusterList[i].verified==2;
+                    clusterList[i].verified=2;
                 }
                 //Check if the newly reported pt belongs to any cluster
                 if (clusterList[i].verified!=2){ //Not abandoned cluster
@@ -80,10 +81,18 @@ contract ForagingPtManagement{
                     x_avg /= int256(clusterList[i].total_credit+amount);
                     int256 y_avg = int256(clusterList[i].y)*int256(clusterList[i].total_credit)+ int256(y)*int256(amount);
                     y_avg /= int256(clusterList[i].total_credit+amount);
-                    if (getDistance(x_avg,y_avg,x,y)<=(radius*3) && getDistance(x_avg,y_avg,x,y)<info.minDistance){
-                        info.minDistance = getDistance(x_avg,y_avg,x,y);
+                    if (getDistance(x_avg, y_avg ,x,y)<=(radius*3) && getDistance(x_avg,y_avg,x,y)<info.minDistance){
+                        info.minDistance = getDistance(x_avg, y_avg ,x,y);
                         info.minClusterIdx = i;
                         info.foundCluster = 1;
+                        info.x=x_avg;
+                        info.y=y_avg;
+                        info.minClusterStatus = clusterList[i].verified;
+                    }
+                    else{
+                        info.minDistance = getDistance(x_avg, y_avg ,x,y);
+                        info.minClusterIdx = i;
+                        info.foundCluster = 0;
                         info.x=x_avg;
                         info.y=y_avg;
                         info.minClusterStatus = clusterList[i].verified;
@@ -149,4 +158,7 @@ contract ForagingPtManagement{
         return clusterList;
     }
 
+    function getClusterInfo() public view returns(clusterInfo memory){
+        return info;
+    }
 }
