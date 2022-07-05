@@ -55,7 +55,8 @@ export MAXRECRUITS=2
 export NUMPT=100
 export MAXLIFE=100
 export MINREP=10
-export RADIUS=100 # 0.1
+export RADIUS=10000 # 0.1
+export DECIMAL_FACTOR=100000 # 1e5
 
 # [OTHER]
 export SEED=350

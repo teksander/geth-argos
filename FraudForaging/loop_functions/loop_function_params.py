@@ -19,6 +19,7 @@ generic_params['arena_size'] = float(os.environ["ARENADIMY"])
 generic_params['num_robots'] = int(os.environ["NUMROBOTS"])
 generic_params['time_limit'] = float(os.environ["TIMELIMIT"]) * 60
 generic_params['seed']       = 350 # None for randomgen
+generic_params['decimal_factor'] = float(os.environ["DECIMAL_FACTOR"])
 
 generic_params['tps'] = eval(os.environ["TPS"])
 generic_params['num_1'] = eval(os.environ["NUM1"])

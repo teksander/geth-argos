@@ -32,7 +32,7 @@ from controller_params import *
 loglevel = 10
 logtofile = False
 
-DECIMAL_FACTOR = 1e5
+DECIMAL_FACTOR = generic_params['decimal_factor']
 # /* Experiment Parameters */
 #######################################################################
 erbDist = 175

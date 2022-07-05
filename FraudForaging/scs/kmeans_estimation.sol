@@ -5,7 +5,7 @@ contract ForagingPtManagement{
     uint constant num_pt = 100;
     uint constant max_life = 100;
     uint constant min_rep = 10; //Minimum number of reported points that make contract verified
-    int256 constant radius = 100;
+    int256 constant radius = 10000;
 
     address public minter;
     mapping (address => uint) public balances;
