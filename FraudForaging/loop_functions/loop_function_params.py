@@ -47,16 +47,19 @@ params['market']['position'] = [0, 0]
 fs_list=[]
 while len(fs_list)<2:
     fs=[0,0]
-    minIntSrcDist = 1.5
+    minIntSrcDist = 1.2
     interSource = False
     while distance(fs,params['home']['position'])<0.3 or distance(fs,params['home']['position'])>1.2 or not interSource:
-        fs = [(random.random()-0.5)*eval(params['environ']['ARENADIMX']),
-          (random.random() - 0.5) * eval(params['environ']['ARENADIMY'])]
+        fs = [(random.random()-0.5)*eval(params['environ']['ARENADIMX'])*0.9,
+          (random.random() - 0.5) * eval(params['environ']['ARENADIMY'])*0.9]
         interSource = True
         for pt in fs_list:
             if distance(fs,pt)<minIntSrcDist:
                 interSource=False
     fs_list.append(fs)
+    print(fs_list)
+fs_list = [[0.3725550599792884, 0.34912730587116264], [-0.7594994838471354, -0.765297276482239]]
+
 params['source']=dict()
 params['source']['positions'] = fs_list
 params['source']['radius'] = 0.1

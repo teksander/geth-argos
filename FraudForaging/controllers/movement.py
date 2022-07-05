@@ -133,13 +133,16 @@ class Navigate(object):
         self.orientation = self.robot.position.get_orientation()
         self.target = Vector2D(target)
 
-    def navigate_with_obstacle_avoidance(self, target = [0,0]):
+    def navigate_with_obstacle_avoidance(self, target = [0,0], use_kf_obs = False):
 
         # Update the current position, orientation and target of the robot
         self.update_state(target = target)
-        
+        if use_kf_obs:
+            myPos=Vector2D([self.kf.x[0][0], self.kf.x[1][0]])
+        else:
+            myPos =  self.position
         # Calculate the local frame vector to the desired target
-        vec_target = (self.target-self.position).rotate(-self.orientation)
+        vec_target = (self.target-myPos).rotate(-self.orientation)
 
         # Calculate the local frame vector to the avoid objects
         acc = Vector2D()
@@ -190,7 +193,7 @@ class Navigate(object):
 
         # Change to global coordinates for the plotting
         self.robot.variables.set_attribute("rays", self._id 
-                                            + ', ' + repr(self.position) 
+                                            + ', ' + repr(self.position)
                                             + ', ' + repr(T.rotate(self.orientation)) 
                                             + ', ' + repr(A.rotate(self.orientation))
                                             + ', ' + repr(D.rotate(self.orientation)) 
@@ -283,13 +286,16 @@ class Navigate(object):
     def stop(self):
         robot.epuck_wheels.set_speed(0,0)
 
-    def get_distance_to(self, to):
+    def get_distance_to(self, to, use_kf_obs=False):
 
         # Update the current position, orientation and target of the robot
         self.update_state(target = to)
-
+        if use_kf_obs:
+            myPos=Vector2D([self.kf.x[0][0], self.kf.x[1][0]])
+        else:
+            myPos =  self.position
         # Return the distance to
-        return abs(self.target-self.position)
+        return abs(self.target-myPos)
 
 
     def saturate(self, left, right, style = 1):

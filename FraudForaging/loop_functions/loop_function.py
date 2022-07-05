@@ -106,6 +106,7 @@ def pre_step():
         for food_location in params['source']['positions']:
             if is_in_circle(robot.position.get_position(), food_location,
                         params['source']['radius']):
+                print('current pos: ', robot.position.get_position(), 'food loc: ', food_location)
                 at_Food=True
         # Is robot currently at home of food source:
         if is_in_circle(robot.position.get_position(), params['home']['position'],

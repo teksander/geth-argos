@@ -41,8 +41,6 @@ gsFreq = 20
 rwSpeed = controller_params['scout_speed']
 navSpeed = controller_params['recruit_speed']
 
-pos_radius = market_params['radius']
-dropoff_radius = market_params['radius_dropoff']
 
 # /* Global Variables */
 #######################################################################
@@ -77,6 +75,7 @@ residual_list= []
 counters['velocity_test'] = 0
 my_speed = 0
 previous_pos = [0,0]
+pos_to_verify = [0,0]
 
 class Transaction(object):
 
@@ -144,7 +143,7 @@ class Transaction(object):
             self.tx = None
 
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos
+    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifersExtract(robotID, 'IP')
 
@@ -212,7 +211,7 @@ def init():
 
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos
+    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify
 
     if not startFlag:
         ##########################
@@ -284,10 +283,21 @@ def controlstep():
 
             arrived = True
 
-            if nav.get_distance_to((0, 0)) < pos_radius + 0.5 * (dropoff_radius - pos_radius):
+            if nav.get_distance_to((0, 0)) < params['home']['radius']:
                 nav.avoid(move=True)
             else:
                 nav.navigate_with_obstacle_avoidance([0,0])
+                arrived = False
+            return arrived
+        def going(target):
+            # Navigate to home position
+
+            arrived = True
+
+            if nav.get_distance_to((target[0], target[1]), use_kf_obs=True) < params['source']['radius']:
+                nav.avoid(move=True)
+            else:
+                nav.navigate_with_obstacle_avoidance(target, use_kf_obs=True)
                 arrived = False
             return arrived
 
@@ -298,10 +308,9 @@ def controlstep():
             else:
                 return -1
 
-        def getDirectionVector(left,right):
-            fv=1
+        def getDirectionVector():
             ori= robot.position.get_orientation()
-            return [fv* math.cos(ori), fv*math.sin(ori)]
+            return [math.cos(ori), math.sin(ori)]
         #########################################################################################################
         #### Idle.IDLE
         #########################################################################################################
@@ -320,7 +329,9 @@ def controlstep():
                 nav.kf.setSpeed(my_speed)
             else:
                 #Update KF's initial state and cmd->state transition matrix
-                fsm.setState(Scout.Query, message="Duration: %.2f" % explore_duration)
+                fsm.setState(Verify.Homing, message="Duration: %.2f" % explore_duration)
+                curpos = robot.position.get_position()[0:2]
+                nav.kf.setState(curpos)
                 print('mtxb: ', nav.kf.B)
                 print("current balance:")
                 print(w3.exposed_balance)
@@ -328,13 +339,17 @@ def controlstep():
             # Query smart contract
             if clocks['query_sc'].query():
                 source_list = w3.sc.functions.getSourceList().call()
+                if len(source_list)>0:
+                    print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
                 for cluster in source_list:
                     if cluster[3] == 0: #exists cluster needs verification
                         fsm.setState(Verify.DriveTo, message="Go to unverified source")
+                        pos_to_verify[0] = float(cluster[0])/DECIMAL_FACTOR
+                        pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
             rw.step()
 
             #estimate position
-            directVec = getDirectionVector(navSpeed / 2, navSpeed / 2)
+            directVec = getDirectionVector()
             nav.kf.predict(directVec)
             odo.step()
             noisy_pos = odo.getNew()
@@ -353,14 +368,38 @@ def controlstep():
                 txs['report'] = Transaction(None)
             elif robot.variables.get_attribute("at")=='source' and txs['report'].hash == None:
                 ticketPrice = 1
-                transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0]*DECIMAL_FACTOR), int(pos_state[1][0]*DECIMAL_FACTOR), 1, w3.toWei(ticketPrice, 'ether'), myUncertainty).transact(
+                transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0]*DECIMAL_FACTOR), int(pos_state[1][0]*DECIMAL_FACTOR), 1, w3.toWei(ticketPrice, 'ether'), int(myUncertainty*DECIMAL_FACTOR)).transact(
                     {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit, 'gasPrice': gasprice})
+                print('Robot ', robot.variables.get_id(), ' report source point: ', int(pos_state[0][0]*DECIMAL_FACTOR), int(pos_state[1][0]*DECIMAL_FACTOR), int(myUncertainty*DECIMAL_FACTOR))
                 txs['report'] = Transaction(transactHash)
                 print("current balance:")
                 print(w3.exposed_balance)
                 fsm.setState(Verify.Homing, message="Homing")
+        elif fsm.query(Verify.DriveTo):
+            # estimate position
+            directVec = getDirectionVector()
+            nav.kf.predict(directVec)
+            odo.step()
+            noisy_pos = odo.getNew()
+            nav.kf.update(noisy_pos)
+            #execute driving cmd
+            arrived = going(pos_to_verify)
+            if arrived:
+                sourceFlag = 0
+                if robot.variables.get_attribute("at")=='source':
+                    sourceFlag =1
+                ticketPrice = 1 # TODO: calcualte ticket price
+                transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
+                                                           int(pos_state[1][0] * DECIMAL_FACTOR), sourceFlag,
+                                                           w3.toWei(ticketPrice, 'ether'),
+                                                           int(myUncertainty * DECIMAL_FACTOR)).transact(
+                    {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
+                     'gasPrice': gasprice})
+                txs['report'] = Transaction(transactHash)
+                fsm.setState(Verify.Homing, message="Homing")
         elif fsm.query(Verify.Homing):
             arrived = homing()
+
             if arrived:
                 fsm.setState(Scout.Query, message="Homing")
 
