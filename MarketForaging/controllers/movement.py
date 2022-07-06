@@ -337,6 +337,9 @@ class Navigate(object):
     def stop(self):
         robot.epuck_wheels.set_speed(0,0)
 
+    def set_wheels(self, right, left):
+        robot.epuck_wheels.set_speed(right,left)
+
     def get_distance_to(self, to):
 
         # Update the current position, orientation and target of the robot

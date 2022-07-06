@@ -10,12 +10,14 @@ clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 def scHandle():
     """ Interact with SC when new blocks are synchronized """
 
-    resources   = sc.functions.getPatches().call()
-    json_list   = [x[5] for x in resources]
+    resources = sc.functions.getPatches().call()
+    json_list = [x[5] for x in resources]
+    mean_list = [x[7] for x in resources]
+    mean_sum  = sum(mean_list)
     
     with open(scresourcesfile, 'w+', buffering=1) as f:
         for i in range(len(resources)):
-            f.write('%s %s %s\n' % (json_list[i], 0, 0))
+            f.write('%s %s %s\n' % (json_list[i], mean_list[i], mean_sum))
 
     logs['sc'].log([w3.eth.blockNumber, 0, len(resources)])
 

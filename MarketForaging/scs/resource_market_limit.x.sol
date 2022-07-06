@@ -58,7 +58,7 @@ contract MarketForaging {
         unique = false;
 
         // Remove patch if quantity is 0
-        if (_qtty < 1) {
+        if (patches[i].qtty < 1) {
           patches_depleted.push(patches[i]);
           patches[i] = patches[patches.length - 1];
           patches.pop();
@@ -103,14 +103,14 @@ contract MarketForaging {
       if (_x == patches[i].x && _y == patches[i].y ) {
 
         // Update average quality
-        patches[i].meanQ = updateMean(patches[i].meanQ, 1000*patches[i].util/(block.number-lastD[msg.sender]), patches[i].count);
-        patches[i].count ++;
+        patches[i].meanQ  = updateMean(patches[i].meanQ, patches[i].util/(block.number-lastD[msg.sender]), patches[i].count);
+        patches[i].count += 1;
       
-        patches[i].json  = _json;
-        patches[i].qtty  = _qtty;
+        patches[i].json   = _json;
+        patches[i].qtty   = _qtty;
 
         // Update robot drop counter;
-        drops[msg.sender] ++;
+        drops[msg.sender]++;
         lastD[msg.sender] = block.number;
 
         // Re-assign robot
@@ -165,11 +165,9 @@ contract MarketForaging {
     uint index = 0;
 
     for (uint i=0; i < patches.length; i++) {
-      if (patches[i].meanQ + patches[i].util > maxQ) {
-        maxQ  = patches[i].meanQ;
-        index = i;
-      }
+      if (patches[i].meanQ > maxQ) index = i;
     }
+
     return index;
   }
 
@@ -198,3 +196,5 @@ contract MarketForaging {
 
   }  
 }
+
+

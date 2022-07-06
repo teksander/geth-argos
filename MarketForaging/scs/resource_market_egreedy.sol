@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant epsilon = 70; 
+  uint constant epsilon = 30; 
 
     struct patch {
 
@@ -17,18 +17,22 @@ contract MarketForaging {
     // Identifier
     uint id;
 
-    // Production
-    uint lastT;
+    // Assignment
     uint meanQ;
     uint count;
-  } 
+    uint worker_count;
 
-  uint id_nonce;
-  mapping(address => uint) tasks;
+  } 
 
   patch[] private patches;
   patch[] private patches_depleted;
-  
+
+  uint id_nonce;
+  mapping(address => uint) tasks;
+  mapping(address => uint) drops;
+  mapping(address => uint) lastD;
+
+
   function updateMean(uint previous, uint current, uint N) private pure returns (uint) {
     return (previous*N + current) / (N+1);
   }
@@ -44,30 +48,17 @@ contract MarketForaging {
     return false;
   }
 
-  function registerRobot() public {
-    // Register as scout initially
-    tasks[msg.sender] = 0;
-  }
-
   function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
     bool unique = true;
     bool depleted = false;
 
-    // If patch is not unique
+    // Is patch unique
     for (uint i=0; i < patches.length; i++) {
       if (_x == patches[i].x && _y == patches[i].y ) {
         unique = false;
 
-        // Update average quality
-        patches[i].meanQ  = updateMean(patches[i].meanQ, patches[i].util/(block.number-patches[i].lastT), patches[i].count);
-        patches[i].lastT  = block.number;
-        patches[i].count += 1;
-      
-        patches[i].json   = _json;
-        patches[i].qtty   = _qtty;
-
         // Remove patch if quantity is 0
-        if (patches[i].qtty < 1) {
+        if (_qtty < 1) {
           patches_depleted.push(patches[i]);
           patches[i] = patches[patches.length - 1];
           patches.pop();
@@ -99,56 +90,96 @@ contract MarketForaging {
                           qlty: _qlty, 
                           json: _json,
                           id:      id_nonce,
-                          lastT:   block.number,
                           meanQ:   0,
-                          count:   0
+                          count:   0,
+                          worker_count: 0
                         }));
-
-
     }
   } 
+
+  function dropResource(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
+
+    for (uint i=0; i < patches.length; i++) {
+      if (_x == patches[i].x && _y == patches[i].y ) {
+
+        // Update average quality
+        patches[i].meanQ = updateMean(patches[i].meanQ, 1000*patches[i].util/(block.number-lastD[msg.sender]), patches[i].count);
+        patches[i].count ++;
+      
+        patches[i].json  = _json;
+        patches[i].qtty  = _qtty;
+
+        // Update robot drop counter;
+        drops[msg.sender] ++;
+        lastD[msg.sender] = block.number;
+
+        // Re-assign robot
+        if (drops[msg.sender] % 1 == 0)  {
+          assignPatch();
+        }
+
+        // Update patch information
+        updatePatch(_x, _y, _qtty, _util, _qlty, _json);
+
+      }
+    }
+  }
+
+  function assignPatch() public {
+
+    uint i = 0;
+    uint j = findByID(tasks[msg.sender]);
+    
+    // Epsilon-greedy algorithm
+    bool exploit = coinFlip(100-epsilon);
+    
+    // Greedy policy
+    if (exploit) {
+      // Get greedy action
+      i = findBest();
+    }
+
+    // Non-greedy policy
+    else {
+
+      // Get random action
+      i = random(patches.length+1);
+    }
+
+    // Unassign current task
+    tasks[msg.sender] = 0;
+    if (j<9999) {
+      patches[j].worker_count--;
+    }
+    
+    // Assign new foraging task
+    if (i < patches.length) {
+      tasks[msg.sender] = patches[i].id;
+      lastD[msg.sender] = block.number;
+      patches[i].worker_count++;
+    }  
+  }
 
   function findBest() private view returns (uint) {
     uint maxQ  = 0;
     uint index = 0;
 
     for (uint i=0; i < patches.length; i++) {
-      if (patches[i].meanQ > maxQ) {
-          index = i;
-        } 
+      if (patches[i].meanQ + patches[i].util > maxQ) {
+        maxQ  = patches[i].meanQ;
+        index = i;
+      }
     }
     return index;
   }
 
-  function assignPatch() public {
+  function findByID(uint id) private view returns (uint) {
 
-    // Epsilon-greedy algorithm
-    bool exploit = coinFlip(100-epsilon);
-
-    // Greedy policy
-    if (exploit) {
-      // Get maximum quality patch
-      (uint i) = findBest();
-
-      // Assign worker
-      tasks[msg.sender] = patches[i].id;
+    for (uint i=0; i < patches.length; i++) {
+      if (patches[i].id == id) return i;
     }
 
-    // Non-greedy policy
-    else {
-      // Get random action
-      uint i = random(patches.length+1);
-
-      // Assign worker
-      if (i < patches.length) {
-        tasks[msg.sender] = patches[i].id;
-      }  
-
-      // Assign scout
-      else {
-        tasks[msg.sender] = 0;
-      }
-    }
+    return 9999;
   }
 
   function getPatches() public view returns (patch[] memory){
@@ -162,11 +193,8 @@ contract MarketForaging {
     if (task_id == 0) return "";
 
     for (uint i=0; i < patches.length; i++) {
-      if (patches[i].id == task_id) {
-          return patches[i].json;
-      } 
+      if (patches[i].id == task_id) return patches[i].json;
     }   
+
   }  
 }
-
-

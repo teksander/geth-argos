@@ -15,7 +15,17 @@ class Recruit(Enum):
     BUY    = 5
     FORAGE = 6
     HOMING = 7
-    PLAN  = 8
+    PLAN   = 8
+    DROP   = 9
+
+class States(Enum):
+    IDLE   = 1
+    PLAN   = 2
+    SCOUT  = 3
+    FORAGE = 4
+    SELL   = 5
+    BUY    = 6
+    DROP   = 7 
 
 class FiniteStateMachine(object):
 

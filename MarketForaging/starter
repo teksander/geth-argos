@@ -60,3 +60,11 @@ if [[ $2 == "--start-novis" ]]; then
 
     argos3 -z -c $ARGOSFILE
 fi
+
+if [[ $3 == "--logs" ]]; then
+    ./tmux-all -l monitor.log
+fi
+
+if [[ $3 == "--python" ]]; then
+    ./tmux-all -s python
+fi

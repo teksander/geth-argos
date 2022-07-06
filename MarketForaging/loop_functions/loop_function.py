@@ -63,7 +63,7 @@ accums['distance'] = Accumulator()
 accums['distance_forage'] = Accumulator()
 accums['distance_explore'] = Accumulator()
 accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots'])]
-clocks['forage']     = [Timer() for i in range(lp['generic']['num_robots'])]
+clocks['forage']     = dict()
 clocks['regen']      = dict()
 
 # Store the position of the market and cache
@@ -187,19 +187,23 @@ def pre_step():
                 # Update robot virtual sensor
                 robot.variables.set_attribute("newResource", res._json)
 
-                # Robot does not carry resource and is Forager? YES -> Pickup resource
+                # Robot does not carry resource and is forager? YES -> Collect resource
                 if not robot.variables.get_attribute("hasResource") \
                    and robot.variables.get_attribute("collectResource"):
 
+                    if robot.id not in clocks['forage']:
+                        clocks['forage'][robot.id] = Timer(lp['patches']['forage_rate'][res.quality])
+
+                    if clocks['forage'][robot.id].query():
                         robot.variables.set_attribute("hasResource", res.quality)
                         res.quantity -= 1
+                        clocks['forage'].pop(robot.id)
 
                         # Resource expired? YES -> Generate new
                         if res.quantity <= 0:
                             resource_list.remove(res)
                             generate_resource(1, [res.quality])
-                            
-
+                        
 
         # Has robot stepped into market drop area? YES
         if is_in_circle(robot.position.get_position(), (cache.x, cache.y), cache.radius):

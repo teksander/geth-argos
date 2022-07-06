@@ -46,6 +46,7 @@ clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 clocks['buffer'] = Timer(0.5)
 clocks['query_resources'] = Timer(1)
 clocks['block'] = Timer(2)
+clocks['search'] = Timer(10)
 clocks['explore'] = Timer(1)
 clocks['buy'] = Timer(cp['buy_duration'])
 clocks['rs'] = Timer(0.02)
@@ -212,7 +213,7 @@ class Transaction(object):
             self.block = w3.eth.blockNumber()
 
         if not self.tx:
-            robot.log.warning('Failed: not found')
+            robot.log.warning('Fail: Not found')
             self.fail = True
             return False
 
@@ -220,7 +221,7 @@ class Transaction(object):
             return False
 
         elif not self.receipt['status']:
-            robot.log.warning('Failed: Status 0')
+            robot.log.warning('Fail: Status 0')
             self.fail = True
             return False
 
@@ -338,6 +339,7 @@ def init():
 
     txs['sell'] = Transaction(None)
     txs['buy']  = Transaction(None)
+    txs['drop']  = Transaction(None)
 
 #########################################################################################################################
 #### CONTROL STEP #######################################################################################################
@@ -370,7 +372,7 @@ def controlstep():
         for clock in clocks.values():
             clock.reset()
 
-        w3.sc.functions.registerRobot().transact()
+        # w3.sc.functions.registerRobot().transact()
 
     else:
 
@@ -461,9 +463,6 @@ def controlstep():
         if logs['resources'].query():
             logs['resources'].log([len(rb)])
 
-        # if logs['odometry'].query():
-        #     logs['odometry'].log([odo.getNew()])
-
         if me.id == '1':
             with open(lp['files']['position'], 'w+') as f:
                 f.write('%s, %s \n' % (repr(gps.getPosition()), repr(odo.getPosition())))
@@ -499,6 +498,7 @@ def controlstep():
 
             resource = tcp_sc.request(data = 'getMyPatch')
 
+            # If resource is assigned, FORAGE
             if resource:
                 rb.addResource(resource, update_best = True)
 
@@ -507,6 +507,7 @@ def controlstep():
                 else:
                     fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._desc)
 
+            # If no resource is assigned, EXPLORE
             else:
 
                 if fsm.getPreviousState() == Scout.EXPLORE:
@@ -515,7 +516,7 @@ def controlstep():
                 else:
                     explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
                     clocks['explore'].set(explore_duration)
-                    fsm.setState(Scout.EXPLORE, message = 'Exploring: %ss' % explore_duration)
+                    fsm.setState(Scout.EXPLORE, message = 'Exploring: %2fs' % explore_duration)
 
 
         #########################################################################################################
@@ -526,7 +527,7 @@ def controlstep():
 
             if clocks['block'].query():
 
-                # Make sure I am still explorer
+                # Confirm I am still scout
                 fsm.setState(Recruit.PLAN, message = None)
 
             else:
@@ -607,7 +608,7 @@ def controlstep():
                     try:
                         txBuy = w3.sc.functions.assignPatch().transact()
                         txs['buy'] = Transaction(txBuy)
-                        robot.log.info('Bought')     
+                        robot.log.info("Buy confirmed")     
 
                     except Exception as e:
                         fsm.setState(Recruit.PLAN, message = "Buy failed")
@@ -630,46 +631,64 @@ def controlstep():
 
             else:
 
+                # Distance to resource
+                distance = nav.get_distance_to(rb.best._pr)
+
                 # Resource virtual sensor
                 resource = sensing()
+                found = resource and resource._p == rb.best._p
 
-                # Found the resource? YES -> Forage
-                if resource and resource._p == rb.best._p:
-                    clocks['forage'].set(lp['patches']['forage_rate'][rb.best.quality])
-                    clocks['forage'].lock()
 
-                    if clocks['forage'].query():
-                        robot.variables.set_attribute("collectResource", "True")
-                        clocks['forage'].unlock()
-                        robot.log.info('Collect: %s', resource._desc)        
+                if not found and distance < 0.8*rb.best.radius:
+                    rb.best.quantity = 0
+                    fsm.setState(Scout.SELL, message = 'Failed foraging trip')
 
-                # Collected resource? NO -> Navigate to resource site
-                if not robot.variables.get_attribute("hasResource"):
+                if found and distance < 0.9*rb.best.radius:
+                    robot.variables.set_attribute("collectResource", "True")
+                    nav.avoid(move = True)
+                    
+                else:
                     nav.navigate_with_obstacle_avoidance(rb.best._pr)
 
-                    # if nav.get_distance_to(rb.best._pr) < 0.1*rb.best.radius:
-                    #     rb.best.quantity = 0
-                    #     fsm.setState(Scout.SELL, message = 'Failed foraging trip')
 
-                # Collected resource? YES -> Go to market
-                else:
-                    fsm.setState(Recruit.HOMING)
-
+                if robot.variables.get_attribute("hasResource"):
+                    fsm.setState(Recruit.DROP)
 
         #########################################################################################################
-        #### Recruit.HOMING
+        #### Recruit.DROP
         #########################################################################################################
-        elif fsm.query(Recruit.HOMING):
+        elif fsm.query(Recruit.DROP):
 
             # Navigate home
             arrived = homing(to_drop = True)
 
             if arrived:
-                robot.variables.set_attribute("dropResource", "True")
-                if not robot.variables.get_attribute("hasResource"):
-                    robot.variables.set_attribute("dropResource", "")
-                    robot.log.info('Dropped: %s', rb.best._desc)  
-                    fsm.setState(Scout.SELL, message = None)
+
+                # Transact to drop resource
+                if not txs['drop'].hash:
+                    dropHash = w3.sc.functions.dropResource(*rb.best._calldata).transact()
+                    txs['drop'] = Transaction(dropHash)
+                    robot.log.info('Dropping: %s', rb.best._desc)
+
+                # Transition state  
+                else:
+                    if txs['drop'].query(3):
+                        robot.variables.set_attribute("dropResource", "True")
+
+                        if not robot.variables.get_attribute("hasResource"):
+                            robot.variables.set_attribute("dropResource", "")
+                            txs['drop'] = Transaction(None)
+                            robot.log.info('Dropped: %s', rb.best._desc)
+                            fsm.setState(Recruit.PLAN, message = "Drop success")
+
+                    elif txs['drop'].fail == True: 
+                        robot.log.info('Drop fail: %s', rb.best._desc)     
+                        txs['drop'] = Transaction(None)
+
+                    elif txs['drop'].hash == None:
+                        robot.log.info('Drop lost: %s', rb.best._desc)
+                        txs['drop'] = Transaction(None)
+
 
 #########################################################################################################################
 #### RESET-DESTROY STEPS ################################################################################################

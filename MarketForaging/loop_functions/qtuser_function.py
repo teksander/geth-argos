@@ -88,10 +88,11 @@ def DrawInWorld():
 				# Draw a gray resource area
 				environment.qt_draw.circle([res.x, res.y, 0.001],[], res.radius, 'gray70', True)
 
-				# ## Draw a gray stake cylinder
-				# stake = int(line.rsplit(' ', 2)[1])
-				# stake_total = int(line.rsplit(' ', 2)[2])
-				# environment.qt_draw.cylinder([res.x, res.y, 0.001],[], 0.015, stake/stake_total , 'gray30')
+				# Draw a gray meanQ cylinder
+				mean     = int(line.rsplit(' ', 2)[1])
+				mean_sum = int(line.rsplit(' ', 2)[2])
+				if mean_sum:
+					environment.qt_draw.cylinder([res.x, res.y, 0.001],[], 0.015, mean/mean_sum , 'gray30')
 
 	resources = list()
 	counts = list()

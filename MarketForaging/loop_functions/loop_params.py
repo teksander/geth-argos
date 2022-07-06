@@ -43,14 +43,14 @@ params['patches']['distribution'] = 'uniform'
 # 									     'x_sg': 0.15 * params['generic']['arena_size'], 
 # 									     'y_sg': 0.15 * params['generic']['arena_size']}]
 
-params['patches']['radius'] = 0.08
+params['patches']['radius'] = 0.15
 params['patches']['qtty_min'] = 10
 params['patches']['qtty_max'] = 10
 params['patches']['dist_min'] = 1.5 * params['cache']['radius'] 
 params['patches']['dist_max'] = 0.5 * params['generic']['arena_size']   
 
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
-params['patches']['forage_rate'] = {'red': 5, 'green':  10, 'blue': 15, 'yellow': 20}
+params['patches']['forage_rate'] = {'red': 3, 'green':  4, 'blue': 5, 'yellow': 9}
 params['patches']['regen_rate']  = {'red': 9999, 'green':  9999, 'blue': 9999, 'yellow': 9999}
 params['patches']['utility']     = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
 
@@ -62,7 +62,7 @@ params['patches']['utility']     = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 
 # params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 
 
-params['patches']['counts'] = {'red': 5, 'green': 5 , 'blue': 5, 'yellow': 5}
+params['patches']['counts'] = {'red': 3, 'green': 2 , 'blue': 1, 'yellow': 1}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
 							   'green':  params['patches']['radius'] , 
 							   'blue':   params['patches']['radius'], 
