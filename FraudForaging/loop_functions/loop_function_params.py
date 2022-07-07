@@ -2,10 +2,7 @@
 import os, math
 import random
 
-def distance(list1, list2):
-    """Distance between two vectors."""
-    squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
-    return sum(squares) ** .5
+
 
 # All parameters
 params = dict()
@@ -20,7 +17,16 @@ generic_params['num_robots'] = int(os.environ["NUMROBOTS"])
 generic_params['time_limit'] = float(os.environ["TIMELIMIT"]) * 60
 generic_params['seed']       = 350 # None for randomgen
 generic_params['decimal_factor'] = float(os.environ["DECIMAL_FACTOR"])
-
+generic_params['num_food_source'] = 3
+generic_params['unitPositionUncertainty'] = 0.0003
+generic_params['frictionUncertainty'] = 0.01
+def load(path):
+    fs_list=[]
+    with open(path,'r') as file:
+        l= list(map(float,file.read().split()))
+    for idx in range(generic_params['num_food_source']):
+        fs_list.append([l[idx*2],l[idx*2+1]])
+    return fs_list
 generic_params['tps'] = eval(os.environ["TPS"])
 generic_params['num_1'] = eval(os.environ["NUM1"])
 generic_params['num_2'] = eval(os.environ["NUM2"])
@@ -35,6 +41,7 @@ market_params = dict()
 market_params['radius']         = generic_params['arena_size'] * math.sqrt(0.03/math.pi)
 market_params['radius_dropoff'] = generic_params['arena_size'] * math.sqrt(0.09/math.pi)
 
+
 params['market'] = market_params
 
 #home position centered as a circle
@@ -45,21 +52,8 @@ params['home']['position'] = [0, 0]
 params['market']['height']   = eval(params['environ']['ARENADIMY'])
 params['market']['width'] 	  = 0.5
 params['market']['position'] = [0, 0]
-fs_list=[]
-while len(fs_list)<2:
-    fs=[0,0]
-    minIntSrcDist = 1.2
-    interSource = False
-    while distance(fs,params['home']['position'])<0.3 or distance(fs,params['home']['position'])>1.2 or not interSource:
-        fs = [(random.random()-0.5)*eval(params['environ']['ARENADIMX'])*0.9,
-          (random.random() - 0.5) * eval(params['environ']['ARENADIMY'])*0.9]
-        interSource = True
-        for pt in fs_list:
-            if distance(fs,pt)<minIntSrcDist:
-                interSource=False
-    fs_list.append(fs)
-    print(fs_list)
-fs_list = [[0.3725550599792884, 0.34912730587116264], [-0.7594994838471354, -0.765297276482239]]
+
+fs_list = load('loop_functions/source_pos.txt')
 
 params['source']=dict()
 params['source']['positions'] = fs_list

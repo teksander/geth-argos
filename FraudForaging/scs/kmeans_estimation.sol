@@ -34,6 +34,8 @@ contract ForagingPtManagement{
     struct clusterInfo{
         int x;
         int y;
+        int xo;
+        int yo;
         int256 minDistance;
         uint minClusterIdx;
         uint foundCluster;
@@ -41,60 +43,74 @@ contract ForagingPtManagement{
     }
     Point[] pointList;
     Cluster[] clusterList;
-    clusterInfo info = clusterInfo(0,0,1e10,0,0,0);
+    clusterInfo info = clusterInfo(0,0,0,0,1e10,0,0,0);
 
-    function getDistance(int256 x1, int256 x2, int256 y1, int256 y2) private view returns(int256) {
-        //3 digits floating num_pt
-        return sqrt(((x2 - x1)**2) + ((y2 - y1)**2));
+    function getDistance(int256 _x1, int256 _x2, int256 _y1, int256 _y2) private pure returns(int256) {
+        //5 digits floating num_pt
+        return sqrt(((_x2 - _x1)**2) + ((_y2 - _y1)**2));
+        //return abs(_x1-_x2)+abs(_y1-_y2);
     }
 
-    function sqrt(int x) private pure returns (int y) {
-      int256 z = (x + 1) / 2;
-        y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
+    function sqrt(int256 _kx) private pure returns (int256 _ky) {
+      int256 _kz = (_kx + 1) / 2;
+        _ky = _kx;
+        while (_kz < _ky) {
+            _ky = _kz;
+            _kz = (_kx / _kz + _kz) / 2;
         }
       }
+    function abs(int256 _k) private pure returns (int256) {
+    return _k >= 0 ? _k : -_k;
+    }
+
 
     function reportNewPt(int256 x, int256 y, uint category, uint256 amount, uint256 uncertainty) public payable{
         require(msg.value == amount);
+        uint256 curtime = block.timestamp;
         // Assign point a cluster
-        info.foundCluster=0;
         info.minDistance = 1e10;
+        info.minClusterIdx = 0;
+        info.foundCluster = 0;
+        int256 x_avg = 0;
+        int256 y_avg = 0;
+        int256 this_distance = 0;
         if (category==1 && clusterList.length == 0){
-            clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount, uncertainty));
+            clusterList.push(Cluster(x,y, curtime+max_life, 0, 1, amount, amount, uncertainty));
             pointList.push(Point(x,y,amount, category, 0, msg.sender, uncertainty));
         }
         else{
             // Search for closest unverified cluster
             for (uint i=0; i<clusterList.length; i++){
                 //Process cluster expiration
-                clusterList[i].life-=1;
-                if (clusterList[i].verified==1 && clusterList[i].life<=0){
+                //clusterList[i].life-=1;
+                if (clusterList[i].verified==1 && clusterList[i].life<curtime){
                     // verified cluster where credit is already redistributed
                     clusterList[i].verified=2;
                 }
                 //Check if the newly reported pt belongs to any cluster
                 if (clusterList[i].verified!=2){ //Not abandoned cluster
-                    int256 x_avg = int256(clusterList[i].x)*int256(clusterList[i].total_credit)+ int256(x)*int256(amount);
-                    x_avg /= int256(clusterList[i].total_credit+amount);
-                    int256 y_avg = int256(clusterList[i].y)*int256(clusterList[i].total_credit)+ int256(y)*int256(amount);
-                    y_avg /= int256(clusterList[i].total_credit+amount);
-                    if (getDistance(x_avg, y_avg ,x,y)<=(radius*3) && getDistance(x_avg,y_avg,x,y)<info.minDistance){
-                        info.minDistance = getDistance(x_avg, y_avg ,x,y);
+                    x_avg = (int256(clusterList[i].x)*int256(clusterList[i].total_credit)+ int256(x)*int256(amount))/int256(clusterList[i].total_credit+amount);
+                    y_avg = (int256(clusterList[i].y)*int256(clusterList[i].total_credit)+ int256(y)*int256(amount))/int256(clusterList[i].total_credit+amount);
+                    this_distance = getDistance(x_avg, x, y_avg,  y);
+                    if (this_distance<=radius && this_distance<info.minDistance){
+                        info.minDistance = this_distance;
                         info.minClusterIdx = i;
                         info.foundCluster = 1;
                         info.x=x_avg;
                         info.y=y_avg;
+                        info.xo = x;
+                        info.yo = y;
                         info.minClusterStatus = clusterList[i].verified;
                     }
-                    else{
-                        info.minDistance = getDistance(x_avg, y_avg ,x,y);
+                    else if (info.foundCluster == 0){
+                        //only for debugging purpose
+                        info.minDistance = this_distance;
                         info.minClusterIdx = i;
                         info.foundCluster = 0;
                         info.x=x_avg;
                         info.y=y_avg;
+                        info.xo = x;
+                        info.yo = y;
                         info.minClusterStatus = clusterList[i].verified;
                     }
                 }
@@ -144,7 +160,7 @@ contract ForagingPtManagement{
             }
             else if (category==1 && info.foundCluster==0){
                 //if point reports a food source position and  belongs to nothing, create new cluster
-                clusterList.push(Cluster(x,y,max_life, 0, 1, amount, amount, uncertainty));
+                clusterList.push(Cluster(x,y,curtime + max_life, 0, 1, amount, amount, uncertainty));
                 pointList.push(Point(x,y,amount, category, clusterList.length-1, msg.sender, uncertainty));
             }
             else{

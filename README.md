@@ -23,9 +23,10 @@ DATE: 22/06/2021
 
 
 To-do-list:
-- Calculation of exact deposited credits based on state estimation uncertainty.
-- Food source position expiration mechanism.
+- (DONE) Calculation of exact deposited credits based on state estimation uncertainty.
+- (DONE) Food source position expiration mechanism.
 - Malicious/fault injection.
+- Logging for foraging experiments
 
 Improvements to argos-python:
 -Implement IMU

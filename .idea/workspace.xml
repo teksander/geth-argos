@@ -2,7 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="634024c7-80af-4f87-8b06-c52c8b3b855c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/FraudForaging/loop_functions/generate_source_pos.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging/controllers/mainloop_fraud.py" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/controllers/mainloop_fraud.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging/controllers/movement.py" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/controllers/movement.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging/controllers/statemachine.py" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/controllers/statemachine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging/loop_functions/loop_function_params.py" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/loop_functions/loop_function_params.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging/reset-geth" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/reset-geth" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging/scs/kmeans_estimation.sol" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/scs/kmeans_estimation.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging/scs/kmeans_estimation.x.sol" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/scs/kmeans_estimation.x.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/argos-python" beforeDir="false" afterPath="$PROJECT_DIR$/argos-python" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/argos-python/py_actusensor_wrapper_epuck.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/argos-python/py_actusensor_wrapper_epuck.cpp" afterDir="false" />
@@ -55,7 +63,7 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.kalmafilter">
+  <component name="RunManager" selected="Python.generate_source_pos">
     <configuration name="generate_floor" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="geth-argos" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -70,6 +78,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/FraudForaging/experiments/floors/generate_floor.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="generate_source_pos" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="geth-argos" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/FraudForaging/loop_functions" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/FraudForaging/loop_functions/generate_source_pos.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -102,6 +132,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.generate_source_pos" />
         <item itemvalue="Python.kalmafilter" />
         <item itemvalue="Python.generate_floor" />
       </list>
@@ -132,7 +163,7 @@
       <workItem from="1655767916774" duration="7743000" />
       <workItem from="1655862383923" duration="57900000" />
       <workItem from="1656609561407" duration="25182000" />
-      <workItem from="1656996267842" duration="2920000" />
+      <workItem from="1656996267842" duration="36267000" />
     </task>
     <servers />
   </component>
@@ -176,5 +207,6 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/geth_argos$kalmafilter.coverage" NAME="kalmafilter Coverage Results" MODIFIED="1656564572085" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/FraudForaging/controllers" />
     <SUITE FILE_PATH="coverage/geth_argos$generate_floor.coverage" NAME="generate_floor Coverage Results" MODIFIED="1656346853696" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/FraudForaging/experiments/floors" />
+    <SUITE FILE_PATH="coverage/geth_argos$generate_source_pos.coverage" NAME="generate_source_pos Coverage Results" MODIFIED="1657083682453" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/FraudForaging/loop_functions" />
   </component>
 </project>

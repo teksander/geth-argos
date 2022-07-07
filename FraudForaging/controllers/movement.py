@@ -5,6 +5,7 @@ import time
 import logging
 from aux import Vector2D
 from kalmafilter import KalmanFilter
+import random
 rays_file = 'rays.txt'
 
 class Odometry(object):
@@ -85,7 +86,7 @@ class Navigate(object):
     until the application exits.
     """
 
-    def __init__(self, robot, MAX_SPEED, withKF = True):
+    def __init__(self, robot, MAX_SPEED, withKF = True, fric=0):
         """ Constructor
         :type range: int
         :param enode: Random-Walk speed (tip: 500)
@@ -121,7 +122,7 @@ class Navigate(object):
 
         # Vectorial obstacle avoidance parameters
         self.Ki = 0.1
-
+        self.friction =  fric
         #Init kalman filter
         if withKF:
             self.kf = KalmanFilter(2,2,2) #state,obs,cmd
@@ -133,7 +134,7 @@ class Navigate(object):
         self.orientation = self.robot.position.get_orientation()
         self.target = Vector2D(target)
 
-    def navigate_with_obstacle_avoidance(self, target = [0,0], use_kf_obs = False):
+    def navigate_with_obstacle_avoidance(self, target = [0,0], use_kf_obs = False, friction = 0):
 
         # Update the current position, orientation and target of the robot
         self.update_state(target = target)
@@ -226,6 +227,8 @@ class Navigate(object):
         #     # left, right = self.avoid(left, right)
 
         # Set wheel speeds
+        right -= right*random.random()*self.friction
+        left -= left*random.random()*self.friction
         self.robot.epuck_wheels.set_speed(right, left)
 
         # Store the distance to arrive at target
@@ -329,7 +332,7 @@ class RandomWalk(object):
     until the application exits.
     """
 
-    def __init__(self, robot, MAX_SPEED):
+    def __init__(self, robot, MAX_SPEED, fric = 0):
         """ Constructor
         :type range: int
         :param enode: Random-Walk speed (tip: 500)
@@ -366,6 +369,8 @@ class RandomWalk(object):
         self.__old_time = time.time()
         self.__old_vec = 0
         self.__accumulator_I = 0
+
+        self.friction = fric
         
 
     def step(self):
@@ -383,6 +388,8 @@ class RandomWalk(object):
             left, right = self.saturate(left, right)
 
             # Set wheel speeds
+            right -= right * random.random() * self.friction
+            left -= left * random.random() * self.friction
             self.robot.epuck_wheels.set_speed(right, left)
 
             # No rays for plotting

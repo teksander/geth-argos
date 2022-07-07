@@ -7,14 +7,15 @@ class Idle(Enum):
 
 class Scout(Enum):
     Query    = 2
+    PrepSend = 3
 
 class Verify(Enum):
-    DriveTo = 3
-    Homing = 4
+    DriveTo = 4
+    Homing = 5
 
 class Foraging(Enum):
-    DriveTo = 5
-    Homing = 6
+    DriveTo = 6
+    Homing = 7
 
 
 
