@@ -9,7 +9,7 @@ params = dict()
 
 # General Parameters
 params['environ'] = os.environ
-
+num_faulty = int(os.environ["NUM2"])
 # General Parameters
 generic_params = dict()
 generic_params['arena_size'] = float(os.environ["ARENADIMY"])
@@ -22,11 +22,17 @@ generic_params['unitPositionUncertainty'] = 0.0003
 generic_params['frictionUncertainty'] = 0.01
 def load(path):
     fs_list=[]
-    with open(path,'r') as file:
-        l= list(map(float,file.read().split()))
-    for idx in range(generic_params['num_food_source']):
-        fs_list.append([l[idx*2],l[idx*2+1]])
-    return fs_list
+    ffs_list = []
+    if os.path.exists(path):
+        with open(path,'r') as file:
+            l= list(map(float,file.read().split()))
+        for idx in range(generic_params['num_food_source']):
+            fs_list.append([l[idx*2],l[idx*2+1]])
+        for idy in range(num_faulty):
+            ffs_list.append([l[(generic_params['num_food_source']+idy)*2],l[(generic_params['num_food_source']+idy)*2+1]])
+        return fs_list, ffs_list
+    else:
+        return  [[0,0]], [[0,0]]
 generic_params['tps'] = eval(os.environ["TPS"])
 generic_params['num_1'] = eval(os.environ["NUM1"])
 generic_params['num_2'] = eval(os.environ["NUM2"])
@@ -53,10 +59,11 @@ params['market']['height']   = eval(params['environ']['ARENADIMY'])
 params['market']['width'] 	  = 0.5
 params['market']['position'] = [0, 0]
 
-fs_list = load('loop_functions/source_pos.txt')
+fs_list, ffs_list = load('loop_functions/source_pos.txt')
 
 params['source']=dict()
 params['source']['positions'] = fs_list
+params['source']['fake_positions'] = ffs_list
 params['source']['radius'] = 0.1
 
 params['quarry'] = dict()

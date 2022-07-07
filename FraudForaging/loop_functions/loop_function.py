@@ -107,12 +107,19 @@ def pre_step():
             if is_in_circle(robot.position.get_position(), food_location,
                         params['source']['radius']):
                 at_Food=True
+        at_Fake= False
+        for food_location in params['source']['fake_positions']:
+            if is_in_circle(robot.position.get_position(), food_location,
+                            params['source']['radius']):
+                at_Fake = True
         # Is robot currently at home of food source:
         if is_in_circle(robot.position.get_position(), params['home']['position'],
                         params['home']['radius']):
             robot.variables.set_attribute("at", "home")
         elif at_Food:
             robot.variables.set_attribute("at", "source")
+        elif at_Fake:
+            robot.variables.set_attribute("at", "fake")
         else:
             robot.variables.set_attribute("at", "none")
 

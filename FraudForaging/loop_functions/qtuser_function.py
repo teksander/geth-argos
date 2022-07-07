@@ -44,6 +44,10 @@ def DrawInWorld():
 	for fs in  params['source']['positions']:
 		environment.qt_draw.circle(fs + [0.01], [], rs, 'blue', True)
 
+	rs = params['source']['radius']
+	for fs in params['source']['fake_positions']:
+		environment.qt_draw.circle(fs + [0.01], [], rs, 'red', True)
+
 	'''
 	# Draw the quarry
 	dx = params['quarry']['width']/2

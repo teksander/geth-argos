@@ -17,6 +17,11 @@ class Foraging(Enum):
     DriveTo = 6
     Homing = 7
 
+class Faulty(Enum):
+    Pending = 8
+    DriveTo = 9
+    Homing = 10
+
 
 
 class FiniteStateMachine(object):

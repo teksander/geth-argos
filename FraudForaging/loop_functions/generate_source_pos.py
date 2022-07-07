@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import os, math
 import random
+os.remove('loop_functions/source_pos.txt')
 from loop_function_params import *
-
+num_faulty = int(os.environ["NUM2"])
 def distance(list1, list2):
     """Distance between two vectors."""
     squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
@@ -28,7 +29,8 @@ def load(path):
     return fs_list
 
 fs_list=[]
-while len(fs_list)<generic_params['num_food_source']:
+while len(fs_list)<(generic_params['num_food_source']+num_faulty):
+    print(len(fs_list))
     fs=[0,0]
     minIntSrcDist = 0.3
     interSource = False

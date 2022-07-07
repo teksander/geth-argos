@@ -12,6 +12,8 @@ from collections import namedtuple
 
 experimentFolder = os.environ["EXPERIMENTFOLDER"]
 maxlife = os.environ["MAXLIFE"]
+num_normal = int(os.environ["NUM1"])
+num_faulty = int(os.environ["NUM2"])
 sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder+'/loop_functions')
 sys.path.insert(1, experimentFolder)
@@ -33,6 +35,7 @@ from controller_params import *
 loglevel = 10
 logtofile = False
 
+typeflag = "normal" #type of current robot
 DECIMAL_FACTOR = generic_params['decimal_factor']
 # /* Experiment Parameters */
 #######################################################################
@@ -69,7 +72,7 @@ clocks['buffer'] = Timer(0.5)
 clocks['query_sc'] = Timer(1)
 clocks['block'] = Timer(2)
 clocks['explore'] = Timer(1)
-clocks['report'] = Timer(controller_params['buy_duration'])
+clocks['faulty_report'] = Timer(120)
 clocks['gs'] = Timer(0.02)
 txList = []
 residual_list= []
@@ -78,6 +81,7 @@ counters['velocity_test'] = 0
 my_speed = 0
 previous_pos = [0,0]
 pos_to_verify = [0,0]
+idx_to_verity = -1
 
 class Transaction(object):
 
@@ -145,11 +149,17 @@ class Transaction(object):
             self.tx = None
 
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, residual_list, source_pos_list, friction
+    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, residual_list, source_pos_list, friction, idx_to_verity
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifersExtract(robotID, 'IP')
+    if int(robotID)>num_normal:
+        typeflag = "malicious" #malicious robot
+    else:
+        typeflag = "normal"
 
     robot.variables.set_attribute("id", str(robotID))
+    robot.variables.set_attribute("type", typeflag)
+    print("Robot: ", robotID, "state set to: ", typeflag)
     robot.variables.set_attribute("state", "")
 
     # /* Initialize Logging Files and Console Logging*/
@@ -213,7 +223,7 @@ def init():
 
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list, source_pos_list
+    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list, source_pos_list, idx_to_verity
 
     if not startFlag:
         ##########################
@@ -321,19 +331,25 @@ def controlstep():
             myUncertainty = sum(residual_list) / len(residual_list)
             return pos_state, math.tanh((1/myUncertainty)*generic_params['unitPositionUncertainty'])
 
-        def depoValueEst(sourceList, myCertainty):
+        def depoValueEst(sourceList, myCertainty, num_cluster = -1):
+            #if num_cluster >0 estimate according to deposited value in the specific cluster
             if len(sourceList)==0:
                 return 1
-            else:
+            elif num_cluster==-1:
                 total_amount = 0
                 total_certainty = 0
                 for cluster in sourceList:
                     total_amount += float(cluster[5])/1e18
                     total_certainty += float(cluster[7])/DECIMAL_FACTOR
-                myAmount = total_amount * (myCertainty/total_certainty)
-                print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
-                myAmount = min(myAmount,10) #maximum 10
-                return myAmount
+            elif num_cluster>=0:
+                cluster = sourceList[num_cluster]
+                total_amount = float(cluster[5]) / 1e18
+                total_certainty = float(cluster[7]) / DECIMAL_FACTOR
+            myAmount = total_amount * (myCertainty / total_certainty)
+            print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
+            myAmount = min(myAmount, 10)  # maximum 10
+            return myAmount
+
 
         #########################################################################################################
         #### Idle.IDLE
@@ -360,7 +376,10 @@ def controlstep():
                 nav.kf.setSpeed(my_speed)
             else:
                 #Update KF's initial state and cmd->state transition matrix
-                fsm.setState(Scout.Query, message="Duration: %.2f" % explore_duration)
+                if robot.variables.get_attribute("type")=="normal":
+                    fsm.setState(Scout.Query, message="Duration: %.2f" % explore_duration)
+                else:
+                    fsm.setState(Faulty.Pending)
                 curpos = robot.position.get_position()[0:2]
                 nav.kf.setState(curpos)
                 print('mtxb: ', nav.kf.B)
@@ -385,11 +404,17 @@ def controlstep():
                     print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
                     print('Robot ', robot.variables.get_id(), ' cluster info get: ', clusterInfo)
                     print(int(time.time()))
+                candidate_cluster = []
                 for cluster in source_list:
                     if cluster[3] == 0: #exists cluster needs verification
-                        fsm.setState(Verify.DriveTo, message="Go to unverified source")
-                        pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
-                        pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+                        candidate_cluster.append(cluster)
+                if len(candidate_cluster)>0:
+                    #randomly select a cluster to verify
+                    idx_to_verity = random.randrange(len(candidate_cluster))
+                    cluster = candidate_cluster[idx_to_verity]
+                    fsm.setState(Verify.DriveTo, message="Go to unverified source")
+                    pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
+                    pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
         elif fsm.query(Verify.DriveTo):
             # estimate position
             pos_state, myCeratinty = posUncertaintyEst()
@@ -402,7 +427,7 @@ def controlstep():
                 if robot.variables.get_attribute("at")=='source':
                     sourceFlag =1
                 source_list = w3.sc.functions.getSourceList().call()
-                ticketPrice = depoValueEst(source_list,myCeratinty)
+                ticketPrice = depoValueEst(source_list,myCeratinty, idx_to_verity)
                 transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
                                                            int(pos_state[1][0] * DECIMAL_FACTOR), sourceFlag,
                                                            w3.toWei(ticketPrice, 'ether'),
@@ -440,8 +465,37 @@ def controlstep():
                       int(pos_state[1][0] * DECIMAL_FACTOR), int(myCeratinty * DECIMAL_FACTOR))
                 txs['report'] = Transaction(transactHash)
                 fsm.setState(Verify.Homing, message="Homing")
+        elif fsm.query(Faulty.Pending):
+            rw.step()
+            if clocks['faulty_report'].query():
+                idx = random.randrange(len(params['source']['fake_positions']))
+                pos_to_verify = params['source']['fake_positions'][idx]
+                fsm.setState(Faulty.DriveTo, message="Drive to fake source point")
+        elif fsm.query(Faulty.DriveTo):
+            pos_state, myCeratinty = posUncertaintyEst()
+            myCeratinty*=10 #Faulty points are reported with 10 times of certainty
+            # execute driving cmd
+            arrived = going(pos_to_verify)
 
-
+            if arrived:
+                source_list = w3.sc.functions.getSourceList().call()
+                ticketPrice = depoValueEst(source_list, myCeratinty)
+                transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
+                                                           int(pos_state[1][0] * DECIMAL_FACTOR), 1,
+                                                           w3.toWei(ticketPrice, 'ether'),
+                                                           int(myCeratinty * DECIMAL_FACTOR)).transact(
+                    {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
+                     'gasPrice': gasprice})
+                print('Robot ', robot.variables.get_id(), ' report fake source point: ',
+                      int(pos_state[0][0] * DECIMAL_FACTOR),
+                      int(pos_state[1][0] * DECIMAL_FACTOR), int(myCeratinty * DECIMAL_FACTOR))
+                txs['report'] = Transaction(transactHash)
+                fsm.setState(Faulty.Homing, message="Homing")
+        elif fsm.query(Faulty.Homing):
+            # post-transaction homing
+            arrived = homing()
+            if arrived:
+                fsm.setState(Faulty.Pending, message="Pending random walk")
 
 
 def reset():
