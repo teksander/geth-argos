@@ -575,14 +575,14 @@ def controlstep():
             else:
                 if txs['sell'].query(3):
                     txs['sell'] = Transaction(None)
-                    fsm.setState(Recruit.PLAN, message = "Sell success")
+                    fsm.setState(Recruit.BUY, message = "Sell success")
 
                 elif txs['sell'].fail == True:    
                     txs['sell'] = Transaction(None)
-                    fsm.setState(Recruit.PLAN, message = "Sell failed")
+                    fsm.setState(Recruit.BUY, message = "Sell failed")
 
                 elif txs['sell'].hash == None:
-                    fsm.setState(Recruit.PLAN, message = "None to sell")
+                    fsm.setState(Recruit.BUY, message = "None to sell")
 
 
         #########################################################################################################
@@ -603,21 +603,9 @@ def controlstep():
                 fsm.setState(Recruit.PLAN, message = "Buy failed")
 
             elif txs['buy'].hash == None:
-
-                if clocks['block'].query():
-                    try:
-                        txBuy = w3.sc.functions.assignPatch().transact()
-                        txs['buy'] = Transaction(txBuy)
-                        robot.log.info("Buy confirmed")     
-
-                    except Exception as e:
-                        fsm.setState(Recruit.PLAN, message = "Buy failed")
-                        txs['buy'] = Transaction(None)
-                        robot.log.warning(e.args)
-                            
-            if clocks['buy'].query():
-                fsm.setState(Idle.IDLE, message = "Buy expired")
-
+                txBuy = w3.sc.functions.assignPatch().transact()
+                txs['buy'] = Transaction(txBuy)
+                robot.log.info("Buying")     
 
 
         #########################################################################################################

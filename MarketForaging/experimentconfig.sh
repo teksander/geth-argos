@@ -15,8 +15,8 @@ export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
 export CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
 export CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
 
-export SCFILE="${EXPERIMENTFOLDER}/scs/resource_market_egreedy.sol" 
-export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/resource_market_egreedy.x.sol" 
+export SCFILE="${EXPERIMENTFOLDER}/scs/resource_market_limit.sol" 
+export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/resource_market_limit.x.sol" 
 
 export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.x.argos"

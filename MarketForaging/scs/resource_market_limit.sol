@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant max_workers = MAXWORKERS; 
+  uint constant max_workers = 11; 
 
     struct patch {
 

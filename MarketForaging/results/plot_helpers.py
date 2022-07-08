@@ -126,28 +126,11 @@ def get_param(group, name, param_dict, param, alias):
     param_dict = eval(param_dict)
     if param in param_dict:
         if alias:
-            group[alias] = param_dict[param]
+            group[alias] = repr(param_dict[param])
         else:
             group[param] = param_dict[param]
     return group
 
-# def get_param_df(df, param_dict, param, alias = None):
-#     df = df.groupby(['EXP','REP']).apply(lambda x: get_param(x, x.name , param_dict, param, alias))
-#     return df
-
-# def get_param(group, name, param_dict, param, alias):
-#     exp = name[0]
-#     rep = name[1]
-            
-#     configfile = '%s/experiment_%s/%s/config.py' % (datadir, exp, rep)
-#     exec(open(configfile).read(), globals())
-#     param_dict = eval(param_dict)
-#     if param in param_dict:
-#         if alias:
-#             group[alias] = param_dict[param]
-#         else:
-#             group[param] = param_dict[param]
-#     return group
 
 def perform_corrections(df):
 
