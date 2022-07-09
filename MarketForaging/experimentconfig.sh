@@ -46,12 +46,8 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXSTAKERS=10
-export MAXWORKERS=$NUMROBOTS
+export MAXWORKERS=2
 export EPSILON=30
-export STAKERSHARE=30
-export WORKERSHARE=$(echo 100-$STAKERSHARE | bc)
-
 
 # [OTHER]
 export SEED=350

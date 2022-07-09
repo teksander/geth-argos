@@ -4,7 +4,7 @@ from aenum import Enum, auto
 from aux import Timer
 
 class Idle(Enum):
-    IDLE   = 1
+    IDLE    = 1
 
 class Scout(Enum):
     SELL    = 2
@@ -27,47 +27,49 @@ class States(Enum):
     BUY    = 6
     DROP   = 7 
 
+stateList = list(Idle)+list(Scout)+list(Recruit)
+
 class FiniteStateMachine(object):
 
     def __init__(self, robot, start = None):
-        self.robot = robot
-        self._prevState = start
-        self._currState = start
-        self._accumTime = dict()
-        self._startTime = time.time()
+        self.robot     = robot
+        self.prevState = start
+        self.currState = start
+        self.accumTime = dict()
+        self.startTime = time.time()
 
     def getPreviousState(self):
-        return self._prevState
+        return self.prevState
 
     def getState(self, ):
-        return self._currState
+        return self.currState
 
     def getTimers(self):
-        return self._accumTime
+        return self.accumTime
 
     def setState(self, state, message = ""):
 
         self.onTransition(state, message)
 
-        if self._currState not in self._accumTime:
-            self._accumTime[self._currState] = 0
+        if self.currState not in self.accumTime:
+            self.accumTime[self.currState] = 0
 
-        self._accumTime[self._currState] += time.time() - self._startTime
-        self._prevState = self._currState
-        self._currState = state
-        self._startTime = time.time()
+        self.accumTime[self.currState] += time.time() - self.startTime
+        self.prevState = self.currState
+        self.currState = state
+        self.startTime = time.time()
     
     def query(self, state, previous = False):
         if previous:
-            return self._prevState == state
+            return self.prevState == state
         else:
-            return self._currState == state
+            return self.currState == state
 
     def onTransition(self, state, message):
         # Robot actions to perform on every transition
 
         if message != None:
-            self.robot.log.info("%s -> %s%s", self._currState, state, ' | '+message)
+            self.robot.log.info("%s -> %s%s", self.currState, state, ' | '+message)
         
         self.robot.variables.set_attribute("collectResource", "")
         self.robot.variables.set_attribute("dropResource", "")

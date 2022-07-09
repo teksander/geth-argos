@@ -250,9 +250,12 @@ class Transaction(object):
         except Exception as e:
             self.tx = None
 
+
+
 ####################################################################################################################################################################################
 #### INIT STEP #####################################################################################################################################################################
 ####################################################################################################################################################################################
+
 def init():
     global clocks,counters, logs, submodules, me, rw, nav, odo, gps, rb, w3, fsm, rs, erb, tcp_sc, rgb
     robotID = str(int(robot.variables.get_id()[2:])+1)
@@ -266,7 +269,7 @@ def init():
     robot.variables.set_attribute("resourceCount", "0")
     robot.variables.set_attribute("state", "")
 
-    # /* Initialize Logging Files and Console Logging*/
+    # /* Initialize Console Logging*/
     #######################################################################
     log_folder = experimentFolder + '/logs/' + robotID + '/'
 
@@ -277,17 +280,7 @@ def init():
     robot.log = logging.getLogger('main')
     robot.log.setLevel(loglevel)
 
-    # Experiment data logs (recorded to file)
-    name   =  'odometry.csv'
-    header = ['DIST']
-    logs['odometry'] = Logger(log_folder+name, header, 10, ID = robotID)
-
-    name   = 'resource.csv'
-    header = ['COUNT']
-    logs['resources'] = Logger(log_folder+name, header, 5, ID = robotID)
-
-
-    # /* Initialize Sub-modules */
+    # /* Initialize submodules */
     #######################################################################
     # # /* Init web3.py */
     robot.log.info('Initialising Python Geth Console...')
@@ -337,9 +330,24 @@ def init():
     # List of submodules --> iterate .start() to start all
     submodules = [w3.geth.miner, erb]
 
+    # /* Initialize logmodules*/
+    #######################################################################
+    # Experiment data logs (recorded to file)
+    name   = 'resource.csv'
+    header = ['COUNT']
+    logs['resources'] = Logger(log_folder+name, header, rate = 5, ID = me.id)
+
+    name   = 'fsm.csv'
+    header = stateList
+    logs['fsm'] = Logger(log_folder+name, header, rate = 10, ID = me.id)
+
+    name   =  'odometry.csv'
+    header = ['DIST']
+    logs['odometry'] = Logger(log_folder+name, header, rate = 10, ID = me.id)
+
     txs['sell'] = Transaction(None)
     txs['buy']  = Transaction(None)
-    txs['drop']  = Transaction(None)
+    txs['drop'] = Transaction(None)
 
 #########################################################################################################################
 #### CONTROL STEP #######################################################################################################
@@ -452,7 +460,6 @@ def controlstep():
 
                     return res
 
-
         ##########################
         ###### MODULE STEPS ######
         ##########################
@@ -462,6 +469,9 @@ def controlstep():
 
         if logs['resources'].query():
             logs['resources'].log([len(rb)])
+
+        if logs['fsm'].query():
+            logs['fsm'].log([round(fsm.accumTime[state], 3) if state in fsm.accumTime else 0 for state in stateList ])
 
         if me.id == '1':
             with open(lp['files']['position'], 'w+') as f:
