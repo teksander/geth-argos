@@ -3,8 +3,8 @@ pragma solidity ^0.8.4;
 
 contract ForagingPtManagement{
     uint constant num_pt = 100;
-    uint constant max_life = 100;
-    uint constant min_rep = 10; //Minimum number of reported points that make contract verified
+    uint constant max_life = 300;
+    uint constant min_rep = 15; //Minimum number of reported points that make contract verified
     int256 constant radius = 10000;
 
     address public minter;
@@ -17,7 +17,7 @@ contract ForagingPtManagement{
         uint category; //0:non food, 1:food
         uint cluster;
         address sender;
-        uint uncertainty;
+        uint realType; //for experimental purpose only, the real food/non food type of the reported xy position
     }
 
     struct Cluster{
@@ -28,7 +28,9 @@ contract ForagingPtManagement{
         uint num_rep; //Number of reported points that supports this cluster
         uint256 total_credit; //Sum of deposited credit
         uint256 total_credit_food; //Sum of deposited credit that report this point as food
-        uint256 total_uncertainty; //Total reported uncertainty
+        uint256 realType; //real food/non food type of the Initially reported Point of the cluster, for experimental purpose only
+        address init_reporter;
+        uint256 intention; //intention = 0 initial report, intention = 1 verification, avoid verification req to be listed as init report
     }
 
     struct clusterInfo{
@@ -64,7 +66,7 @@ contract ForagingPtManagement{
     }
 
 
-    function reportNewPt(int256 x, int256 y, uint category, uint256 amount, uint256 uncertainty) public payable{
+    function reportNewPt(int256 x, int256 y, uint category, uint256 amount, uint256 realType, uint256 intention) public payable{
         require(msg.value == amount);
         uint256 curtime = block.timestamp;
         // Assign point a cluster
@@ -75,8 +77,8 @@ contract ForagingPtManagement{
         int256 y_avg = 0;
         int256 this_distance = 0;
         if (category==1 && clusterList.length == 0){
-            clusterList.push(Cluster(x,y, curtime+max_life, 0, 1, amount, amount, uncertainty));
-            pointList.push(Point(x,y,amount, category, 0, msg.sender, uncertainty));
+            clusterList.push(Cluster(x,y, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention));
+            pointList.push(Point(x,y,amount, category, 0, msg.sender, realType));
         }
         else{
             // Search for closest unverified cluster
@@ -117,11 +119,11 @@ contract ForagingPtManagement{
             }
 
             //if exists non-verified cluster that the new point belongs
-            if (info.minClusterStatus == 0 && info.foundCluster==1){
+            if (info.minClusterStatus == 0 && info.foundCluster==1 && clusterList[info.minClusterIdx].init_reporter != msg.sender){
 
                 clusterList[info.minClusterIdx].num_rep+=1;
                 clusterList[info.minClusterIdx].total_credit+=amount;
-                clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
+                //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
                 if (category==1){
                     clusterList[info.minClusterIdx].total_credit_food+=amount;
                 }
@@ -129,7 +131,7 @@ contract ForagingPtManagement{
                 clusterList[info.minClusterIdx].x = info.x;
                 clusterList[info.minClusterIdx].y = info.y;
                 //ADD CORRESPONDING POINT
-                pointList.push(Point(x,y,amount, category, info.minClusterIdx, msg.sender, uncertainty));
+                pointList.push(Point(x,y,amount, category, info.minClusterIdx, msg.sender, realType));
 
 
                 //If cluster receives enough samples, verified.
@@ -139,9 +141,22 @@ contract ForagingPtManagement{
                     clusterList[info.minClusterIdx].verified=1; //cluster verified
                     total_non_food_credit = clusterList[info.minClusterIdx].total_credit-clusterList[info.minClusterIdx].total_credit_food;
                     //Redistribute money
+                    uint256 food_num =0;
                     for (uint j=0; j<pointList.length; j++){
                         if (pointList[j].cluster == info.minClusterIdx && pointList[j].category ==1){
-                            bonus_credit = total_non_food_credit*pointList[j].credit/clusterList[info.minClusterIdx].total_credit_food;
+                            food_num+=1;
+                         }
+                    }
+
+                    for (uint j=0; j<pointList.length; j++){
+                        if (pointList[j].cluster == info.minClusterIdx && pointList[j].category ==1){
+                            //bonus_credit = total_non_food_credit*pointList[j].credit/clusterList[info.minClusterIdx].total_credit_food;
+                            if (food_num>0){
+                                bonus_credit = total_non_food_credit/food_num;
+                            }
+                            else{
+                                bonus_credit = 0;
+                            }
                             payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
                          }
                     }
@@ -150,18 +165,31 @@ contract ForagingPtManagement{
                     clusterList[info.minClusterIdx].verified=2; //cluster abandon
                     total_non_food_credit = clusterList[info.minClusterIdx].total_credit-clusterList[info.minClusterIdx].total_credit_food;
                     //Redistribute money
+                    uint256 non_food_num =0;
                     for (uint j=0; j<pointList.length; j++){
                         if (pointList[j].cluster == info.minClusterIdx && pointList[j].category ==0){
-                            bonus_credit = clusterList[info.minClusterIdx].total_credit_food*pointList[j].credit/total_non_food_credit;
+                            non_food_num+=1;
+                         }
+                    }
+                    for (uint j=0; j<pointList.length; j++){
+                        if (pointList[j].cluster == info.minClusterIdx && pointList[j].category ==0){
+                            // bonus_credit = clusterList[info.minClusterIdx].total_credit_food*pointList[j].credit/total_non_food_credit;
+                            if (non_food_num>0){
+                                bonus_credit = clusterList[info.minClusterIdx].total_credit_food/non_food_num;
+                            }
+                            else{
+                                bonus_credit = 0;
+                            }
+
                             payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
                          }
                     }
                 }
             }
-            else if (category==1 && info.foundCluster==0){
+            else if (category==1 && info.foundCluster==0 && intention==0){
                 //if point reports a food source position and  belongs to nothing, create new cluster
-                clusterList.push(Cluster(x,y,curtime + max_life, 0, 1, amount, amount, uncertainty));
-                pointList.push(Point(x,y,amount, category, clusterList.length-1, msg.sender, uncertainty));
+                clusterList.push(Cluster(x,y,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention));
+                pointList.push(Point(x,y,amount, category, clusterList.length-1, msg.sender, realType));
             }
             else{
                 //Do nothing and transfer back, if anything else

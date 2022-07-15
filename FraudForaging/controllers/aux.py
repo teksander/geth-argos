@@ -501,6 +501,23 @@ class Logger(object):
                 pass
                 logger.warning('Failed to log data to file')
 
+    def log_force(self, data):
+        """ Method to log row of data
+        :param data: row of data to log
+        :type data: list
+        """
+
+
+        self.tStamp = time.time()
+        try:
+            tString = str(round(self.tStamp - self.tStart, 3))
+            pData = ' '.join([str(x) for x in data])
+            self.file.write('{} {} {}\n'.format(self.id, tString, pData))
+            self.latest = self.tStamp
+        except:
+            pass
+            logger.warning('Failed to log data to file')
+
     def queryTimer(self):
         return time.time()-self.tStamp > self.rate
 

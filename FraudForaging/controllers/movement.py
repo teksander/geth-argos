@@ -70,10 +70,14 @@ class NoisyOdometry(object):
         self.__distance_traveled = (position - self.__position).length
         self.__distance_accumul += self.__distance_traveled
         self.__noisy_position = position
+        self.__position = position
         self.__noisy_position.x += random.normalvariate(0, self.sigma)
         self.__noisy_position.y += random.normalvariate(0, self.sigma)
 
     def getNew(self, reset = False):
+        return self.__position
+
+    def getGroundTruth(self, reset = False):
         return self.__noisy_position
 
     def getDiff(self):
@@ -112,7 +116,7 @@ class Navigate(object):
 
         # Navigation parameters
         self.Kp = 50                                    # Angular velocity proportional gain
-        self.window_size = 10                           # Avoid vector filtering           
+        self.window_size = 5                           # Avoid vector filtering
         self.thresh = math.radians(70)                  # Wait before moving
         self.thresh_front_collision = math.radians(15)  # Aggressive avoidance
 

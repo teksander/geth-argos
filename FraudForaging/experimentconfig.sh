@@ -29,8 +29,9 @@ export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
 # [ARGOS]
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"
-export NUM1=10
-export NUM2=1
+export NUM1A=15
+export NUM1B=0
+export NUM2=0
 export RABRANGE="0.3"
 
 export ARENADIMX=2
@@ -41,7 +42,7 @@ export ARENADIMYH=$(echo "scale=2 ; $ARENADIMY/2" | bc)
 
 
 # export DENSITY=3
-export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
+export NUMROBOTS=$(echo $NUM1A+$NUM1B+$NUM2 | bc)
 
 export STARTDIM=$(echo "scale=2 ; $ARENADIMY/5" | bc)
 export TPS=10
@@ -53,14 +54,14 @@ export BLOCKPERIOD=2
 export MAXRECRUITS=2
 #On chain estimator
 export NUMPT=100
-export MAXLIFE=100
-export MINREP=10
+export MAXLIFE=300
+export MINREP=15
 export RADIUS=10000 # 0.1
 export DECIMAL_FACTOR=100000 # 1e5
 
 # [OTHER]
 export SEED=350
-export TIMELIMIT=15
+export TIMELIMIT=500
 export REPS=2
 
 

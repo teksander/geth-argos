@@ -9,7 +9,6 @@ params = dict()
 
 # General Parameters
 params['environ'] = os.environ
-num_faulty = int(os.environ["NUM2"])
 # General Parameters
 generic_params = dict()
 generic_params['arena_size'] = float(os.environ["ARENADIMY"])
@@ -18,8 +17,9 @@ generic_params['time_limit'] = float(os.environ["TIMELIMIT"]) * 60
 generic_params['seed']       = 350 # None for randomgen
 generic_params['decimal_factor'] = float(os.environ["DECIMAL_FACTOR"])
 generic_params['num_food_source'] = 3
-generic_params['unitPositionUncertainty'] = 0.0003
+generic_params['unitPositionUncertainty'] = 0.003
 generic_params['frictionUncertainty'] = 0.01
+num_malicious = int(os.environ["NUM2"])
 def load(path):
     fs_list=[]
     ffs_list = []
@@ -28,14 +28,12 @@ def load(path):
             l= list(map(float,file.read().split()))
         for idx in range(generic_params['num_food_source']):
             fs_list.append([l[idx*2],l[idx*2+1]])
-        for idy in range(num_faulty):
+        for idy in range(num_malicious):
             ffs_list.append([l[(generic_params['num_food_source']+idy)*2],l[(generic_params['num_food_source']+idy)*2+1]])
         return fs_list, ffs_list
     else:
         return  [[0,0]], [[0,0]]
 generic_params['tps'] = eval(os.environ["TPS"])
-generic_params['num_1'] = eval(os.environ["NUM1"])
-generic_params['num_2'] = eval(os.environ["NUM2"])
 generic_params['arena_dim'] = eval(os.environ["ARENADIMY"])
 generic_params['rab_range'] = eval(os.environ["RABRANGE"])
 generic_params['block_period'] = eval(os.environ["BLOCKPERIOD"])
@@ -52,7 +50,7 @@ params['market'] = market_params
 
 #home position centered as a circle
 params['home']=dict()
-params['home']['radius'] = 0.1
+params['home']['radius'] = 0.2
 params['home']['position'] = [0, 0]
 
 params['market']['height']   = eval(params['environ']['ARENADIMY'])
