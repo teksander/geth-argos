@@ -43,16 +43,20 @@ params['patches']['distribution'] = 'uniform'
 # 									     'x_sg': 0.15 * params['generic']['arena_size'], 
 # 									     'y_sg': 0.15 * params['generic']['arena_size']}]
 
-params['patches']['radius'] = 0.08
-params['patches']['qtty_min'] = 10
-params['patches']['qtty_max'] = 10
+params['patches']['radius'] = 0.12
+params['patches']['qtty_min'] = 15
+params['patches']['qtty_max'] = 15
 params['patches']['dist_min'] = 1.5 * params['cache']['radius'] 
 params['patches']['dist_max'] = 0.5 * params['generic']['arena_size']   
 
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
-params['patches']['forage_rate'] = {'red': 7, 'green':  7, 'blue': 7, 'yellow': 7}
-params['patches']['regen_rate']  = {'red': 9999, 'green':  9999, 'blue': 9999, 'yellow': 9999}
-params['patches']['utility']     = {'red': 2, 'green':  4, 'blue': 8, 'yellow': 16}
+params['patches']['forage_rate'] = {'red': 5, 'green':  5, 'blue': 5, 'yellow': 5}
+params['patches']['regen_rate']  = {'red': 30, 'green':  30, 'blue': 30, 'yellow': 30}
+params['patches']['utility']     = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
+
+params['patches']['dec_returns_func']   = 'linear' # constant, linear or logarithmic decreasing returns
+params['patches']['dec_returns_thresh'] = 15       # qqty of resource before dec returns starts
+params['patches']['dec_returns_mult']   = 8        # multiplier of the original forage rate for the last resource being foraged
 
 # params['patches']['area_percent'] = 0.005 * (10/generic_params['num_robots'])
 # params['patches']['radius']    = params['generic']['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
@@ -62,7 +66,7 @@ params['patches']['utility']     = {'red': 2, 'green':  4, 'blue': 8, 'yellow': 
 # params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 
 
-params['patches']['counts'] = {'red': 3, 'green': 3 , 'blue': 3, 'yellow': 3}
+params['patches']['counts'] = {'red': 1, 'green': 1 , 'blue': 1, 'yellow': 1}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
 							   'green':  params['patches']['radius'] , 
 							   'blue':   params['patches']['radius'], 

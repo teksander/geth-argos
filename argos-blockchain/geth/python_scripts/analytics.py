@@ -8,19 +8,41 @@ global clocks, counters, logs, txs
 clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
 def scHandle():
-    """ Interact with SC when new blocks are synchronized """
+    """ Interact with SC every time new blocks are synchronized """
+
+    # SC index map
+    _x       = 0
+    _y       = 1
+    _qtty    = 2
+    _util    = 3
+    _qlty    = 4
+    _json    = 5
+    _id      = 6
+    _meanQ   = 7
+    _count   = 8
+    _wCount  = 9
 
     resources = sc.functions.getPatches().call()
-    json_list = [x[5] for x in resources]
-    mean_list = [x[7] for x in resources]
-    mean_sum  = sum(mean_list)
+    mean_total  = sum([res[_meanQ] for res in resources])
     
+    # Write to a file used for qt_draw in ARGoS
     with open(scresourcesfile, 'w+', buffering=1) as f:
-        for i in range(len(resources)):
-            f.write('%s %s %s\n' % (json_list[i], mean_list[i], mean_sum))
+        for res in resources:
+            f.write('%s %s %s\n' % (res[_json], res[_meanQ], mean_total))
 
-    logs['sc'].log([w3.eth.blockNumber, 0, len(resources)])
-
+    # Write to the log file used data analysis
+    for res in resources:        
+        logs['sc'].log([
+            block['number'], 
+            block['hash'].hex(), 
+            block['parentHash'].hex(), 
+            res[_x], 
+            res[_y], 
+            res[_qtty], 
+            res[_util],
+            res[_qlty],
+            res[_meanQ],
+            res[_wCount]])
 
 if __name__ == '__main__':
 
@@ -48,7 +70,7 @@ if __name__ == '__main__':
     logs['block'] = Logger(logfolder+name, header, ID=robotID)
 
     name        = 'sc.csv'  
-    header      = ['BLOCK', 'BALANCE', '#RESOURCES']   
+    header      = ['BLOCK', 'HASH', 'PHASH', 'X', 'Y', 'QTTY', 'UTIL', 'QLTY', 'MEANQ', 'WCOUNT']   
     logs['sc']  = Logger(logfolder+name, header, ID=robotID)
 
     name         = 'sync.csv' 
@@ -87,16 +109,16 @@ if __name__ == '__main__':
                     logs['extra'].log([getFolderSize('/root/.ethereum/devchain/geth/chaindata')])
 
                 newBlocks = bf.get_new_entries()
+
                 if newBlocks:
-
-                    scHandle()
-
                     logs['sync'].log([len(newBlocks)])
 
                     # 1) Log relevant block details 
                     for blockHex in newBlocks:
-                        
+
                         block = w3.eth.getBlock(blockHex)
+
+                        scHandle()
 
                         logs['block'].log([time.time()-block['timestamp'], 
                                     block['timestamp'], 

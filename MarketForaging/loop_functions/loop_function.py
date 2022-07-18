@@ -26,8 +26,8 @@ os.makedirs(os.path.dirname(log_folder), exist_ok=True)
 # /* Global Variables */
 #######################################################################
 
-global resource_list, resource_counter
-resource_list = []
+global allresources, resource_counter
+allresources = []
 resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
 position_previous = dict()
 
@@ -116,7 +116,7 @@ def generate_resource(n = 1, qualities = None, max_attempts = 50):
                 overlap = True
 
             # Discard if resource overlaps with other resources
-            if any([is_in_circle((res.x, res.y), (x,y), res.radius+radius) for res in resource_list]):
+            if any([is_in_circle((res.x, res.y), (x,y), res.radius+radius) for res in allresources]):
                 overlap = True
 
             # Discard if resource overlaps with market
@@ -132,11 +132,11 @@ def generate_resource(n = 1, qualities = None, max_attempts = 50):
                 overlap = True
 
         # Append new resource to the global list of resources
-        resource_list.append(Resource({'x':x, 'y':y, 'radius':radius, 'quantity':quantity, 'quality':quality, 'utility':lp['patches']['utility'][quality]}))
+        allresources.append(Resource({'x':x, 'y':y, 'radius':radius, 'quantity':quantity, 'quality':quality, 'utility':lp['patches']['utility'][quality]}))
 
-        clocks['regen'][resource_list[-1]] = Timer(lp['patches']['regen_rate'][resource_list[-1].quality])
+        clocks['regen'][allresources[-1]] = Timer(lp['patches']['regen_rate'][allresources[-1].quality])
 
-        # print('Created Resource: ' + resource_list[-1]._json)
+        # print('Created Resource: ' + allresources[-1]._json)
 
 
 def init():
@@ -168,43 +168,41 @@ def init():
 def pre_step():
     global startFlag, startTime, resource_counter
 
+    # Tasks to perform on the first time step
     if not startFlag:
         startTime = time.time()
     
-    # Resource regeneration
-    for res in resource_list:
-        if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
-            res.quantity += 1
+    # Tasks to perform every time step
+    foragers = {res: [] for res in allresources}
 
+    # Tasks to perform for each robot
     for robot in allrobots:
         robot.variables.set_attribute("newResource", "")
         robot.variables.set_attribute("at", "")
         
         # Has robot stepped into resource? YES -> Update virtual sensor
-        for res in resource_list:
+        for res in allresources:
+
             if is_in_circle(robot.position.get_position(), (res.x, res.y), res.radius):
 
                 # Update robot virtual sensor
                 robot.variables.set_attribute("newResource", res._json)
 
-                # Robot does not carry resource and is forager? YES -> Collect resource
+                # Robot does not carry resource and is forager? YES -> Forage resource
                 if not robot.variables.get_attribute("hasResource") \
                    and robot.variables.get_attribute("collectResource"):
-
-                    if robot.id not in clocks['forage']:
-                        clocks['forage'][robot.id] = Timer(lp['patches']['forage_rate'][res.quality])
-
-                    if clocks['forage'][robot.id].query():
-                        robot.variables.set_attribute("hasResource", res.quality)
-                        res.quantity -= 1
+                   foragers[res].append(robot.id) 
+                else:
+                    if robot.id in clocks['forage']: 
                         clocks['forage'].pop(robot.id)
 
-                        # Resource expired? YES -> Generate new
-                        if res.quantity <= 0:
-                            resource_list.remove(res)
-                            generate_resource(1, [res.quality])
+                # Robot foraging timer is up? YES -> Collect resource
+                if robot.id in clocks['forage']:
+                    robot.variables.set_attribute("forageTimer", str(round(clocks['forage'][robot.id].rate,2)))
+                    if clocks['forage'][robot.id].query():
+                        res.quantity -= 1
+                        robot.variables.set_attribute("hasResource", res.quality)
                         
-
         # Has robot stepped into market drop area? YES
         if is_in_circle(robot.position.get_position(), (cache.x, cache.y), cache.radius):
             robot.variables.set_attribute("at", "cache")
@@ -220,6 +218,42 @@ def pre_step():
                 robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
 
 
+    # Tasks to perform for each resource
+    for res in allresources:
+
+        # Regenerate resource
+        if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
+            res.quantity += 1
+
+        # Shuffle foragers to randomize who gets resources faster
+        random.shuffle(foragers[res])
+
+        # Base forage rate for resource type
+        forageRate    = lp['patches']['forage_rate'][res.quality]
+        m = (forageRate/lp['patches']['dec_returns_thresh']) * (1 - lp['patches']['dec_returns_mult'])
+        b = forageRate*lp['patches']['dec_returns_mult']
+        
+
+        # Collect resources
+        clocked   = [x for x in foragers[res] if x in clocks['forage']] 
+        unclocked = [x for x in foragers[res] if x not in clocks['forage']] 
+        already_clocking = len(clocked)
+
+        for robotID in unclocked: 
+
+            # Apply decreasing returns
+            if lp['patches']['dec_returns_func'] == 'linear':
+
+                if res.quantity < lp['patches']['dec_returns_thresh']:
+                    forageRate = m * (res.quantity-already_clocking) + b
+                    already_clocking += 1
+
+            elif lp['patches']['dec_returns_func'] == 'log':
+                pass
+
+            clocks['forage'][robotID] = Timer(forageRate)
+
+
 def post_step():
     global startFlag, clocks, accums, resource_counter
     global RAM, CPU
@@ -227,10 +261,15 @@ def post_step():
     if not startFlag:
         startFlag = True
 
+    # Regenerate depleted patches
+    depleted = [res for res in allresources if res.quantity <= 0]
+    allresources[:] = [res for res in allresources if res not in depleted]
+
+    generate_resource(len(depleted), [res.quality for res in depleted])
 
     # Record the resources to be drawn to a file
     with open(lp['files']['patches'], 'w', buffering=1) as f:
-        for res in resource_list:
+        for res in allresources:
             f.write(res._json+'\n')
 
     # Record the carried resourced to be drawn to a file

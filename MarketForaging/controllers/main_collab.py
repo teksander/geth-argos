@@ -56,7 +56,7 @@ clocks['forage'] = Timer(0)
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
 cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['radius']})
 
-# Index map
+# SC index map
 _x       = 0
 _y       = 1
 _qtty    = 2
@@ -64,9 +64,9 @@ _util    = 3
 _qlty    = 4
 _json    = 5
 _id      = 6
-_lastT   = 7
-_meanQ   = 8
-_count   = 9
+_meanQ   = 7
+_count   = 8
+_wCount  = 9
 
 class ResourceBuffer(object):
     """ Establish the resource buffer class 
@@ -268,6 +268,7 @@ def init():
     robot.variables.set_attribute("hasResource", "")
     robot.variables.set_attribute("resourceCount", "0")
     robot.variables.set_attribute("state", "")
+    robot.variables.set_attribute("forageTimer", "0")
 
     # /* Initialize Console Logging*/
     #######################################################################
@@ -636,21 +637,21 @@ def controlstep():
                 resource = sensing()
                 found = resource and resource._p == rb.best._p
 
-
-                if not found and distance < 0.8*rb.best.radius:
+                if not found and distance < 0.7*rb.best.radius:
                     rb.best.quantity = 0
                     fsm.setState(Scout.SELL, message = 'Failed foraging trip')
 
                 if found and distance < 0.9*rb.best.radius:
+
                     robot.variables.set_attribute("collectResource", "True")
                     nav.avoid(move = True)
-                    
+
                 else:
                     nav.navigate_with_obstacle_avoidance(rb.best._pr)
 
-
                 if robot.variables.get_attribute("hasResource"):
-                    fsm.setState(Recruit.DROP)
+                    robot.variables.set_attribute("collectResource", "")
+                    fsm.setState(Recruit.DROP, message = "Collection %s secs" % robot.variables.get_attribute("forageTimer"))
 
         #########################################################################################################
         #### Recruit.DROP

@@ -167,6 +167,18 @@ def create_digraph(df):
     
     return digraph
 
+def get_mainchain_df(df, leaf):
+    parentHash = leaf
+    main_path = []
+    
+    for (idx, row) in df[::-1].iterrows():
+        if row['HASH'] == parentHash:
+            main_path.append(idx)
+            parentHash = row['PHASH']
+        
+    return df.iloc[main_path]
+
+
 def convert_digraph(digraph):
     return nx.nx_pydot.from_pydot(pydotplus.graph_from_dot_data(digraph.source))
 

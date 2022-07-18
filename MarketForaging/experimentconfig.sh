@@ -15,7 +15,7 @@ export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
 export CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
 export CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
 
-export SCNAME="resource_market_limit"
+export SCNAME="resource_market_egreedy"
 export SCFILE="${EXPERIMENTFOLDER}/scs/${SCNAME}.sol" 
 export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/${SCNAME}.x.sol" 
 
@@ -27,16 +27,16 @@ export SWARMNAME=ethereum
 export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
-export NUM1=11
+export NUM1=5
 export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
 
 export NUM2=0
 export CON2="${EXPERIMENTFOLDER}/controllers/main_greedy.py"
 
-export RABRANGE="0.5"
+export RABRANGE="0.4"
 export WHEELNOISE="0"
 export TPS=10
-export DENSITY="1.5"
+export DENSITY="3"
 
 export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
 export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
@@ -48,7 +48,7 @@ export BLOCKPERIOD=2
 
 # [SC]
 export MAXWORKERS=2
-export EPSILON=30
+export EPSILON=50
 
 # [OTHER]
 export SEED=350

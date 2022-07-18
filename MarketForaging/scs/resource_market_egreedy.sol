@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant epsilon = 30; 
+  uint constant epsilon = 50; 
 
     struct patch {
 
@@ -37,11 +37,11 @@ contract MarketForaging {
     return (previous*N + current) / (N+1);
   }
 
-  function random(uint mod) private view returns (uint) {
-    return uint(keccak256(abi.encode(block.timestamp))) % mod;
+  function random(uint mod) public view returns (uint) {
+    return uint(keccak256(abi.encode(block.timestamp,msg.sender))) % mod;
   }
 
-  function coinFlip(uint odds) private view returns (bool) {
+  function coinFlip(uint odds) public view returns (bool) {
     if (random(100) < odds) {
       return true;
     }
@@ -109,19 +109,17 @@ contract MarketForaging {
         patches[i].json  = _json;
         patches[i].qtty  = _qtty;
 
-        // Update robot drop counter;
-        drops[msg.sender] ++;
-        lastD[msg.sender] = block.number;
-
-        // Re-assign robot
-        if (drops[msg.sender] % 1 == 0)  {
-          assignPatch();
-        }
-
         // Update patch information
         updatePatch(_x, _y, _qtty, _util, _qlty, _json);
-
       }
+    }
+    // Update robot drop counter;
+    drops[msg.sender] ++;
+    lastD[msg.sender] = block.number;
+
+    // Re-assign robot
+    if (drops[msg.sender] % 1 == 0)  {
+      assignPatch();
     }
   }
 

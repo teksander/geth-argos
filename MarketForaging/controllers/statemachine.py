@@ -71,7 +71,6 @@ class FiniteStateMachine(object):
         if message != None:
             self.robot.log.info("%s -> %s%s", self.currState, state, ' | '+message)
         
-        self.robot.variables.set_attribute("collectResource", "")
         self.robot.variables.set_attribute("dropResource", "")
         self.robot.variables.set_attribute("state", str(state))
 

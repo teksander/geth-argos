@@ -38,7 +38,7 @@ contract MarketForaging {
   }
 
   function random(uint mod) private view returns (uint) {
-    return uint(keccak256(abi.encode(block.timestamp))) % mod;
+    return uint(keccak256(abi.encode(block.timestamp)+abi.encode(msg.sender))) % mod;
   }
 
   function coinFlip(uint odds) private view returns (bool) {
@@ -109,19 +109,17 @@ contract MarketForaging {
         patches[i].json  = _json;
         patches[i].qtty  = _qtty;
 
-        // Update robot drop counter;
-        drops[msg.sender] ++;
-        lastD[msg.sender] = block.number;
-
-        // Re-assign robot
-        if (drops[msg.sender] % 1 == 0)  {
-          assignPatch();
-        }
-
         // Update patch information
         updatePatch(_x, _y, _qtty, _util, _qlty, _json);
-
       }
+    }
+    // Update robot drop counter;
+    drops[msg.sender] ++;
+    lastD[msg.sender] = block.number;
+
+    // Re-assign robot
+    if (drops[msg.sender] % 1 == 0)  {
+      assignPatch();
     }
   }
 
