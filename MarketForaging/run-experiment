@@ -53,14 +53,39 @@ run() {
 }
 
 
-EXP=130_staking
-# copy "test120_scaling/25_blockchain2"
-config "REPS" 5
+EXP=113_epsilon_test
 
-# Experiment parameter
-CFG=10_collab
-config "NUM1" 10
-config "NUM2" 0
-config "MAXWORKERS" 2
+config "REPS" 1
+config "NUM1" 11
+
+#-----------------------
+# config "SCNAME" "resource_market_limit" 
+
+# for MAXWORKERS in $(seq 4 1 5); do 
+# 	CFG=limit_${MAXWORKERS}
+# 	config "MAXWORKERS" ${MAXWORKERS}
+# 	wait
+# 	run    "${EXP}/${CFG}"
+# done
+
+
+#-----------------------
+config "SCNAME" "resource_market_egreedy"
+
+CFG=egreedy_50
+config "EPSILON" 50
 wait
 run    "${EXP}/${CFG}"
+
+# CFG=egreedy_20
+# config "EPSILON" 20
+# wait
+# run    "${EXP}/${CFG}"
+
+
+# for EPSILON in $(seq 0 10 100); do 
+# 	CFG=egreedy_${EPSILON}
+# 	config "EPSILON" ${EPSILON}
+# 	wait
+# 	run    "${EXP}/${CFG}"
+# done

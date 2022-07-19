@@ -637,7 +637,7 @@ def controlstep():
                 resource = sensing()
                 found = resource and resource._p == rb.best._p
 
-                if not found and distance < 0.7*rb.best.radius:
+                if not found and distance < 0.5*rb.best.radius:
                     rb.best.quantity = 0
                     fsm.setState(Scout.SELL, message = 'Failed foraging trip')
 
