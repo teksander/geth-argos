@@ -49,6 +49,7 @@ export BLOCKPERIOD=2
 # [SC]
 export MAXWORKERS=2
 export EPSILON=50
+export WINSIZE=5
 
 # [OTHER]
 export SEED=350

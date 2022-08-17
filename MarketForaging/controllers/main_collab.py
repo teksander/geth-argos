@@ -633,13 +633,13 @@ def controlstep():
                 # Distance to resource
                 distance = nav.get_distance_to(rb.best._pr)
 
-                # Resource virtual sensor
+                # Resource virtu`al sensor
                 resource = sensing()
                 found = resource and resource._p == rb.best._p
 
-                if not found and distance < 0.5*rb.best.radius:
-                    rb.best.quantity = 0
-                    fsm.setState(Scout.SELL, message = 'Failed foraging trip')
+                # if not found and distance < 0.5*rb.best.radius:
+                #     rb.best.quantity = 0
+                #     fsm.setState(Scout.SELL, message = 'Failed foraging trip')
 
                 if found and distance < 0.9*rb.best.radius:
 

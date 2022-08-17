@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 contract MarketForaging {
 
   uint constant epsilon = EPSILON; 
+  uint constant expma   = 15; 
 
     struct patch {
 
@@ -21,7 +22,6 @@ contract MarketForaging {
     uint meanQ;
     uint count;
     uint worker_count;
-
   } 
 
   patch[] private patches;
@@ -34,7 +34,7 @@ contract MarketForaging {
 
 
   function updateMean(uint previous, uint current, uint N) private pure returns (uint) {
-    return (previous*N + current) / (N+1);
+    return (previous + expma*current) / (N+expma);
   }
 
   function random(uint mod) public view returns (uint) {

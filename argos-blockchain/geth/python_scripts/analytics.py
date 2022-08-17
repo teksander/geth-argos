@@ -42,7 +42,8 @@ def scHandle():
             res[_util],
             res[_qlty],
             res[_meanQ],
-            res[_wCount]])
+            res[_wCount],
+            len(resources)])
 
 if __name__ == '__main__':
 
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     logs['block'] = Logger(logfolder+name, header, ID=robotID)
 
     name        = 'sc.csv'  
-    header      = ['BLOCK', 'HASH', 'PHASH', 'X', 'Y', 'QTTY', 'UTIL', 'QLTY', 'MEANQ', 'WCOUNT']   
+    header      = ['BLOCK', 'HASH', 'PHASH', 'X', 'Y', 'QTTY', 'UTIL', 'QLTY', 'MEANQ', 'WCOUNT', 'RCOUNT']   
     logs['sc']  = Logger(logfolder+name, header, ID=robotID)
 
     name         = 'sync.csv' 
