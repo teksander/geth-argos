@@ -37,17 +37,6 @@ contract MarketForaging {
     return (previous*N + current) / (N+1);
   }
 
-  function random(uint mod) private view returns (uint) {
-    return uint(keccak256(abi.encode(block.timestamp)+abi.encode(msg.sender))) % mod;
-  }
-
-  function coinFlip(uint odds) private view returns (bool) {
-    if (random(100) < odds) {
-      return true;
-    }
-    return false;
-  }
-
   function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
     bool unique = true;
     bool depleted = false;

@@ -103,7 +103,8 @@ contract MarketForaging {
       if (_x == patches[i].x && _y == patches[i].y ) {
 
         // Update average quality
-        patches[i].meanQ = updateMean(patches[i].meanQ, 1000*patches[i].util/(block.number-lastD[msg.sender]), patches[i].count);
+        // patches[i].meanQ = updateMean(patches[i].meanQ, 1000*patches[i].util/(block.number-lastD[msg.sender]), patches[i].count);
+        patches[i].meanQ = 1000*patches[i].util/(block.number-lastD[msg.sender]);
         patches[i].count ++;
       
         patches[i].json  = _json;

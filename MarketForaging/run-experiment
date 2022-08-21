@@ -39,43 +39,51 @@ run() {
 	# Configure experiment
 	. experimentconfig.sh
 
-	for REP in $(seq 1 ${REPS}); do
+	# If is a testrun
+	if  [[ $2 = "--test" || $2 = "-t" ]]; then
+		echo "Running test ${1}"
+		. starter -r -s
 
-		# Perform experiment
-		. starter --reset-geth --start-novis
+	else
+		for REP in $(seq 1 ${REPS}); do
+			echo "Runing experiment ${1}"
 
-		# Collect data
-		if [ $# -eq 1 ]; then
-		    bash collect-logs ${1}
-		fi
-		
-	done
+			# Perform experiment
+			. starter -r -sz
+
+			# Collect data
+			if [ $# -eq 1 ]; then
+			    bash collect-logs ${1}
+			fi
+			
+		done
+	fi
 }
 
 
-EXP=113_epsilon_test
+EXP=115_size
 
-config "REPS" 1
-config "NUM1" 11
-
-#-----------------------
-# config "SCNAME" "resource_market_limit" 
-
-# for MAXWORKERS in $(seq 4 1 5); do 
-# 	CFG=limit_${MAXWORKERS}
-# 	config "MAXWORKERS" ${MAXWORKERS}
-# 	wait
-# 	run    "${EXP}/${CFG}"
-# done
-
+config "REPS" 5
+config "NUM1" 5
 
 #-----------------------
-config "SCNAME" "resource_market_egreedy"
+config "SCNAME" "resource_market_limit" 
 
-CFG=egreedy_50
-config "EPSILON" 50
-wait
-run    "${EXP}/${CFG}"
+for MAXWORKERS in $(seq 2 1 5); do 
+	CFG=limit_${MAXWORKERS}
+	config "MAXWORKERS" ${MAXWORKERS}
+	wait
+	run    "${EXP}/${CFG}" $1
+done
+
+
+# #-----------------------
+# config "SCNAME" "resource_market_egreedy"
+
+# CFG=limit_3
+# config "EPSILON" 50
+# wait
+# run    "${EXP}/${CFG}" $1
 
 # CFG=egreedy_20
 # config "EPSILON" 20
