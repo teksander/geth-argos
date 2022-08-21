@@ -11,7 +11,7 @@ params['generic'] = dict()
 params['generic']['time_limit'] = float(os.environ["TIMELIMIT"]) * 60
 params['generic']['arena_size'] = float(os.environ["ARENADIM"])
 params['generic']['num_robots'] = int(os.environ["NUMROBOTS"])
-params['generic']['seed']       = 350 # None for randomgen
+params['generic']['seed']       = 358 # None for randomgen
 params['generic']['tps'] = eval(os.environ["TPS"])
 params['generic']['num_1'] = eval(os.environ["NUM1"])
 params['generic']['num_2'] = eval(os.environ["NUM2"])
@@ -24,16 +24,16 @@ params['generic']['max_workers'] = eval(os.environ["MAXWORKERS"])
 
 # Parameters for marketplace
 params['market'] = dict()
-params['market']['x'] = 0
-params['market']['y'] = 0
 params['market']['radius'] = params['generic']['arena_size'] * math.sqrt(0.05/math.pi)
+params['market']['x'] = 0
+params['market']['y'] = params['generic']['arena_size']/2-params['market']['radius']*1.5
+
 
 # Parameters for cache
 params['cache'] = dict()
-params['cache']['x'] = 0
-params['cache']['y'] = 0
 params['cache']['radius']  = params['generic']['arena_size'] * math.sqrt(0.10/math.pi)
-
+params['cache']['x'] = params['market']['x']
+params['cache']['y'] = params['market']['y']
 
 params['patches'] = dict()
 params['patches']['distribution'] = 'uniform' 
@@ -43,10 +43,11 @@ params['patches']['distribution'] = 'uniform'
 # 									     'x_sg': 0.15 * params['generic']['arena_size'], 
 # 									     'y_sg': 0.15 * params['generic']['arena_size']}]
 
-params['patches']['radius'] = 0.12
+params['patches']['known']  = True
+params['patches']['radius'] = 0.20
 params['patches']['qtty_min'] = 15
 params['patches']['qtty_max'] = 15
-params['patches']['dist_min'] = 1.5 * params['cache']['radius'] 
+params['patches']['dist_min'] = 1 * params['cache']['radius'] 
 params['patches']['dist_max'] = 0.5 * params['generic']['arena_size']   
 
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}

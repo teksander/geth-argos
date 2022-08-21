@@ -261,7 +261,6 @@ def init():
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
-    robot.variables.set_attribute("newResource", "")
     robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("collectResource", "")
     robot.variables.set_attribute("dropResource", "")
@@ -381,6 +380,14 @@ def controlstep():
         for clock in clocks.values():
             clock.reset()
 
+        # Startup transactions
+        res = robot.variables.get_attribute("newResource")
+        print(res)
+        if res:
+            resource = Resource(res)
+            print(resource._calldata)
+            sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
+
         # w3.sc.functions.registerRobot().transact()
 
     else:
@@ -421,7 +428,7 @@ def controlstep():
             arrived = True
 
             if to_drop:
-                if nav.get_distance_to((0,0)) < market.radius + 0.5* (cache.radius - market.radius):
+                if nav.get_distance_to(market._p) < market.radius + 0.5* (cache.radius - market.radius):
                     nav.avoid(move = True)
                 else:
                     nav.navigate_with_obstacle_avoidance(market._pr)

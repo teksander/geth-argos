@@ -70,7 +70,7 @@ clocks['regen']      = dict()
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
 cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['radius']})
 
-def generate_resource(n = 1, qualities = None, max_attempts = 50):
+def generate_resource(n = 1, qualities = None, max_attempts = 500):
     global stopFlag
     for i in range(n):
         overlap = True
@@ -156,14 +156,17 @@ def init():
     logs['collection'] = Logger(log_folder+file, header, rate = 1, ID = '0')
     logs['collection'].start()
 
+    for quality, count in counts.items():
+        generate_resource(count, qualities = count*[quality])
+
     for robot in allrobots:
         print(robot.variables.get_all_attributes())
         robot.id = int(robot.variables.get_attribute("id"))-1
         position_previous[robot.variables.get_attribute("id")] = Vector2D(robot.position.get_position()[0:2]) 
-
-    for quality, count in counts.items():
-        generate_resource(count, qualities = count*[quality])
-
+        
+        if lp['patches']['known']:
+            print(robot.id)
+            robot.variables.set_attribute("newResource", allresources[robot.id % len(allresources)]._json)
             
 def pre_step():
     global startFlag, startTime, resource_counter
@@ -177,9 +180,8 @@ def pre_step():
 
     # Tasks to perform for each robot
     for robot in allrobots:
-        robot.variables.set_attribute("newResource", "")
         robot.variables.set_attribute("at", "")
-        
+
         # Has robot stepped into resource? YES -> Update virtual sensor
         for res in allresources:
 
@@ -283,6 +285,7 @@ def post_step():
 
     # Record the rays to be drawn for each robot
     for robot in allrobots:
+        robot.variables.set_attribute("newResource", "")
         p = 'a'
         if robot.variables.get_attribute("id") == "1":
             p = 'w+'
