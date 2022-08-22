@@ -10,6 +10,12 @@ config() {
 }
 
 ##################################################################################
+### EXAMPLE: loopconfig "patches" "radius" 0.05 
+loopconfig() {
+	sed -i "/\['${1}'\]\['${2}'\]/ s/=.*/= ${3}/" loop_functions/loop_params.py
+}
+
+##################################################################################
 ### EXAMPLE: copy "test116_patchy/20_blockchain1"
 copy() {
 	# Collect the config from results
@@ -61,21 +67,34 @@ run() {
 }
 
 
-EXP=115_size
 
-config "REPS" 5
-config "NUM1" 5
+
+EXP=115_patch_size
+
+config "REPS" 3
+config "NUM1" 10
 
 #-----------------------
 config "SCNAME" "resource_market_limit" 
+config "MAXWORKERS" 2
 
-for MAXWORKERS in $(seq 2 1 5); do 
-	CFG=limit_${MAXWORKERS}
-	config "MAXWORKERS" ${MAXWORKERS}
+declare -a arr=(0.20 0.16 0.12 0.08 0.04)
+for patch_radius in "${arr[@]}"; do 
+	loopconfig "patches" "radius" patch_radius	
 	wait
-	run    "${EXP}/${CFG}" $1
-done
+	run    "${EXP}/limit_2" $1
+done	
 
+#-----------------------
+config "SCNAME" "resource_market_egreedy" 
+config "EPSILON" 50
+
+declare -a arr=(0.20 0.16 0.12 0.08 0.04)
+for patch_radius in "${arr[@]}"; do 
+	loopconfig "patches" "radius" patch_radius	
+	wait
+	run    "${EXP}/egreedy_50" $1
+done
 
 # #-----------------------
 # config "SCNAME" "resource_market_egreedy"
