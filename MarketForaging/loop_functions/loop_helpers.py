@@ -25,7 +25,9 @@ def is_in_circle(point, center, radius):
     else:
         return False
 
-def is_in_rectangle(point, center, width, height):
+def is_in_rectangle(point, center, width, height = None):
+    if not height:
+        height = width
     dx = abs(point[0] - center[0])
     dy = abs(point[1] - center[1])
 

@@ -640,16 +640,13 @@ def controlstep():
                 # Distance to resource
                 distance = nav.get_distance_to(rb.best._pr)
 
-                # Resource virtu`al sensor
+                # Resource virtual sensor
                 resource = sensing()
                 found = resource and resource._p == rb.best._p
-
-                # if not found and distance < 0.5*rb.best.radius:
-                #     rb.best.quantity = 0
-                #     fsm.setState(Scout.SELL, message = 'Failed foraging trip')
+                if found:
+                    rb.best = resource
 
                 if found and distance < 0.9*rb.best.radius:
-
                     robot.variables.set_attribute("collectResource", "True")
                     nav.avoid(move = True)
 
