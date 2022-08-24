@@ -86,14 +86,20 @@ def generate_resource(n = 1, qualities = None, max_attempts = 500):
 
             # Generate a new resource position (uniform)
             if lp['patches']['distribution'] == 'uniform':
-                x = round(random.uniform(-lp['generic']['arena_size']/2, lp['generic']['arena_size']/2), 2)
-                y = round(random.uniform(-lp['generic']['arena_size']/2, lp['generic']['arena_size']/2), 2)
+                # x = round(random.uniform(-lp['generic']['arena_size']/2, lp['generic']['arena_size']/2), 2)
+                # y = round(random.uniform(-lp['generic']['arena_size']/2, lp['generic']['arena_size']/2), 2)
+                r1 = lp['patches']['dist_min']
+                r2 = lp['patches']['dist_max'] 
+                r = math.sqrt(r1**2 + (r2**2-r1**2)*random.random())
+                t = 2 * math.pi * random.random()
+                x = r * math.cos(t) 
+                y = r * math.sin(t) 
 
             # Generate a new resource position (patchy)
             elif lp['patches']['distribution'] == 'patchy':
                 patch = random.choices(lp['patches']['hotspots'])[0]
-                x = round(random.gauss(patch['x_mu'], patch['x_sg']), 2)
-                y = round(random.gauss(patch['y_mu'], patch['y_sg']), 2)
+                # x = round(random.gauss(patch['x_mu'], patch['x_sg']), 2)
+                # y = round(random.gauss(patch['y_mu'], patch['y_sg']), 2)
 
             
             # Generate a new resource radius
@@ -123,12 +129,16 @@ def generate_resource(n = 1, qualities = None, max_attempts = 500):
             if is_in_circle((market.x, market.y), (x,y), cache.radius+radius):
                 overlap = True
 
-            # Discard if resource overlaps with minimum area
-            if is_in_circle((0, 0), (x,y), lp['patches']['dist_min']+radius):
+            # Discard if resource is inside minimum area
+            if is_in_circle((0, 0), (x,y), lp['patches']['dist_min']):
                 overlap = True
 
-            # Discard if resource overlaps with maximum area
-            if not is_in_circle((0, 0), (x,y), lp['patches']['dist_max']-radius):
+            # Discard if resource is outside maximum area
+            if not is_in_circle((0, 0), (x,y), lp['patches']['dist_max']):
+                overlap = True
+
+            # Discard if resource is outside of arena
+            if is_in_rectangle((0, 0), (x,y), lp['generic']['arena_size']/2):
                 overlap = True
 
         # Append new resource to the global list of resources

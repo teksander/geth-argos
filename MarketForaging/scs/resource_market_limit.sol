@@ -25,7 +25,6 @@ contract MarketForaging {
   } 
 
   patch[] private patches;
-  patch[] private patches_depleted;
 
   uint id_nonce;
   mapping(address => uint) tasks;
@@ -49,34 +48,19 @@ contract MarketForaging {
   }
 
   function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
-    bool unique = true;
-    bool depleted = false;
 
-    // Is patch unique
-    for (uint i=0; i < patches.length; i++) {
-      if (_x == patches[i].x && _y == patches[i].y ) {
-        unique = false;
+    uint i = findByPos(_x, _y);
 
-        // Remove patch if quantity is 0
-        if (_qtty < 1) {
-          patches_depleted.push(patches[i]);
-          patches[i] = patches[patches.length - 1];
-          patches.pop();
-        }
-        break;
-      }
-    } 
-
-    // Is patch depleted
-    for (uint i=0; i < patches_depleted.length; i++) {
-      if (_x == patches_depleted[i].x && _y == patches_depleted[i].y ) {
-        depleted = true;
-        break;
-      }
+    // If patch is already known
+    if (i < 9999) { 
+      patches[i].qtty  = _qtty;
+      patches[i].util  = _util;
+      patches[i].qlty  = _qlty;
+      patches[i].json  = _json;
     }
 
-    // If patch is unique
-    if (unique && !depleted) { 
+    // If patch is new
+    else {
 
       // Increment unique patch id
       id_nonce++;
@@ -100,17 +84,16 @@ contract MarketForaging {
   function dropResource(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
 
     uint i = findByPos(_x, _y);
+
     if (i < 9999) {
-      // Update average quality
-      uint new_value = 1000*patches[i].util/(block.number-lastD[msg.sender]);
+
+      // Update quality
+      uint newQ = 1000*patches[i].util/(block.number-lastD[msg.sender]);
 
       // patches[i].meanQ = updateMean(patches[i].meanQ, new_value, patches[i].count);
-      patches[i].meanQ = new_value;
+      patches[i].meanQ = newQ;
       patches[i].count ++;
     
-      patches[i].json  = _json;
-      patches[i].qtty  = _qtty;
-
       // Update patch information
       updatePatch(_x, _y, _qtty, _util, _qlty, _json);
     }
@@ -136,15 +119,11 @@ contract MarketForaging {
     // Limit foragers algorithm
     uint i = findBestAvailiableU();
 
-    // Assign if there is availiable
-    if (i<9999) {
-      
-      // Assign new foraging task
-      if (i < patches.length) {
-        tasks[msg.sender] = patches[i].id;
-        lastD[msg.sender] = block.number;
-        patches[i].worker_count++;
-      }  
+    // Assign new foraging task
+    if (i < patches.length) {
+      tasks[msg.sender] = patches[i].id;
+      lastD[msg.sender] = block.number;
+      patches[i].worker_count++;
     }
   }
 
@@ -166,7 +145,9 @@ contract MarketForaging {
     uint index = 9999;
 
     for (uint i=0; i < patches.length; i++) {
-      if (patches[i].util > maxU && patches[i].worker_count < max_workers) {
+      if (patches[i].util > maxU 
+          && patches[i].worker_count < max_workers 
+          && patches[i].qtty > patches[i].worker_count) {
         maxU  = patches[i].util;
         index = i;
       }
@@ -175,17 +156,19 @@ contract MarketForaging {
   }
 
   function findByID(uint id) private view returns (uint) {
-
     for (uint i=0; i < patches.length; i++) {
-      if (patches[i].id == id) return i;
+      if (patches[i].id == id) {
+        return i;
+      }
     } 
     return 9999;
   }
 
   function findByPos(int _x, int _y) private view returns (uint) {
-
     for (uint i=0; i < patches.length; i++) {
-      if (_x == patches[i].x && _y == patches[i].y) return i;
+      if (_x == patches[i].x && _y == patches[i].y) {
+        return i;
+      }
     } 
     return 9999;
   }

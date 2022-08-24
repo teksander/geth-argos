@@ -29,7 +29,7 @@ params['generic']['max_workers'] = eval(os.environ["MAXWORKERS"])
 params['market'] = dict()
 params['market']['radius'] = params['generic']['arena_size'] * math.sqrt(0.05/math.pi)
 params['market']['x'] = 0
-params['market']['y'] = params['generic']['arena_size']/2-params['market']['radius']*1.5
+params['market']['y'] = 0 #params['generic']['arena_size']/2-params['market']['radius']*1.5
 
 
 # Parameters for cache
@@ -51,8 +51,11 @@ params['patches']['known']    = True
 params['patches']['radius']   = 0.12
 params['patches']['qtty_min'] = 15
 params['patches']['qtty_max'] = 15
-params['patches']['dist_min'] = 1 * params['cache']['radius'] 
-params['patches']['dist_max'] = 0.5 * params['generic']['arena_size']   
+# params['patches']['dist_min'] = 1 * params['cache']['radius'] 
+# params['patches']['dist_max'] = 0.5 * params['generic']['arena_size'] 
+
+params['patches']['dist_min'] = 2.00 * params['cache']['radius'] 
+params['patches']['dist_max'] = 2.01 * params['cache']['radius']
 
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
 params['patches']['forage_rate'] = {'red': 5, 'green':  5, 'blue': 5, 'yellow': 5}

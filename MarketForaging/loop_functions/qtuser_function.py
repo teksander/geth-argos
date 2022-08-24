@@ -35,9 +35,9 @@ def init():
 	for i in range(0,100):
 		
 		r = (lp['patches']['radius'] - res_diam) * math.sqrt(random.random())
-		theta = 2 * math.pi * random.random()
+		t = 2 * math.pi * random.random()
 
-		item_list.append((r * math.cos(theta), r * math.sin(theta)))
+		item_list.append((r * math.cos(t), r * math.sin(t)))
 
 
 def DrawInWorld():
