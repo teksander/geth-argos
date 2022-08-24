@@ -15,7 +15,7 @@ export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
 export CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
 export CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
 
-export SCNAME="resource_market_egreedy"
+export SCNAME="resource_market_limit"
 export SCFILE="${EXPERIMENTFOLDER}/scs/${SCNAME}.sol" 
 export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/${SCNAME}.x.sol" 
 
@@ -47,7 +47,7 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXWORKERS=2
+export MAXWORKERS=10
 export EPSILON=50
 export WINSIZE=5
 

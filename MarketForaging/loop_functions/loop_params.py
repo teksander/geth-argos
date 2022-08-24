@@ -46,8 +46,9 @@ params['patches']['distribution'] = 'uniform'
 # 									     'x_sg': 0.15 * params['generic']['arena_size'], 
 # 									     'y_sg': 0.15 * params['generic']['arena_size']}]
 
-params['patches']['known']  = True
-params['patches']['radius'] = 0.04
+params['patches']['respawn']  = False
+params['patches']['known']    = True
+params['patches']['radius']   = 0.12
 params['patches']['qtty_min'] = 15
 params['patches']['qtty_max'] = 15
 params['patches']['dist_min'] = 1 * params['cache']['radius'] 

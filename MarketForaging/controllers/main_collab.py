@@ -672,10 +672,10 @@ def controlstep():
 
                 # Transact to drop resource
                 if not txs['drop'].hash:
+                    robot.log.info('Dropping: %s', rb.best._desc)
                     dropHash = w3.sc.functions.dropResource(*rb.best._calldata).transact()
                     txs['drop'] = Transaction(dropHash)
-                    robot.log.info('Dropping: %s', rb.best._desc)
-
+   
                 # Transition state  
                 else:
                     if txs['drop'].query(3):

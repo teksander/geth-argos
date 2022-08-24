@@ -60,6 +60,16 @@ eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
 
 for opt in "$@"
 do
+
+if [[ $opt == "--logs" || $opt == "-l" ]]; then
+    ./tmux-all -l monitor.log
+fi
+
+if [[ $opt == "--python" || $opt == "-p" ]]; then
+    ./tmux-all -s python
+fi
+done
+    
 if [[ $opt == "--start" || $opt == "-s" ]]; then
     echo "+-----------------------------------------------------------+"
     echo "Starting Experiment-GUI"
@@ -74,12 +84,5 @@ if [[ $opt == "--start-novis" || $opt == "-sz" ]]; then
     argos3 -z -c $ARGOSFILE
 fi
 
-if [[ $opt == "--logs" || $opt == "-l" ]]; then
-    ./tmux-all -l monitor.log
-fi
 
-if [[ $opt == "--python" || $opt == "-p" ]]; then
-    ./tmux-all -s python
-fi
-done
 

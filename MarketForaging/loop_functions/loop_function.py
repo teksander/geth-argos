@@ -190,9 +190,10 @@ def pre_step():
                 # Update robot virtual sensor
                 robot.variables.set_attribute("newResource", res._json)
 
-                # Robot does not carry resource and is forager? YES -> Forage resource
+                # Robot does not carry resource, is forager and resource is not depleted? YES -> Forage resource
                 if not robot.variables.get_attribute("hasResource") \
-                   and robot.variables.get_attribute("collectResource"):
+                   and robot.variables.get_attribute("collectResource") \
+                   and res.quantity > 0:
                    foragers[res].append(robot.id) 
                 else:
                     if robot.id in clocks['forage']: 
@@ -264,10 +265,10 @@ def post_step():
         startFlag = True
 
     # Regenerate depleted patches
-    depleted = [res for res in allresources if res.quantity <= 0]
-    allresources[:] = [res for res in allresources if res not in depleted]
-
-    generate_resource(len(depleted), [res.quality for res in depleted])
+    if lp['patches']['respawn']:
+        depleted = [res for res in allresources if res.quantity <= 0]
+        allresources[:] = [res for res in allresources if res not in depleted]
+        generate_resource(len(depleted), [res.quality for res in depleted])
 
     # Record the resources to be drawn to a file
     with open(lp['files']['patches'], 'w', buffering=1) as f:

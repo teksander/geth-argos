@@ -4,8 +4,9 @@ contract MarketForaging {
 
   uint constant epsilon = 50; 
   uint constant expma   = 15; 
+  uint constant explore = 0;
 
-    struct patch {
+  struct patch {
 
     // Details 
     int x;
@@ -119,14 +120,18 @@ contract MarketForaging {
 
     // Re-assign robot
     if (drops[msg.sender] % 1 == 0)  {
+
+      // Unassign current task
+      tasks[msg.sender] = 0;
+      patches[i].worker_count--;
+
+      // Assign new task
       assignPatch();
     }
   }
 
   function assignPatch() public {
-
     uint i = 0;
-    uint j = findByID(tasks[msg.sender]);
     
     // Epsilon-greedy algorithm
     bool exploit = coinFlip(100-epsilon);
@@ -134,22 +139,16 @@ contract MarketForaging {
     // Greedy policy
     if (exploit) {
       // Get greedy action
-      i = findBest();
+      i = findBestQ();
     }
 
     // Non-greedy policy
     else {
 
       // Get random action
-      i = random(patches.length+1);
+      i = random(patches.length + explore);
     }
 
-    // Unassign current task
-    tasks[msg.sender] = 0;
-    if (j<9999) {
-      patches[j].worker_count--;
-    }
-    
     // Assign new foraging task
     if (i < patches.length) {
       tasks[msg.sender] = patches[i].id;
@@ -158,7 +157,7 @@ contract MarketForaging {
     }  
   }
 
-  function findBest() private view returns (uint) {
+  function findBestQ() private view returns (uint) {
     uint maxQ  = 0;
     uint index = 0;
 
