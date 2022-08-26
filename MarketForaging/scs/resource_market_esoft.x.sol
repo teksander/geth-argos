@@ -148,16 +148,12 @@ contract MarketForaging {
     uint index = 0;
 
     for (uint i=0; i < patches.length; i++) {
-      sumQ += patches[i].meanQ;
-    }
-
-    if (sumQ == 0) {
-      return random(patches.length + explore);
+      sumQ += patches[i].meanQ + patches[i].util;
     }
 
     uint rand = random(sumQ);
     for (uint i=0; i < patches.length; i++) {
-      if (rand < patches[i].meanQ) {
+      if (rand < patches[i].meanQ + patches[i].util) {
         index = i;
         break;
       }
