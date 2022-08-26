@@ -146,8 +146,7 @@ contract MarketForaging {
 
     for (uint i=0; i < patches.length; i++) {
       if (patches[i].util > maxU 
-          && patches[i].worker_count < max_workers 
-          && patches[i].qtty > patches[i].worker_count) {
+          && patches[i].worker_count < max_workers) {
         maxU  = patches[i].util;
         index = i;
       }
@@ -189,3 +188,6 @@ contract MarketForaging {
 
   }  
 }
+
+// Backups
+// && patches[i].qtty > patches[i].worker_count

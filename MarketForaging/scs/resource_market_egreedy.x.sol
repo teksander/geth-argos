@@ -129,7 +129,6 @@ contract MarketForaging {
 
     // Non-greedy policy
     else {
-
       // Get random action
       i = random(patches.length + explore);
     }
@@ -172,7 +171,7 @@ contract MarketForaging {
     } 
     return 9999;
   }
-  
+
   function getPatches() public view returns (patch[] memory){
     return patches;
   }

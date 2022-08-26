@@ -15,7 +15,7 @@ export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
 export CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
 export CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
 
-export SCNAME="resource_market_limit"
+export SCNAME="resource_market_esoft"
 export SCFILE="${EXPERIMENTFOLDER}/scs/${SCNAME}.sol" 
 export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/${SCNAME}.x.sol" 
 

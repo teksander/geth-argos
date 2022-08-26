@@ -8,9 +8,18 @@ sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
 import loop_params as lp
 import control_params as cp
 
-dict_list = [(name, value) for name, value in lp.params.items() if isinstance(value, dict) and not name.startswith('__')]
-dict_list.extend([('control', cp.params)])
-saveconfig = open(os.environ['EXPERIMENTFOLDER'] + '/logs/config.py', 'w+')
+# Collect the loop parameters
+dict_list = [(param, value) for param, value in lp.params.items() if isinstance(value, dict)]
 
+# Collect the control parameters
+dict_list.extend([('control', cp.params)])
+
+# Collect the experiment configuration
+f = open('experimentconfig.sh', 'r')
+experimentconfig = f.read()
+experimentparams = {param:value for param,value in os.environ.items() if param in experimentconfig}
+dict_list.extend([('experiment',experimentparams)])
+
+savefile = open(os.environ['EXPERIMENTFOLDER'] + '/logs/config.py', 'w+')
 for name, param_dict in dict_list:
-	saveconfig.write('%s = %s \n' % (name, repr(param_dict)))
+	savefile.write('%s = %s \n' % (name, repr(param_dict)))
