@@ -17,8 +17,8 @@ generic_params['time_limit'] = float(os.environ["TIMELIMIT"]) * 60
 generic_params['seed']       = 350 # None for randomgen
 generic_params['decimal_factor'] = float(os.environ["DECIMAL_FACTOR"])
 generic_params['num_food_source'] = 3
-generic_params['unitPositionUncertainty'] = (0.025/15)*20
-generic_params['frictionUncertainty'] = (0.015/15)*20
+generic_params['unitPositionUncertainty'] = 0.025
+generic_params['frictionUncertainty'] = 0.015
 num_malicious = int(os.environ["NUM2"])
 def load(path):
     fs_list=[]

@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 contract ForagingPtManagement{
     uint constant num_pt = 100;
     uint constant max_life = 5;
-    uint constant min_rep = 20; //Minimum number of reported points that make contract verified
+    uint constant min_rep = 15; //Minimum number of reported points that make contract verified
     int256 constant radius = 10000;
     uint constant min_balance= 28000000000000000000; //Minimum number of balance to confirm a cluster
 
