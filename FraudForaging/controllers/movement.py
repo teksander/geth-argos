@@ -167,8 +167,8 @@ class Navigate(object):
             self.__window = []
 
         # Normalize and weight to obtain desired control behavior
-        T = 0.2 * vec_target.normalize()
-        A = 0.5 * -vec_avoid#.normalize()
+        T = 0.35 * vec_target.normalize()
+        A = 0.3 * -vec_avoid#.normalize()
 
         # Saturate the avoid angle
         if abs(A.angle) > math.radians(90):

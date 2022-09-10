@@ -21,6 +21,7 @@ class Faulty(Enum):
     Pending = 8
     DriveTo = 9
     Homing = 10
+    DriveToReal = 11
 
 
 

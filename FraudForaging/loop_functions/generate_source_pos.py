@@ -33,9 +33,9 @@ fs_list=[]
 while len(fs_list)<(generic_params['num_food_source']+num_malicious):
     print(len(fs_list))
     fs=[0,0]
-    minIntSrcDist = 0.3
+    minIntSrcDist = 0.5
     interSource = False
-    while distance(fs,params['home']['position'])<0.3 or distance(fs,params['home']['position'])>0.8 or not interSource:
+    while distance(fs,params['home']['position'])<0.5 or distance(fs,params['home']['position'])>0.6 or not interSource:
         fs = [(random.random()-0.5)*eval(params['environ']['ARENADIMX'])*0.9,
           (random.random() - 0.5) * eval(params['environ']['ARENADIMY'])*0.9]
         interSource = True

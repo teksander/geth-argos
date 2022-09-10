@@ -22,9 +22,9 @@ from console import *
 from aux import *
 from statemachine import *
 from helpers import *
-
 from loop_function_params import *
 from controller_params import *
+import decimal
 
 # /* Logging Levels for Console and File */
 #######################################################################
@@ -68,9 +68,10 @@ clocks['buffer'] = Timer(0.5)
 clocks['query_sc'] = Timer(1)
 clocks['block'] = Timer(2)
 clocks['explore'] = Timer(1)
-clocks['faulty_report'] = Timer(120)
+clocks['faulty_report'] = Timer(21)
 clocks['gs'] = Timer(0.02)
 clocks['log_cluster'] = Timer(30)
+clocks['clean_vidx'] = Timer(300)
 txList = []
 residual_list = []
 source_pos_list = []
@@ -81,7 +82,7 @@ pos_to_verify = [0, 0]
 idx_to_verity = -1
 verified_idx = []
 myBalance = 0
-
+fault_behaviour =  False
 
 class Transaction(object):
 
@@ -151,7 +152,7 @@ class Transaction(object):
 
 
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance
+    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifersExtract(robotID, 'IP')
     print(num_normal + num_faulty)
@@ -207,7 +208,8 @@ def init():
     my_friction = friction * int(robotID)
     if robot.variables.get_attribute("type") == 'faulty':
         my_friction = friction * 20
-
+    elif robot.variables.get_attribute("type") == 'malicious':
+        my_friction = friction * int(num_normal/2)
     robot.log.info('Initialising navigation...')
     nav = Navigate(robot, navSpeed, withKF=True, fric=my_friction)
 
@@ -219,6 +221,9 @@ def init():
     robot.log.info('Initialising odometry...')
     if robot.variables.get_attribute("type") == 'faulty':
         odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * 50)
+    elif robot.variables.get_attribute("type") == 'malicious':
+        print('malicious agent, odo noise set to, ', int(num_normal/2))
+        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(num_normal/2))
     else:
         odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(robotID))
 
@@ -242,7 +247,7 @@ def init():
 
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list, source_pos_list, idx_to_verity, verified_idx, myBalance
+    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance
 
     if not startFlag:
         ##########################
@@ -358,11 +363,19 @@ def controlstep():
 
         def is_at_food(point):
             at_Food = 0
+            at_location = []
+            distance=-1
+            mindist = 10000
             for food_location in params['source']['positions']:
+                dx = abs(point[0] - food_location[0])
+                dy = abs(point[1] - food_location[1])
+                mindist = min(dx**2+dy**2, mindist)
                 if is_in_circle(point, food_location,
                                 params['source']['radius']):
                     at_Food = 1
-            return at_Food
+                    at_location = food_location
+                    distance=dx**2+dy**2
+            return at_Food,(at_location, mindist)
 
         def depoValueEst(sourceList=None, myCertainty=None, num_cluster=-1):
             # if num_cluster >0 estimate according to deposited value in the specific cluster
@@ -382,6 +395,13 @@ def controlstep():
             myAmount = total_amount * (myCertainty / total_certainty)
             '''
             myBalance = w3.exposed_balance
+            points_list = w3.sc.functions.getPointListInfo().call()
+            source_list = w3.sc.functions.getSourceList().call()
+
+            for point_rec in points_list:
+                if point_rec[5] == w3.exposed_key and source_list[int(point_rec[4])][3] == 0:
+                    myBalance += decimal.Decimal(float(point_rec[2]) / 1e18)
+
             myAmount = max((myBalance - 1) / 3, 0)
             print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
 
@@ -396,7 +416,7 @@ def controlstep():
                 logs['cluster'] = Logger(log_folder + filename, header, 30, ID=robotID)
 
                 for c in source_list:
-                    realType = is_at_food([c[0] / DECIMAL_FACTOR, c[1]/DECIMAL_FACTOR])
+                    realType, _ = is_at_food([c[0] / DECIMAL_FACTOR, c[1]/DECIMAL_FACTOR])
                     logs['cluster'].log_force([c, realType])
         #########################################################################################################
         #### Idle.IDLE
@@ -408,6 +428,21 @@ def controlstep():
             if txs['report'].verify > -1:
                 verified_idx.remove(txs['report'].verify)
             txs['report'] = Transaction(None)
+        if clocks['clean_vidx'].query():
+            verified_idx=[]
+            source_list = w3.sc.functions.getSourceList().call()
+            points_list = w3.sc.functions.getPointListInfo().call()
+            for idx, cluster in enumerate(source_list):
+                if cluster[3] != 0:
+                    verified_idx.append(idx)
+                else:
+                    found=False
+                    for point_rec in points_list:
+                        if point_rec[4]==idx and point_rec[5] == w3.exposed_key:
+                            found=True
+                    if found:
+                        verified_idx.append(idx)
+
 
         if fsm.query(Idle.IDLE):
             # State transition: Scout.EXPLORE
@@ -453,24 +488,30 @@ def controlstep():
             elif clocks['query_sc'].query() and txs['report'].hash == None:
                 source_list = w3.sc.functions.getSourceList().call()
                 clusterInfo = w3.sc.functions.getClusterInfo().call()
+
                 if len(source_list) > 0:
                     print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
                     print('Robot ', robot.variables.get_id(), ' cluster info get: ', clusterInfo)
-                    print(int(time.time()))
                 candidate_cluster = []
                 for idx, cluster in enumerate(source_list):
                     if cluster[3] == 0:  # exists cluster needs verification
                         candidate_cluster.append((cluster, idx))
                 if len(candidate_cluster) > 0:
                     # randomly select a cluster to verify
-                    idx_to_verity = random.randrange(len(candidate_cluster))
-                    is_verified = False
-                    for idx_verified in verified_idx:
-                        if candidate_cluster[idx_to_verity][1] == idx_verified:
-                            is_verified = True
-                    if not is_verified:
-                        verified_idx.append(candidate_cluster[idx_to_verity][1])
-                        cluster = candidate_cluster[idx_to_verity][0]
+                    none_verified_idx = []
+                    # idx_to_verity = random.randrange(len(candidate_cluster))
+
+                    for idx_to_verity in range(len(candidate_cluster)):
+                        is_verified = False
+                        for idx_verified in verified_idx:
+                            if candidate_cluster[idx_to_verity][1] == idx_verified:
+                                is_verified = True
+                        if not is_verified:
+                            none_verified_idx.append(idx_to_verity)
+                    if len(none_verified_idx) > 0:
+                        select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
+                        verified_idx.append(candidate_cluster[select_idx][1])
+                        cluster = candidate_cluster[select_idx][0]
                         fsm.setState(Verify.DriveTo, message="Go to unverified source")
                         pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
                         pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
@@ -488,8 +529,9 @@ def controlstep():
                 source_list = w3.sc.functions.getSourceList().call()
 
                 ticketPrice = depoValueEst()
-                realType = is_at_food([pos_state[0][0], pos_state[1][0]])
+                realType,_ = is_at_food([pos_state[0][0], pos_state[1][0]])
                 if ticketPrice > 0:
+                    print('robot ', robot.variables.get_id(), ' vote: ', sourceFlag)
                     transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
                                                                int(pos_state[1][0] * DECIMAL_FACTOR), sourceFlag,
                                                                w3.toWei(ticketPrice, 'ether'),
@@ -524,7 +566,7 @@ def controlstep():
                     fsm.setState(Scout.Query, message="Homing")
             '''
             if arrived:
-                fsm.setState(Scout.Query, message="Homing")
+                fsm.setState(Scout.Query, message="Arrived home")
 
 
         elif fsm.query(Scout.PrepSend):
@@ -544,14 +586,17 @@ def controlstep():
 
 
                 ticketPrice = depoValueEst()
-                realType = is_at_food([avgx[int(len(avgx)/2)], avgy[int(len(avgy)/2)]])
-                if ticketPrice > 0:
-                    transactHash = w3.sc.functions.reportNewPt(int(avgx[int(len(avgx)/2)] * DECIMAL_FACTOR),
-                                                               int(avgy[int(len(avgy)/2)] * DECIMAL_FACTOR), 1,
+                realType, real_loc = is_at_food([avgx[int(len(avgx)/2)], avgy[int(len(avgy)/2)]])
+                print('real info: ', real_loc)
+                print("sp_lgh: ", len(source_pos_list))
+                if ticketPrice > 0 and real_loc[1]<10000 and (real_loc[1]<(params['source']['radius']*0.7)**2): #this report condition is only for the BCD experiments
+                    transactHash = w3.sc.functions.reportNewPt(int(real_loc[0][0] * DECIMAL_FACTOR),
+                                                               int(real_loc[0][1] * DECIMAL_FACTOR), 1,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType), 0).transact(
                         {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
                          'gasPrice': gasprice})
+
                     print('Robot ', robot.variables.get_id(), ' report source point: ',
                           int(pos_state[0][0] * DECIMAL_FACTOR),
                           int(pos_state[1][0] * DECIMAL_FACTOR), int(realType))
@@ -560,11 +605,44 @@ def controlstep():
                 fsm.setState(Verify.Homing, message="Homing")
         elif fsm.query(Faulty.Pending):
             rw.step()
-            if clocks['faulty_report'].query():
+            if clocks['faulty_report'].query() or fault_behaviour: #Malicious behaviour
                 idx = random.randrange(len(params['source']['fake_positions']))
                 pos_to_verify = params['source']['fake_positions'][idx]
                 fsm.setState(Faulty.DriveTo, message="Drive to fake source point")
-                print("robot: ", robot.variables.get_id(), " drive to fake source: ", pos_to_verify)
+                print("robot: ", robot.variables.get_id()," ",params['source']['fake_positions'], " drive to fake source: ", pos_to_verify)
+                fault_behaviour = False
+            elif clocks['query_sc'].query():
+                source_list = w3.sc.functions.getSourceList().call()
+                clusterInfo = w3.sc.functions.getClusterInfo().call()
+                if len(source_list) > 0:
+                    print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
+                    print('Robot ', robot.variables.get_id(), ' cluster info get: ', clusterInfo)
+                    print(int(time.time()))
+                candidate_cluster = []
+                for idx, cluster in enumerate(source_list):
+                    if cluster[3] == 0:  # exists cluster needs verification
+                        candidate_cluster.append((cluster, idx))
+                if len(candidate_cluster)> 0:
+                    # randomly select a cluster to verify
+                    none_verified_idx=[]
+                    #idx_to_verity = random.randrange(len(candidate_cluster))
+
+                    for idx_to_verity in range(len(candidate_cluster)):
+                        is_verified = False
+                        for idx_verified in verified_idx:
+                            if candidate_cluster[idx_to_verity][1] == idx_verified:
+                                is_verified = True
+                        if not is_verified:
+                            none_verified_idx.append(idx_to_verity)
+                    if len(none_verified_idx)>0:
+                        select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
+                        verified_idx.append(candidate_cluster[select_idx][1])
+                        cluster = candidate_cluster[select_idx][0]
+                        fsm.setState(Faulty.DriveToReal, message="Go to real unverified source")
+                        fault_behaviour = True #Perform fault in next round
+                        pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
+                        pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+
         elif fsm.query(Faulty.DriveTo):
             pos_state, _ = posUncertaintyEst()
             # execute driving cmd
@@ -586,6 +664,32 @@ def controlstep():
                       int(pos_state[1][0] * DECIMAL_FACTOR), int(realType))
                 txs['report'] = Transaction(transactHash)
                 fsm.setState(Faulty.Homing, message="Homing")
+        elif fsm.query(Faulty.DriveToReal):
+            pos_state, _ = posUncertaintyEst()
+
+            # execute driving cmd
+            arrived = going(pos_to_verify)
+
+            if arrived:
+                sourceFlag = 0
+                if robot.variables.get_attribute("at") == 'source':
+                    sourceFlag = 1
+                source_list = w3.sc.functions.getSourceList().call()
+
+                ticketPrice = depoValueEst()
+                realType = is_at_food([pos_state[0][0], pos_state[1][0]])
+                if ticketPrice > 0:
+                    transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
+                                                               int(pos_state[1][0] * DECIMAL_FACTOR), sourceFlag,
+                                                               w3.toWei(ticketPrice, 'ether'),
+                                                               int(realType),
+                                                               1).transact(
+                        {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
+                         'gasPrice': gasprice})
+                    robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
+                    txs['report'] = Transaction(transactHash, verified_idx=idx_to_verity, myID=int(robotID))
+                fsm.setState(Faulty.Homing, message="Homing")
+
         elif fsm.query(Faulty.Homing):
             # post-transaction homing
             arrived = homing()
@@ -603,7 +707,7 @@ def controlstep():
             '''
             if arrived:
                 myBalance = w3.exposed_balance
-                clocks['faulty_report'].reset()
+                #clocks['faulty_report'].reset()
                 fsm.setState(Faulty.Pending, message="Pending random walk")
 
 

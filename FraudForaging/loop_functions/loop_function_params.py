@@ -17,8 +17,8 @@ generic_params['time_limit'] = float(os.environ["TIMELIMIT"]) * 60
 generic_params['seed']       = 350 # None for randomgen
 generic_params['decimal_factor'] = float(os.environ["DECIMAL_FACTOR"])
 generic_params['num_food_source'] = 3
-generic_params['unitPositionUncertainty'] = 0.003
-generic_params['frictionUncertainty'] = 0.01
+generic_params['unitPositionUncertainty'] = 0.025
+generic_params['frictionUncertainty'] = 0.015
 num_malicious = int(os.environ["NUM2"])
 def load(path):
     fs_list=[]
@@ -30,6 +30,7 @@ def load(path):
             fs_list.append([l[idx*2],l[idx*2+1]])
         for idy in range(num_malicious):
             ffs_list.append([l[(generic_params['num_food_source']+idy)*2],l[(generic_params['num_food_source']+idy)*2+1]])
+        print("load source pts: ", ffs_list)
         return fs_list, ffs_list
     else:
         return  [[0,0]], [[0,0]]

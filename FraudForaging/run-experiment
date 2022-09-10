@@ -42,7 +42,7 @@ run() {
 	for REP in $(seq 1 ${REPS}); do
 
 		# Perform experiment
-		. starter --reset-geth --start
+		. starter --reset-geth --start-novis
 
 		# Collect data
 		if [ $# -eq 1 ]; then
@@ -53,9 +53,10 @@ run() {
 }
 
 
-EXP=test120
-copy "test120_concentrated/25_blockchain2"
-config "REPS" 2
+#EXP=test120
+#copy "test120_concentrated/25_blockchain2"
+config "REPS" 15
+run "FraudForaging/161501_paper_config_120min_add_45agents_all_normal_no_min_balance_100trial_friction_addb"
 
 
 # # Experiment parameter
