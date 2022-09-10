@@ -64,12 +64,12 @@ class NoisyOdometry(object):
         self.sigma = std
 
     def step(self):
-
-        position = Vector2D(self.robot.position.get_position()[0:2])
+        mypos = self.robot.position.get_position()[0:2]
+        position = Vector2D(mypos)
 
         self.__distance_traveled = (position - self.__position).length
         self.__distance_accumul += self.__distance_traveled
-        self.__noisy_position = position
+        self.__noisy_position = Vector2D(mypos)
         self.__position = position
         self.__noisy_position.x += random.normalvariate(0, self.sigma)
         self.__noisy_position.y += random.normalvariate(0, self.sigma)
