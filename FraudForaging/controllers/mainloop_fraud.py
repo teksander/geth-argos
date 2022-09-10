@@ -432,8 +432,8 @@ def controlstep():
         if txs['report'].query(9):
             txs['report'] = Transaction(None)
         elif txs['report'].fail == True:
-            if txs['report'].verify > -1:
-                verified_idx.remove(txs['report'].verify)
+            #if txs['report'].verify > -1:
+            #    verified_idx.remove(txs['report'].verify)
             txs['report'] = Transaction(None)
         if clocks['clean_vidx'].query():
             verified_idx=[]
