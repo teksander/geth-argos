@@ -581,14 +581,20 @@ def controlstep():
             else:
                 # average position over buffer
                 avgx = []
+                avgxv,avgyv = 0,0
                 avgy = []
                 for pos in source_pos_list:
                     avgx.append(pos[0])
+                    avgxv+=pos[0]
                     avgy.append(pos[1])
+                    avgyv += pos[1]
+                avgxv/=len(source_pos_list)
+                avgyv/=len(source_pos_list)
 
 
                 ticketPrice = depoValueEst()
-                realType, real_loc = is_at_food([avgx[int(len(avgx)/2)], avgy[int(len(avgy)/2)]])
+                #realType, real_loc = is_at_food([avgx[int(len(avgx)/2)], avgy[int(len(avgy)/2)]])
+                realType, real_loc = is_at_food([avgx[int(len(avgx) / 2)], avgy[int(len(avgy) / 2)]])
                 print('real info: ', real_loc)
                 print("sp_lgh: ", len(source_pos_list))
                 if ticketPrice > 0 and real_loc[1]<10000 and (real_loc[1]<(params['source']['radius']*0.7)**2): #this report condition is only for the BCD experiments
