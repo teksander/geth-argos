@@ -75,10 +75,10 @@ class NoisyOdometry(object):
         self.__noisy_position.y += random.normalvariate(0, self.sigma)
 
     def getNew(self, reset = False):
-        return self.__position
+        return self.__noisy_position
 
     def getGroundTruth(self, reset = False):
-        return self.__noisy_position
+        return self.__position
 
     def getDiff(self):
         return self.__distance_traveled

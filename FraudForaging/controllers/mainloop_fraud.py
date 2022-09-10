@@ -349,7 +349,10 @@ def controlstep():
             directVec = getDirectionVector()
             nav.kf.predict(directVec)
             odo.step()
-            noisy_pos = odo.getNew()
+            if robot.variables.get_attribute("at") == 'home':
+                noisy_pos = odo.getGroundTruth()
+            else:
+                noisy_pos = odo.getNew()
             nav.kf.update(noisy_pos)
             pos_state = nav.kf.x
             # modulo of the residual as the uncertainty measure
