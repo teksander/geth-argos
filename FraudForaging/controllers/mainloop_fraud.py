@@ -248,7 +248,6 @@ def init():
 
 def controlstep():
     global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance
-
     if not startFlag:
         ##########################
         #### FIRST STEP ##########
@@ -394,13 +393,13 @@ def controlstep():
                 total_certainty = float(cluster[7]) / DECIMAL_FACTOR
             myAmount = total_amount * (myCertainty / total_certainty)
             '''
-            myBalance = w3.exposed_balance
+            myBalance = float(w3.exposed_balance)
             points_list = w3.sc.functions.getPointListInfo().call()
             source_list = w3.sc.functions.getSourceList().call()
 
             for point_rec in points_list:
                 if point_rec[5] == w3.exposed_key and source_list[int(point_rec[4])][3] == 0:
-                    myBalance += decimal.Decimal(float(point_rec[2]) / 1e18)
+                    myBalance += float(point_rec[2]) / 1e18
 
             myAmount = max((myBalance - 1) / 3, 0)
             print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
