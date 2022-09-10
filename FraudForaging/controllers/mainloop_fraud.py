@@ -408,6 +408,7 @@ def controlstep():
                         myBalance += float(point_rec[2]) / 1e18
                         source_buffer[int(point_rec[4])] = 1
             '''
+            myBalance = w3.exposed_balance
             myAmount = max((myBalance - 1) / 3, 0)
             print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
 

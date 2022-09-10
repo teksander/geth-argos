@@ -252,7 +252,7 @@ contract ForagingPtManagement{
                 }
             }
             else if (category==1 && info.foundCluster==0 && intention==0 && clusterList[info.minClusterIdx].init_reporter != msg.sender){
-                //if point reports a food source position and  belongs to nothing, create new cluster
+                //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster, this is only for experimental purpose
                 clusterList.push(Cluster(x,y,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention));
                 pointList.push(Point(x,y,amount, category, int256(clusterList.length-1), msg.sender, realType));
             }
