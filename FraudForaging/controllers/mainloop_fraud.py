@@ -392,15 +392,19 @@ def controlstep():
                 total_amount = float(cluster[5]) / 1e18
                 total_certainty = float(cluster[7]) / DECIMAL_FACTOR
             myAmount = total_amount * (myCertainty / total_certainty)
-            '''
+
             myBalance = float(w3.exposed_balance)
             points_list = w3.sc.functions.getPointListInfo().call()
             source_list = w3.sc.functions.getSourceList().call()
 
+            source_buffer = [0 for _ in range(len(source_list))]
+            #add up all non-suttled funds on chain
             for point_rec in points_list:
                 if point_rec[5] == w3.exposed_key and source_list[int(point_rec[4])][3] == 0:
-                    myBalance += float(point_rec[2]) / 1e18
-
+                    if source_buffer[int(point_rec[4])]==0:
+                        myBalance += float(point_rec[2]) / 1e18
+                        source_buffer[int(point_rec[4])] = 1
+            '''
             myAmount = max((myBalance - 1) / 3, 0)
             print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
 
@@ -429,6 +433,7 @@ def controlstep():
             txs['report'] = Transaction(None)
         if clocks['clean_vidx'].query():
             verified_idx=[]
+            '''
             source_list = w3.sc.functions.getSourceList().call()
             points_list = w3.sc.functions.getPointListInfo().call()
             for idx, cluster in enumerate(source_list):
@@ -441,7 +446,7 @@ def controlstep():
                             found=True
                     if found:
                         verified_idx.append(idx)
-
+            '''
 
         if fsm.query(Idle.IDLE):
             # State transition: Scout.EXPLORE
@@ -571,7 +576,7 @@ def controlstep():
         elif fsm.query(Scout.PrepSend):
             # continue last action to verify exact food source position
             pos_state, _ = posUncertaintyEst()
-            if robot.variables.get_attribute("at") == 'source' and len(source_pos_list) < 100:
+            if robot.variables.get_attribute("at") == 'source' and len(source_pos_list) < 100: #length of source_pos_list controls the quality of the food center estimation
                 source_pos_list.append([pos_state[0][0], pos_state[1][0]])
             else:
                 # average position over buffer
@@ -580,8 +585,6 @@ def controlstep():
                 for pos in source_pos_list:
                     avgx.append(pos[0])
                     avgy.append(pos[1])
-
-                source_list = w3.sc.functions.getSourceList().call()
 
 
                 ticketPrice = depoValueEst()

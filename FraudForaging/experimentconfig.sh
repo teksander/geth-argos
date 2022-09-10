@@ -29,7 +29,7 @@ export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
 # [ARGOS]
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"
-export NUM1A=15
+export NUM1A=20
 export NUM1B=0
 export NUM2=0
 export RABRANGE="0.3"
@@ -55,7 +55,7 @@ export MAXRECRUITS=2
 #On chain estimator
 export NUMPT=100
 export MAXLIFE=5
-export MINREP=15
+export MINREP=20
 export RADIUS=10000 # 0.1
 export DECIMAL_FACTOR=100000 # 1e5
 export MINBALANCE=28000000000000000000
