@@ -42,7 +42,8 @@ run() {
 	for REP in $(seq 1 ${REPS}); do
 
 		# Perform experiment
-		. starter --reset-geth --start-novis
+		#. starter --reset-geth --start-novis
+		. starter --reset-geth --start
 
 		# Collect data
 		if [ $# -eq 1 ]; then

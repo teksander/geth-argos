@@ -79,6 +79,47 @@ contract ForagingPtManagement{
         int256 x_avg = 0;
         int256 y_avg = 0;
         int256 this_distance = 0;
+        //recluster all points // can be skippt in certain task configuration
+        for (uint k=0; k<pointList.length-1; k++){
+            for (uint i=0; i<clusterList.length; i++){
+                //Process cluster expirationamount
+                if (clusterList[i].verified==1 && clusterList[i].life<curtime){
+                    // verified cluster where credit is already redistributed
+                    clusterList[i].verified=2;
+                }
+                //Check if the newly reported pt belongs to any cluster
+                if (clusterList[i].verified!=2){ //Not abandoned cluster
+                    x_avg = (int256(clusterList[i].x)*int256(clusterList[i].total_credit)+ int256(pointList[k].x)*int256(amount))/int256(clusterList[i].total_credit+amount);
+                    y_avg = (int256(clusterList[i].y)*int256(clusterList[i].total_credit)+ int256(pointList[k].y)*int256(amount))/int256(clusterList[i].total_credit+amount);
+                    this_distance = getDistance(x_avg, pointList[k].x, y_avg,  pointList[k].y);
+                    if (this_distance<info.minDistance){
+                        info.minDistance = this_distance;
+                        info.minClusterIdx = i;
+                        info.foundCluster = 1;
+                        info.x=x_avg;
+                        info.y=y_avg;
+                        info.xo = x;
+                        info.yo = y;
+                        info.minClusterStatus = clusterList[i].verified;
+                    }
+                }
+            }
+            if (info.minClusterIdx != pointList[k].cluster){
+                clusterList[pointList[k].cluster].num_rep-=1;
+                clusterList[pointList[k].cluster].total_credit-=pointList[k].credit;
+                if (pointList[k].category==1){
+                    clusterList[pointList[k].cluster].total_credit_food-=pointList[k].credit;
+                }
+                clusterList[info.minClusterIdx].num_rep+=1;
+                clusterList[info.minClusterIdx].total_credit+=pointList[k].credit;
+                if (pointList[k].category==1){
+                    clusterList[info.minClusterIdx].total_credit_food+=pointList[k].credit;
+                }
+                pointList[k].cluster = info.minClusterIdx
+            }
+
+        }
+
         //unique rep
         for (uint i=0; i<clusterList.length; i++){
             if (clusterList[i].verified==0){
@@ -99,7 +140,13 @@ contract ForagingPtManagement{
 
         }
 
-
+        // Assign new point a cluster
+        info.minDistance = 1e10;
+        info.minClusterIdx = 0;
+        info.foundCluster = 0;
+        int256 x_avg = 0;
+        int256 y_avg = 0;
+        int256 this_distance = 0;
         if (category==1 && clusterList.length == 0){
             clusterList.push(Cluster(x,y, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention));
             pointList.push(Point(x,y,amount, category, 0, msg.sender, realType));

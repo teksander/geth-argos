@@ -31,7 +31,7 @@ export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"
 export NUM1A=15
 export NUM1B=0
-export NUM2=0
+export NUM2=1
 export RABRANGE="0.3"
 
 export ARENADIMX=2

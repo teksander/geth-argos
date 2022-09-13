@@ -664,7 +664,7 @@ def controlstep():
                 source_list = w3.sc.functions.getSourceList().call()
 
                 ticketPrice = depoValueEst()
-                realType = is_at_food([pos_state[0][0], pos_state[1][0]])
+                realType, _ = is_at_food([pos_state[0][0], pos_state[1][0]])
                 transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
                                                            int(pos_state[1][0] * DECIMAL_FACTOR), 1,
                                                            w3.toWei(ticketPrice, 'ether'),
