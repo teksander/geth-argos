@@ -35,7 +35,7 @@ def init():
 		stone_list.append((x, y))
 
 def DrawInWorld():
-	'''
+
 	# Draw home
 	rh = params['home']['radius']
 	environment.qt_draw.circle(params['home']['position']+[0.01], [], rh,'green', True)
@@ -47,29 +47,6 @@ def DrawInWorld():
 	rs = params['source']['radius']
 	for fs in params['source']['fake_positions']:
 		environment.qt_draw.circle(fs + [0.01], [], rs, 'red', True)
-
-
-	# Draw the quarry
-	dx = params['quarry']['width']/2
-	dy = params['quarry']['height']/2
-	environment.qt_draw.polygon(params['quarry']['position']+[0.01],[], [[-dx,-dy],[-dx,dy],[dx,dy],[dx,-dy]], 'gray70', True)
-
-	# Draw the construction site
-	dx = params['csite']['width']/2
-	dy = params['csite']['height']/2
-	environment.qt_draw.polygon(params['csite']['position']+[0.01],[], [[-dx,-dy],[-dx,dy],[dx,dy],[dx,-dy]], 'custom', True)
-
-	# Draw stones
-	qtt = 30
-	for stone in stone_list[1:qtt]:
-		environment.qt_draw.box([stone[0], stone[1], 0.01], [], [0.04,0.06,0.08],'gray40')
-
-	# Draw stones carried by robots
-	with open(robot_file, 'r') as f:
-		for line in f:
-			robotID, x, y, quality = eval(line)
-			environment.qt_draw.cylinder([x, y, 0.10],[], res_diam, res_height, quality)
-	'''
 	# Draw rays
 	if generic_params['show_rays']:
 		with open(rays_file, 'r') as f:

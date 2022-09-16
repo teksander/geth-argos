@@ -79,8 +79,8 @@ contract ForagingPtManagement{
         int256 x_avg = 0;
         int256 y_avg = 0;
         int256 this_distance = 0;
-        //recluster all points // can be skippt in certain task configuration
-        for (uint k=0; k<pointList.length-1; k++){
+        //recluster all points // can be skept in certain task configuration
+        for (uint k=0; k<pointList.length; k++){
             for (uint i=0; i<clusterList.length; i++){
                 //Process cluster expirationamount
                 if (clusterList[i].verified==1 && clusterList[i].life<curtime){
