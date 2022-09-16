@@ -35,7 +35,7 @@ def init():
 		stone_list.append((x, y))
 
 def DrawInWorld():
-
+	'''
 	# Draw home
 	rh = params['home']['radius']
 	environment.qt_draw.circle(params['home']['position']+[0.01], [], rh,'green', True)
@@ -48,7 +48,7 @@ def DrawInWorld():
 	for fs in params['source']['fake_positions']:
 		environment.qt_draw.circle(fs + [0.01], [], rs, 'red', True)
 
-	'''
+
 	# Draw the quarry
 	dx = params['quarry']['width']/2
 	dy = params['quarry']['height']/2

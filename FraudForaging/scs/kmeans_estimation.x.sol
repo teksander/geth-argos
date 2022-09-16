@@ -104,18 +104,18 @@ contract ForagingPtManagement{
                     }
                 }
             }
-            if (info.minClusterIdx != pointList[k].cluster){
-                clusterList[pointList[k].cluster].num_rep-=1;
-                clusterList[pointList[k].cluster].total_credit-=pointList[k].credit;
+            if (info.minClusterIdx != uint(pointList[k].cluster)){
+                clusterList[uint(pointList[k].cluster)].num_rep-=1;
+                clusterList[uint(pointList[k].cluster)].total_credit-=pointList[k].credit;
                 if (pointList[k].category==1){
-                    clusterList[pointList[k].cluster].total_credit_food-=pointList[k].credit;
+                    clusterList[uint(pointList[k].cluster)].total_credit_food-=pointList[k].credit;
                 }
                 clusterList[info.minClusterIdx].num_rep+=1;
                 clusterList[info.minClusterIdx].total_credit+=pointList[k].credit;
                 if (pointList[k].category==1){
                     clusterList[info.minClusterIdx].total_credit_food+=pointList[k].credit;
                 }
-                pointList[k].cluster = info.minClusterIdx
+                pointList[k].cluster = int256(info.minClusterIdx);
             }
 
         }
@@ -144,9 +144,9 @@ contract ForagingPtManagement{
         info.minDistance = 1e10;
         info.minClusterIdx = 0;
         info.foundCluster = 0;
-        int256 x_avg = 0;
-        int256 y_avg = 0;
-        int256 this_distance = 0;
+        x_avg = 0;
+        y_avg = 0;
+        this_distance = 0;
         if (category==1 && clusterList.length == 0){
             clusterList.push(Cluster(x,y, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention));
             pointList.push(Point(x,y,amount, category, 0, msg.sender, realType));
