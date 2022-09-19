@@ -167,6 +167,17 @@ def create_digraph(df):
     
     return digraph
 
+def get_mainchain_df2(df, leaf):
+    mainchain = [leaf]
+    main_path = []
+    
+    for (idx, row) in df[::-1].iterrows():
+        if row['PHASH'] in main_path:
+            main_path.append(idx)
+        
+    return df.iloc[main_path]
+
+
 def get_mainchain_df(df, leaf):
     parentHash = leaf
     main_path = []

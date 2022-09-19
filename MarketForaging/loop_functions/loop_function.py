@@ -67,8 +67,8 @@ clocks['forage']     = dict()
 clocks['regen']      = dict()
 
 # Store the position of the market and cache
-market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
-cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['radius']})
+market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['r']})
+cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['r']})
 
 def generate_resource(n = 1, qualities = None, max_attempts = 500):
     global stopFlag

@@ -27,7 +27,7 @@ export SWARMNAME=ethereum
 export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
-export NUM1=10
+export NUM1=7
 export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
 
 export NUM2=0
@@ -39,8 +39,10 @@ export TPS=10
 export DENSITY="3"
 
 export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
-export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
-export ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
+export ARENADIM=2
+export ARENADIMH=1
+# export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
+# export ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
 export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 
 # [GETH]
@@ -48,7 +50,7 @@ export BLOCKPERIOD=2
 
 # [SC]
 export MAXWORKERS=10
-export EPSILON=50
+export EPSILON=15
 export WINSIZE=5
 
 # [OTHER]

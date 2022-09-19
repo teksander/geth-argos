@@ -27,16 +27,15 @@ params['generic']['max_workers'] = eval(os.environ["MAXWORKERS"])
 
 # Parameters for marketplace
 params['market'] = dict()
-params['market']['radius'] = params['generic']['arena_size'] * math.sqrt(0.05/math.pi)
 params['market']['x'] = 0
 params['market']['y'] = 0 #params['generic']['arena_size']/2-params['market']['radius']*1.5
-
+params['market']['r'] = 0.15 *params['generic']['arena_size'] * math.sqrt(1/math.pi)
 
 # Parameters for cache
 params['cache'] = dict()
-params['cache']['radius']  = params['generic']['arena_size'] * math.sqrt(0.10/math.pi)
 params['cache']['x'] = params['market']['x']
 params['cache']['y'] = params['market']['y']
+params['cache']['r'] = 0.07 +params['market']['r']
 
 params['patches'] = dict()
 params['patches']['distribution'] = 'uniform' 
@@ -51,20 +50,23 @@ params['patches']['known']    = True
 params['patches']['radius']   = 0.12
 params['patches']['qtty_min'] = 15
 params['patches']['qtty_max'] = 15
-# params['patches']['dist_min'] = 1 * params['cache']['radius'] 
+# params['patches']['dist_min'] = 1 * params['cache']['r'] 
 # params['patches']['dist_max'] = 0.5 * params['generic']['arena_size'] 
 
-params['patches']['dist_min'] = 2.00 * params['cache']['radius'] 
-params['patches']['dist_max'] = 2.01 * params['cache']['radius']
+params['patches']['dist_min'] = 2.5 * params['cache']['r'] 
+params['patches']['dist_max'] = 2.51 * params['cache']['r']
 
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
 params['patches']['forage_rate'] = {'red': 5, 'green':  5, 'blue': 5, 'yellow': 5}
 params['patches']['regen_rate']  = {'red': 30, 'green':  30, 'blue': 30, 'yellow': 30}
 params['patches']['utility']     = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
 
-params['patches']['dec_returns_func']   = 'linear' # constant, linear or logarithmic decreasing returns
-params['patches']['dec_returns_thresh'] = 15       # qqty of resource before dec returns starts
-params['patches']['dec_returns_mult']   = 8        # multiplier of the original forage rate for the last resource being foraged
+# constant, linear or logarithmic decreasing returns
+# qqty of resource before dec returns starts
+# multiplier of the original forage rate for the last resource being foraged 
+params['patches']['dec_returns_func']   = 'linear' 
+params['patches']['dec_returns_thresh'] = params['patches']['qtty_max']
+params['patches']['dec_returns_mult']   = 10        
 
 # params['patches']['area_percent'] = 0.005 * (10/generic_params['num_robots'])
 # params['patches']['radius']    = params['generic']['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
@@ -74,7 +76,7 @@ params['patches']['dec_returns_mult']   = 8        # multiplier of the original 
 # params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 
 
-params['patches']['counts'] = {'red': 1, 'green': 1 , 'blue': 1, 'yellow': 1}
+params['patches']['counts'] = {'red': 0, 'green': 0 , 'blue': 1, 'yellow': 0}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
 							   'green':  params['patches']['radius'] , 
 							   'blue':   params['patches']['radius'], 

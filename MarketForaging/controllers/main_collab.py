@@ -53,8 +53,8 @@ clocks['rs'] = Timer(0.02)
 clocks['forage'] = Timer(0)
 
 # Store the position of the market and cache
-market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['radius']})
-cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['radius']})
+market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['r']})
+cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['r']})
 
 # SC index map
 _x       = 0
