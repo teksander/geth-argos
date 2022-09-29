@@ -602,8 +602,8 @@ def controlstep():
                 print('real info: ', real_loc)
                 print("sp_lgh: ", len(source_pos_list))
                 if ticketPrice > 0 and real_loc[1]<10000 and (real_loc[1]<(params['source']['radius']*0.7)**2): #this report condition is only for the BCD experiments
-                    transactHash = w3.sc.functions.reportNewPt(int(real_loc[0][0] * DECIMAL_FACTOR),
-                                                               int(real_loc[0][1] * DECIMAL_FACTOR), 1,
+                    transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
+                                                               int(pos_state[1][0] * DECIMAL_FACTOR), 1,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType), 0).transact(
                         {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
