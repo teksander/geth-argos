@@ -389,6 +389,7 @@ def controlstep():
             sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
 
         # w3.sc.functions.registerRobot().transact()
+        robot.colored_blob_omnidirectional_camera.enable()
 
     else:
 
@@ -495,6 +496,7 @@ def controlstep():
         #########################################################################################################
         #### Any.STATE
         #########################################################################################################
+        print(robot.colored_blob_omnidirectional_camera.get_readings())
 
         peering()
 
