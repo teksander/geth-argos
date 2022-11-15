@@ -47,14 +47,14 @@ params['patches']['distribution'] = 'uniform'
 
 params['patches']['respawn']  = False
 params['patches']['known']    = True
-params['patches']['radius']   = 0.12
+params['patches']['radius']   = 0.06
 params['patches']['qtty_min'] = 15
 params['patches']['qtty_max'] = 15
 # params['patches']['dist_min'] = 1 * params['cache']['r'] 
 # params['patches']['dist_max'] = 0.5 * params['generic']['arena_size'] 
 
-params['patches']['dist_min'] = 2.5 * params['cache']['r'] 
-params['patches']['dist_max'] = 2.51 * params['cache']['r']
+params['patches']['dist_min'] = 1.5 * params['cache']['r'] 
+params['patches']['dist_max'] = 5 * params['cache']['r']
 
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
 params['patches']['forage_rate'] = {'red': 5, 'green':  5, 'blue': 5, 'yellow': 5}
@@ -76,7 +76,7 @@ params['patches']['dec_returns_mult']   = 10
 # params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 
 
-params['patches']['counts'] = {'red': 0, 'green': 0 , 'blue': 1, 'yellow': 0}
+params['patches']['counts'] = {'red': 2, 'green': 2 , 'blue': 1, 'yellow': 1}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
 							   'green':  params['patches']['radius'] , 
 							   'blue':   params['patches']['radius'], 
