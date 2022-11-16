@@ -185,6 +185,44 @@ class Navigate(object):
         self.orientation = self.robot.position.get_orientation()
         self.target = Vector2D(target)
 
+    def navigate(self, target = [0,0]):
+
+        # Update the current position, orientation and target of the robot
+        self.update_state(target = target)
+        
+        # Calculate the local frame vector to the desired target
+        vec_target = (self.target-self.position).rotate(-self.orientation)
+        
+
+        T = vec_target.normalize()
+
+        # The desired vector (we only care about direction)
+        D = T
+
+        self.update_rays(Vector2D(0,0),Vector2D(0,0),D)
+
+        dotProduct = 0
+        # The target angle is behind the robot, we just rotate, no forward motion
+        if D.angle > self.thresh or D.angle < -self.thresh:
+            dotProduct = 0
+
+        # Else, we project the forward motion vector to the desired angle
+        else:
+            dotProduct = Vector2D(1,0).dot(D.normalize())
+
+        # The angular velocity component is the desired angle scaled linearly
+        angularVelocity = self.Kp * D.angle
+
+        # The final wheel speeds are computed combining the forward and angular velocities
+        right = dotProduct * self.MAX_SPEED/2 - angularVelocity * self.L
+        left = dotProduct * self.MAX_SPEED/2 + angularVelocity * self.L
+
+        # Set wheel speeds
+        self.robot.epuck_wheels.set_speed(right, left)
+
+        # Store the distance to arrive at target
+        self.__distance_to_target = abs(vec_target)
+
     def navigate_with_obstacle_avoidance(self, target = [0,0]):
 
         # Update the current position, orientation and target of the robot

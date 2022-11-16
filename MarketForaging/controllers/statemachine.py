@@ -19,13 +19,14 @@ class Recruit(Enum):
     DROP   = 9
 
 class States(Enum):
-    IDLE   = 1
+    INIT   = 1
     PLAN   = 2
     SCOUT  = 3
     FORAGE = 4
     SELL   = 5
     BUY    = 6
     DROP   = 7 
+    QUEUE  = 8
 
 stateList = list(Idle)+list(Scout)+list(Recruit)
 

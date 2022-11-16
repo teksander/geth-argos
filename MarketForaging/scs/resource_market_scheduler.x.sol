@@ -20,22 +20,21 @@ contract MarketForaging {
     uint id;
 
     // Assignment
-    uint meanQ;
-    uint count;
-    uint worker_count;
+    address worker;
+
+    // Scheduling
+    uint lastA;
+    uint lastD;
   } 
 
-  patch[] private patches;
+  address[] queue;
 
+  patch[] private patches;
+  
   uint id_nonce;
   mapping(address => uint) tasks;
   mapping(address => uint) drops;
-  mapping(address => uint) lastD;
 
-
-  function updateMean(uint previous, uint current, uint N) private pure returns (uint) {
-    return (previous + expma*current) / (N+expma);
-  }
 
   function random(uint mod) public view returns (uint) {
     return uint(keccak256(abi.encode(block.timestamp,msg.sender))) % mod;
@@ -74,10 +73,10 @@ contract MarketForaging {
                           util: _util,
                           qlty: _qlty, 
                           json: _json,
-                          id:      id_nonce,
-                          meanQ:   0,
-                          count:   0,
-                          worker_count: 0
+                          id:     id_nonce,
+                          worker: address(0),
+                          lastA: 0,
+                          lastD: 0
                         }));
     }
   } 
@@ -87,93 +86,61 @@ contract MarketForaging {
     uint i = findByPos(_x, _y);
 
     if (i < 9999) {
-
-      // Update quality
-      uint newQ = 1000*patches[i].util/(block.number-lastD[msg.sender]);
-
-      // patches[i].meanQ = updateMean(patches[i].meanQ, new_value, patches[i].count);
-      patches[i].meanQ = newQ;
-      patches[i].count ++;
-    
+  
       // Update patch information
       updatePatch(_x, _y, _qtty, _util, _qlty, _json);
     }
 
     // Update robot drop counter;
     drops[msg.sender] ++;
-    lastD[msg.sender] = block.number;
+    patches[i].lastD == block.number;
+
 
     // Re-assign robot
     if (drops[msg.sender] % 1 == 0)  {
       
       // Unassign current task
       tasks[msg.sender] = 0;
-      if (i < 9999) { patches[i].worker_count--; }
+      if (i < 9999) { patches[i].worker == address(0); }
 
-      // Assign new task
+      // Assign new worker
       assignPatch();
     }
   }
 
+  function joinQueue() public {
+    uint t = amInQueue();
+    if (t==9999) { queue.push(msg.sender); }
+  }
+
+
   function assignPatch() public {
 
-    uint i = 0;
-    
-    // Epsilon-soft algorithm
-    bool exploit = coinFlip(100-epsilon);
-    
-    // Soft-greedy policy
-    if (exploit) {
-      // Get soft-greedy action
-      i = findWeightedChoice();
+    uint i = findBestAvailiable();
+
+    if (i < 9999 && queue.length > 0) {
+      address next = queue[0];
+      patches[i].worker = next;
+      tasks[next] = patches[i].id;
+
+      for (uint j = 0; j < queue.length-1; j++) { queue[j] = queue[j+1]; }
+      queue.pop();
     }
-
-    // Non-greedy policy
-    else {
-      // Get random action
-      i = random(patches.length + explore);
-    }
-
-    // Assign new foraging task
-    if (i < patches.length) {
-      tasks[msg.sender] = patches[i].id;
-      lastD[msg.sender] = block.number;
-      patches[i].worker_count++;
-    }  
-
   }
 
-  function findWeightedChoice() private view returns (uint) {
-    uint sumQ  = 0;
-    uint index = 0;
+  function findBestAvailiable() public view returns (uint) {
+    uint maxU  = 0;
+    uint index = 9999;
 
     for (uint i=0; i < patches.length; i++) {
-      sumQ += patches[i].meanQ + patches[i].util;
-    }
-
-    uint rand = random(sumQ);
-    for (uint i=0; i < patches.length; i++) {
-      if (rand < patches[i].meanQ + patches[i].util) {
-        index = i;
-        break;
-      }
-      rand -= patches[i].meanQ;
-    }
-    return index;
-  }
-
-  function findBestQ() private view returns (uint) {
-    uint maxQ  = 0;
-    uint index = 0;
-
-    for (uint i=0; i < patches.length; i++) {
-      if (patches[i].meanQ + patches[i].util > maxQ) {
-        maxQ  = patches[i].meanQ;
+      if (patches[i].worker == address(0) && patches[i].util > maxU) {
+        maxU  = patches[i].util;
         index = i;
       }
     }
     return index;
   }
+
 
   function findByID(uint id) private view returns (uint) {
 
@@ -192,10 +159,24 @@ contract MarketForaging {
     } 
     return 9999;
   }
+
+  function amInQueue() public view returns (uint) {
+    for (uint i=0; i < queue.length; i++) {
+      if (queue[i] == msg.sender) {
+        return i;
+      }
+    } 
+    return 9999;
+  }
   
   function getPatches() public view returns (patch[] memory){
     return patches;
   }
+
+  function getQueue() public view returns (address[] memory){
+    return queue;
+  }
+
 
   function getMyPatch() public view returns (string memory){
 

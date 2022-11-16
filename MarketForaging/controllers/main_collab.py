@@ -325,7 +325,7 @@ def init():
     rgb = RGBLEDs(robot)
 
     # /* Init Finite-State-Machine */
-    fsm = FiniteStateMachine(robot, start = Idle.IDLE)
+    fsm = FiniteStateMachine(robot, start = States.INIT)
 
     # List of submodules --> iterate .start() to start all
     submodules = [w3.geth.miner, erb]
@@ -345,9 +345,10 @@ def init():
     header = ['DIST']
     logs['odometry'] = Logger(log_folder+name, header, rate = 10, ID = me.id)
 
-    txs['sell'] = Transaction(None)
-    txs['buy']  = Transaction(None)
-    txs['drop'] = Transaction(None)
+    txs['sell']  = Transaction(None)
+    txs['buy']   = Transaction(None)
+    txs['drop']  = Transaction(None)
+    txs['queue'] = Transaction(None)
 
 #########################################################################################################################
 #### CONTROL STEP #######################################################################################################
@@ -380,16 +381,13 @@ def controlstep():
         for clock in clocks.values():
             clock.reset()
 
-        # Startup transactions
+        # Globally known resources
         res = robot.variables.get_attribute("newResource")
         print(res)
         if res:
             resource = Resource(res)
             print(resource._calldata)
             sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
-
-        # w3.sc.functions.registerRobot().transact()
-        # robot.colored_blob_omnidirectional_camera.enable()
 
     else:
 
@@ -496,7 +494,6 @@ def controlstep():
         #########################################################################################################
         #### Any.STATE
         #########################################################################################################
-        # print(robot.colored_blob_omnidirectional_camera.get_readings())
 
         peering()
 
@@ -504,11 +501,12 @@ def controlstep():
             odo.setPosition()
 
         #########################################################################################################
-        #### Idle.IDLE
+        #### States.INIT
         #########################################################################################################
-        if fsm.query(Idle.IDLE):
+        if fsm.query(States.INIT):
 
             fsm.setState(Recruit.PLAN, message = "Planning")
+
 
         #########################################################################################################
         #### Recruit.PLAN  
@@ -517,6 +515,8 @@ def controlstep():
         elif fsm.query(Recruit.PLAN):
 
             resource = tcp_sc.request(data = 'getMyPatch')
+            patches = tcp_sc.request(data = 'getPatches')
+            queue_position = tcp_sc.request(data = 'getMyQueuePos')
 
             # If resource is assigned, FORAGE
             if resource:
@@ -527,16 +527,24 @@ def controlstep():
                 else:
                     fsm.setState(Recruit.FORAGE, message = 'Foraging: %s' % rb.best._desc)
 
-            # If no resource is assigned, EXPLORE
+            # If I am not in queue
+            elif queue_position == 9999:
+                fsm.setState(States.QUEUE, message = 'Joining queue')
+
+            elif 0 in [eval(x[7]) for x in patches]:
+                fsm.setState(Recruit.BUY, message = 'Buying because there is availiable')
+
             else:
+                homing()
 
-                if fsm.getPreviousState() == Scout.EXPLORE:
-                    fsm.setState(Scout.EXPLORE, message = None)
+                # if fsm.getPreviousState() == Scout.EXPLORE:
+                #     fsm.setState(Scout.EXPLORE, message = None)
 
-                else:
-                    explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
-                    clocks['explore'].set(explore_duration)
-                    fsm.setState(Scout.EXPLORE, message = 'Exploring: %2fs' % explore_duration)
+                # else:
+                #     explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
+                #     clocks['explore'].set(explore_duration)
+                #     fsm.setState(Scout.EXPLORE, message = 'Exploring: %2fs' % explore_duration)
+
 
 
         #########################################################################################################
@@ -606,6 +614,28 @@ def controlstep():
 
 
         #########################################################################################################
+        #### States.QUEUE  
+        #########################################################################################################
+
+        elif fsm.query(States.QUEUE):
+
+            # Navigate home
+            homing()
+
+            if txs['queue'].query(3):
+                txs['queue'] = Transaction(None)
+                fsm.setState(Recruit.PLAN, message = "Buy success")
+
+            elif txs['queue'].fail == True:    
+                txs['queue'] = Transaction(None)
+                fsm.setState(Recruit.PLAN, message = "Buy failed")
+
+            elif txs['queue'].hash == None:
+                tx = w3.sc.functions.joinQueue().transact()
+                txs['queue'] = Transaction(tx)
+                robot.log.info("Queueing")   
+
+        #########################################################################################################
         #### Recruit.BUY  
         #########################################################################################################
 
@@ -653,7 +683,8 @@ def controlstep():
                     nav.avoid(move = True)
 
                 else:
-                    nav.navigate_with_obstacle_avoidance(rb.best._pr)
+                    # nav.navigate_with_obstacle_avoidance(rb.best._pr)
+                    nav.navigate(rb.best._pr)
 
                 if robot.variables.get_attribute("hasResource"):
                     robot.variables.set_attribute("collectResource", "")

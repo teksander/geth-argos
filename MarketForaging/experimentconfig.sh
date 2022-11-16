@@ -7,27 +7,26 @@ export EXPERIMENTFOLDER="$MAINFOLDER/MarketForaging"
 export BLOCKCHAINPATH="$HOMEFOLDER/eth_data_para/data"
 
 # [FILES]
+export ARGOSNAME="market-foraging"
 export GENESISNAME="genesis_poa"
-export GENESISFILE="${DOCKERFOLDER}/geth/files/$GENESISNAME.json"
-
 export CONTRACTNAME="MarketForaging"
+export SCNAME="resource_market_scheduler"
+
+export GENESISFILE="${DOCKERFOLDER}/geth/files/$GENESISNAME.json"
 export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
 export CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
 export CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
-
-export SCNAME="resource_market_esoft"
 export SCFILE="${EXPERIMENTFOLDER}/scs/${SCNAME}.sol" 
 export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/${SCNAME}.x.sol" 
-
-export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
-export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.x.argos"
+export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/${ARGOSNAME}.argos"
+export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/${ARGOSNAME}.x.argos"
 
 # [DOCKER]
 export SWARMNAME=ethereum
 export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
-export NUM1=15
+export NUM1=7
 export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
 
 export NUM2=0

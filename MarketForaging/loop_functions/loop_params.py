@@ -29,7 +29,8 @@ params['generic']['max_workers'] = eval(os.environ["MAXWORKERS"])
 params['market'] = dict()
 params['market']['x'] = 0
 params['market']['y'] = 0 #params['generic']['arena_size']/2-params['market']['radius']*1.5
-params['market']['r'] = 0.15 *params['generic']['arena_size'] * math.sqrt(1/math.pi)
+# params['market']['r'] = 0.15 *params['generic']['arena_size'] * math.sqrt(1/math.pi)
+params['market']['r'] = 2 * 0.073/2 * math.sqrt(params['generic']['num_robots'])
 
 # Parameters for cache
 params['cache'] = dict()
@@ -76,7 +77,7 @@ params['patches']['dec_returns_mult']   = 10
 # params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 
 
-params['patches']['counts'] = {'red': 2, 'green': 2 , 'blue': 1, 'yellow': 1}
+params['patches']['counts'] = {'red': 1, 'green': 1 , 'blue': 0, 'yellow': 0}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
 							   'green':  params['patches']['radius'] , 
 							   'blue':   params['patches']['radius'], 
