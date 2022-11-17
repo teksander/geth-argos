@@ -2,9 +2,8 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant epsilon = EPSILON; 
-  uint constant expma   = 15; 
-  uint constant explore = 0;
+  uint constant DCURVE = DCURVE; 
+  uint constant epoch  = EPOCH;
 
   struct patch {
 
@@ -12,23 +11,16 @@ contract MarketForaging {
     int x;
     int y;
     uint qtty;
-    uint util;
+    int[3] demand;  
     string qlty;
     string json; 
 
     // Identifier
     uint id;
 
-    // Assignment
-    address worker;
-
-    // Scheduling
-    uint lastA;
-    uint lastD;
   } 
 
   address[] queue;
-
   patch[] private patches;
   
   uint id_nonce;

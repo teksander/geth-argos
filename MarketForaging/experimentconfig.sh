@@ -10,7 +10,7 @@ export BLOCKCHAINPATH="$HOMEFOLDER/eth_data_para/data"
 export ARGOSNAME="market-foraging"
 export GENESISNAME="genesis_poa"
 export CONTRACTNAME="MarketForaging"
-export SCNAME="resource_market_scheduler"
+export SCNAME="resource_market_limit"
 
 export GENESISFILE="${DOCKERFOLDER}/geth/files/$GENESISNAME.json"
 export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"

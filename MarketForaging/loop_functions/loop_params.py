@@ -58,16 +58,23 @@ params['patches']['dist_min'] = 1.5 * params['cache']['r']
 params['patches']['dist_max'] = 5 * params['cache']['r']
 
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
-params['patches']['forage_rate'] = {'red': 5, 'green':  5, 'blue': 5, 'yellow': 5}
-params['patches']['regen_rate']  = {'red': 30, 'green':  30, 'blue': 30, 'yellow': 30}
-params['patches']['utility']     = {'red': 2, 'green':  4, 'blue': 6, 'yellow': 8}
+params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 6, 'yellow': 4}
+params['patches']['regen_rate']  = {'red': 20, 'green':  20, 'blue': 20, 'yellow': 20}
 
-# constant, linear or logarithmic decreasing returns
-# qqty of resource before dec returns starts
-# multiplier of the original forage rate for the last resource being foraged 
-params['patches']['dec_returns_func']   = 'linear' 
-params['patches']['dec_returns_thresh'] = params['patches']['qtty_max']
-params['patches']['dec_returns_mult']   = 10        
+params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 1, 'yellow': 1}
+
+
+params['patches']['dec_returns_func']   = 'linear'                      # constant, linear or logarithmic decreasing returns
+params['patches']['dec_returns_thresh'] = params['patches']['qtty_max'] # qqty of resource before dec returns starts
+params['patches']['dec_returns_mult']   = 10                            # multiplier of the original forage rate for the last resource being foraged 
+
+params['patches']['counts'] = {'red': 0, 'green': 0 , 'blue': 1, 'yellow': 0}
+params['patches']['radii']  = {'red':    params['patches']['radius'], 
+							   'green':  params['patches']['radius'] , 
+							   'blue':   params['patches']['radius'], 
+							   'yellow': params['patches']['radius']}
+
+
 
 # params['patches']['area_percent'] = 0.005 * (10/generic_params['num_robots'])
 # params['patches']['radius']    = params['generic']['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 
@@ -77,11 +84,6 @@ params['patches']['dec_returns_mult']   = 10
 # params['patches']['frequency'] = {'red': 0.25, 'green': 0.25 , 'blue': 0.25, 'yellow': 0.25}
 
 
-params['patches']['counts'] = {'red': 1, 'green': 1 , 'blue': 0, 'yellow': 0}
-params['patches']['radii']  = {'red':    params['patches']['radius'], 
-							   'green':  params['patches']['radius'] , 
-							   'blue':   params['patches']['radius'], 
-							   'yellow': params['patches']['radius']}
 
 # Parameters for the economy
 # economy_params = dict()
