@@ -2,9 +2,16 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant max_workers = 10; 
+  int[4] Demand = [int(0), 0, -1, 6];
 
-  struct patch {
+  struct Epoch {
+    uint number;
+    uint start;
+    uint duration;
+    uint supply;
+  }
+
+  struct Patch {
 
     // Details 
     int x;
@@ -18,34 +25,20 @@ contract MarketForaging {
     uint id;
 
     // Assignment
-    uint meanQ;
-    uint count;
-    uint worker_count;
+    uint max_workers;
+    uint tot_workers;
 
+    Epoch epoch;
   } 
 
-  patch[] private patches;
+  Patch[] private patches;
+  Epoch[] public  epochs;
 
   uint id_nonce;
   mapping(address => uint) tasks;
   mapping(address => uint) drops;
   mapping(address => uint) lastD;
 
-
-  function updateMean(uint previous, uint current, uint N) private pure returns (uint) {
-    return (previous*N + current) / (N+1);
-  }
-
-  function random(uint mod) private view returns (uint) {
-    return uint(keccak256(abi.encode(block.timestamp))) % mod;
-  }
-
-  function coinFlip(uint odds) private view returns (bool) {
-    if (random(100) < odds) {
-      return true;
-    }
-    return false;
-  }
 
   function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
 
@@ -66,7 +59,14 @@ contract MarketForaging {
       id_nonce++;
 
       // Append new patch to list
-      patches.push(patch({
+      Epoch memory new_epoch = Epoch({
+                          number: 1, 
+                          start: block.number, 
+                          duration: 0,
+                          supply: 0
+                        }); 
+
+      patches.push(Patch({
                           x: _x, 
                           y: _y, 
                           qtty: _qtty, 
@@ -74,9 +74,9 @@ contract MarketForaging {
                           qlty: _qlty, 
                           json: _json,
                           id:      id_nonce,
-                          meanQ:   0,
-                          count:   0,
-                          worker_count: 0
+                          max_workers:   2,
+                          tot_workers:   0,
+                          epoch: new_epoch
                         }));
     }
   } 
@@ -85,69 +85,57 @@ contract MarketForaging {
 
     uint i = findByPos(_x, _y);
 
-    if (i < 9999) {
+    if (i < 9999 && tasks[msg.sender] == patches[i].id) {
 
-      // Update quality
-      uint newQ = 1000*patches[i].util/(block.number-lastD[msg.sender]);
-
-      // patches[i].meanQ = updateMean(patches[i].meanQ, new_value, patches[i].count);
-      patches[i].meanQ = newQ;
-      patches[i].count ++;
+      // New good in current epoch
+      patches[i].epoch.supply += 1;
     
       // Update patch information
       updatePatch(_x, _y, _qtty, _util, _qlty, _json);
-    }
-      
-    // Update robot drop counter;
-    drops[msg.sender] ++;
-    lastD[msg.sender] = block.number;
 
-    // Re-assign robot
-    if (drops[msg.sender] % 1 == 0)  {
-      
-      // Unassign current task
-      tasks[msg.sender] = 0;
-      if (i < 9999) { patches[i].worker_count--; }
+      if (patches[i].epoch.supply == patches[i].tot_workers) {
 
-      // Assign new task
-      assignPatch();
+        // New epoch starts
+        Epoch memory new_epoch = Epoch({
+                            number: patches[i].epoch.number + 1, 
+                            start: block.number, 
+                            duration: 0,
+                            supply: 0
+                          }); 
+
+        // Increase max workers
+        // patches[i].max_workers += 1;
+        assignPatch();
+
+        // Store epoch
+        patches[i].epoch.duration = block.number - patches[i].epoch.start;
+        epochs.push(patches[i].epoch);
+
+        // Update epoch
+        patches[i].epoch = new_epoch;
+      }
     }
   }
+
 
   function assignPatch() public {
 
     // Limit foragers algorithm
-    uint i = findBestAvailiableU();
+    uint i = findAvailiable();
 
     // Assign new foraging task
     if (i < patches.length) {
+      patches[i].tot_workers++;
       tasks[msg.sender] = patches[i].id;
-      lastD[msg.sender] = block.number;
-      patches[i].worker_count++;
     }
   }
 
-  function findBestQ() private view returns (uint) {
-    uint maxQ  = 0;
-    uint index = 0;
+  function findAvailiable() private view returns (uint) {
 
-    for (uint i=0; i < patches.length; i++) {
-      if (patches[i].meanQ + patches[i].util > maxQ) {
-        maxQ  = patches[i].meanQ;
-        index = i;
-      }
-    }
-    return index;
-  }
-
-  function findBestAvailiableU() private view returns (uint) {
-    uint maxU  = 0;
     uint index = 9999;
 
     for (uint i=0; i < patches.length; i++) {
-      if (patches[i].util > maxU 
-          && patches[i].worker_count < max_workers) {
-        maxU  = patches[i].util;
+      if (patches[i].tot_workers < patches[i].max_workers && tasks[msg.sender] != patches[i].id) {
         index = i;
       }
     }
@@ -172,8 +160,19 @@ contract MarketForaging {
     return 9999;
   }
 
-  function getPatches() public view returns (patch[] memory){
+  function getPatches() public view returns (Patch[] memory){
     return patches;
+  }
+
+  function getEpochs() public view returns (Epoch[] memory){
+    return epochs;
+  }
+
+  function getPatch() public view returns (Patch memory){
+
+    for (uint i=0; i < patches.length; i++) {
+      if (patches[i].id == tasks[msg.sender]) return patches[i];
+    }   
   }
 
   function getMyPatch() public view returns (string memory){
@@ -188,6 +187,24 @@ contract MarketForaging {
 
   }  
 }
+
+  // function updateMean(uint previous, uint current, uint N) private pure returns (uint) {
+  //   return (previous*N + current) / (N+1);
+  // }
+
+  // function random(uint mod) private view returns (uint) {
+  //   return uint(keccak256(abi.encode(block.timestamp))) % mod;
+  // }
+
+  // function coinFlip(uint odds) private view returns (bool) {
+  //   if (random(100) < odds) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
+
+
+
 
 // Backups
 // && patches[i].qtty > patches[i].worker_count

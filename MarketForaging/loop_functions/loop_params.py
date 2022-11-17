@@ -48,7 +48,7 @@ params['patches']['distribution'] = 'uniform'
 
 params['patches']['respawn']  = False
 params['patches']['known']    = True
-params['patches']['radius']   = 0.06
+params['patches']['radius']   = 0.12
 params['patches']['qtty_min'] = 15
 params['patches']['qtty_max'] = 15
 # params['patches']['dist_min'] = 1 * params['cache']['r'] 

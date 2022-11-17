@@ -225,8 +225,10 @@ if __name__ == '__main__':
 
 		resources  = sc.functions.getPatches().call()
 		myResource = sc.functions.getMyPatch().call()
-		myQueuePos = sc.functions.amInQueue().call()
-		tcp_resources.setData({'getPatches':resources, 'getMyPatch':myResource, 'getMyQueuePos':myQueuePos })
+		myResource_all = sc.functions.getPatch().call()
+		block_number = w3.eth.blockNumber
+
+		tcp_resources.setData({'getPatches': resources, 'getMyPatch': myResource, 'getPatch': myResource_all, 'block': block_number})
 
 		time.sleep(0.5)
 

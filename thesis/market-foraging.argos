@@ -71,27 +71,27 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="1.825, 1.825, 1.5" center="0,0,0">
+  <arena size="1.527, 1.527, 1.5" center="0,0,0">
 
  <floor id="f" source="image" path="/home/eksander/geth-argos/MarketForaging/experiments/floors/market.png" />
 
-    <box id="wall_north" size="1.825,0.06,0.1" movable="false">
-      <body position="0,.912,0" orientation="0,0,0" />
+    <box id="wall_north" size="1.527,0.06,0.1" movable="false">
+      <body position="0,.763,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="1.825,0.06,0.1" movable="false">
-      <body position="0,-.912,0" orientation="0,0,0" />
+    <box id="wall_south" size="1.527,0.06,0.1" movable="false">
+      <body position="0,-.763,0" orientation="0,0,0" />
     </box>
-    <box id="wall_east" size="0.06,1.825,0.1" movable="false">
-      <body position=".912,0,0" orientation="0,0,0" />
+    <box id="wall_east" size="0.06,1.527,0.1" movable="false">
+      <body position=".763,0,0" orientation="0,0,0" />
     </box>
-    <box id="wall_west" size="0.06,1.825,0.1" movable="false">
-      <body position="-.912,0,0" orientation="0,0,0" />
+    <box id="wall_west" size="0.06,1.527,0.1" movable="false">
+      <body position="-.763,0,0" orientation="0,0,0" />
     </box>
 
     <distribute>
-      <position method="uniform" min="-.365,-.365,0" max=".365,.365,0" /> 
+      <position method="uniform" min="-.305,-.305,0" max=".305,.305,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="10" max_trials="15"> 
+      <entity quantity="7" max_trials="15"> 
         <e-puck id="bc" >
           <controller config="collab" />
         </e-puck>
@@ -99,9 +99,9 @@
     </distribute>
 
     <distribute>
-      <position method="uniform" min="-.365,-.365,0" max=".365,.365,0" /> 
+      <position method="uniform" min="-.305,-.305,0" max=".305,.305,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="0" max_trials="15" base_num="10"> 
+      <entity quantity="0" max_trials="15" base_num="7"> 
         <e-puck id="gr" >
           <controller config="greedy" />
         </e-puck>
