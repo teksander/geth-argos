@@ -388,10 +388,10 @@ def controlstep():
         if res:
             resource = Resource(res)
             print(resource._calldata)
-            sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
+            w3.sc.functions.updatePatch(*resource._calldata).transact()
 
-        # w3.sc.functions.registerRobot().transact()
-        # robot.colored_blob_omnidirectional_camera.enable()
+        my_eff = int(float(robot.variables.get_attribute("eff"))*100)
+        w3.sc.functions.register(my_eff).transact()
 
     else:
 
@@ -446,6 +446,20 @@ def controlstep():
                 else:
                     nav.navigate_with_obstacle_avoidance(market._pr)
                     arrived = False
+
+            return arrived
+
+        def grouping(target):
+
+            # Navigate to the market
+            x = cache.radius if target[0] > 0 else -cache.radius
+
+            arrived = True
+            if nav.get_distance_to((x,0)) < 0.3*market.radius:           
+                nav.avoid(move = True) 
+            else:
+                nav.navigate_with_obstacle_avoidance((x,0))
+                arrived = False
 
             return arrived
 
@@ -519,18 +533,6 @@ def controlstep():
         elif fsm.query(Recruit.PLAN):
             global previous_epoch_num
 
-            # SC index map
-            _x       = 0
-            _y       = 1
-            _qtty    = 2
-            _util    = 3
-            _qlty    = 4
-            _json    = 5
-            _id      = 6
-            _max_w   = 7
-            _tot_w   = 8
-            _epoch   = 9
-
             resource  = tcp_sc.request(data = 'getMyPatch')
             resources = tcp_sc.request(data = 'getPatches')
             block     = tcp_sc.request(data = 'block')
@@ -539,7 +541,6 @@ def controlstep():
             epoch_stt = epoch[1]
             
             availiable = any([x[_max_w]-x[_tot_w]>0 for x in resources])
-
 
             # If resource is assigned, FORAGE
             if resource:
@@ -550,96 +551,18 @@ def controlstep():
                     fsm.setState(Recruit.FORAGE, message = None)
 
                 else:
-                    homing()
+                    grouping(rb.best._p)
 
-                    if epoch_num > previous_epoch_num:
+                    if epoch_num > previous_epoch_num and block > epoch_stt:
                         previous_epoch_num = epoch_num
-                        print('Epoch #%s duration: %s' % (epoch_num, block-epoch_stt))
                         fsm.setState(Recruit.FORAGE, message = 'Foraging: %s // epoch: %s' % (rb.best._desc, epoch_num))
 
             # If not assigned but availiable, ASSIGN
             elif availiable:
-
                 homing()
-
                 fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
             else:
                 homing()
-
-                # if fsm.getPreviousState() == Scout.EXPLORE:
-                #     fsm.setState(Scout.EXPLORE, message = None)
-
-                # else:
-                #     explore_duration = random.gauss(cp['explore_mu'], cp['explore_sg'])
-                #     clocks['explore'].set(explore_duration)
-                #     fsm.setState(Scout.EXPLORE, message = 'Exploring: %2fs' % explore_duration)
-
-
-        #########################################################################################################
-        #### Scout.EXPLORE
-        #########################################################################################################
-
-        # elif fsm.query(Scout.EXPLORE):
-
-        #     if clocks['block'].query():
-
-        #         # Confirm I am still scout
-        #         fsm.setState(Recruit.PLAN, message = None)
-
-        #     else:
-
-        #         # Perform a random-walk 
-        #         rw.step()
-
-        #         # Look for resources
-        #         sensing()
-
-        #         # Transition state
-        #         if clocks['explore'].query(reset = False):
-
-        #             # Sucess exploration: Sell
-        #             if rb.buffer:
-        #                 fsm.setState(Scout.SELL, message = "Found %s" % len(rb))
-
-        #             # Unsucess exploration: Buy
-        #             else:
-        #                 clocks['buy'].reset()
-        #                 fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
-
-
-        #########################################################################################################
-        #### Scout.SELL
-        #########################################################################################################
-
-        # elif fsm.query(Scout.SELL):
-
-        #     # Navigate to market
-        #     if fsm.query(Recruit.HOMING, previous = True):
-        #         homing(to_drop = True)
-        #     else:
-        #         homing()
-
-        #     # Sell resource information  
-        #     if rb.buffer:
-        #         resource = rb.buffer.pop(-1)
-        #         print(resource._calldata)
-        #         sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
-        #         txs['sell'] = Transaction(sellHash)
-        #         robot.log.info('Selling: %s', resource._desc)
-
-        #     # Transition state  
-        #     else:
-        #         if txs['sell'].query(3):
-        #             txs['sell'] = Transaction(None)
-        #             fsm.setState(Recruit.BUY, message = "Sell success")
-
-        #         elif txs['sell'].fail == True:    
-        #             txs['sell'] = Transaction(None)
-        #             fsm.setState(Recruit.BUY, message = "Sell failed")
-
-        #         elif txs['sell'].hash == None:
-        #             fsm.setState(Recruit.BUY, message = "None to sell")
-
 
         #########################################################################################################
         #### Recruit.BUY  
@@ -729,6 +652,71 @@ def controlstep():
                     elif txs['drop'].hash == None:
                         robot.log.info('Drop lost: %s', rb.best._desc)
                         txs['drop'] = Transaction(None)
+
+        #########################################################################################################
+        #### Scout.EXPLORE
+        #########################################################################################################
+
+        # elif fsm.query(Scout.EXPLORE):
+
+        #     if clocks['block'].query():
+
+        #         # Confirm I am still scout
+        #         fsm.setState(Recruit.PLAN, message = None)
+
+        #     else:
+
+        #         # Perform a random-walk 
+        #         rw.step()
+
+        #         # Look for resources
+        #         sensing()
+
+        #         # Transition state
+        #         if clocks['explore'].query(reset = False):
+
+        #             # Sucess exploration: Sell
+        #             if rb.buffer:
+        #                 fsm.setState(Scout.SELL, message = "Found %s" % len(rb))
+
+        #             # Unsucess exploration: Buy
+        #             else:
+        #                 clocks['buy'].reset()
+        #                 fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
+
+
+        #########################################################################################################
+        #### Scout.SELL
+        #########################################################################################################
+
+        # elif fsm.query(Scout.SELL):
+
+        #     # Navigate to market
+        #     if fsm.query(Recruit.HOMING, previous = True):
+        #         homing(to_drop = True)
+        #     else:
+        #         homing()
+
+        #     # Sell resource information  
+        #     if rb.buffer:
+        #         resource = rb.buffer.pop(-1)
+        #         print(resource._calldata)
+        #         sellHash = w3.sc.functions.updatePatch(*resource._calldata).transact()
+        #         txs['sell'] = Transaction(sellHash)
+        #         robot.log.info('Selling: %s', resource._desc)
+
+        #     # Transition state  
+        #     else:
+        #         if txs['sell'].query(3):
+        #             txs['sell'] = Transaction(None)
+        #             fsm.setState(Recruit.BUY, message = "Sell success")
+
+        #         elif txs['sell'].fail == True:    
+        #             txs['sell'] = Transaction(None)
+        #             fsm.setState(Recruit.BUY, message = "Sell failed")
+
+        #         elif txs['sell'].hash == None:
+        #             fsm.setState(Recruit.BUY, message = "None to sell")
 
 
 #########################################################################################################################

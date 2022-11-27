@@ -716,6 +716,10 @@ class Vector2D:
     def to_polar(self):
         """Return the vector's components in polar coordinates."""
         return self.length, self.angle
+
+    def tuple(self):
+        """Return the vector's components as a tuple."""
+        return (self.x, self.y)
         
 class mydict(dict):
     def __mul__(self, k):

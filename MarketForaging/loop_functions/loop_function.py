@@ -63,8 +63,8 @@ accums['distance'] = Accumulator()
 accums['distance_forage'] = Accumulator()
 accums['distance_explore'] = Accumulator()
 accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots'])]
-clocks['forage']     = dict()
 clocks['regen']      = dict()
+clocks['ready']      = dict()
 
 # Store the position of the market and cache
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['r']})
@@ -145,7 +145,7 @@ def generate_resource(n = 1, qualities = None, max_attempts = 500):
         allresources.append(Resource({'x':x, 'y':y, 'radius':radius, 'quantity':quantity, 'quality':quality, 'utility':lp['patches']['utility'][quality]}))
 
         clocks['regen'][allresources[-1]] = Timer(lp['patches']['regen_rate'][allresources[-1].quality])
-
+        clocks['ready'][allresources[-1]] = Timer(lp['patches']['forage_rate'][allresources[-1].quality])
         # print('Created Resource: ' + allresources[-1]._json)
 
 
@@ -170,12 +170,14 @@ def init():
         generate_resource(count, qualities = count*[quality])
 
     for robot in allrobots:
-        print(robot.variables.get_all_attributes())
+
         robot.id = int(robot.variables.get_attribute("id"))-1
+        robot.variables.set_attribute("eff", str(lp['economy']['efficiency_best']+robot.id*lp['economy']['efficiency_step']))
         position_previous[robot.variables.get_attribute("id")] = Vector2D(robot.position.get_position()[0:2]) 
         
+        print(robot.variables.get_all_attributes())
+
         if lp['patches']['known']:
-            print(robot.id)
             robot.variables.set_attribute("newResource", allresources[robot.id % len(allresources)]._json)
             
 def pre_step():
@@ -185,9 +187,6 @@ def pre_step():
     if not startFlag:
         startTime = time.time()
     
-    # Tasks to perform every time step
-    foragers = {res: [] for res in allresources}
-
     # Tasks to perform for each robot
     for robot in allrobots:
         robot.variables.set_attribute("at", "")
@@ -199,22 +198,15 @@ def pre_step():
 
                 # Update robot virtual sensor
                 robot.variables.set_attribute("newResource", res._json)
+                robot.variables.set_attribute("at", res._json)
+                
+                # Robot does not carry resource and is foraging? YES -> Add to foragers
+                if not robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("collectResource"):
 
-                # Robot does not carry resource, is forager and resource is not depleted? YES -> Forage resource
-                if not robot.variables.get_attribute("hasResource") \
-                   and robot.variables.get_attribute("collectResource") \
-                   and res.quantity > 0:
-                   foragers[res].append(robot.id) 
-                else:
-                    if robot.id in clocks['forage']: 
-                        clocks['forage'].pop(robot.id)
-
-                # Robot foraging timer is up? YES -> Collect resource
-                if robot.id in clocks['forage']:
-                    robot.variables.set_attribute("forageTimer", str(round(clocks['forage'][robot.id].rate,2)))
-                    if clocks['forage'][robot.id].query():
-                        res.quantity -= 1
+                    if clocks['ready'][res].query():
                         robot.variables.set_attribute("hasResource", res.quality)
+                        robot.variables.set_attribute("forageTimer", str(round(clocks['ready'][res].rate, 2)))
+                        res.quantity -= 1
                         
         # Has robot stepped into market drop area? YES
         if is_in_circle(robot.position.get_position(), (cache.x, cache.y), cache.radius):
@@ -223,13 +215,19 @@ def pre_step():
             # Does the robot carry resource? YES -> Sell resource
             resource_quality = robot.variables.get_attribute("hasResource")
             if resource_quality and robot.variables.get_attribute("dropResource"):      
+
                 resource_counter[resource_quality] += 1  
-
                 accums['collection'][robot.id].acc(lp['patches']['utility'][resource_quality])
-
                 robot.variables.set_attribute("hasResource", "")
                 robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
 
+    def forage_rate(res):
+        if res.quantity >= lp['patches']['dec_returns_thresh']:
+            return lp['patches']['forage_rate'][res.quality]
+        else:
+            m = lp['patches']['dec_returns_slope']
+            b = lp['patches']['dec_returns_thresh']*lp['patches']['dec_returns_slope']+6
+            return -m*res.quantity + b
 
     # Tasks to perform for each resource
     for res in allresources:
@@ -238,33 +236,8 @@ def pre_step():
         if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
             res.quantity += 1
 
-        # Shuffle foragers to randomize who gets resources faster
-        random.shuffle(foragers[res])
-
-        # Base forage rate for resource type
-        forageRate    = lp['patches']['forage_rate'][res.quality]
-        m = (forageRate/lp['patches']['dec_returns_thresh']) * (1 - lp['patches']['dec_returns_mult'])
-        b = forageRate*lp['patches']['dec_returns_mult']
-        
-
-        # Collect resources
-        clocked   = [x for x in foragers[res] if x in clocks['forage']] 
-        unclocked = [x for x in foragers[res] if x not in clocks['forage']] 
-        already_clocking = len(clocked)
-
-        for robotID in unclocked: 
-
-            # Apply decreasing returns
-            if lp['patches']['dec_returns_func'] == 'linear':
-
-                if res.quantity < lp['patches']['dec_returns_thresh']:
-                    forageRate = m * (res.quantity-already_clocking) + b
-                    already_clocking += 1
-
-            elif lp['patches']['dec_returns_func'] == 'log':
-                pass
-
-            clocks['forage'][robotID] = Timer(forageRate)
+        # Update resource ready timer
+        clocks['ready'][res].set(forage_rate(res), reset=False)
 
 
 def post_step():

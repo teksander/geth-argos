@@ -23,6 +23,7 @@ params['generic']['arena_dim'] = eval(os.environ["ARENADIM"])
 params['generic']['rab_range'] = eval(os.environ["RABRANGE"])
 params['generic']['block_period'] = eval(os.environ["BLOCKPERIOD"])
 params['generic']['max_workers'] = eval(os.environ["MAXWORKERS"])
+params['generic']['regen_rate'] = eval(os.environ["REGENRATE"])
 
 
 # Parameters for marketplace
@@ -56,17 +57,22 @@ params['patches']['qtty_max'] = 15
 
 params['patches']['dist_min'] = 1.5 * params['cache']['r'] 
 params['patches']['dist_max'] = 5 * params['cache']['r']
-
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
 params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 6, 'yellow': 4}
-params['patches']['regen_rate']  = {'red': 20, 'green':  20, 'blue': 20, 'yellow': 20}
+params['patches']['regen_rate']  = {k:params['generic']['regen_rate'] for k in params['patches']['qualities']}
 
-params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 1, 'yellow': 1}
+# params['patches']['regen_rate']  = {'red': 20, 'green':  20, 'blue': 20, 'yellow': 20}
+
+params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 8, 'yellow': 1}
 
 
 params['patches']['dec_returns_func']   = 'linear'                      # constant, linear or logarithmic decreasing returns
 params['patches']['dec_returns_thresh'] = params['patches']['qtty_max'] # qqty of resource before dec returns starts
-params['patches']['dec_returns_mult']   = 10                            # multiplier of the original forage rate for the last resource being foraged 
+params['patches']['dec_returns_slope']  = 10                            # each resource is 10s slower than previous
+
+params['patches']['dec_returns_func']   = 'linear'                      # constant, linear or logarithmic decreasing returns
+params['patches']['dec_returns_thresh'] = params['patches']['qtty_max'] # qqty of resource before dec returns starts
+params['patches']['dec_returns_slope']  = 10                            # each resource is 10s slower than previous
 
 params['patches']['counts'] = {'red': 0, 'green': 0 , 'blue': 1, 'yellow': 0}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
@@ -86,8 +92,15 @@ params['patches']['radii']  = {'red':    params['patches']['radius'],
 
 
 # Parameters for the economy
-# economy_params = dict()
-# economy_params['fuel_cost'] = 0.1 # eth per second of exploration
+params['economy'] = dict()
+params['economy']['efficiency_distribution'] = 'linear' 
+params['economy']['efficiency_best'] = 0.25  # amps/block of best robot
+params['economy']['efficiency_step'] = 0.01 # amps/block increase per robot ID
+
+# params['economy']['efficiency_distribution'] = 'normal' 
+# params['economy']['efficiency_mean']  = 0.5  # amps/block of average robot
+# params['economy']['efficiency_sigma'] = 0.05 # amps/block deviation from average
+
 
 # Initialize the files which store QT_draw information 
 params['files'] = dict()

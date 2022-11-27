@@ -10,7 +10,7 @@ export BLOCKCHAINPATH="$HOMEFOLDER/eth_data_para/data"
 export ARGOSNAME="market-foraging"
 export GENESISNAME="genesis_poa"
 export CONTRACTNAME="MarketForaging"
-export SCNAME="resource_market_limit"
+export SCNAME="resource_market_demand_firm"
 
 export GENESISFILE="${DOCKERFOLDER}/geth/files/$GENESISNAME.json"
 export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
@@ -26,7 +26,7 @@ export SWARMNAME=ethereum
 export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
-export NUM1=10
+export NUM1=11
 export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
 
 export NUM2=0
@@ -49,6 +49,11 @@ export BLOCKPERIOD=2
 
 # [SC]
 export MAXWORKERS=2
+export REGENRATE=20
+export FUELCOST=90
+export QUOTA_temp=$(echo " scale=4 ; (75/$REGENRATE*$BLOCKPERIOD+0.05)/1" | bc)
+export QUOTA=$(echo "$QUOTA_temp*10/1" | bc)
+export QUOTA=200
 export EPSILON=15
 export WINSIZE=5
 
