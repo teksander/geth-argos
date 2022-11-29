@@ -50,7 +50,7 @@ export BLOCKPERIOD=2
 # [SC]
 export MAXWORKERS=2
 export REGENRATE=20
-export FUELCOST=90
+export FUELCOST=100
 export QUOTA_temp=$(echo " scale=4 ; (75/$REGENRATE*$BLOCKPERIOD+0.05)/1" | bc)
 export QUOTA=$(echo "$QUOTA_temp*10/1" | bc)
 export QUOTA=200

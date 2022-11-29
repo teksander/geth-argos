@@ -34,8 +34,9 @@ logtofile = False
 global startFlag, geth_peer_count
 startFlag = False
 
-global txList
-txList = []
+global txList, tripList
+txList   = []
+tripList = []
 
 global submodules
 submodules = []
@@ -109,7 +110,7 @@ class ResourceBuffer(object):
             if new_res.quantity < res.quantity:
                 res.quantity = new_res.quantity
                 res._timeStamp = new_res._timeStamp
-                robot.log.info("Updated resource: %s" % self.getJSON(res))
+                # robot.log.info("Updated resource: %s" % self.getJSON(res))
 
         if update_best:
             self.best = self.getResourceByLocation((new_res.x, new_res.y))
@@ -252,7 +253,40 @@ class Transaction(object):
         except Exception as e:
             self.tx = None
 
+class Trip(object):
 
+    def __init__(self):
+        self.tStart = time.time()
+        self.FC     = 0
+        self.Q      = 0
+        self.C      = []
+        self.MC     = []
+        self.TC     = 0
+        self.ATC    = 0
+        tripList.append(self)
+
+    def update(self, Q):
+
+        if self.FC == 0:
+            self.FC = time.time() - self.tStart
+
+        if int(Q) > self.Q:
+            self.Q = int(Q)
+            self.C.append(time.time() - self.tStart - self.FC)
+
+            if len(self.C) > 1:
+                new_mc = self.C[-1]-self.C[-2]
+                robot.log.info("Collected // MC: %.2f" % new_mc)
+                self.MC.append(new_mc)
+
+            self.TC  = time.time() - self.tStart
+            self.ATC = self.TC/self.Q
+
+
+    def __str__(self):
+        C  = str([round(x, 2) for x in self.C]).replace(' ','')
+        MC = str([round(x, 2) for x in self.MC]).replace(' ','')
+        return "%s %.2f %s %s %s %.2f %.2f" % (self.tStart, self.FC, self.Q, C, MC, self.TC, self.ATC)        
 
 ####################################################################################################################################################################################
 #### INIT STEP #####################################################################################################################################################################
@@ -264,12 +298,14 @@ def init():
     robotIP = identifersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
     robot.variables.set_attribute("scresources", "[]")
-    robot.variables.set_attribute("collectResource", "")
+    robot.variables.set_attribute("foraging", "")
     robot.variables.set_attribute("dropResource", "")
     robot.variables.set_attribute("hasResource", "")
     robot.variables.set_attribute("resourceCount", "0")
     robot.variables.set_attribute("state", "")
     robot.variables.set_attribute("forageTimer", "0")
+    robot.variables.set_attribute("quantity", "0")
+    robot.variables.set_attribute("groupSize", "1")
 
     # /* Initialize Console Logging*/
     #######################################################################
@@ -338,6 +374,10 @@ def init():
     name   = 'resource.csv'
     header = ['COUNT']
     logs['resources'] = Logger(log_folder+name, header, rate = 5, ID = me.id)
+
+    name   = 'firm.csv'
+    header = ['TSTART', 'FC', 'Q', 'C', 'MC', 'TC', 'ATC', 'PROFIT']
+    logs['firm'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'fsm.csv'
     header = stateList
@@ -537,6 +577,7 @@ def controlstep():
             resources = tcp_sc.request(data = 'getPatches')
             block     = tcp_sc.request(data = 'block')
             epoch     = tcp_sc.request(data = 'getPatch')[9]
+            max_w     = tcp_sc.request(data = 'getPatch')[_tot_w]
             epoch_num = epoch[0]
             epoch_stt = epoch[1]
             
@@ -556,6 +597,9 @@ def controlstep():
                     if epoch_num > previous_epoch_num and block > epoch_stt:
                         previous_epoch_num = epoch_num
                         fsm.setState(Recruit.FORAGE, message = 'Foraging: %s // epoch: %s' % (rb.best._desc, epoch_num))
+
+                        robot.variables.set_attribute("groupSize", str(max_w))
+                        Trip()
 
             # If not assigned but availiable, ASSIGN
             elif availiable:
@@ -593,6 +637,7 @@ def controlstep():
         elif fsm.query(Recruit.FORAGE):
 
             if clocks['block'].query():
+
                 # Update foraging resource
                 fsm.setState(Recruit.PLAN, message = None)
 
@@ -604,19 +649,37 @@ def controlstep():
                 # Resource virtual sensor
                 resource = sensing()
                 found = resource and resource._p == rb.best._p
+
                 if found:
                     rb.best = resource
 
                 if found and distance < 0.9*rb.best.radius:
-                    robot.variables.set_attribute("collectResource", "True")
+
+                    robot.variables.set_attribute("foraging", "True")
+                    tripList[-1].update(robot.variables.get_attribute("quantity"))
+
                     nav.avoid(move = True)
+
+                    # print("%s: %s" % (me.id, tripList[-1]))
 
                 else:
                     nav.navigate_with_obstacle_avoidance(rb.best._pr)
 
-                if robot.variables.get_attribute("hasResource"):
-                    robot.variables.set_attribute("collectResource", "")
-                    fsm.setState(Recruit.DROP, message = "Collection %s secs" % robot.variables.get_attribute("forageTimer"))
+                # Firm decision making
+
+                if tripList[-1].Q > 2 and tripList[-1].MC[-1] > lp['patches']['utility'][rb.best.quality]:
+                    robot.variables.set_attribute("foraging", "")
+                    profit = tripList[-1].Q * lp['patches']['utility'][rb.best.quality] - tripList[-1].TC
+
+                    # Log the result of the trip
+                    logs['firm'].log([*str(tripList[-1]).split(), profit])
+
+                    fsm.setState(Recruit.DROP, message = "Collected %s resources // profit: %s" % (tripList[-1].Q, round(profit,2)))
+
+
+                # if robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("quantity")==str(cp['maxQ']):
+                #     robot.variables.set_attribute("foraging", "")
+                #     fsm.setState(Recruit.DROP, message = "Collected %s resources" % (robot.variables.get_attribute("quantity")))
 
         #########################################################################################################
         #### Recruit.DROP
@@ -630,8 +693,10 @@ def controlstep():
 
                 # Transact to drop resource
                 if not txs['drop'].hash:
-                    robot.log.info('Dropping: %s', rb.best._desc)
-                    dropHash = w3.sc.functions.dropResource(*rb.best._calldata).transact()
+
+                    cost = round(1000*tripList[-1].TC)
+                    robot.log.info('Dropping: %s // TC: %s' % (rb.best._desc, cost))
+                    dropHash = w3.sc.functions.dropResource(*rb.best._calldata, tripList[-1].Q, cost).transact()
                     txs['drop'] = Transaction(dropHash)
    
                 # Transition state  
@@ -643,6 +708,8 @@ def controlstep():
                             robot.variables.set_attribute("dropResource", "")
                             txs['drop'] = Transaction(None)
                             robot.log.info('Dropped: %s', rb.best._desc)
+                            balance = w3.sc.functions.getBalance().call()
+                            robot.log.info('Balance: %s', balance)
                             fsm.setState(Recruit.PLAN, message = "Drop success")
 
                     elif txs['drop'].fail == True: 

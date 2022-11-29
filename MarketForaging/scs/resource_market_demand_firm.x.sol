@@ -5,10 +5,12 @@ contract MarketForaging {
   int[4] Demand               = [int(0), 0, -1, 6];
   uint constant quota         = QUOTA;
   uint constant fuel_cost     = FUELCOST;
+  uint constant max_workers   = MAXWORKERS;
 
   struct Robot {
     bool isRegistered;
     uint efficiency;
+    uint income;
     uint balance;
     uint task;
   }
@@ -57,7 +59,8 @@ contract MarketForaging {
     if (!robot[msg.sender].isRegistered){
       robot[msg.sender].isRegistered = true;
       robot[msg.sender].efficiency   = eff;
-      robot[msg.sender].balance      = 100*20;
+      robot[msg.sender].income       = 0;
+      robot[msg.sender].balance      = 20000;
     }
   }
 
@@ -99,7 +102,7 @@ contract MarketForaging {
                           qlty: _qlty, 
                           json: _json,
                           id:      id_nonce,
-                          max_workers:   5,
+                          max_workers:   max_workers,
                           tot_workers:   0,
                           epoch: new_epoch
                         }));
@@ -108,10 +111,12 @@ contract MarketForaging {
 
   function buyFuel(uint duration) internal {
 
-    uint tokens_consumed = robot[msg.sender].efficiency * duration * fuel_cost / 100;
-    // efficiency:  amps/block  -- robot internal parameter
-    // duration:    blocks      -- duration of trip
-    // fuel_cost:   tokens/amp  -- cost of 1 amp
+    // uint tokens_consumed = robot[msg.sender].efficiency * duration * fuel_cost / 10000;
+    uint tokens_consumed = duration;
+
+    // efficiency:  amps/block     -- robot internal parameter
+    // duration:    centi-seconds  -- duration of trip
+    // fuel_cost:   tokens/amp     -- cost of 1 amp
 
     if (robot[msg.sender].balance < tokens_consumed) {
       robot[msg.sender].balance = 0;
@@ -122,7 +127,7 @@ contract MarketForaging {
     
   }
 
-  function dropResource(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
+  function dropResource(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json, uint _Q, uint _TC) public {
 
     uint i = findByPos(_x, _y);
 
@@ -135,7 +140,8 @@ contract MarketForaging {
       updatePatch(_x, _y, _qtty, _util, _qlty, _json);
 
       // Pay the robot
-      robot[msg.sender].balance += 100*patches[i].util;
+      robot[msg.sender].income  += _Q*patches[i].util;
+      robot[msg.sender].balance += _Q*1000*patches[i].util;
 
       // Buy the fuel and update firm analysis
       uint duration = (block.number - patches[i].epoch.start);
@@ -146,7 +152,7 @@ contract MarketForaging {
         patches[i].epoch.MC.push(new_mc);
       }
 
-      buyFuel(duration);
+      buyFuel(_TC);
 
       if (patches[i].epoch.supply == patches[i].tot_workers) {
 
@@ -174,6 +180,15 @@ contract MarketForaging {
         // patches[i].epoch.consumption
 
       }
+    }
+  }
+
+  function assignToPatch(uint i) public {
+
+    // Assign robot to chosen patch
+    if (patches[i].tot_workers < patches[i].max_workers) {
+      patches[i].tot_workers++;
+      robot[msg.sender].task = patches[i].id;
     }
   }
 
@@ -242,14 +257,20 @@ contract MarketForaging {
 
     for (uint i=0; i < patches.length; i++) {
       if (patches[i].id == task_id) return patches[i].json;
-    }   
-  }  
+    } 
+  }
+
+  function getBalance() public view returns (uint){
+    return robot[msg.sender].balance;
+  }
+}
+  
 
 // function runningMean(uint previous, uint current, uint N) private pure returns (uint) {
 //   return (previous*N + current) / (N+1);
 //   }
 
-}
+
 
   // function random(uint mod) private view returns (uint) {
   //   return uint(keccak256(abi.encode(block.timestamp))) % mod;

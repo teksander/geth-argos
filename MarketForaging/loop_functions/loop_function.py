@@ -55,16 +55,18 @@ RAM = getRAMPercent()
 CPU = getCPUPercent()
 
 # Initialize timers/accumulators/logs:
-global clocks, accums, logs
-clocks, accums, logs = dict(), dict(), dict()
+global clocks, accums, logs, other
+clocks, accums, logs, other = dict(), dict(), dict(), dict()
 
-clocks['update_status'] = Timer(10)
+clocks['simlog'] = Timer(10)
 accums['distance'] = Accumulator()
 accums['distance_forage'] = Accumulator()
 accums['distance_explore'] = Accumulator()
 accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots'])]
 clocks['regen']      = dict()
 clocks['ready']      = dict()
+clocks['forage']     = dict()
+other['foragers']    = dict()
 
 # Store the position of the market and cache
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['r']})
@@ -146,15 +148,24 @@ def generate_resource(n = 1, qualities = None, max_attempts = 500):
 
         clocks['regen'][allresources[-1]] = Timer(lp['patches']['regen_rate'][allresources[-1].quality])
         clocks['ready'][allresources[-1]] = Timer(lp['patches']['forage_rate'][allresources[-1].quality])
+        other['foragers'][allresources[-1]] = set()
+
         # print('Created Resource: ' + allresources[-1]._json)
 
+def forage_rate(res):
+    if res.quantity >= lp['patches']['dec_returns_thresh']:
+        return lp['patches']['forage_rate'][res.quality]
+    else:
+        m = lp['patches']['dec_returns_slope']
+        b = lp['patches']['dec_returns_thresh']*lp['patches']['dec_returns_slope']+lp['patches']['forage_rate'][res.quality]
+        return -m*res.quantity + b   
 
 def init():
 
     header = ['TPS', 'RAM', 'CPU']
-    file   = 'status.csv'  
-    logs['status'] = Logger(log_folder+file, header, ID = '0')
-    logs['status'].start()
+    file   = 'simulation.csv'  
+    logs['simulation'] = Logger(log_folder+file, header, ID = '0')
+    logs['simulation'].start()
 
     header = ['DIST', 'RECRUIT_DIST', 'SCOUT_DIST']+list(resource_counter) + ['TOTAL', 'VALUE']
     file   = 'loop_function.csv'
@@ -179,13 +190,18 @@ def init():
 
         if lp['patches']['known']:
             robot.variables.set_attribute("newResource", allresources[robot.id % len(allresources)]._json)
-            
+
+        # clocks['forage'] = {robot: Timer(100) for robot in allrobots}
+
 def pre_step():
     global startFlag, startTime, resource_counter
 
     # Tasks to perform on the first time step
     if not startFlag:
         startTime = time.time()
+
+    # for robot in allrobots:
+    #     print(robot.position.get_position())
     
     # Tasks to perform for each robot
     for robot in allrobots:
@@ -193,20 +209,19 @@ def pre_step():
 
         # Has robot stepped into resource? YES -> Update virtual sensor
         for res in allresources:
-
+        
             if is_in_circle(robot.position.get_position(), (res.x, res.y), res.radius):
 
                 # Update robot virtual sensor
                 robot.variables.set_attribute("newResource", res._json)
                 robot.variables.set_attribute("at", res._json)
                 
-                # Robot does not carry resource and is foraging? YES -> Add to foragers
-                if not robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("collectResource"):
+                # Robot is foraging? YES -> Add to foragers
+                if robot.variables.get_attribute("foraging"):
 
-                    if clocks['ready'][res].query():
-                        robot.variables.set_attribute("hasResource", res.quality)
-                        robot.variables.set_attribute("forageTimer", str(round(clocks['ready'][res].rate, 2)))
-                        res.quantity -= 1
+                    if robot not in other['foragers'][res]:
+                        other['foragers'][res].add(robot)
+                        clocks['forage'][robot] = Timer(100)
                         
         # Has robot stepped into market drop area? YES
         if is_in_circle(robot.position.get_position(), (cache.x, cache.y), cache.radius):
@@ -214,30 +229,54 @@ def pre_step():
 
             # Does the robot carry resource? YES -> Sell resource
             resource_quality = robot.variables.get_attribute("hasResource")
-            if resource_quality and robot.variables.get_attribute("dropResource"):      
+            if resource_quality and robot.variables.get_attribute("dropResource"):
 
-                resource_counter[resource_quality] += 1  
+                resource_counter[resource_quality] += int(robot.variables.get_attribute("quantity")) 
                 accums['collection'][robot.id].acc(lp['patches']['utility'][resource_quality])
-                robot.variables.set_attribute("hasResource", "")
-                robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
 
-    def forage_rate(res):
-        if res.quantity >= lp['patches']['dec_returns_thresh']:
-            return lp['patches']['forage_rate'][res.quality]
-        else:
-            m = lp['patches']['dec_returns_slope']
-            b = lp['patches']['dec_returns_thresh']*lp['patches']['dec_returns_slope']+6
-            return -m*res.quantity + b
+                logs['collection'].log([robot.id, resource_quality, resource_counter[resource_quality]])
+
+                robot.variables.set_attribute("hasResource", "")
+                robot.variables.set_attribute("quantity", "0")
+                robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
+                
+
 
     # Tasks to perform for each resource
     for res in allresources:
 
+        n_foragers = len(other['foragers'][res])
+        ok_to_forage = False
+        gsz = [int(robot.variables.get_attribute("groupSize")) for robot in other['foragers'][res]]
+
+        if len(set(gsz)) == 1:
+            if n_foragers == gsz[0] or any([int(robot.variables.get_attribute("quantity")) for robot in other['foragers'][res]]):
+                ok_to_forage = True
+
+        
+        for robot in random.sample(other['foragers'][res], len(other['foragers'][res])):
+            clocks['forage'][robot].set(forage_rate(res), reset=False)
+
+            if clocks['forage'][robot].query() and ok_to_forage:
+                robot.variables.set_attribute("hasResource", res.quality)
+                robot.variables.set_attribute("quantity", str(int(robot.variables.get_attribute("quantity"))+1))
+                robot.variables.set_attribute("forageTimer", str(round(clocks['forage'][robot].rate, 2)))
+                res.quantity -= 1
+
+            if not robot.variables.get_attribute("foraging"):
+                other['foragers'][res].remove(robot)
+                clocks['forage'][robot] = None
+
+
         # Regenerate resource
-        if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
-            res.quantity += 1
+        # if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
+        #     res.quantity += 1
+
+        if not other['foragers'][res]:
+            res.quantity = lp['patches']['qtty_max']
 
         # Update resource ready timer
-        clocks['ready'][res].set(forage_rate(res), reset=False)
+        
 
 
 def post_step():
@@ -265,7 +304,8 @@ def post_step():
                 robotID = str(int(robot.variables.get_id()[2:])+1)
                 x = str(robot.position.get_position()[0])
                 y = str(robot.position.get_position()[1])
-                f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("hasResource")) + '\n')
+                # f.write(robotID + ', ' + x + ', ' + y + ', ' +  + '\n')
+                f.write('%s, %s, %s, %s, %s \n' % (robotID, x, y, robot.variables.get_attribute("quantity"), repr(robot.variables.get_attribute("hasResource"))))
 
     # Record the rays to be drawn for each robot
     for robot in allrobots:
@@ -287,12 +327,12 @@ def post_step():
             accums['distance_explore'].acc(distance_traveled)
 
 
-    # Logging of simulation status (RAM, CPU, TPS)   
-    if clocks['update_status'].query():
+    # Logging of simulation simulation (RAM, CPU, TPS)   
+    if clocks['simlog'].query():
         RAM = getRAMPercent()
         CPU = getCPUPercent()
-    TPS = round(1/(time.time()-logs['status'].latest))
-    logs['status'].log([TPS, CPU, RAM])
+    TPS = round(1/(time.time()-logs['simulation'].latest))
+    logs['simulation'].log([TPS, CPU, RAM])
 
     # Logging of loop function variables
     logs['loop'].log([accums['distance_forage'].value]
@@ -301,8 +341,6 @@ def post_step():
               + [str(value) for value in resource_counter.values()] 
               + [sum(resource_counter.values())] 
               + [sum([resource_counter[x]*lp['patches']['utility'][x] for x in lp['patches']['utility']])])
-
-    logs['collection'].log([accum.value for accum in accums['collection']])
 
 
 def is_experiment_finished():

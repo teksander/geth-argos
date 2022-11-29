@@ -604,11 +604,11 @@ class RandomWalk(object):
         if(fMaxReadVal > 0):
             # Yes, we do: avoid it 
             if(unMaxReadIdx == 0 or unMaxReadIdx == 1): 
-                # The obstacle is on the left, turn right 
+                # The obstacle is on the right, turn left 
                 left, right = -self.MAX_SPEED/2, self.MAX_SPEED/2
             else: 
                 # The obstacle is on the left, turn right 
-                left, right = -self.MAX_SPEED/2, self.MAX_SPEED/2       
+                left, right = self.MAX_SPEED/2, -self.MAX_SPEED/2       
 
         return left, right
         

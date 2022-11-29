@@ -50,29 +50,30 @@ params['patches']['distribution'] = 'uniform'
 params['patches']['respawn']  = False
 params['patches']['known']    = True
 params['patches']['radius']   = 0.12
-params['patches']['qtty_min'] = 15
-params['patches']['qtty_max'] = 15
+params['patches']['qtty_min'] = 50
+params['patches']['qtty_max'] = 50
 # params['patches']['dist_min'] = 1 * params['cache']['r'] 
 # params['patches']['dist_max'] = 0.5 * params['generic']['arena_size'] 
 
 params['patches']['dist_min'] = 1.5 * params['cache']['r'] 
 params['patches']['dist_max'] = 5 * params['cache']['r']
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
-params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 6, 'yellow': 4}
+params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 1, 'yellow': 4}
 params['patches']['regen_rate']  = {k:params['generic']['regen_rate'] for k in params['patches']['qualities']}
 
 # params['patches']['regen_rate']  = {'red': 20, 'green':  20, 'blue': 20, 'yellow': 20}
 
-params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 8, 'yellow': 1}
+params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 10, 'yellow': 1}
 
 
-params['patches']['dec_returns_func']   = 'linear'                      # constant, linear or logarithmic decreasing returns
-params['patches']['dec_returns_thresh'] = params['patches']['qtty_max'] # qqty of resource before dec returns starts
-params['patches']['dec_returns_slope']  = 10                            # each resource is 10s slower than previous
+params['patches']['dec_returns_func']   = 'linear'                       # constant, linear or logarithmic decreasing returns
+params['patches']['dec_returns_thresh'] = params['patches']['qtty_max']  # qqty of resource before dec returns starts
+params['patches']['dec_returns_slope']  = 0.75                           # seconds each resource is slower than previous
 
-params['patches']['dec_returns_func']   = 'linear'                      # constant, linear or logarithmic decreasing returns
-params['patches']['dec_returns_thresh'] = params['patches']['qtty_max'] # qqty of resource before dec returns starts
-params['patches']['dec_returns_slope']  = 10                            # each resource is 10s slower than previous
+
+# params['patches']['dec_returns_func']   = 'exp'                      # constant, linear or logarithmic decreasing returns
+# params['patches']['dec_returns_thresh'] = params['patches']['qtty_max'] # qqty of resource before dec returns starts
+# params['patches']['dec_returns_slope']  = 0.5                           # seconds each resource is slower than previous
 
 params['patches']['counts'] = {'red': 0, 'green': 0 , 'blue': 1, 'yellow': 0}
 params['patches']['radii']  = {'red':    params['patches']['radius'], 
@@ -94,13 +95,8 @@ params['patches']['radii']  = {'red':    params['patches']['radius'],
 # Parameters for the economy
 params['economy'] = dict()
 params['economy']['efficiency_distribution'] = 'linear' 
-params['economy']['efficiency_best'] = 0.25  # amps/block of best robot
-params['economy']['efficiency_step'] = 0.01 # amps/block increase per robot ID
-
-# params['economy']['efficiency_distribution'] = 'normal' 
-# params['economy']['efficiency_mean']  = 0.5  # amps/block of average robot
-# params['economy']['efficiency_sigma'] = 0.05 # amps/block deviation from average
-
+params['economy']['efficiency_best'] = 1  # amps/second of best robot
+params['economy']['efficiency_step'] = 0  # amps/second increase per robot ID
 
 # Initialize the files which store QT_draw information 
 params['files'] = dict()

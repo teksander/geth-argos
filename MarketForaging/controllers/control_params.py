@@ -13,3 +13,7 @@ params['max_forages']    = 3
 params['gsFreq']     = 20
 params['erbtFreq']   = 10
 params['erbDist']    = 175
+
+
+# Maximum quantity of resource a robot can transport
+params['maxQ'] = 10
