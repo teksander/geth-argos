@@ -50,7 +50,18 @@ def getEnodes():
 
 def getIds():
 		return [readEnode(enode) for enode in getEnodes('geth')]
-	
+
+# class Call:
+# 	def __init__(self):
+# 		self.functions = dict()
+# 		for name in sc.functions:
+# 			self.functions[name] = getattr(sc.functions, name)
+
+# 	for name in self.functions.keys():
+# 		print(name)
+# 	exec('def %s(self, *argv):\n\
+# 	        \t return function(argv).call()' % (name))
+
 if __name__ == '__main__':
 
     w3 = init_web3()
@@ -58,7 +69,7 @@ if __name__ == '__main__':
     myEN  = w3.geth.admin.nodeInfo().enode
     myKEY = w3.eth.coinbase
     sc = registerSC(w3)
-
+    # call = Call()
 
 ### THIS SCRIPT NOW GOES IN CONTROLLER AND IS IMPORTED INTO ARGOS ####
 

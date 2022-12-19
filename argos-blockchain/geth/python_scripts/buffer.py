@@ -157,7 +157,7 @@ peers_geth = []
 peered = set()
 
 
-def buffer():
+def peering():
 	""" Control routine for robot-to-robot dynamic peering """
 	global peered, peers, peers_geth
 	
@@ -178,7 +178,7 @@ def buffer():
 
 	for peer in temp:
 		if peer not in peers.values():
-			enode = tcp.request(peer, port)
+			enode = tcp_enode.request(peer, port)
 			if 'enode' in enode:
 				w3.provider.make_request("admin_removePeer",[enode])
 				peered.remove(peer)
@@ -191,24 +191,67 @@ def buffer():
 	# 		print('Removed peer: %s|%s' % (peer, enode))
 
 	peers = dict()
+	tcp_peering.setData(len(peers_geth))
+
+
+Patch_key = sc.functions.Patch_key().call()
+Epoch_key = sc.functions.Epoch_key().call()
+Robot_key = sc.functions.Robot_key().call()
+Token_key = sc.functions.Token_key().call()
+
+def l2d(l,k):
+	if l:
+		return {a: l[i] for i, a in enumerate(k)}
+	else:
+		return None
+
+def blockHandle():
+	""" Every time new blocks are synchronized """
+
+	patches = [l2d(x, Patch_key) for x in sc.functions.getPatches().call()]
+	patch   = l2d(sc.functions.getPatch().call(), Patch_key)
+	epoch   = l2d(patch['epoch'], Epoch_key)
+	robot   = l2d(sc.functions.robot(w3.key).call(), Robot_key)
+	token   = l2d(sc.functions.token().call(), Token_key)
+	block   = w3.eth.blockNumber
+
+	tcp_queries.setData({
+		'getPatches': patches, 
+		'getPatch': patch, 
+		'getEpoch': epoch,
+		'getRobot': robot,
+		'token':    token,
+		'block':    block
+		})
 
 if __name__ == '__main__':
 
+################################################################################################################
+### TCP for peering ###
+################################################################################################################
 
 	data = len(peers_geth)
 	host = subprocess.getoutput("ip addr | grep 172.18.0. | tr -s ' ' | cut -d ' ' -f 3 | cut -d / -f 1")
 	port = 9898    
 
-	tcp = TCP_server2(data, host, port)
-	tcp.start()   
+	tcp_peering = TCP_server2(data, host, port)
+	tcp_peering.start()   
+
+################################################################################################################
+### TCP for queries ###
 ################################################################################################################
 
-	data = sc.functions.getPatches().call() 
+	data = ""
 	port = 9899    
 
+	tcp_queries = TCP_mp(data, host, port)
+	tcp_queries.start()   
+
+	blockHandle()
+
 ################################################################################################################
-	tcp_resources = TCP_mp(data, host, port)
-	tcp_resources.start()   
+### TCP for enodes ###
+################################################################################################################
 
 	data = w3.enode
 	host = getIps([w3.enode])[0]
@@ -217,18 +260,15 @@ if __name__ == '__main__':
 	tcp_enode = TCP_server(w3.enode, host, port, unlocked = True)
 	tcp_enode.start()
 
+################################################################################################################
+	
 	while True:
-		peers = tcp.getNew()
+		peers = tcp_peering.getNew()
 		if peers:
-			buffer()
-			tcp.setData(len(peers_geth))
-
-		resources  = sc.functions.getPatches().call()
-		myResource = sc.functions.getMyPatch().call()
-		myResource_all = sc.functions.getPatch().call()
-		block_number = w3.eth.blockNumber
-
-		tcp_resources.setData({'getPatches': resources, 'getMyPatch': myResource, 'getPatch': myResource_all, 'block': block_number})
+			peering()
+			
+		newBlocks = bf.get_new_entries()
+		if newBlocks:
+			blockHandle()
 
 		time.sleep(0.5)
-

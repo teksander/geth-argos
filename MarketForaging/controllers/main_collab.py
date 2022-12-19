@@ -491,14 +491,15 @@ def controlstep():
 
         def grouping(target):
 
+            vec_group = Vector2D(target).normalize()*(market.radius+cache.radius)/2
+
             # Navigate to the market
-            x = cache.radius if target[0] > 0 else -cache.radius
 
             arrived = True
-            if nav.get_distance_to((x,0)) < 0.3*market.radius:           
+            if nav.get_distance_to(tuple(vec_group)) < 0.3*market.radius:           
                 nav.avoid(move = True) 
             else:
-                nav.navigate_with_obstacle_avoidance((x,0))
+                nav.navigate_with_obstacle_avoidance(tuple(vec_group))
                 arrived = False
 
             return arrived
@@ -552,10 +553,11 @@ def controlstep():
         #########################################################################################################
         #### Any.STATE
         #########################################################################################################
-        # print(robot.colored_blob_omnidirectional_camera.get_readings())
 
+        # Perform the blockchain peering step
         peering()
 
+        # Get perfect position if at nest
         if robot.variables.get_attribute("at") == "cache":
             odo.setPosition()
 
@@ -573,20 +575,19 @@ def controlstep():
         elif fsm.query(Recruit.PLAN):
             global previous_epoch_num
 
-            resource  = tcp_sc.request(data = 'getMyPatch')
+            resource  = tcp_sc.request(data = 'getPatch')
             resources = tcp_sc.request(data = 'getPatches')
             block     = tcp_sc.request(data = 'block')
-            epoch     = tcp_sc.request(data = 'getPatch')[9]
-            max_w     = tcp_sc.request(data = 'getPatch')[_tot_w]
-            epoch_num = epoch[0]
-            epoch_stt = epoch[1]
-            
-            availiable = any([x[_max_w]-x[_tot_w]>0 for x in resources])
+            epoch     = tcp_sc.request(data = 'getEpoch')
+            robot_sc  = tcp_sc.request(data = 'getRobot')
+
+            availiable = any([res['tot']<res['max'] for res in resources])
+            assigned   = bool(resource and resource['json'])
 
             # If resource is assigned, FORAGE
-            if resource:
+            if assigned:
 
-                rb.addResource(resource, update_best = True)
+                rb.addResource(resource['json'], update_best = True)
 
                 if fsm.getPreviousState() == Recruit.FORAGE:
                     fsm.setState(Recruit.FORAGE, message = None)
@@ -594,11 +595,11 @@ def controlstep():
                 else:
                     grouping(rb.best._p)
 
-                    if epoch_num > previous_epoch_num and block > epoch_stt:
-                        previous_epoch_num = epoch_num
-                        fsm.setState(Recruit.FORAGE, message = 'Foraging: %s // epoch: %s' % (rb.best._desc, epoch_num))
+                    if epoch['number'] > previous_epoch_num and block > epoch['start']:
+                        previous_epoch_num = epoch['number']
+                        fsm.setState(Recruit.FORAGE, message = 'Foraging: %s // epoch: %s' % (rb.best._desc, epoch['number']))
 
-                        robot.variables.set_attribute("groupSize", str(max_w))
+                        robot.variables.set_attribute("groupSize", "0")
                         Trip()
 
             # If not assigned but availiable, ASSIGN

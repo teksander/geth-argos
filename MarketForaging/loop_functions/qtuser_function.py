@@ -11,6 +11,7 @@ sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
              os.environ['EXPERIMENTFOLDER']]
 
 from groundsensor import Resource
+from aux import Vector2D
 
 from loop_params import params as lp
 from control_params import params as cp
@@ -66,7 +67,7 @@ def DrawInWorld():
 
 	# Draw resources carried by robots
 	draw_resources_on_robots()
-				
+	
 	# Draw rays
 	if lp['generic']['show_rays']:
 		with open(lp['files']['rays'], 'r') as f:

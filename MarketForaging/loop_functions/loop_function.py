@@ -152,13 +152,26 @@ def generate_resource(n = 1, qualities = None, max_attempts = 500):
 
         # print('Created Resource: ' + allresources[-1]._json)
 
-def forage_rate(res):
-    if res.quantity >= lp['patches']['dec_returns_thresh']:
-        return lp['patches']['forage_rate'][res.quality]
-    else:
-        m = lp['patches']['dec_returns_slope']
-        b = lp['patches']['dec_returns_thresh']*lp['patches']['dec_returns_slope']+lp['patches']['forage_rate'][res.quality]
-        return -m*res.quantity + b   
+def forage_rate(res, carried = 0):
+    cost_base    = lp['patches']['forage_rate'][res.quality]
+    qtty_carried = int(carried)
+
+    cost_patch = 0
+    cost_robot = 0
+
+    if res.quantity >= lp['patches']['dec_returns']['thresh']:
+        cost_patch = cost_base
+
+    elif lp['patches']['dec_returns']['func'] == 'linear':
+        m = lp['patches']['dec_returns']['slope']
+        b = cost_base + m*lp['patches']['dec_returns']['thresh']
+        cost_patch = -m*res.quantity + b   
+
+    if qtty_carried != 0:
+        cost_robot = qtty_carried*lp['patches']['dec_returns']['slope_robot']
+
+    return cost_patch + cost_robot
+
 
 def init():
 
@@ -246,16 +259,16 @@ def pre_step():
     for res in allresources:
 
         n_foragers = len(other['foragers'][res])
-        ok_to_forage = False
-        gsz = [int(robot.variables.get_attribute("groupSize")) for robot in other['foragers'][res]]
+        ok_to_forage = True
+        # gsz = [int(robot.variables.get_attribute("groupSize")) for robot in other['foragers'][res]]
 
-        if len(set(gsz)) == 1:
-            if n_foragers == gsz[0] or any([int(robot.variables.get_attribute("quantity")) for robot in other['foragers'][res]]):
-                ok_to_forage = True
+        # if len(set(gsz)) == 1:
+        #     if n_foragers == gsz[0] or any([int(robot.variables.get_attribute("quantity")) for robot in other['foragers'][res]]):
+        #         ok_to_forage = True
 
         
         for robot in random.sample(other['foragers'][res], len(other['foragers'][res])):
-            clocks['forage'][robot].set(forage_rate(res), reset=False)
+            clocks['forage'][robot].set(forage_rate(res, robot.variables.get_attribute("quantity")), reset=False)
 
             if clocks['forage'][robot].query() and ok_to_forage:
                 robot.variables.set_attribute("hasResource", res.quality)

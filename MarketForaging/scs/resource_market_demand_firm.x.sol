@@ -2,11 +2,22 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  int[4] Demand               = [int(0), 0, -1, 6];
   uint constant quota         = QUOTA;
   uint constant fuel_cost     = FUELCOST;
   uint constant max_workers   = MAXWORKERS;
 
+
+  function Token_key() public pure returns (string[2] memory){
+    return ["robots", "supply"];
+  }
+  struct Token {
+    uint robots;
+    uint supply;
+  }
+
+  function Robot_key() public pure returns (string[5] memory){
+    return ["isRegistered", "efficiency", "income", "balance", "task"];
+  }
   struct Robot {
     bool isRegistered;
     uint efficiency;
@@ -15,19 +26,22 @@ contract MarketForaging {
     uint task;
   }
 
+  function Epoch_key() public pure returns (string[5] memory){
+    return ["number", "start", "Q", "TC", "ATC"];
+  }
   struct Epoch {
     uint number;
     uint start;
-    uint supply;
-    uint consumption;
-    uint[] C; 
-    uint[] MC; 
-    uint TC;
-    uint ATC;
+    uint[] Q; 
+    uint[] TC; 
+    uint[] ATC;
   }
 
-  struct Patch {
 
+  function Patch_key() public pure returns (string[10] memory){
+    return ["x", "y", "qtty", "util", "qlty", "json", "id", "max", "tot", "epoch"];
+  }
+  struct Patch {
     // Details 
     int x;
     int y;
@@ -46,23 +60,35 @@ contract MarketForaging {
     Epoch epoch;
   } 
 
-  Patch[] private patches;
+  mapping(address => Robot) public robot;
+  Token public token;
   Epoch[] public  epochs;
+  Patch[] private patches;
+  
+  
 
+  Epoch private epoch0 = Epoch({
+                      number: 1, 
+                      start: block.number, 
+                      Q: new uint[](0),
+                      TC: new uint[](0),
+                      ATC: new uint[](0)
+                    }); 
   uint id_nonce;
 
-  mapping(address => uint) drops;
-  mapping(address => uint) lastD;
-  mapping(address => Robot) public robot;
+  
 
   function register(uint eff) public {
-    if (!robot[msg.sender].isRegistered){
+    if (!robot[msg.sender].isRegistered) {
       robot[msg.sender].isRegistered = true;
       robot[msg.sender].efficiency   = eff;
       robot[msg.sender].income       = 0;
       robot[msg.sender].balance      = 20000;
+      token.supply += 20000;
+      token.robots += 1;
     }
   }
+
 
   function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
 
@@ -82,18 +108,6 @@ contract MarketForaging {
       // Increment unique patch id
       id_nonce++;
 
-      // Append new patch to list
-      Epoch memory new_epoch = Epoch({
-                          number: 1, 
-                          start: block.number, 
-                          supply: 0,
-                          consumption: 0,
-                          C: new uint[](0),
-                          MC: new uint[](0),
-                          TC: 0,
-                          ATC: 0
-                        }); 
-
       patches.push(Patch({
                           x: _x, 
                           y: _y, 
@@ -101,10 +115,10 @@ contract MarketForaging {
                           util: _util,
                           qlty: _qlty, 
                           json: _json,
-                          id:      id_nonce,
+                          id:   id_nonce,
                           max_workers:   max_workers,
                           tot_workers:   0,
-                          epoch: new_epoch
+                          epoch: epoch0
                         }));
     }
   } 
@@ -119,9 +133,11 @@ contract MarketForaging {
     // fuel_cost:   tokens/amp     -- cost of 1 amp
 
     if (robot[msg.sender].balance < tokens_consumed) {
+      token.supply -= robot[msg.sender].balance;
       robot[msg.sender].balance = 0;
     }
     else {
+      token.supply -= tokens_consumed;
       robot[msg.sender].balance -= tokens_consumed;
     }
     
@@ -133,34 +149,32 @@ contract MarketForaging {
 
     if (i < 9999 && robot[msg.sender].task == patches[i].id) {
 
-      // New good in current epoch
-      patches[i].epoch.supply++;
-    
       // Update patch information
       updatePatch(_x, _y, _qtty, _util, _qlty, _json);
 
       // Pay the robot
-      robot[msg.sender].income  += _Q*patches[i].util;
-      robot[msg.sender].balance += _Q*1000*patches[i].util;
+      uint income = _Q*patches[i].util;
+      robot[msg.sender].income  += income;
+      robot[msg.sender].balance += income*1000;
+      token.supply += income*1000;
 
-      // Buy the fuel and update firm analysis
-      uint duration = (block.number - patches[i].epoch.start);
-      patches[i].epoch.C.push(duration);
-
-      if (patches[i].epoch.C.length > 1) {
-        uint new_mc = duration-patches[i].epoch.C[patches[i].epoch.C.length-1];
-        patches[i].epoch.MC.push(new_mc);
-      }
+      // Robot deposits the item and purchases more fuel
+      patches[i].epoch.Q.push(_Q);
+      patches[i].epoch.TC.push(_TC);
+      patches[i].epoch.ATC.push(_TC/_Q);
 
       buyFuel(_TC);
 
-      if (patches[i].epoch.supply == patches[i].tot_workers) {
+      // // Buy the fuel and update firm analysis
+      // uint duration = (block.number - patches[i].epoch.start);
+      // patches[i].epoch.C.push(duration);
 
-        // Finalize previous epoch
-        patches[i].epoch.TC  = duration;
-        patches[i].epoch.ATC = 100*duration/patches[i].epoch.supply;
-        patches[i].epoch.consumption = 1000*patches[i].epoch.supply/patches[i].epoch.TC;
+      // if (patches[i].epoch.C.length > 1) {
+      //   uint new_mc = duration-patches[i].epoch.C[patches[i].epoch.C.length-1];
+      //   patches[i].epoch.MC.push(new_mc);
+      // }
 
+      if (patches[i].epoch.Q.length == patches[i].tot_workers) {
 
         // // Rules for increasing number of workers
         // if (patches[i].epoch.consumption < quota) {
@@ -171,14 +185,9 @@ contract MarketForaging {
         epochs.push(patches[i].epoch);
         patches[i].epoch.number++;
         patches[i].epoch.start = block.number+5;
-        patches[i].epoch.supply = 0;
-        patches[i].epoch.TC = 0;
-        patches[i].epoch.C = new uint[](0);
-        patches[i].epoch.MC = new uint[](0);
-
-        // patches[i].epoch.duration
-        // patches[i].epoch.consumption
-
+        patches[i].epoch.Q     = new uint[](0);
+        patches[i].epoch.TC    = new uint[](0);
+        patches[i].epoch.ATC   = new uint[](0);
       }
     }
   }

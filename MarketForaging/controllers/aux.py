@@ -692,9 +692,15 @@ class Vector2D:
     def __abs__(self):
         """Absolute value (magnitude) of the vector."""
         return math.sqrt(self.x**2 + self.y**2)
+
     def __round__(self, decimals):
         """Round the vector2D x and y"""
-        return Vector2D(round(self.x, decimals), round(self.x, decimals))
+        return Vector2D(round(self.x, decimals), round(self.y, decimals))
+
+    def __iter__(self):
+        """Return the iterable object"""
+        for i in [self.x, self.y]:
+            yield i
 
     def rotate(self, angle):
         return Vector2D(self.length, self.angle + angle, polar = True)
@@ -705,9 +711,6 @@ class Vector2D:
             return self
         else:
             return Vector2D(self.x/abs(self), self.y/abs(self))
-            
-            # self.x = normalized.x
-            # self.y = normalized.y
 
     def distance_to(self, other):
         """The distance between vectors self and other."""
@@ -716,10 +719,6 @@ class Vector2D:
     def to_polar(self):
         """Return the vector's components in polar coordinates."""
         return self.length, self.angle
-
-    def tuple(self):
-        """Return the vector's components as a tuple."""
-        return (self.x, self.y)
         
 class mydict(dict):
     def __mul__(self, k):
