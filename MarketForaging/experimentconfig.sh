@@ -26,7 +26,7 @@ export SWARMNAME=ethereum
 export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
-export NUM1=7
+export NUM1=21
 export CON1="${EXPERIMENTFOLDER}/controllers/main_collab.py"
 
 export NUM2=0
@@ -35,7 +35,7 @@ export CON2="${EXPERIMENTFOLDER}/controllers/main_greedy.py"
 export RABRANGE="0.4"
 export WHEELNOISE="0"
 export TPS=10
-export DENSITY="1.5"
+export DENSITY="3"
 
 export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
 # export ARENADIM=2

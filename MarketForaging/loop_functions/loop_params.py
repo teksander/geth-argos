@@ -49,7 +49,7 @@ params['patches']['distribution'] = 'uniform'
 
 params['patches']['respawn']  = False
 params['patches']['known']    = True
-params['patches']['radius']   = 0.18
+params['patches']['radius']   = 0.30
 params['patches']['qtty_min'] = 50
 params['patches']['qtty_max'] = 50
 # params['patches']['dist_min'] = 1 * params['cache']['r'] 
@@ -59,12 +59,12 @@ params['patches']['dist_min'] = 1.5 * params['cache']['r']
 params['patches']['dist_max'] = 5 * params['cache']['r']
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
 params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 0.5, 'yellow': 4}
-params['patches']['regen_rate']  = {'red': 10, 'green':  8, 'blue': 8, 'yellow': 4}
+params['patches']['regen_rate']  = {'red': 10, 'green':  8, 'blue': 5, 'yellow': 4}
 # params['patches']['regen_rate']  = {k:params['generic']['regen_rate'] for k in params['patches']['qualities']}
 
 # params['patches']['regen_rate']  = {'red': 20, 'green':  20, 'blue': 20, 'yellow': 20}
 
-params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 12, 'yellow': 1}
+params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 15, 'yellow': 1}
 
 
 params['patches']['dec_returns'] = dict()
