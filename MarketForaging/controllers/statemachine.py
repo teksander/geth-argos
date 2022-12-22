@@ -19,14 +19,13 @@ class Recruit(Enum):
     DROP   = 9
 
 class States(Enum):
-    INIT   = 1
+    IDLE   = 1
     PLAN   = 2
-    SCOUT  = 3
+    ASSIGN = 3
     FORAGE = 4
-    SELL   = 5
-    BUY    = 6
-    DROP   = 7 
-    QUEUE  = 8
+    DROP   = 5 
+    JOIN   = 6
+    LEAVE  = 7
 
 stateList = list(Idle)+list(Scout)+list(Recruit)
 
@@ -34,10 +33,17 @@ class FiniteStateMachine(object):
 
     def __init__(self, robot, start = None):
         self.robot     = robot
+        self.storage   = None
         self.prevState = start
         self.currState = start
         self.accumTime = dict()
         self.startTime = time.time()
+
+    def setStorage(self,_storage = None):
+        self.storage = _storage
+
+    def getStorage(self):
+        return self.storage
 
     def getPreviousState(self):
         return self.prevState

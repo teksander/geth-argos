@@ -209,16 +209,18 @@ def blockHandle():
 	""" Every time new blocks are synchronized """
 
 	patches = [l2d(x, Patch_key) for x in sc.functions.getPatches().call()]
+	epochs  = [l2d(x, Epoch_key) for x in sc.functions.getEpochs().call()]
 	patch   = l2d(sc.functions.getPatch().call(), Patch_key)
-	epoch   = l2d(patch['epoch'], Epoch_key)
 	robot   = l2d(sc.functions.robot(w3.key).call(), Robot_key)
 	token   = l2d(sc.functions.token().call(), Token_key)
-	block   = w3.eth.blockNumber
+	availiable = sc.functions.findAvailiable().call() < 9999
+	block    = w3.eth.blockNumber
 
 	tcp_queries.setData({
+		'getAvailiable': availiable, 
 		'getPatches': patches, 
+		'getEpochs': epochs,
 		'getPatch': patch, 
-		'getEpoch': epoch,
 		'getRobot': robot,
 		'token':    token,
 		'block':    block

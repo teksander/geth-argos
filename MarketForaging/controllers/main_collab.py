@@ -57,18 +57,6 @@ clocks['forage'] = Timer(0)
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['r']})
 cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['r']})
 
-# SC index map
-_x       = 0
-_y       = 1
-_qtty    = 2
-_util    = 3
-_qlty    = 4
-_json    = 5
-_id      = 6
-_max_w   = 7
-_tot_w   = 8
-_epoch   = 9
-
 previous_epoch_num = -1
 
 class ResourceBuffer(object):
@@ -363,7 +351,7 @@ def init():
     rgb = RGBLEDs(robot)
 
     # /* Init Finite-State-Machine */
-    fsm = FiniteStateMachine(robot, start = Idle.IDLE)
+    fsm = FiniteStateMachine(robot, start = States.IDLE)
 
     # List of submodules --> iterate .start() to start all
     submodules = [w3.geth.miner, erb]
@@ -465,41 +453,50 @@ def controlstep():
                 elif geth_peer_count > 2:
                     rgb.setLED(rgb.all, 3*['red'])
 
-        def homing(to_drop = False):
-            # Navigate to the market
+        def homing():
 
+            # Navigate to the market
             arrived = True
 
-            if to_drop:
-                if nav.get_distance_to(market._p) < market.radius + 0.5* (cache.radius - market.radius):
-                    nav.avoid(move = True)
-                else:
-                    nav.navigate_with_obstacle_avoidance(market._pr)
-                    arrived = False
-            else:
-                if nav.get_distance_to(market._pr) < 0.5*market.radius:           
-                    nav.avoid(move = True)
-                    
-                elif nav.get_distance_to(market._pr) < market.radius and geth_peer_count > 1:
-                    nav.avoid(move = True)
+            if nav.get_distance_to(market._pr) < 0.5*market.radius:           
+                nav.avoid(move = True)
+                
+            elif nav.get_distance_to(market._pr) < market.radius and geth_peer_count > 1:
+                nav.avoid(move = True)
 
-                else:
-                    nav.navigate_with_obstacle_avoidance(market._pr)
-                    arrived = False
+            else:
+                nav.navigate_with_obstacle_avoidance(market._pr)
+                arrived = False
 
             return arrived
 
-        def grouping(target):
+        def dropping(resource):
 
-            vec_group = Vector2D(target).normalize()*(market.radius+cache.radius)/2
+            target = Vector2D(resource._p).rotate(-25, degrees = True)
+            target = tuple(target.normalize()*(market.radius+cache.radius)/2)
 
-            # Navigate to the market
-
+            # Navigate to drop location
             arrived = True
-            if nav.get_distance_to(tuple(vec_group)) < 0.3*market.radius:           
+
+            if nav.get_distance_to(market._p) < market.radius + 0.5* (cache.radius-market.radius):
+                nav.avoid(move = True)
+            else:
+                nav.navigate_with_obstacle_avoidance(target)
+                arrived = False
+
+            return arrived
+
+        def grouping(resource):
+
+            target = Vector2D(resource._p).rotate(25, degrees = True)
+            target = tuple(target.normalize()*(market.radius+cache.radius)/2)
+
+            # Navigate to the group location
+            arrived = True
+            if nav.get_distance_to(target) < 0.3*market.radius:           
                 nav.avoid(move = True) 
             else:
-                nav.navigate_with_obstacle_avoidance(tuple(vec_group))
+                nav.navigate_with_obstacle_avoidance(target)
                 arrived = False
 
             return arrived
@@ -562,133 +559,205 @@ def controlstep():
             odo.setPosition()
 
         #########################################################################################################
-        #### Idle.IDLE
+        #### States.IDLE
         #########################################################################################################
-        if fsm.query(Idle.IDLE):
+        if fsm.query(States.IDLE):
 
-            fsm.setState(Recruit.PLAN, message = "Planning")
+            fsm.setState(States.PLAN, message = "Planning")
 
         #########################################################################################################
-        #### Recruit.PLAN  
+        #### States.PLAN  
         ######################################################################################################### 
 
-        elif fsm.query(Recruit.PLAN):
+        elif fsm.query(States.PLAN):
             global previous_epoch_num
 
+            block     = tcp_sc.request(data = 'block')
+            token     = tcp_sc.request(data = 'token')
             resource  = tcp_sc.request(data = 'getPatch')
             resources = tcp_sc.request(data = 'getPatches')
-            block     = tcp_sc.request(data = 'block')
-            epoch     = tcp_sc.request(data = 'getEpoch')
-            robot_sc  = tcp_sc.request(data = 'getRobot')
+            epochs    = tcp_sc.request(data = 'getEpochs')
+            robot.sc  = tcp_sc.request(data = 'getRobot')
 
-            availiable = any([res['tot']<res['max'] for res in resources])
+            availiable = any([res['tot']==0 for res in resources])
+            # availiable = tcp_sc.request(data = 'getAvailiable')
             assigned   = bool(resource and resource['json'])
+            arrived    = False
+            join       = False
+            leave      = False
+            res        = None
+
+            # To forage or not (market decisions)
+            for res in resources:
+                res = Resource(res['json'])
+
+                # Variables that can be usefull for decisions
+                if len(epochs) > 0:
+                    epoch_latest = epochs[-1]
+
+                    # Decision is performed once per epoch
+                    if epoch_latest['number'] > previous_epoch_num:
+                        AP = res.utility*1000 - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
+                        # BP = max([res.utility*1000-x for x in epoch_latest['ATC']])
+                        # WP = min([res.utility*1000-x for x in epoch_latest['ATC']])
+                        # FC = nav.get_distance_to(res._p)/cp['recruit_speed']*100
+                        # my_fraction_of_TS = 100*round(robot.sc['balance']/token['supply'],3)
+                        # my_deviation = 100*round(robot.sc['balance']/token['supply']-1/token['robots'],3)
+                        # print(AP, BP, WP)
+                        
+                        K = 1/20000
+                        # Linear
+                        P = K * AP
+                        # Sigmoid
+                        
+                        robot.log.info("Join/leave P: %.2f" % P)
+                        if random.random() < abs(P):
+                            if P > 0:
+                                join = True
+                            else:
+                                leave = True
+
+                        previous_epoch_num = epoch_latest['number']
+
+                        if join:
+                            break
 
             # If resource is assigned, FORAGE
             if assigned:
-
                 rb.addResource(resource['json'], update_best = True)
 
-                if fsm.getPreviousState() == Recruit.FORAGE:
-                    fsm.setState(Recruit.FORAGE, message = None)
-
-                else:
-                    grouping(rb.best._p)
-
-                    if epoch['number'] > previous_epoch_num and block > epoch['start']:
-                        previous_epoch_num = epoch['number']
-                        fsm.setState(Recruit.FORAGE, message = 'Foraging: %s // epoch: %s' % (rb.best._desc, epoch['number']))
-
-                        robot.variables.set_attribute("groupSize", "0")
-                        Trip()
-
+                arrived = grouping(rb.best)
+                if arrived:
+                    Trip()
+                    robot.variables.set_attribute("groupSize", "0")
+                    fsm.setState(States.FORAGE, message = 'Foraging: %s' % (rb.best._desc))
+                        
             # If not assigned but availiable, ASSIGN
             elif availiable:
                 homing()
-                fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
+                fsm.setState(States.ASSIGN, message = "Assigning")
+            elif join:
+                homing()
+                fsm.setStorage(res)
+                fsm.setState(States.JOIN, message = "Joining: %s" % res._desc)
+            elif leave:
+                homing()
+                fsm.setStorage(res)
+                fsm.setState(States.LEAVE, message = "Leaving: %s" % res._desc)
             else:
                 homing()
 
         #########################################################################################################
-        #### Recruit.BUY  
+        #### States.ASSIGN  
         #########################################################################################################
 
-        elif fsm.query(Recruit.BUY):
-
-            # Navigate home
-            # homing()
+        elif fsm.query(States.ASSIGN):
 
             if txs['buy'].query(3):
                 txs['buy'] = Transaction(None)
-                fsm.setState(Recruit.PLAN, message = "Buy success")
+                fsm.setState(States.PLAN, message = "Assign success")
 
             elif txs['buy'].fail == True:    
                 txs['buy'] = Transaction(None)
-                fsm.setState(Recruit.PLAN, message = "Buy failed")
+                fsm.setState(States.PLAN, message = "Assign failed")
 
             elif txs['buy'].hash == None:
-                txBuy = w3.sc.functions.assignPatch().transact()
-                txs['buy'] = Transaction(txBuy)
-                robot.log.info("Buying")     
+                res = fsm.getStorage()
+                txHash = w3.sc.functions.assignPatch().transact()
+                txs['buy'] = Transaction(txHash)
+                robot.log.info("Assigning patch")     
 
 
         #########################################################################################################
-        #### Recruit.FORAGE
+        #### States.JOIN  
         #########################################################################################################
-        elif fsm.query(Recruit.FORAGE):
 
-            if clocks['block'].query():
+        elif fsm.query(States.JOIN):
 
-                # Update foraging resource
-                fsm.setState(Recruit.PLAN, message = None)
+            if txs['buy'].query(3):
+                txs['buy'] = Transaction(None)
+                fsm.setState(States.PLAN, message = "Join success")
+
+            elif txs['buy'].fail == True:    
+                txs['buy'] = Transaction(None)
+                fsm.setState(States.PLAN, message = "Join failed")
+
+            elif txs['buy'].hash == None:
+                res = fsm.getStorage()
+                txHash = w3.sc.functions.assignToPatch(*res._calldata).transact()
+                txs['buy'] = Transaction(txHash)
+                robot.log.info("Joining patch") 
+
+        #########################################################################################################
+        #### States.LEAVE  
+        #########################################################################################################
+
+        elif fsm.query(States.LEAVE):
+
+            if txs['buy'].query(3):
+                txs['buy'] = Transaction(None)
+                fsm.setState(States.PLAN, message = "Leave success")
+
+            elif txs['buy'].fail == True:    
+                txs['buy'] = Transaction(None)
+                fsm.setState(States.PLAN, message = "Leave failed")
+
+            elif txs['buy'].hash == None:
+                res = fsm.getStorage()
+                txHash = w3.sc.functions.leavePatch(*res._calldata).transact()
+                txs['buy'] = Transaction(txHash)
+                robot.log.info("Leaving patch") 
+
+        #########################################################################################################
+        #### States.FORAGE
+        #########################################################################################################
+        elif fsm.query(States.FORAGE):
+
+            #     # Update foraging resource
+            # if clocks['block'].query():
+            #     fsm.setState(States.PLAN, message = None)
+            # else:
+
+            # Distance to resource
+            distance = nav.get_distance_to(rb.best._pr)
+
+            # Resource virtual sensor
+            resource = sensing()
+            found = resource and resource._p == rb.best._p
+
+            if found:
+                rb.best = resource
+
+            if found and distance < 0.9*rb.best.radius:
+                robot.variables.set_attribute("foraging", "True")
+                tripList[-1].update(robot.variables.get_attribute("quantity"))
+                nav.avoid(move = True)
 
             else:
+                nav.navigate_with_obstacle_avoidance(rb.best._pr)
 
-                # Distance to resource
-                distance = nav.get_distance_to(rb.best._pr)
+            # Firm decision making
+            if tripList[-1].Q > 2 and tripList[-1].MC[-1] > lp['patches']['utility'][rb.best.quality]:
+                robot.variables.set_attribute("foraging", "")
+                profit = tripList[-1].Q * lp['patches']['utility'][rb.best.quality] - tripList[-1].TC
 
-                # Resource virtual sensor
-                resource = sensing()
-                found = resource and resource._p == rb.best._p
+                # Log the result of the trip
+                logs['firm'].log([*str(tripList[-1]).split(), profit])
 
-                if found:
-                    rb.best = resource
-
-                if found and distance < 0.9*rb.best.radius:
-
-                    robot.variables.set_attribute("foraging", "True")
-                    tripList[-1].update(robot.variables.get_attribute("quantity"))
-
-                    nav.avoid(move = True)
-
-                    # print("%s: %s" % (me.id, tripList[-1]))
-
-                else:
-                    nav.navigate_with_obstacle_avoidance(rb.best._pr)
-
-                # Firm decision making
-
-                if tripList[-1].Q > 2 and tripList[-1].MC[-1] > lp['patches']['utility'][rb.best.quality]:
-                    robot.variables.set_attribute("foraging", "")
-                    profit = tripList[-1].Q * lp['patches']['utility'][rb.best.quality] - tripList[-1].TC
-
-                    # Log the result of the trip
-                    logs['firm'].log([*str(tripList[-1]).split(), profit])
-
-                    fsm.setState(Recruit.DROP, message = "Collected %s resources // profit: %s" % (tripList[-1].Q, round(profit,2)))
+                fsm.setState(States.DROP, message = "Collected %s resources // profit: %s" % (tripList[-1].Q, round(profit,2)))
 
 
-                # if robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("quantity")==str(cp['maxQ']):
-                #     robot.variables.set_attribute("foraging", "")
-                #     fsm.setState(Recruit.DROP, message = "Collected %s resources" % (robot.variables.get_attribute("quantity")))
+            # if robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("quantity")==str(cp['maxQ']):
+            #     robot.variables.set_attribute("foraging", "")
+            #     fsm.setState(States.DROP, message = "Collected %s resources" % (robot.variables.get_attribute("quantity")))
 
         #########################################################################################################
-        #### Recruit.DROP
+        #### States.DROP
         #########################################################################################################
-        elif fsm.query(Recruit.DROP):
+        elif fsm.query(States.DROP):
 
             # Navigate home
-            arrived = homing(to_drop = True)
+            arrived = dropping(rb.best)
 
             if arrived:
 
@@ -706,12 +775,9 @@ def controlstep():
                         robot.variables.set_attribute("dropResource", "True")
 
                         if not robot.variables.get_attribute("hasResource"):
-                            robot.variables.set_attribute("dropResource", "")
                             txs['drop'] = Transaction(None)
-                            robot.log.info('Dropped: %s', rb.best._desc)
-                            balance = w3.sc.functions.getBalance().call()
-                            robot.log.info('Balance: %s', balance)
-                            fsm.setState(Recruit.PLAN, message = "Drop success")
+                            robot.variables.set_attribute("dropResource", "")   
+                            fsm.setState(States.PLAN, message = "Dropped: %s" % rb.best._desc)
 
                     elif txs['drop'].fail == True: 
                         robot.log.info('Drop fail: %s', rb.best._desc)     
@@ -730,7 +796,7 @@ def controlstep():
         #     if clocks['block'].query():
 
         #         # Confirm I am still scout
-        #         fsm.setState(Recruit.PLAN, message = None)
+        #         fsm.setState(States.PLAN, message = None)
 
         #     else:
 
@@ -750,7 +816,7 @@ def controlstep():
         #             # Unsucess exploration: Buy
         #             else:
         #                 clocks['buy'].reset()
-        #                 fsm.setState(Recruit.BUY, message = "Found %s" % len(rb))
+        #                 fsm.setState(States.ASSIGN, message = "Found %s" % len(rb))
 
 
         #########################################################################################################
@@ -777,14 +843,14 @@ def controlstep():
         #     else:
         #         if txs['sell'].query(3):
         #             txs['sell'] = Transaction(None)
-        #             fsm.setState(Recruit.BUY, message = "Sell success")
+        #             fsm.setState(States.ASSIGN, message = "Sell success")
 
         #         elif txs['sell'].fail == True:    
         #             txs['sell'] = Transaction(None)
-        #             fsm.setState(Recruit.BUY, message = "Sell failed")
+        #             fsm.setState(States.ASSIGN, message = "Sell failed")
 
         #         elif txs['sell'].hash == None:
-        #             fsm.setState(Recruit.BUY, message = "None to sell")
+        #             fsm.setState(States.ASSIGN, message = "None to sell")
 
 
 #########################################################################################################################

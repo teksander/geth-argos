@@ -59,7 +59,8 @@ params['patches']['dist_min'] = 1.5 * params['cache']['r']
 params['patches']['dist_max'] = 5 * params['cache']['r']
 params['patches']['qualities']   = {'red', 'green' , 'blue', 'yellow'}
 params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 0.5, 'yellow': 4}
-params['patches']['regen_rate']  = {k:params['generic']['regen_rate'] for k in params['patches']['qualities']}
+params['patches']['regen_rate']  = {'red': 10, 'green':  8, 'blue': 8, 'yellow': 4}
+# params['patches']['regen_rate']  = {k:params['generic']['regen_rate'] for k in params['patches']['qualities']}
 
 # params['patches']['regen_rate']  = {'red': 20, 'green':  20, 'blue': 20, 'yellow': 20}
 
@@ -70,7 +71,7 @@ params['patches']['dec_returns'] = dict()
 params['patches']['dec_returns']['func']   = 'linear'                       # constant, linear or logarithmic decreasing returns
 params['patches']['dec_returns']['thresh'] = params['patches']['qtty_max']  # qqty of resource before dec returns starts
 params['patches']['dec_returns']['slope']  = 1                              # seconds each resource is slower than previous
-params['patches']['dec_returns']['slope_robot'] = 1
+params['patches']['dec_returns']['slope_robot'] = 1.5
 
 # params['patches']['dec_returns_func']   = 'exp'                      # constant, linear or logarithmic decreasing returns
 # params['patches']['dec_returns_thresh'] = params['patches']['qtty_max'] # qqty of resource before dec returns starts

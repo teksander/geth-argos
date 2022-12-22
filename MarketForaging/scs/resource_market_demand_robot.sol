@@ -5,7 +5,6 @@ contract MarketForaging {
   uint constant quota         = QUOTA;
   uint constant fuel_cost     = FUELCOST;
   uint constant max_workers   = MAXWORKERS;
-  uint constant lim_assign    = LIMITASSIGN;
 
 
   function Token_key() public pure returns (string[2] memory){
@@ -39,8 +38,8 @@ contract MarketForaging {
   }
 
 
-  function Patch_key() public pure returns (string[11] memory){
-    return ["x", "y", "qtty", "util", "qlty", "json", "id", "max", "tot", "last_assign", "epoch"];
+  function Patch_key() public pure returns (string[10] memory){
+    return ["x", "y", "qtty", "util", "qlty", "json", "id", "max", "tot", "epoch"];
   }
   struct Patch {
     // Details 
@@ -57,7 +56,6 @@ contract MarketForaging {
     // Assignment
     uint max_workers;
     uint tot_workers;
-    uint last_assign;
 
     Epoch epoch;
   } 
@@ -120,7 +118,6 @@ contract MarketForaging {
                           id:   id_nonce,
                           max_workers:   max_workers,
                           tot_workers:   0,
-                          last_assign:   0,
                           epoch: epoch0
                         }));
     }
@@ -195,24 +192,13 @@ contract MarketForaging {
     }
   }
 
-  function assignToPatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
-
-    uint i = findByPos(_x, _y);
+  function assignToPatch(uint i) public {
 
     // Assign robot to chosen patch
     if (patches[i].tot_workers < patches[i].max_workers) {
       patches[i].tot_workers++;
       robot[msg.sender].task = patches[i].id;
     }
-  }
-
-  function leavePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
-
-    uint i = findByPos(_x, _y);
-
-    // Assign robot to chosen patch
-    patches[i].tot_workers--;
-    robot[msg.sender].task = 0;
   }
 
   function assignPatch() public {
@@ -223,19 +209,16 @@ contract MarketForaging {
     // Assign new foraging task
     if (i < patches.length) {
       patches[i].tot_workers++;
-      patches[i].last_assign = block.number;
       robot[msg.sender].task = patches[i].id;
     }
   }
 
-  function findAvailiable() public view returns (uint) {
+  function findAvailiable() private view returns (uint) {
 
     uint index = 9999;
 
     for (uint i=0; i < patches.length; i++) {
-      if (patches[i].tot_workers < patches[i].max_workers 
-        && robot[msg.sender].task != patches[i].id
-        && block.number >= lim_assign+patches[i].last_assign) {
+      if (patches[i].tot_workers < patches[i].max_workers && robot[msg.sender].task != patches[i].id) {
         index = i;
       }
     }

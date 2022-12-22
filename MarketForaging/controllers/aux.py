@@ -702,7 +702,10 @@ class Vector2D:
         for i in [self.x, self.y]:
             yield i
 
-    def rotate(self, angle):
+    def rotate(self, angle, degrees = False):
+        if degrees:
+            angle = math.radians(angle)
+            
         return Vector2D(self.length, self.angle + angle, polar = True)
 
     def normalize(self):

@@ -282,15 +282,11 @@ def pre_step():
 
 
         # Regenerate resource
-        # if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
-        #     res.quantity += 1
+        if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
+            res.quantity += 1
 
-        if not other['foragers'][res]:
-            res.quantity = lp['patches']['qtty_max']
-
-        # Update resource ready timer
-        
-
+        # if not other['foragers'][res]:
+        #     res.quantity = lp['patches']['qtty_max']
 
 def post_step():
     global startFlag, clocks, accums, resource_counter
