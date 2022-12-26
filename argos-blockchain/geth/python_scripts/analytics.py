@@ -33,10 +33,10 @@ def scHandle():
     resources = sc.functions.getPatches().call()
     robot = sc.functions.robot(w3.key).call()
     
-    # Write to a file used for qt_draw in ARGoS
-    with open(scresourcesfile, 'w+', buffering=1) as f:
-        for res in resources:
-            f.write('%s\n' % (res[_json]))
+    # # Write to a file used for qt_draw in ARGoS
+    # with open(scresourcesfile, 'w+', buffering=1) as f:
+    #     for res in resources:
+    #         f.write('%s\n' % (res[_json]))
 
     # Write to the log file used data analysis
     for res in resources:        

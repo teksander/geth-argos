@@ -35,7 +35,7 @@ export CON2="${EXPERIMENTFOLDER}/controllers/main_greedy.py"
 export RABRANGE="0.4"
 export WHEELNOISE="0"
 export TPS=10
-export DENSITY="3"
+export DENSITY="4.5"
 
 export NUMROBOTS=$(echo $NUM1+$NUM2 | bc)
 # export ARENADIM=2
@@ -48,8 +48,8 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXWORKERS=5
-export LIMITASSIGN=10
+export MAXWORKERS=3
+export LIMITASSIGN=0
 export REGENRATE=20
 export FUELCOST=100
 export QUOTA_temp=$(echo " scale=4 ; (75/$REGENRATE*$BLOCKPERIOD+0.05)/1" | bc)
@@ -59,7 +59,7 @@ export EPSILON=15
 export WINSIZE=5
 
 # [OTHER]
-export SEED=350
+export SEED=1500
 export TIMELIMIT=15
 export SLEEPTIME=5
 export REPS=4

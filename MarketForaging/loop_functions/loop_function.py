@@ -29,7 +29,7 @@ os.makedirs(os.path.dirname(log_folder), exist_ok=True)
 global allresources, resource_counter
 allresources = []
 resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
-position_previous = dict()
+# position_previous = dict()
 
 if 'radii' and 'counts' in lp['patches']:
     radii  = lp['patches']['radii']
@@ -59,10 +59,11 @@ global clocks, accums, logs, other
 clocks, accums, logs, other = dict(), dict(), dict(), dict()
 
 clocks['simlog'] = Timer(10)
-accums['distance'] = Accumulator()
-accums['distance_forage'] = Accumulator()
-accums['distance_explore'] = Accumulator()
+# accums['distance'] = Accumulator()
+# accums['distance_forage'] = Accumulator()
+# accums['distance_explore'] = Accumulator()
 accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots'])]
+
 clocks['regen']      = dict()
 clocks['ready']      = dict()
 clocks['forage']     = dict()
@@ -86,8 +87,13 @@ def generate_resource(n = 1, qualities = None, max_attempts = 500):
                 stopFlag = True
                 break
 
+            # Generate a new resource position (fixed)
+            if lp['patches']['distribution'] == 'fixed':
+                x = lp['patches']['x'][i]
+                y = lp['patches']['y'][i]
+
             # Generate a new resource position (uniform)
-            if lp['patches']['distribution'] == 'uniform':
+            elif lp['patches']['distribution'] == 'uniform':
                 # x = round(random.uniform(-lp['generic']['arena_size']/2, lp['generic']['arena_size']/2), 2)
                 # y = round(random.uniform(-lp['generic']['arena_size']/2, lp['generic']['arena_size']/2), 2)
                 r1 = lp['patches']['dist_min']
@@ -175,36 +181,37 @@ def forage_rate(res, carried = 0):
 
 def init():
 
+    # Initialize logfiles for loop function
+    file   = 'simulation.csv'
     header = ['TPS', 'RAM', 'CPU']
-    file   = 'simulation.csv'  
     logs['simulation'] = Logger(log_folder+file, header, ID = '0')
-    logs['simulation'].start()
 
-    header = ['DIST', 'RECRUIT_DIST', 'SCOUT_DIST']+list(resource_counter) + ['TOTAL', 'VALUE']
-    file   = 'loop_function.csv'
+    file   = 'loop.csv'
+    header = list(resource_counter) + ['TOTAL', 'VALUE']
     logs['loop'] = Logger(log_folder+file, header, ID = '0')
-    logs['loop'].start()
 
-    header = [str(robotID) for robotID in range(1, lp['generic']['num_robots']+1)]
     file   = 'collection.csv'
+    header = ['ROBOT_ID', 'QLTY', 'QTTY','TOTAL']
     logs['collection'] = Logger(log_folder+file, header, rate = 1, ID = '0')
-    logs['collection'].start()
 
+
+    # Initialize resources in the arena
     for quality, count in counts.items():
         generate_resource(count, qualities = count*[quality])
 
+    # Initialize robot parameters
     for robot in allrobots:
 
         robot.id = int(robot.variables.get_attribute("id"))-1
         robot.variables.set_attribute("eff", str(lp['economy']['efficiency_best']+robot.id*lp['economy']['efficiency_step']))
-        position_previous[robot.variables.get_attribute("id")] = Vector2D(robot.position.get_position()[0:2]) 
+        # position_previous[robot.variables.get_attribute("id")] = Vector2D(robot.position.get_position()[0:2]) 
         
-        print(robot.variables.get_all_attributes())
-
         if lp['patches']['known']:
             robot.variables.set_attribute("newResource", allresources[robot.id % len(allresources)]._json)
 
-        # clocks['forage'] = {robot: Timer(100) for robot in allrobots}
+    for log in logs.values():
+        log.start()
+
 
 def pre_step():
     global startFlag, startTime, resource_counter
@@ -212,9 +219,6 @@ def pre_step():
     # Tasks to perform on the first time step
     if not startFlag:
         startTime = time.time()
-
-    # for robot in allrobots:
-    #     print(robot.position.get_position())
     
     # Tasks to perform for each robot
     for robot in allrobots:
@@ -258,19 +262,10 @@ def pre_step():
     # Tasks to perform for each resource
     for res in allresources:
 
-        n_foragers = len(other['foragers'][res])
-        ok_to_forage = True
-        # gsz = [int(robot.variables.get_attribute("groupSize")) for robot in other['foragers'][res]]
-
-        # if len(set(gsz)) == 1:
-        #     if n_foragers == gsz[0] or any([int(robot.variables.get_attribute("quantity")) for robot in other['foragers'][res]]):
-        #         ok_to_forage = True
-
-        
         for robot in random.sample(other['foragers'][res], len(other['foragers'][res])):
             clocks['forage'][robot].set(forage_rate(res, robot.variables.get_attribute("quantity")), reset=False)
 
-            if clocks['forage'][robot].query() and ok_to_forage:
+            if clocks['forage'][robot].query():
                 robot.variables.set_attribute("hasResource", res.quality)
                 robot.variables.set_attribute("quantity", str(int(robot.variables.get_attribute("quantity"))+1))
                 robot.variables.set_attribute("forageTimer", str(round(clocks['forage'][robot].rate, 2)))
@@ -280,13 +275,9 @@ def pre_step():
                 other['foragers'][res].remove(robot)
                 clocks['forage'][robot] = None
 
-
         # Regenerate resource
         if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
             res.quantity += 1
-
-        # if not other['foragers'][res]:
-        #     res.quantity = lp['patches']['qtty_max']
 
 def post_step():
     global startFlag, clocks, accums, resource_counter
@@ -306,7 +297,7 @@ def post_step():
         for res in allresources:
             f.write(res._json+'\n')
 
-    # Record the carried resourced to be drawn to a file
+    # Record the carried resources to be drawn to a file
     with open(lp['files']['robots'], 'w', buffering=1) as f:
         for robot in allrobots:
             if robot.variables.get_attribute("hasResource"):
@@ -325,17 +316,6 @@ def post_step():
         with open(lp['files']['rays'], p, buffering=1) as f:
             f.write(robot.variables.get_attribute("rays"))
 
-
-    # Record the distance each robot has travelled in the current step
-        position_current = Vector2D(robot.position.get_position()[0:2])              
-        distance_traveled = (position_current - position_previous[robot.variables.get_attribute("id")]).length  
-        accums['distance_forage'].acc(distance_traveled)
-        if robot.variables.get_attribute("state") == "Recruit.FORAGE":
-            accums['distance_forage'].acc(distance_traveled)
-        if robot.variables.get_attribute("state") == "Scout.EXPLORE":
-            accums['distance_explore'].acc(distance_traveled)
-
-
     # Logging of simulation simulation (RAM, CPU, TPS)   
     if clocks['simlog'].query():
         RAM = getRAMPercent()
@@ -344,10 +324,7 @@ def post_step():
     logs['simulation'].log([TPS, CPU, RAM])
 
     # Logging of loop function variables
-    logs['loop'].log([accums['distance_forage'].value]
-              + [accums['distance_forage'].value]
-              + [accums['distance_explore'].value]
-              + [str(value) for value in resource_counter.values()] 
+    logs['loop'].log([str(value) for value in resource_counter.values()] 
               + [sum(resource_counter.values())] 
               + [sum([resource_counter[x]*lp['patches']['utility'][x] for x in lp['patches']['utility']])])
 

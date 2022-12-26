@@ -472,8 +472,8 @@ def controlstep():
 
         def dropping(resource):
 
-            target = Vector2D(resource._p).rotate(-25, degrees = True)
-            target = tuple(target.normalize()*(market.radius+cache.radius)/2)
+            direction = (resource._pv-market._pv).rotate(-25, degrees = True).normalize()
+            target = direction*(market.radius+cache.radius)/2+market._pv
 
             # Navigate to drop location
             arrived = True
@@ -488,8 +488,8 @@ def controlstep():
 
         def grouping(resource):
 
-            target = Vector2D(resource._p).rotate(25, degrees = True)
-            target = tuple(target.normalize()*(market.radius+cache.radius)/2)
+            direction = (resource._pv-market._pv).rotate(25, degrees = True).normalize()
+            target = direction*(market.radius+cache.radius)/2+market._pv
 
             # Navigate to the group location
             arrived = True
@@ -579,48 +579,48 @@ def controlstep():
             epochs    = tcp_sc.request(data = 'getEpochs')
             robot.sc  = tcp_sc.request(data = 'getRobot')
 
-            availiable = any([res['tot']==0 for res in resources])
-            # availiable = tcp_sc.request(data = 'getAvailiable')
+            availiable = tcp_sc.request(data = 'getAvailiable')
+            # availiable = any([res['tot']==0 for res in resources])    
             assigned   = bool(resource and resource['json'])
             arrived    = False
             join       = False
             leave      = False
             res        = None
 
-            # To forage or not (market decisions)
-            for res in resources:
-                res = Resource(res['json'])
+            # # To forage or not (market decisions)
+            # for res in resources:
+            #     res = Resource(res['json'])
 
-                # Variables that can be usefull for decisions
-                if len(epochs) > 0:
-                    epoch_latest = epochs[-1]
+            #     # Variables that can be usefull for decisions
+            #     if len(epochs) > 0:
+            #         epoch_latest = epochs[-1]
 
-                    # Decision is performed once per epoch
-                    if epoch_latest['number'] > previous_epoch_num:
-                        AP = res.utility*1000 - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
-                        # BP = max([res.utility*1000-x for x in epoch_latest['ATC']])
-                        # WP = min([res.utility*1000-x for x in epoch_latest['ATC']])
-                        # FC = nav.get_distance_to(res._p)/cp['recruit_speed']*100
-                        # my_fraction_of_TS = 100*round(robot.sc['balance']/token['supply'],3)
-                        # my_deviation = 100*round(robot.sc['balance']/token['supply']-1/token['robots'],3)
-                        # print(AP, BP, WP)
+            #         # Decision is performed once per epoch
+            #         if epoch_latest['number'] > previous_epoch_num:
+            #             AP = res.utility*1000 - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
+            #             # BP = max([res.utility*1000-x for x in epoch_latest['ATC']])
+            #             # WP = min([res.utility*1000-x for x in epoch_latest['ATC']])
+            #             # FC = nav.get_distance_to(res._p)/cp['recruit_speed']*100
+            #             # my_fraction_of_TS = 100*round(robot.sc['balance']/token['supply'],3)
+            #             # my_deviation = 100*round(robot.sc['balance']/token['supply']-1/token['robots'],3)
+            #             # print(AP, BP, WP)
                         
-                        K = 1/20000
-                        # Linear
-                        P = K * AP
-                        # Sigmoid
+            #             K = 1/20000
+            #             # Linear
+            #             P = K * AP
+            #             # Sigmoid
                         
-                        robot.log.info("Join/leave P: %.2f" % P)
-                        if random.random() < abs(P):
-                            if P > 0:
-                                join = True
-                            else:
-                                leave = True
+            #             robot.log.info("Join/leave P: %.2f" % P)
+            #             if random.random() < abs(P):
+            #                 if P > 0:
+            #                     join = True
+            #                 else:
+            #                     leave = True
 
-                        previous_epoch_num = epoch_latest['number']
+            #             previous_epoch_num = epoch_latest['number']
 
-                        if join:
-                            break
+            #             if join:
+            #                 break
 
             # If resource is assigned, FORAGE
             if assigned:

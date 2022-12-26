@@ -4,8 +4,8 @@ contract MarketForaging {
 
   uint constant quota         = 200;
   uint constant fuel_cost     = 100;
-  uint constant max_workers   = 5;
-  uint constant lim_assign    = 10;
+  uint constant max_workers   = 3;
+  uint constant lim_assign    = 0;
 
 
   function Token_key() public pure returns (string[2] memory){

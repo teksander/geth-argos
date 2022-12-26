@@ -120,7 +120,7 @@ class Timer:
     def __init__(self, rate = 0, name = None):
         self.name = name
         self.rate = rate
-        self.time = time.time()
+        self.tick = time.time()
         self.isLocked = False
 
     def query(self, reset = True):
@@ -132,7 +132,7 @@ class Timer:
             return False
 
     def remaining(self):
-        return self.rate - (time.time() - self.time)
+        return self.rate - (time.time() - self.tick)
 
     def set(self, rate, reset = True):
         if not self.isLocked:
@@ -143,7 +143,7 @@ class Timer:
 
     def reset(self):
         if not self.isLocked:
-            self.time = time.time()
+            self.tick = time.time()
         return self
 
     def lock(self):
@@ -614,7 +614,7 @@ class Vector2D:
             self.x = x
             self.y = y
 
-            if isinstance(x, (list, tuple)) and not y: 
+            if isinstance(x, (Vector2D, list, tuple)) and not y: 
                 self.x = x[0]
                 self.y = x[1]
             
@@ -701,6 +701,15 @@ class Vector2D:
         """Return the iterable object"""
         for i in [self.x, self.y]:
             yield i
+
+    def __getitem__(self, index):
+        """Return the iterable object"""
+        if index == 0 or index == 'x':
+            return self.x
+        elif index == 1 or index == 'y':
+            return self.y
+        raise NotImplementedError('Vector2D is two-dimensional array (x,y)')
+
 
     def rotate(self, angle, degrees = False):
         if degrees:
