@@ -253,7 +253,9 @@ class Trip(object):
         self.ATC    = 0
         tripList.append(self)
 
+
     def update(self, Q):
+        finished = False
 
         if self.FC == 0:
             self.FC = time.time() - self.tStart
@@ -266,10 +268,13 @@ class Trip(object):
                 new_mc = self.C[-1]-self.C[-2]
                 robot.log.info("Collected // MC: %.2f" % new_mc)
                 self.MC.append(new_mc)
+                if new_mc > lp['patches']['utility'][rb.best.quality]:
+                    finished = True
 
             self.TC  = time.time() - self.tStart
             self.ATC = self.TC/self.Q
 
+        return finished
 
     def __str__(self):
         C  = str([round(x, 2) for x in self.C]).replace(' ','')
@@ -493,10 +498,10 @@ def controlstep():
 
             # Navigate to the group location
             arrived = True
-            if nav.get_distance_to(target) < 0.3*market.radius:           
+            if nav.get_distance_to(target) < 0.2*market.radius:           
                 nav.avoid(move = True) 
             else:
-                nav.navigate_with_obstacle_avoidance(target)
+                nav.navigate(target)
                 arrived = False
 
             return arrived
@@ -579,55 +584,62 @@ def controlstep():
             epochs    = tcp_sc.request(data = 'getEpochs')
             robot.sc  = tcp_sc.request(data = 'getRobot')
 
-            availiable = tcp_sc.request(data = 'getAvailiable')
-            # availiable = any([res['tot']==0 for res in resources])    
+            availiable = tcp_sc.request(data = 'getAvailiable')   
             assigned   = bool(resource and resource['json'])
             arrived    = False
             join       = False
             leave      = False
             res        = None
 
-            # # To forage or not (market decisions)
-            # for res in resources:
-            #     res = Resource(res['json'])
+            # To forage or not (market decisions)
+            for res in resources:
+                res = Resource(res['json'])
 
-            #     # Variables that can be usefull for decisions
-            #     if len(epochs) > 0:
-            #         epoch_latest = epochs[-1]
+                # Variables that can be usefull for decisions
+                if len(epochs) > 0:
+                    epoch_latest = epochs[-1]
 
-            #         # Decision is performed once per epoch
-            #         if epoch_latest['number'] > previous_epoch_num:
-            #             AP = res.utility*1000 - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
-            #             # BP = max([res.utility*1000-x for x in epoch_latest['ATC']])
-            #             # WP = min([res.utility*1000-x for x in epoch_latest['ATC']])
-            #             # FC = nav.get_distance_to(res._p)/cp['recruit_speed']*100
-            #             # my_fraction_of_TS = 100*round(robot.sc['balance']/token['supply'],3)
-            #             # my_deviation = 100*round(robot.sc['balance']/token['supply']-1/token['robots'],3)
-            #             # print(AP, BP, WP)
+                    # Decision is performed once per epoch
+                    if epoch_latest['number'] > previous_epoch_num:
+                        AP = res.utility*1000 - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
+                        # BP = max([res.utility*1000-x for x in epoch_latest['ATC']])
+                        # WP = min([res.utility*1000-x for x in epoch_latest['ATC']])
+                        # FC = nav.get_distance_to(res._p)/cp['recruit_speed']*100
+                        # my_fraction_of_TS = 100*round(robot.sc['balance']/token['supply'],3)
+                        # my_deviation = 100*round(robot.sc['balance']/token['supply']-1/token['robots'],3)
+                        # print(AP, BP, WP)
                         
-            #             K = 1/20000
-            #             # Linear
-            #             P = K * AP
-            #             # Sigmoid
+                        # Parameters
+                        K = 0
+                        # K = 0.4/20000
+
+                        # Linear
+                        P = K * AP
                         
-            #             robot.log.info("Join/leave P: %.2f" % P)
-            #             if random.random() < abs(P):
-            #                 if P > 0:
-            #                     join = True
-            #                 else:
-            #                     leave = True
+                        # Sigmoid
+                        
+                        robot.log.info("Join/leave P: %.2f" % P)
+                        if random.random() < abs(P):
+                            if P > 0:
+                                join = True
+                            else:
+                                leave = True
 
-            #             previous_epoch_num = epoch_latest['number']
+                        previous_epoch_num = epoch_latest['number']
 
-            #             if join:
-            #                 break
+                        if join:
+                            break
 
             # If resource is assigned, FORAGE
             if assigned:
                 rb.addResource(resource['json'], update_best = True)
-
                 arrived = grouping(rb.best)
-                if arrived:
+
+                if leave:
+                    fsm.setStorage(res)
+                    fsm.setState(States.LEAVE, message = "Leaving: %s" % res._desc)
+
+                elif arrived:
                     Trip()
                     robot.variables.set_attribute("groupSize", "0")
                     fsm.setState(States.FORAGE, message = 'Foraging: %s' % (rb.best._desc))
@@ -640,10 +652,6 @@ def controlstep():
                 homing()
                 fsm.setStorage(res)
                 fsm.setState(States.JOIN, message = "Joining: %s" % res._desc)
-            elif leave:
-                homing()
-                fsm.setStorage(res)
-                fsm.setState(States.LEAVE, message = "Leaving: %s" % res._desc)
             else:
                 homing()
 
@@ -684,7 +692,7 @@ def controlstep():
 
             elif txs['buy'].hash == None:
                 res = fsm.getStorage()
-                txHash = w3.sc.functions.assignToPatch(*res._calldata).transact()
+                txHash = w3.sc.functions.joinPatch(*res._calldata).transact()
                 txs['buy'] = Transaction(txHash)
                 robot.log.info("Joining patch") 
 
@@ -724,20 +732,21 @@ def controlstep():
             # Resource virtual sensor
             resource = sensing()
             found = resource and resource._p == rb.best._p
+            finished = False
 
             if found:
                 rb.best = resource
 
             if found and distance < 0.9*rb.best.radius:
                 robot.variables.set_attribute("foraging", "True")
-                tripList[-1].update(robot.variables.get_attribute("quantity"))
+                finished = tripList[-1].update(robot.variables.get_attribute("quantity"))
                 nav.avoid(move = True)
 
             else:
                 nav.navigate_with_obstacle_avoidance(rb.best._pr)
 
-            # Firm decision making
-            if tripList[-1].Q > 2 and tripList[-1].MC[-1] > lp['patches']['utility'][rb.best.quality]:
+            # Short-run decision making
+            if finished:
                 robot.variables.set_attribute("foraging", "")
                 profit = tripList[-1].Q * lp['patches']['utility'][rb.best.quality] - tripList[-1].TC
 

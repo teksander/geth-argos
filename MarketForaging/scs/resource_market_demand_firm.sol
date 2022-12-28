@@ -4,8 +4,8 @@ contract MarketForaging {
 
   uint constant quota         = 200;
   uint constant fuel_cost     = 100;
-  uint constant max_workers   = 3;
-  uint constant lim_assign    = 0;
+  uint constant maxw   = 5;
+  uint constant lim_assign    = 10;
 
 
   function Token_key() public pure returns (string[2] memory){
@@ -55,8 +55,8 @@ contract MarketForaging {
     uint id;
 
     // Assignment
-    uint max_workers;
-    uint tot_workers;
+    uint maxw;
+    uint totw;
     uint last_assign;
 
     Epoch epoch;
@@ -88,6 +88,13 @@ contract MarketForaging {
       robot[msg.sender].balance      = 20000;
       token.supply += 20000;
       token.robots += 1;
+
+      for (uint i=0; i < patches.length; i++) {
+        if (patches[i].totw < patches[i].maxw && robot[msg.sender].task == 0) {
+          patches[i].totw++;
+          robot[msg.sender].task = patches[i].id;
+        }
+      }
     }
   }
 
@@ -118,8 +125,8 @@ contract MarketForaging {
                           qlty: _qlty, 
                           json: _json,
                           id:   id_nonce,
-                          max_workers:   max_workers,
-                          tot_workers:   0,
+                          maxw:   maxw,
+                          totw:   0,
                           last_assign:   0,
                           epoch: epoch0
                         }));
@@ -177,11 +184,11 @@ contract MarketForaging {
       //   patches[i].epoch.MC.push(new_mc);
       // }
 
-      if (patches[i].epoch.Q.length == patches[i].tot_workers) {
+      if (patches[i].epoch.Q.length == patches[i].totw) {
 
         // // Rules for increasing number of workers
         // if (patches[i].epoch.consumption < quota) {
-        //   patches[i].max_workers++;
+        //   patches[i].maxw++;
         // }
 
         // Init new epoch
@@ -195,13 +202,13 @@ contract MarketForaging {
     }
   }
 
-  function assignToPatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
+  function joinPatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
 
     uint i = findByPos(_x, _y);
 
     // Assign robot to chosen patch
-    if (patches[i].tot_workers < patches[i].max_workers) {
-      patches[i].tot_workers++;
+    if (robot[msg.sender].task == 0){
+      patches[i].totw++;
       robot[msg.sender].task = patches[i].id;
     }
   }
@@ -210,9 +217,11 @@ contract MarketForaging {
 
     uint i = findByPos(_x, _y);
 
-    // Assign robot to chosen patch
-    patches[i].tot_workers--;
-    robot[msg.sender].task = 0;
+    // Unassign robot to chosen patch
+    if (robot[msg.sender].task == patches[i].id){
+      patches[i].totw--;
+      robot[msg.sender].task = 0;
+    }
   }
 
   function assignPatch() public {
@@ -222,7 +231,7 @@ contract MarketForaging {
 
     // Assign new foraging task
     if (i < patches.length) {
-      patches[i].tot_workers++;
+      patches[i].totw++;
       patches[i].last_assign = block.number;
       robot[msg.sender].task = patches[i].id;
     }
@@ -233,7 +242,7 @@ contract MarketForaging {
     uint index = 9999;
 
     for (uint i=0; i < patches.length; i++) {
-      if (patches[i].tot_workers < patches[i].max_workers 
+      if (patches[i].totw < patches[i].maxw 
         && robot[msg.sender].task != patches[i].id
         && block.number >= lim_assign+patches[i].last_assign) {
         index = i;

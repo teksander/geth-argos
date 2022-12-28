@@ -63,7 +63,7 @@ params['patches']['counts'] = {'red': 0, 'green': 0 , 'blue': 1, 'yellow': 0}
 params['patches']['radii']  = {k: params['patches']['radius'] for k in params['patches']['qualities']}
 
 # Parameters for resource economy
-params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 15, 'yellow': 1}
+params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 25, 'yellow': 1}
 params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 0.5, 'yellow': 4}
 params['patches']['regen_rate']  = {'red': 10, 'green':  8, 'blue': 5, 'yellow': 4}
 
@@ -73,10 +73,10 @@ params['patches']['dec_returns']['thresh'] = params['patches']['qtty_max']  # qq
 params['patches']['dec_returns']['slope']  = 1 
 
 params['patches']['dec_returns']['func_robot']  = 'linear'                  # seconds each resource is slower than previous
-params['patches']['dec_returns']['slope_robot'] = 1.5
+params['patches']['dec_returns']['slope_robot'] = 3
 
-params['patches']['dec_returns']['func_robot']  = 'exp'                  # seconds each resource is slower than previous
-params['patches']['dec_returns']['slope_robot'] = 1.5
+# params['patches']['dec_returns']['func_robot']  = 'exp'                  # seconds each resource is slower than previous
+# params['patches']['dec_returns']['slope_robot'] = 3
 
 # params['patches']['area_percent'] = 0.005 * (10/generic_params['num_robots'])
 # params['patches']['radius']    = params['generic']['arena_size']  * math.sqrt(resource_params['area_percent']/math.pi) 

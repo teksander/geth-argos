@@ -216,7 +216,7 @@ def blockHandle():
 	availiable = sc.functions.findAvailiable().call() < 9999
 	block    = w3.eth.blockNumber
 
-	tcp_queries.setData({
+	tcp_calls.setData({
 		'getAvailiable': availiable, 
 		'getPatches': patches, 
 		'getEpochs': epochs,
@@ -240,14 +240,14 @@ if __name__ == '__main__':
 	tcp_peering.start()   
 
 ################################################################################################################
-### TCP for queries ###
+### TCP for calls ###
 ################################################################################################################
 
 	data = ""
 	port = 9899    
 
-	tcp_queries = TCP_mp(data, host, port)
-	tcp_queries.start()   
+	tcp_calls = TCP_mp(data, host, port)
+	tcp_calls.start()   
 
 	blockHandle()
 
@@ -268,7 +268,13 @@ if __name__ == '__main__':
 		peers = tcp_peering.getNew()
 		if peers:
 			peering()
-			
+		
+		# requests = tcp_reqs.getNew()
+		# if requests:
+		# 	for req in requests:
+		#		eval(sc.%s().%s(*req['args']) % (req['func'],req[''])
+		#
+
 		newBlocks = bf.get_new_entries()
 		if newBlocks:
 			blockHandle()
