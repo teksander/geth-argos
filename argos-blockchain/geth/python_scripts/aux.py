@@ -201,7 +201,7 @@ class TCP_mp(object):
     until the application exits.
     """
 
-    def __init__(self, data, host, port):
+    def __init__(self, data = None, host = None, port = None):
         """ Constructor
         :type data: any
         :param data: Data to be sent back upon request

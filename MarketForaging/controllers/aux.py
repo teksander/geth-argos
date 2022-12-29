@@ -189,7 +189,7 @@ class TCP_mp(object):
     until the application exits.
     """
 
-    def __init__(self, data, host, port):
+    def __init__(self, data = None, host = None, port = None):
         """ Constructor
         :type data: any
         :param data: Data to be sent back upon request
@@ -205,35 +205,32 @@ class TCP_mp(object):
 
         self.running  = False
         self.received = []
-        self.__stop   = False
-
-        logger.info('TCP-Server OK')
 
     def __hosting(self):
         """ This method runs in the background until program is closed """ 
+        logger.info('TCP server running')
 
         # Setup the listener
         listener = Listener((self.host, self.port))
 
-        print('TCP server OK')  
-
         while True:
+            try:
+                __conn = listener.accept()
+                __call = __conn.recv()
+                __conn.send(self.data[__call])
 
-            __conn = listener.accept()
+            except Exception as e:
+                logger.error('TCP connection failed')
 
-            # __call  = __conn.recv(1024)
-            __call = 'getMyResource'
-            __conn.send(self.data[__call])
-
-
-            if self.__stop:
+            if not self.running:
                 __conn.close()
                 break 
                 
     def request(self, data = None, host = None, port = None):
         """ This method is used to request data from a running TCP server """
 
-        msg = ""
+        __msg = ""
+
         if not data:
             data = self.data
         if not host:
@@ -244,15 +241,13 @@ class TCP_mp(object):
         try:
             __conn = Client((host, port))
             __conn.send(data)
-
-            msg = __conn.recv()
-            
+            __msg  = __conn.recv()
             __conn.close()
 
-        except:
-            print('TCP connection failed')
+            return __msg
 
-        return msg
+        except:
+            logger.error('TCP request failed')
 
     def getNew(self):
         if self.running:
@@ -282,7 +277,6 @@ class TCP_mp(object):
 
     def stop(self):
         """ This method is called before a clean exit """   
-        self.__stop  = True
         self.running = False
         print('TCP server is OFF') 
 
@@ -750,7 +744,7 @@ class mydict(dict):
             return mydict([[key, round(self[key])] for key in self])
         return mydict([[key, round(self[key], n)] for key in self])
 
-def identifersExtract(robotID, query = 'IP'):
+def identifiersExtract(robotID, query = 'IP'):
 
     identifier = os.environ['CONTAINERBASE'] + '.' + str(robotID) + '.'
 
@@ -761,8 +755,6 @@ def identifersExtract(robotID, query = 'IP'):
                     return line.split()[-2]
                 if query == 'IP_DOCKER':
                     return line.split()[-1]
-                if query == 'ENODE':
-                    return line.split()[1]
 
 def getFolderSize(folder):
     # Return the size of a folder

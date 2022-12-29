@@ -26,6 +26,7 @@ class States(Enum):
     DROP   = 5 
     JOIN   = 6
     LEAVE  = 7
+    HOMING = 8
 
 stateList = list(Idle)+list(Scout)+list(Recruit)
 
@@ -38,9 +39,10 @@ class FiniteStateMachine(object):
         self.currState = start
         self.accumTime = dict()
         self.startTime = time.time()
-
-    def setStorage(self,_storage = None):
-        self.storage = _storage
+        self.pass_along = None
+        
+    def setStorage(self,storage = None):
+        self.storage = storage
 
     def getStorage(self):
         return self.storage
@@ -54,7 +56,7 @@ class FiniteStateMachine(object):
     def getTimers(self):
         return self.accumTime
 
-    def setState(self, state, message = ""):
+    def setState(self, state, message = "", pass_along = None):
 
         self.onTransition(state, message)
 
@@ -65,6 +67,7 @@ class FiniteStateMachine(object):
         self.prevState = self.currState
         self.currState = state
         self.startTime = time.time()
+        self.pass_along = pass_along
     
     def query(self, state, previous = False):
         if previous:

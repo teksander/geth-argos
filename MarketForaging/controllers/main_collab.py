@@ -19,7 +19,6 @@ from rgbleds import RGBLEDs
 from console import *
 from aux import *
 from statemachine import *
-from loop_helpers import is_in_circle
 
 from loop_params import params as lp
 from control_params import params as cp
@@ -46,7 +45,7 @@ clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
 clocks['buffer'] = Timer(0.5)
 clocks['query_resources'] = Timer(1)
-clocks['block'] = Timer(2)
+clocks['block'] = Timer(lp['generic']['block_period'])
 clocks['search'] = Timer(10)
 clocks['explore'] = Timer(1)
 clocks['buy'] = Timer(cp['buy_duration'])
@@ -180,9 +179,10 @@ class Transaction(object):
 
     def __init__(self, txHash, name = "", query_latency = 2):
         self.name      = name
-        self.tx        = None
         self.hash      = txHash
+        self.tx        = None
         self.receipt   = None
+
         self.fail      = False
         self.block     = w3.eth.blockNumber()
         self.last      = 0
@@ -229,17 +229,19 @@ class Transaction(object):
             else:
                 return False
 
+    def getTransaction(self):
+        try:
+            self.tx = w3.eth.getTransaction(self.hash)
+        except Exception as e:
+            self.tx = None
+
     def getTransactionReceipt(self):
         try:
             self.receipt = w3.eth.getTransactionReceipt(self.hash)
         except Exception as e:
             self.receipt = None
 
-    def getTransaction(self):
-        try:
-            self.tx = w3.eth.getTransaction(self.hash)
-        except Exception as e:
-            self.tx = None
+
 
 class Trip(object):
 
@@ -288,7 +290,7 @@ class Trip(object):
 def init():
     global clocks,counters, logs, submodules, me, rw, nav, odo, gps, rb, w3, fsm, rs, erb, tcp_sc, rgb
     robotID = str(int(robot.variables.get_id()[2:])+1)
-    robotIP = identifersExtract(robotID, 'IP')
+    robotIP = identifiersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
     robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("foraging", "")
@@ -298,6 +300,7 @@ def init():
     robot.variables.set_attribute("state", "")
     robot.variables.set_attribute("forageTimer", "0")
     robot.variables.set_attribute("quantity", "0")
+    robot.variables.set_attribute("block", "")
     robot.variables.set_attribute("groupSize", "1")
 
     # /* Initialize Console Logging*/
@@ -315,7 +318,7 @@ def init():
     #######################################################################
     # # /* Init web3.py */
     robot.log.info('Initialising Python Geth Console...')
-    w3 = init_web3(robotID)
+    w3 = init_web3(robotIP)
 
     # /* Init an instance of peer for this Pi-Puck */
     me = Peer(robotID, robotIP, w3.enode, w3.key)
@@ -426,11 +429,21 @@ def controlstep():
         my_eff = int(float(robot.variables.get_attribute("eff"))*100)
         w3.sc.functions.register(my_eff).transact()
 
+
+
     else:
 
         ###########################
         ######## ROUTINES ########
         ###########################
+
+        def send_to_docker():
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((me.ip, 9898))
+                s.sendall("hi from robot %s" % me.id)
+                data = s.recv(1024)
+                print(data)
+
 
         def peering():
             global geth_peer_count
@@ -440,7 +453,7 @@ def controlstep():
                 peer_IPs = dict()
                 peers = erb.getNew()
                 for peer in peers:
-                    peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
+                    peer_IPs[peer] = identifiersExtract(peer, 'IP_DOCKER')
 
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.connect((me.ip, 9898))
@@ -463,7 +476,7 @@ def controlstep():
             # Navigate to the market
             arrived = True
 
-            if nav.get_distance_to(market._pr) < 0.5*market.radius:           
+            if nav.get_distance_to(market._pr) < 0.9*market.radius:           
                 nav.avoid(move = True)
                 
             elif nav.get_distance_to(market._pr) < market.radius and geth_peer_count > 1:
@@ -577,6 +590,9 @@ def controlstep():
         elif fsm.query(States.PLAN):
             global previous_epoch_num
 
+            availiable = assigned =  arrived = join = leave = False
+            res = None
+
             block     = tcp_sc.request(data = 'block')
             token     = tcp_sc.request(data = 'token')
             resource  = tcp_sc.request(data = 'getPatch')
@@ -584,12 +600,8 @@ def controlstep():
             epochs    = tcp_sc.request(data = 'getEpochs')
             robot.sc  = tcp_sc.request(data = 'getRobot')
 
-            availiable = tcp_sc.request(data = 'getAvailiable')   
+            availiable = tcp_sc.request(data = 'getAvailiable')
             assigned   = bool(resource and resource['json'])
-            arrived    = False
-            join       = False
-            leave      = False
-            res        = None
 
             # To forage or not (market decisions)
             for res in resources:
@@ -601,23 +613,19 @@ def controlstep():
 
                     # Decision is performed once per epoch
                     if epoch_latest['number'] > previous_epoch_num:
-                        AP = res.utility*1000 - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
-                        # BP = max([res.utility*1000-x for x in epoch_latest['ATC']])
-                        # WP = min([res.utility*1000-x for x in epoch_latest['ATC']])
-                        # FC = nav.get_distance_to(res._p)/cp['recruit_speed']*100
-                        # my_fraction_of_TS = 100*round(robot.sc['balance']/token['supply'],3)
-                        # my_deviation = 100*round(robot.sc['balance']/token['supply']-1/token['robots'],3)
-                        # print(AP, BP, WP)
-                        
+
+                        average_profit = res.utility*1000 - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
+                    
                         # Parameters
-                        K = 0
-                        # K = 0.4/20000
+                        # K = 0
+                        K = 0.4/20000
 
                         # Linear
-                        P = K * AP
+                        P = K * average_profit
                         
                         # Sigmoid
-                        
+
+                        robot.log.info("Average Profit: %.2f" % average_profit)
                         robot.log.info("Join/leave P: %.2f" % P)
                         if random.random() < abs(P):
                             if P > 0:
@@ -630,36 +638,49 @@ def controlstep():
                         if join:
                             break
 
-            # If resource is assigned, FORAGE
+
+
             if assigned:
                 rb.addResource(resource['json'], update_best = True)
-                arrived = grouping(rb.best)
 
                 if leave:
-                    fsm.setStorage(res)
-                    fsm.setState(States.LEAVE, message = "Leaving: %s" % res._desc)
-
-                elif arrived:
-                    Trip()
-                    robot.variables.set_attribute("groupSize", "0")
-                    fsm.setState(States.FORAGE, message = 'Foraging: %s' % (rb.best._desc))
+                    fsm.setState(States.LEAVE, message = "Leaving: %s" % res._desc, pass_along = res)
+                else:
+                    fsm.setState(States.HOMING, message = "")
                         
-            # If not assigned but availiable, ASSIGN
             elif availiable:
-                homing()
                 fsm.setState(States.ASSIGN, message = "Assigning")
+
             elif join:
-                homing()
-                fsm.setStorage(res)
-                fsm.setState(States.JOIN, message = "Joining: %s" % res._desc)
+                fsm.setState(States.JOIN, message = "Joining: %s" % res._desc, pass_along = res)
+
             else:
+                fsm.setState(States.HOMING, message = None, pass_along = 'homing')
+
+        #########################################################################################################
+        #### States.HOMING  
+        #########################################################################################################
+
+        elif fsm.query(States.HOMING):
+
+            if fsm.pass_along == 'homing':
                 homing()
+            else:
+                arrived = grouping(rb.best)
+                if arrived:
+                    Trip()
+                    fsm.setState(States.FORAGE, message = 'Foraging: %s' % (rb.best._desc))
+
+            if clocks['block'].query():
+                fsm.setState(States.PLAN, message = None)
 
         #########################################################################################################
         #### States.ASSIGN  
         #########################################################################################################
 
         elif fsm.query(States.ASSIGN):
+
+            homing()
 
             if txs['buy'].query(3):
                 txs['buy'] = Transaction(None)
@@ -670,7 +691,7 @@ def controlstep():
                 fsm.setState(States.PLAN, message = "Assign failed")
 
             elif txs['buy'].hash == None:
-                res = fsm.getStorage()
+                res = fsm.pass_along
                 txHash = w3.sc.functions.assignPatch().transact()
                 txs['buy'] = Transaction(txHash)
                 robot.log.info("Assigning patch")     
@@ -691,7 +712,7 @@ def controlstep():
                 fsm.setState(States.PLAN, message = "Join failed")
 
             elif txs['buy'].hash == None:
-                res = fsm.getStorage()
+                res = fsm.pass_along
                 txHash = w3.sc.functions.joinPatch(*res._calldata).transact()
                 txs['buy'] = Transaction(txHash)
                 robot.log.info("Joining patch") 
@@ -702,6 +723,8 @@ def controlstep():
 
         elif fsm.query(States.LEAVE):
 
+            homing()
+
             if txs['buy'].query(3):
                 txs['buy'] = Transaction(None)
                 fsm.setState(States.PLAN, message = "Leave success")
@@ -711,7 +734,7 @@ def controlstep():
                 fsm.setState(States.PLAN, message = "Leave failed")
 
             elif txs['buy'].hash == None:
-                res = fsm.getStorage()
+                res = fsm.pass_along
                 txHash = w3.sc.functions.leavePatch(*res._calldata).transact()
                 txs['buy'] = Transaction(txHash)
                 robot.log.info("Leaving patch") 

@@ -6,6 +6,7 @@ import subprocess
 from console import *
 import threading
 import copy
+from hexbytes import HexBytes
 
 from aux import TCP_mp, TCP_server
 
@@ -214,7 +215,11 @@ def blockHandle():
 	robot   = l2d(sc.functions.robot(w3.key).call(), Robot_key)
 	token   = l2d(sc.functions.token().call(), Token_key)
 	availiable = sc.functions.findAvailiable().call() < 9999
-	block    = w3.eth.blockNumber
+	block      = dict(w3.eth.getBlock('latest'))
+
+	for key, value in block.items():
+		if type(value)==HexBytes:
+			block[key] = value.hex()
 
 	tcp_calls.setData({
 		'getAvailiable': availiable, 
@@ -227,6 +232,7 @@ def blockHandle():
 		})
 
 if __name__ == '__main__':
+
 
 ################################################################################################################
 ### TCP for peering ###
@@ -263,7 +269,7 @@ if __name__ == '__main__':
 	tcp_enode.start()
 
 ################################################################################################################
-	
+
 	while True:
 		peers = tcp_peering.getNew()
 		if peers:

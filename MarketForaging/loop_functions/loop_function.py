@@ -3,14 +3,15 @@
 # /* Import Packages */
 #######################################################################
 import random, math
-import time, sys, os
+import time, sys, os, json
 import logging
+from hexbytes import HexBytes
 
 sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
              os.environ['EXPERIMENTFOLDER']]
 
-from aux import Vector2D, Logger, Timer, Accumulator, mydict
+from aux import Vector2D, Logger, Timer, Accumulator, mydict, identifiersExtract
 from groundsensor import Resource
 
 from control_params import params as cp
@@ -64,6 +65,7 @@ clocks['simlog'] = Timer(10)
 # accums['distance_explore'] = Accumulator()
 accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots'])]
 
+clocks['block']      = Timer(lp['generic']['block_period'])
 clocks['regen']      = dict()
 clocks['ready']      = dict()
 clocks['forage']     = dict()
@@ -181,7 +183,21 @@ def forage_rate(res, carried = 0):
 
 def init():
 
-    # Initialize logfiles for loop function
+    # Init resources in the arena
+    for quality, count in counts.items():
+        generate_resource(count, qualities = count*[quality])
+
+    # Init robot parameters
+    for robot in allrobots:
+
+        robot.id = int(robot.variables.get_attribute("id"))
+        robot.ip = identifiersExtract(robot.id)
+        robot.variables.set_attribute("eff", str(lp['economy']['efficiency_best']+robot.id*lp['economy']['efficiency_step']))
+        
+        if lp['patches']['known']:
+            robot.variables.set_attribute("newResource", allresources[robot.id % len(allresources)]._json)
+    
+    # Init logfiles for loop function
     file   = 'simulation.csv'
     header = ['TPS', 'RAM', 'CPU']
     logs['simulation'] = Logger(log_folder+file, header, ID = '0')
@@ -193,21 +209,6 @@ def init():
     file   = 'collection.csv'
     header = ['ROBOT_ID', 'QLTY', 'QTTY','TOTAL']
     logs['collection'] = Logger(log_folder+file, header, rate = 1, ID = '0')
-
-
-    # Initialize resources in the arena
-    for quality, count in counts.items():
-        generate_resource(count, qualities = count*[quality])
-
-    # Initialize robot parameters
-    for robot in allrobots:
-
-        robot.id = int(robot.variables.get_attribute("id"))-1
-        robot.variables.set_attribute("eff", str(lp['economy']['efficiency_best']+robot.id*lp['economy']['efficiency_step']))
-        # position_previous[robot.variables.get_attribute("id")] = Vector2D(robot.position.get_position()[0:2]) 
-        
-        if lp['patches']['known']:
-            robot.variables.set_attribute("newResource", allresources[robot.id % len(allresources)]._json)
 
     for log in logs.values():
         log.start()
@@ -221,6 +222,7 @@ def pre_step():
         startTime = time.time()
     
     # Tasks to perform for each robot
+    lastBlock = None
     for robot in allrobots:
         robot.variables.set_attribute("at", "")
 
@@ -256,8 +258,13 @@ def pre_step():
                 robot.variables.set_attribute("hasResource", "")
                 robot.variables.set_attribute("quantity", "0")
                 robot.variables.set_attribute("resourceCount", str(int(robot.variables.get_attribute("resourceCount"))+1))
-                
 
+        # if clocks['block'].query():
+        #     block = eval(robot.variables.get_attribute("block"))
+        #     if lastBlock == None or block['totalDifficulty']>lastBlock['totalDifficulty']:
+        #         lastBlock = block
+        #         print('New Block:', lastBlock['number'], lastBlock['totalDifficulty'])
+        # robot.variables.set_attribute('block', repr(block))
 
     # Tasks to perform for each resource
     for res in allresources:
