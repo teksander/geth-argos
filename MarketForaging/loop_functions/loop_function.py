@@ -63,7 +63,7 @@ clocks['simlog'] = Timer(10)
 # accums['distance'] = Accumulator()
 # accums['distance_forage'] = Accumulator()
 # accums['distance_explore'] = Accumulator()
-accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots'])]
+accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots']+1)]
 
 clocks['block']      = Timer(lp['generic']['block_period'])
 clocks['regen']      = dict()

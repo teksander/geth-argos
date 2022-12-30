@@ -372,8 +372,12 @@ def init():
     logs['resources'] = Logger(log_folder+name, header, rate = 5, ID = me.id)
 
     name   = 'firm.csv'
-    header = ['TSTART', 'FC', 'Q', 'C', 'MC', 'TC', 'ATC', 'PROFIT']
+    header = ['TSTART', 'FC', 'Q', 'C', 'MC', 'TC', 'ATC', 'PROFIT', 'EPOCH']
     logs['firm'] = Logger(log_folder+name, header, ID = me.id)
+
+    name   = 'epoch.csv'
+    header = ['NUMBER', 'BSTART', 'Q', 'TC', 'ATC']
+    logs['epoch'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'fsm.csv'
     header = stateList
@@ -599,6 +603,7 @@ def controlstep():
             resources = tcp_sc.request(data = 'getPatches')
             epochs    = tcp_sc.request(data = 'getEpochs')
             robot.sc  = tcp_sc.request(data = 'getRobot')
+            robot.epochs = epochs
 
             availiable = tcp_sc.request(data = 'getAvailiable')
             assigned   = bool(resource and resource['json'])
@@ -607,7 +612,7 @@ def controlstep():
             for res in resources:
                 res = Resource(res['json'])
 
-                # Variables that can be usefull for decisions
+                # Variables that can be useful for decisions
                 if len(epochs) > 0:
                     epoch_latest = epochs[-1]
 
@@ -773,8 +778,13 @@ def controlstep():
                 robot.variables.set_attribute("foraging", "")
                 profit = tripList[-1].Q * lp['patches']['utility'][rb.best.quality] - tripList[-1].TC
 
+                if len(robot.epochs) == 0:
+                    epoch_latest = 0
+                else:
+                    epoch_latest = robot.epochs[-1]['number']+1
+
                 # Log the result of the trip
-                logs['firm'].log([*str(tripList[-1]).split(), profit])
+                logs['firm'].log([*str(tripList[-1]).split(), profit, epoch_latest])
 
                 fsm.setState(States.DROP, message = "Collected %s resources // profit: %s" % (tripList[-1].Q, round(profit,2)))
 
@@ -901,6 +911,10 @@ def destroy():
     variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
     with open(variables_file, 'w+') as vf:
         vf.write(repr(fsm.getTimers())) 
+
+    epochs = tcp_sc.request(data = 'getEpochs')
+    for epoch in epochs:
+        logs['epoch'].log(list(epoch.values()))
 
     print('Killed robot '+ me.id)
 
