@@ -380,8 +380,8 @@ def init():
     logs['epoch'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'robot_sc.csv'
-    header = ['NUMBER', 'BSTART', 'Q', 'TC', 'ATC']
-    logs['epoch'] = Logger(log_folder+name, header, ID = me.id)
+    header = ["isRegistered", "efficiency", "income", "balance", "task"]
+    logs['robot_sc'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'fsm.csv'
     header = stateList
@@ -921,7 +921,7 @@ def destroy():
         logs['epoch'].log([str(x).replace(" ","") for x in epoch.values()])
 
     robot.sc  = tcp_sc.request(data = 'getRobot')
-    logs['robot_sc'].log(list(robot.sc))
+    logs['robot_sc'].log(list(robot.sc.values()))
 
     print('Killed robot '+ me.id)
 
