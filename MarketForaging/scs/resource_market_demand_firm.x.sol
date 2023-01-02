@@ -207,8 +207,9 @@ contract MarketForaging {
     uint i = findByPos(_x, _y);
 
     // Assign robot to chosen patch
-    if (robot[msg.sender].task == 0){
+    if (robot[msg.sender].task == 0 && block.number >= lim_assign+patches[i].last_assign){
       patches[i].totw++;
+      patches[i].last_assign = block.number;
       robot[msg.sender].task = patches[i].id;
     }
   }

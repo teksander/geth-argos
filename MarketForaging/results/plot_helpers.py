@@ -26,49 +26,7 @@ def tic():
     global tstart
     tstart = time.time()
 def toc():
-    print(time.time()-tstart)
-    
-    
-# def create_df(experiments, logfile, exclude_patterns = []):
-#     df_list = []
-#     experiments = [experiments] if isinstance(experiments, str) else experiments
-    
-#     for experiment in experiments:
-        
-#         # Make sure plot folder exists
-#         path = '%s/experiment_%s' % (plotdir, experiment)
-
-#         # Check whether the specified path exists or not
-#         isExist = os.path.exists(path)
-
-#         if not isExist:
-#           # Create a new directory because it does not exist 
-#           os.makedirs(path)
-#           print("The new plot directory is created!")
-        
-#         configs = sorted(glob.glob('%s/experiment_%s/*/' % (datadir, experiment)))
-        
-#         if exclude_patterns:
-#             for exclude in exclude_patterns:
-#                 configs = [config for config in configs if exclude not in config]
-
-#         for config in configs:
-#             csvfile_list = sorted(glob.glob('%s/*/*/%s.csv' % (config, logfile)))
-            
-#             for csvfile in csvfile_list:
-#                 df = pd.read_csv(csvfile, delimiter=" ")
-#                 df['REP'] = csvfile.split('/')[-3]
-#                 df['EXP'] = experiment + '/'+ config.split('/')[-2]
-#                 df = perform_corrections(df)
-#                 df_list.append(df)
-        
-#     if df_list:
-#         full_df = pd.concat(df_list, ignore_index=True)
-#         full_df.get_param = get_param_df
-#         return full_df
-#     else:
-#         return None
-
+    print(time.time()-tstart)  
 
 def create_df(experiments, logfile, exclude_patterns = []):
     df_list = []
