@@ -48,8 +48,10 @@ export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
 export BLOCKPERIOD=2
 
 # [SC]
-export MAXWORKERS=5
-export LIMITASSIGN=10
+export MAXWORKERS=1
+export LIMITASSIGN=0
+export DEMAND_A=44
+export DEMAND_B=3222
 export REGENRATE=20
 export FUELCOST=100
 export QUOTA_temp=$(echo " scale=4 ; (75/$REGENRATE*$BLOCKPERIOD+0.05)/1" | bc)

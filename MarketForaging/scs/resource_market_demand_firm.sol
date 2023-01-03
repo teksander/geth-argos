@@ -4,9 +4,10 @@ contract MarketForaging {
 
   uint constant quota         = 200;
   uint constant fuel_cost     = 100;
-  uint constant maxw   = 5;
-  uint constant lim_assign    = 10;
-
+  uint constant maxw          = 1;
+  uint constant lim_assign    = 0;
+  uint constant demandA    = 44;
+  uint constant demandB    = 3222;
 
   function Token_key() public pure returns (string[2] memory){
     return ["robots", "supply"];
@@ -27,8 +28,8 @@ contract MarketForaging {
     uint task;
   }
 
-  function Epoch_key() public pure returns (string[5] memory){
-    return ["number", "start", "Q", "TC", "ATC"];
+  function Epoch_key() public pure returns (string[6] memory){
+    return ["number", "start", "Q", "TC", "ATC", "price"];
   }
   struct Epoch {
     uint number;
@@ -36,6 +37,7 @@ contract MarketForaging {
     uint[] Q; 
     uint[] TC; 
     uint[] ATC;
+    uint price;
   }
 
 
@@ -74,11 +76,18 @@ contract MarketForaging {
                       start: block.number, 
                       Q: new uint[](0),
                       TC: new uint[](0),
-                      ATC: new uint[](0)
+                      ATC: new uint[](0),
+                      price: linearDemand(0)
                     }); 
   uint id_nonce;
 
-  
+  function linearDemand(uint Q) public returns (uint){
+    uint P = 0;
+    if (demandB>demandA*Q) {
+      P = demandB-demandA*Q;
+    }
+    return P;
+  }
 
   function register(uint eff) public {
     if (!robot[msg.sender].isRegistered) {
@@ -97,7 +106,6 @@ contract MarketForaging {
       }
     }
   }
-
 
   function updatePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
 
@@ -150,8 +158,8 @@ contract MarketForaging {
       token.supply -= tokens_consumed;
       robot[msg.sender].balance -= tokens_consumed;
     }
-    
   }
+    
 
   function dropResource(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json, uint _Q, uint _TC) public {
 
@@ -163,10 +171,10 @@ contract MarketForaging {
       updatePatch(_x, _y, _qtty, _util, _qlty, _json);
 
       // Pay the robot
-      uint income = _Q*patches[i].util;
-      robot[msg.sender].income  += income;
-      robot[msg.sender].balance += income*1000;
-      token.supply += income*1000;
+      uint payout = _Q*patches[i].util*patches[i].epoch.price;
+      robot[msg.sender].income  += payout;
+      robot[msg.sender].balance += payout;
+      token.supply += payout;
 
       // Robot deposits the item and purchases more fuel
       patches[i].epoch.Q.push(_Q);
@@ -190,6 +198,10 @@ contract MarketForaging {
         // if (patches[i].epoch.consumption < quota) {
         //   patches[i].maxw++;
         // }
+        uint total_Q = 0;
+        for (uint j=0; j < patches[i].epoch.Q.length; j++) {
+          total_Q += patches[i].epoch.Q[j];
+        }
 
         // Init new epoch
         epochs.push(patches[i].epoch);
@@ -198,6 +210,7 @@ contract MarketForaging {
         patches[i].epoch.Q     = new uint[](0);
         patches[i].epoch.TC    = new uint[](0);
         patches[i].epoch.ATC   = new uint[](0);
+        patches[i].epoch.price  = linearDemand(total_Q);
       }
     }
   }
@@ -299,6 +312,7 @@ contract MarketForaging {
   function getBalance() public view returns (uint){
     return robot[msg.sender].balance;
   }
+
 }
   
 

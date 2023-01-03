@@ -7,6 +7,8 @@ echo "Updating the Smart Contract"
 
 sed -e "s|MAXSTAKERS|$MAXSTAKERS|g"\
     -e "s|MAXWORKERS|$MAXWORKERS|g"\
+    -e "s|DEMAND_A|$DEMAND_A|g"\
+    -e "s|DEMAND_B|$DEMAND_B|g"\
     -e "s|LIMITASSIGN|$LIMITASSIGN|g"\
     -e "s|QUOTA|$QUOTA|g"\
     -e "s|FUELCOST|$FUELCOST|g"\

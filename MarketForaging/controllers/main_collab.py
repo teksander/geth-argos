@@ -30,32 +30,24 @@ logtofile = False
 
 # /* Global Variables */
 #######################################################################
-global startFlag, geth_peer_count
+global startFlag
 startFlag = False
 
-global txList, tripList
-txList   = []
-tripList = []
-
-global submodules
-submodules = []
+global txList, tripList, submodules
+txList, tripList, submodules = [], [], []
 
 global clocks, counters, logs, txs
 clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
-clocks['buffer'] = Timer(0.5)
-clocks['query_resources'] = Timer(1)
+clocks['peering'] = Timer(0.5)
+clocks['sensing'] = Timer(0.02)
 clocks['block'] = Timer(lp['generic']['block_period'])
-clocks['search'] = Timer(10)
-clocks['explore'] = Timer(1)
-clocks['buy'] = Timer(cp['buy_duration'])
-clocks['rs'] = Timer(0.02)
-clocks['forage'] = Timer(0)
 
 # Store the position of the market and cache
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['r']})
 cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['r']})
 
+global geth_peer_count
 previous_epoch_num = -1
 
 class ResourceBuffer(object):
@@ -268,7 +260,7 @@ class Trip(object):
 
             if len(self.C) > 1:
                 new_mc = self.C[-1]-self.C[-2]
-                robot.log.info("Collected // MC: %.2f" % new_mc)
+                robot.log.info("Collected %.2f // MC: %.2f" % (self.Q, new_mc))
                 self.MC.append(new_mc)
                 if new_mc > lp['patches']['utility'][rb.best.quality]:
                     finished = True
@@ -376,11 +368,13 @@ def init():
     logs['firm'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'epoch.csv'
-    header = ['NUMBER', 'BSTART', 'Q', 'TC', 'ATC']
+    # header = ['NUMBER', 'BSTART', 'Q', 'TC', 'ATC', 'price']
+    header =w3.sc.functions.Epoch_key().call()
     logs['epoch'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'robot_sc.csv'
-    header = ["isRegistered", "efficiency", "income", "balance", "task"]
+    # header = ["isRegistered", "efficiency", "income", "balance", "task"]
+    header = w3.sc.functions.Robot_key().call()
     logs['robot_sc'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'fsm.csv'
@@ -456,7 +450,7 @@ def controlstep():
         def peering():
             global geth_peer_count
             geth_peer_count = 0
-            if clocks['buffer'].query(): 
+            if clocks['peering'].query(): 
 
                 peer_IPs = dict()
                 peers = erb.getNew()
@@ -530,7 +524,7 @@ def controlstep():
         def sensing(global_pos = True):
 
             # Sense environment for resources
-            if clocks['rs'].query(): 
+            if clocks['sensing'].query(): 
                 res = rs.getNew()
 
                 if res:
@@ -623,7 +617,7 @@ def controlstep():
                     # Decision is performed once per epoch
                     if epoch_latest['number'] > previous_epoch_num:
 
-                        average_profit = res.utility*1000 - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
+                        average_profit = res.utility*epoch_latest['price'] - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
                     
                         # Parameters
                         # K = 0

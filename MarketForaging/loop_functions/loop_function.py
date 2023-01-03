@@ -282,9 +282,9 @@ def pre_step():
                 other['foragers'][res].remove(robot)
                 clocks['forage'][robot] = None
 
-        # Regenerate resource
-        if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
-            res.quantity += 1
+            # Regenerate resource
+            if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
+                res.quantity += 1
 
 def post_step():
     global startFlag, clocks, accums, resource_counter
