@@ -50,8 +50,8 @@ export BLOCKPERIOD=2
 # [SC]
 export MAXWORKERS=1
 export LIMITASSIGN=0
-export DEMAND_A=44
-export DEMAND_B=3222
+export DEMAND_A=0
+export DEMAND_B=1000
 export REGENRATE=20
 export FUELCOST=100
 export QUOTA_temp=$(echo " scale=4 ; (75/$REGENRATE*$BLOCKPERIOD+0.05)/1" | bc)
@@ -62,7 +62,7 @@ export WINSIZE=5
 
 # [OTHER]
 export SEED=1500
-export TIMELIMIT=25
+export TIMELIMIT=100
 export SLEEPTIME=5
 export REPS=4
 

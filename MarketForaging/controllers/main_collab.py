@@ -247,33 +247,40 @@ class Trip(object):
         self.ATC    = 0
         tripList.append(self)
 
+    @property
+    def timedelta(self):
+        return round(1000*(time.time()-self.tStart))
 
     def update(self, Q):
         finished = False
 
         if self.FC == 0:
-            self.FC = time.time() - self.tStart
+            self.FC = self.timedelta
 
         if int(Q) > self.Q:
+            patch  = tcp_sc.request(data = 'getPatch')
+            self.price = patch['util']*patch['epoch']['price']
             self.Q = int(Q)
-            self.C.append(time.time() - self.tStart - self.FC)
+            self.C.append(self.timedelta-self.FC)
 
             if len(self.C) > 1:
-                new_mc = self.C[-1]-self.C[-2]
-                robot.log.info("Collected %.2f // MC: %.2f" % (self.Q, new_mc))
-                self.MC.append(new_mc)
-                if new_mc > lp['patches']['utility'][rb.best.quality]:
+                MC = self.C[-1]-self.C[-2]
+                robot.log.info("Collected %i // MC: %i" % (self.Q, MC))
+                self.MC.append(MC)
+
+                if MC > self.price:
                     finished = True
 
-            self.TC  = time.time() - self.tStart
-            self.ATC = self.TC/self.Q
+            self.TC  = self.timedelta
+            self.ATC = round(self.TC/self.Q)
+            self.profit  = round(self.Q*self.price-self.TC)
 
         return finished
 
     def __str__(self):
-        C  = str([round(x, 2) for x in self.C]).replace(' ','')
-        MC = str([round(x, 2) for x in self.MC]).replace(' ','')
-        return "%s %.2f %s %s %s %.2f %.2f" % (self.tStart, self.FC, self.Q, C, MC, self.TC, self.ATC)        
+        C  = str(self.C).replace(' ','')
+        MC = str(self.MC).replace(' ','')
+        return "%i %i %s %s %i %i %i" % (self.FC, self.Q, C, MC, self.TC, self.ATC, self.profit)        
 
 ####################################################################################################################################################################################
 #### INIT STEP #####################################################################################################################################################################
@@ -364,7 +371,7 @@ def init():
     logs['resources'] = Logger(log_folder+name, header, rate = 5, ID = me.id)
 
     name   = 'firm.csv'
-    header = ['TSTART', 'FC', 'Q', 'C', 'MC', 'TC', 'ATC', 'PROFIT', 'EPOCH']
+    header = ['FC', 'Q', 'C', 'MC', 'TC', 'ATC', 'PROFIT', 'EPOCH']
     logs['firm'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'epoch.csv'
@@ -606,37 +613,36 @@ def controlstep():
             availiable = tcp_sc.request(data = 'getAvailiable')
             assigned   = bool(resource and resource['json'])
 
-            # To forage or not (market decisions)
+            # LONG-RUN DECISION MAKING
             for res in resources:
                 res = Resource(res['json'])
 
                 # Variables that can be useful for decisions
                 if len(epochs) > 0:
-                    epoch_latest = epochs[-1]
 
                     # Decision is performed once per epoch
-                    if epoch_latest['number'] > previous_epoch_num:
+                    if epochs[-1]['number'] > previous_epoch_num:
 
-                        average_profit = res.utility*epoch_latest['price'] - sum(epoch_latest['ATC'])/len(epoch_latest['ATC'])
+                        AP = res.utility*epochs[-1]['price']-sum(epochs[-1]['ATC'])/len(epochs[-1]['ATC'])
                     
                         # Parameters
                         # K = 0
                         K = 0.4/20000
 
                         # Linear
-                        P = K * average_profit
+                        P = K * AP
                         
                         # Sigmoid
 
-                        robot.log.info("Average Profit: %.2f" % average_profit)
-                        robot.log.info("Join/leave P: %.2f" % P)
+                        robot.log.info("Average Profit: %s" % round(AP))
+                        robot.log.info("Join/leave P: %s" % round(100*P,1))
                         if random.random() < abs(P):
                             if P > 0:
                                 join = True
                             else:
                                 leave = True
 
-                        previous_epoch_num = epoch_latest['number']
+                        previous_epoch_num = epochs[-1]['number']
 
                         if join:
                             break
@@ -771,10 +777,9 @@ def controlstep():
             else:
                 nav.navigate_with_obstacle_avoidance(rb.best._pr)
 
-            # Short-run decision making
+            ### SHORT-RUN DECISION MAKING
             if finished:
                 robot.variables.set_attribute("foraging", "")
-                profit = tripList[-1].Q * lp['patches']['utility'][rb.best.quality] - tripList[-1].TC
 
                 if len(robot.epochs) == 0:
                     epoch_latest = 0
@@ -782,14 +787,9 @@ def controlstep():
                     epoch_latest = robot.epochs[-1]['number']+1
 
                 # Log the result of the trip
-                logs['firm'].log([*str(tripList[-1]).split(), profit, epoch_latest])
+                logs['firm'].log([*str(tripList[-1]).split(), epoch_latest])
 
-                fsm.setState(States.DROP, message = "Collected %s resources // profit: %s" % (tripList[-1].Q, round(profit,2)))
-
-
-            # if robot.variables.get_attribute("hasResource") and robot.variables.get_attribute("quantity")==str(cp['maxQ']):
-            #     robot.variables.set_attribute("foraging", "")
-            #     fsm.setState(States.DROP, message = "Collected %s resources" % (robot.variables.get_attribute("quantity")))
+                fsm.setState(States.DROP, message = "Collected %s // Profit: %s" % (tripList[-1].Q, round(tripList[-1].profit,2)))
 
         #########################################################################################################
         #### States.DROP
@@ -804,9 +804,8 @@ def controlstep():
                 # Transact to drop resource
                 if not txs['drop'].hash:
 
-                    cost = round(1000*tripList[-1].TC)
-                    robot.log.info('Dropping: %s // TC: %s' % (rb.best._desc, cost))
-                    dropHash = w3.sc.functions.dropResource(*rb.best._calldata, tripList[-1].Q, cost).transact()
+                    robot.log.info('Dropping. TC:%s ATC:%s' % (tripList[-1].TC, tripList[-1].ATC))
+                    dropHash = w3.sc.functions.dropResource(*rb.best._calldata, tripList[-1].Q, tripList[-1].TC).transact()
                     txs['drop'] = Transaction(dropHash)
    
                 # Transition state  
@@ -826,6 +825,76 @@ def controlstep():
                     elif txs['drop'].hash == None:
                         robot.log.info('Drop lost: %s', rb.best._desc)
                         txs['drop'] = Transaction(None)
+
+
+#########################################################################################################################
+#### RESET-DESTROY STEPS ################################################################################################
+#########################################################################################################################
+
+def reset():
+    pass
+
+def destroy():
+    if startFlag:
+        w3.geth.miner.stop()
+        for enode in getEnodes():
+            w3.geth.admin.removePeer(enode)
+
+    variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
+    with open(variables_file, 'w+') as vf:
+        vf.write(repr(fsm.getTimers())) 
+
+    epochs = tcp_sc.request(data = 'getEpochs')
+    for epoch in epochs:
+        logs['epoch'].log([str(x).replace(" ","") for x in epoch.values()])
+
+    robot.sc  = tcp_sc.request(data = 'getRobot')
+    logs['robot_sc'].log(list(robot.sc.values()))
+
+    print('Killed robot '+ me.id)
+
+#########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
+
+
+def getEnodes():
+    return [peer['enode'] for peer in w3.geth.admin.peers()]
+
+def getEnodeById(__id, gethEnodes = None):
+    if not gethEnodes:
+        gethEnodes = getEnodes() 
+
+    for enode in gethEnodes:
+        if readEnode(enode, output = 'id') == __id:
+            return enode
+
+def getIds(__enodes = None):
+    if __enodes:
+        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
+    else:
+        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         #########################################################################################################
         #### Scout.EXPLORE
@@ -891,53 +960,3 @@ def controlstep():
 
         #         elif txs['sell'].hash == None:
         #             fsm.setState(States.ASSIGN, message = "None to sell")
-
-
-#########################################################################################################################
-#### RESET-DESTROY STEPS ################################################################################################
-#########################################################################################################################
-
-def reset():
-    pass
-
-def destroy():
-    if startFlag:
-        w3.geth.miner.stop()
-        for enode in getEnodes():
-            w3.geth.admin.removePeer(enode)
-
-    variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
-    with open(variables_file, 'w+') as vf:
-        vf.write(repr(fsm.getTimers())) 
-
-    epochs = tcp_sc.request(data = 'getEpochs')
-    for epoch in epochs:
-        logs['epoch'].log([str(x).replace(" ","") for x in epoch.values()])
-
-    robot.sc  = tcp_sc.request(data = 'getRobot')
-    logs['robot_sc'].log(list(robot.sc.values()))
-
-    print('Killed robot '+ me.id)
-
-#########################################################################################################################
-#########################################################################################################################
-#########################################################################################################################
-
-
-def getEnodes():
-    return [peer['enode'] for peer in w3.geth.admin.peers()]
-
-def getEnodeById(__id, gethEnodes = None):
-    if not gethEnodes:
-        gethEnodes = getEnodes() 
-
-    for enode in gethEnodes:
-        if readEnode(enode, output = 'id') == __id:
-            return enode
-
-def getIds(__enodes = None):
-    if __enodes:
-        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
-    else:
-        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
-

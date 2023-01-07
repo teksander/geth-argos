@@ -206,6 +206,10 @@ def init():
     header = list(resource_counter) + ['TOTAL', 'VALUE']
     logs['loop'] = Logger(log_folder+file, header, ID = '0')
 
+    file   = 'patches.csv'
+    header = ['JSON']
+    logs['patches'] = Logger(log_folder+file, header, ID = '0')
+
     file   = 'collection.csv'
     header = ['ROBOT_ID', 'QLTY', 'QTTY','TOTAL']
     logs['collection'] = Logger(log_folder+file, header, rate = 1, ID = '0')
@@ -286,6 +290,8 @@ def pre_step():
             if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
                 res.quantity += 1
 
+            logs['patches'].log([res._json])
+
 def post_step():
     global startFlag, clocks, accums, resource_counter
     global RAM, CPU
@@ -293,7 +299,7 @@ def post_step():
     if not startFlag:
         startFlag = True
 
-    # Regenerate depleted patches
+    # Respawn depleted patches
     if lp['patches']['respawn']:
         depleted = [res for res in allresources if res.quantity <= 0]
         allresources[:] = [res for res in allresources if res not in depleted]

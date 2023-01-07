@@ -6,8 +6,8 @@ contract MarketForaging {
   uint constant fuel_cost     = 100;
   uint constant maxw          = 1;
   uint constant lim_assign    = 0;
-  uint constant demandA    = 44;
-  uint constant demandB    = 3222;
+  uint constant demandA    = 0;
+  uint constant demandB    = 1000;
 
   function Token_key() public pure returns (string[2] memory){
     return ["robots", "supply"];
@@ -71,14 +71,7 @@ contract MarketForaging {
   
   
 
-  Epoch private epoch0 = Epoch({
-                      number: 1, 
-                      start: block.number, 
-                      Q: new uint[](0),
-                      TC: new uint[](0),
-                      ATC: new uint[](0),
-                      price: linearDemand(0)
-                    }); 
+  // Epoch private epoch0 = ; 
   uint id_nonce;
 
   function linearDemand(uint Q) public returns (uint){
@@ -136,7 +129,14 @@ contract MarketForaging {
                           maxw:   maxw,
                           totw:   0,
                           last_assign:   0,
-                          epoch: epoch0
+                          epoch: Epoch({
+                                number: 1, 
+                                start: block.number, 
+                                Q: new uint[](0),
+                                TC: new uint[](0),
+                                ATC: new uint[](0),
+                                price: linearDemand(0)
+                    })
                         }));
     }
   } 

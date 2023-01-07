@@ -63,17 +63,17 @@ params['patches']['counts'] = {'red': 0, 'green': 0 , 'blue': 1, 'yellow': 0}
 params['patches']['radii']  = {k: params['patches']['radius'] for k in params['patches']['qualities']}
 
 # Parameters for resource economy
-params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 8, 'yellow': 1}
-params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 1, 'yellow': 4}
-params['patches']['regen_rate']  = {'red': 10, 'green':  8, 'blue': 0, 'yellow': 4}
+params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 25, 'yellow': 1}
+params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 0.5, 'yellow': 4}
+params['patches']['regen_rate']  = {'red': 1, 'green':  2, 'blue': 5, 'yellow': 6}
 
 params['patches']['dec_returns'] = dict()
 params['patches']['dec_returns']['func']   = 'linear'                       # constant, linear or logarithmic decreasing returns
 params['patches']['dec_returns']['thresh'] = params['patches']['qtty_max']  # qqty of resource before dec returns starts
-params['patches']['dec_returns']['slope']  = 0.5 
+params['patches']['dec_returns']['slope']  = 1 
 
 params['patches']['dec_returns']['func_robot']  = 'linear'                  # seconds each resource is slower than previous
-params['patches']['dec_returns']['slope_robot'] = 1
+params['patches']['dec_returns']['slope_robot'] = 3
 
 # params['patches']['dec_returns']['func_robot']  = 'exp'                  # seconds each resource is slower than previous
 # params['patches']['dec_returns']['slope_robot'] = 3

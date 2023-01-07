@@ -210,8 +210,13 @@ def blockHandle():
 	""" Every time new blocks are synchronized """
 
 	patches = [l2d(x, Patch_key) for x in sc.functions.getPatches().call()]
-	epochs  = [l2d(x, Epoch_key) for x in sc.functions.getEpochs().call()]
+	for index, patch in enumerate(patches):
+		patches[index]['epoch'] = l2d(patch['epoch'], Epoch_key)
+
 	patch   = l2d(sc.functions.getPatch().call(), Patch_key)
+	patch['epoch'] = l2d(patch['epoch'], Epoch_key)
+
+	epochs  = [l2d(x, Epoch_key) for x in sc.functions.getEpochs().call()]
 	robot   = l2d(sc.functions.robot(w3.key).call(), Robot_key)
 	token   = l2d(sc.functions.token().call(), Token_key)
 	availiable = sc.functions.findAvailiable().call() < 9999

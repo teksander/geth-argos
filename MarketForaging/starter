@@ -36,8 +36,6 @@ for opt in "$@"
 do
 if [[ $opt == "--reset" || $opt == "-r" ]]; then
 
-    cp -r controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
-
     echo "+-----------------------------------------------------------+"
     echo "Resetting Geth..."
     ./reset-geth

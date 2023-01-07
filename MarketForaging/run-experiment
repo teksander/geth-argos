@@ -67,18 +67,12 @@ run() {
 }
 
 
-EXP=203_flock_marg_util
+EXP=207_decision
+CFG=linear_20_test
+
 config "REPS" 4
-
-declare -a arr=(1 2 3 4 5 6 7 8)
-
-
-for n in "${arr[@]}"; do 
-	config "MAXWORKERS" $n
-	wait
-	run    "${EXP}/${n}" $1
-done
-
+wait
+run    "${EXP}/${CFG}" $1
 
 
 
