@@ -62,7 +62,7 @@ export WINSIZE=5
 
 # [OTHER]
 export SEED=1500
-export TIMELIMIT=100
+export TIMELIMIT=15
 export SLEEPTIME=5
 export REPS=4
 

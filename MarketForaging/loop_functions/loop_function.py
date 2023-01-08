@@ -290,7 +290,7 @@ def pre_step():
             if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
                 res.quantity += 1
 
-            logs['patches'].log([res._json])
+            logs['patches'].log([res._json.replace(" ", "")])
 
 def post_step():
     global startFlag, clocks, accums, resource_counter
