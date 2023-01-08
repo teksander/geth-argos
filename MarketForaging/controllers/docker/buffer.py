@@ -168,8 +168,7 @@ def peering():
 
 	for peer in peers:
 		if peers[peer] not in peered:
-			enode = tcp_enode.request(peers[peer], port) 
-
+			enode = tcp_enode.request(host=peers[peer], port=5000) 
 			if 'enode' in enode:
 				w3.geth.admin.addPeer(enode)
 				peered.add(peers[peer])
@@ -179,17 +178,11 @@ def peering():
 
 	for peer in temp:
 		if peer not in peers.values():
-			enode = tcp_enode.request(peer, port)
+			enode = tcp_enode.request(host=peer, port=5000)
 			if 'enode' in enode:
 				w3.provider.make_request("admin_removePeer",[enode])
 				peered.remove(peer)
 				print('Removed peer: %s|%s' % (peer, enode))
-
-	# for peer in peers_geth:
-	# 	if peer not in peers.values():
-	# 		enode = tcp_enode.request(peer, port)
-	# 		w3.provider.make_request("admin_removePeer",[enode])
-	# 		print('Removed peer: %s|%s' % (peer, enode))
 
 	peers = dict()
 	tcp_peering.setData(len(peers_geth))

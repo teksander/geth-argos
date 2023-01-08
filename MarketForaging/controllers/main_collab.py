@@ -371,7 +371,7 @@ def init():
     logs['resources'] = Logger(log_folder+name, header, rate = 5, ID = me.id)
 
     name   = 'firm.csv'
-    header = ['FC', 'Q', 'C', 'MC', 'TC', 'ATC', 'PROFIT', 'EPOCH']
+    header = ['FC', 'Q', 'C', 'MC', 'TC', 'ATC', 'PROFIT']
     logs['firm'] = Logger(log_folder+name, header, ID = me.id)
 
     name   = 'epoch.csv'
@@ -753,10 +753,12 @@ def controlstep():
         #########################################################################################################
         elif fsm.query(States.FORAGE):
 
-            #     # Update foraging resource
-            # if clocks['block'].query():
-            #     fsm.setState(States.PLAN, message = None)
-            # else:
+            # Update foraging resource
+            if clocks['block'].query():
+                myPatch = tcp_sc.request(data = 'getPatch')
+
+                if myPatch == None or myPatch == "" or myPatch == []:
+                    print("False Forage: %s %s" % (myPatch, type(myPatch)))
 
             # Distance to resource
             distance = nav.get_distance_to(rb.best._pr)
@@ -771,8 +773,9 @@ def controlstep():
 
             if found and distance < 0.9*rb.best.radius:
                 robot.variables.set_attribute("foraging", "True")
-                finished = tripList[-1].update(robot.variables.get_attribute("quantity"))
                 nav.avoid(move = True)
+
+                finished = tripList[-1].update(robot.variables.get_attribute("quantity"))
 
             else:
                 nav.navigate_with_obstacle_avoidance(rb.best._pr)
@@ -781,13 +784,8 @@ def controlstep():
             if finished:
                 robot.variables.set_attribute("foraging", "")
 
-                if len(robot.epochs) == 0:
-                    epoch_latest = 0
-                else:
-                    epoch_latest = robot.epochs[-1]['number']+1
-
                 # Log the result of the trip
-                logs['firm'].log([*str(tripList[-1]).split(), epoch_latest])
+                logs['firm'].log([*str(tripList[-1]).split()])
 
                 fsm.setState(States.DROP, message = "Collected %s // Profit: %s" % (tripList[-1].Q, round(tripList[-1].profit,2)))
 

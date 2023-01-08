@@ -208,7 +208,7 @@ def init():
 
     file   = 'patches.csv'
     header = ['JSON']
-    logs['patches'] = Logger(log_folder+file, header, ID = '0')
+    logs['patches'] = Logger(log_folder+file, header, rate = 2, ID = '0')
 
     file   = 'collection.csv'
     header = ['ROBOT_ID', 'QLTY', 'QTTY','TOTAL']

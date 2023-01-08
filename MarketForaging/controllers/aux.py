@@ -220,7 +220,7 @@ class TCP_mp(object):
                 __conn.send(self.data[__call])
 
             except Exception as e:
-                logger.error('TCP connection failed')
+                print('TCP send failed')
 
             if not self.running:
                 __conn.close()
@@ -278,7 +278,7 @@ class TCP_mp(object):
     def stop(self):
         """ This method is called before a clean exit """   
         self.running = False
-        print('TCP server is OFF') 
+        logger.info('TCP server is OFF') 
 
 class TCP_server(object):
     """ Set up TCP_server on a background thread
