@@ -273,6 +273,7 @@ def pre_step():
     # Tasks to perform for each resource
     for res in allresources:
 
+        # Forage resources
         for robot in random.sample(other['foragers'][res], len(other['foragers'][res])):
             clocks['forage'][robot].set(forage_rate(res, robot.variables.get_attribute("quantity")), reset=False)
 
@@ -286,11 +287,11 @@ def pre_step():
                 other['foragers'][res].remove(robot)
                 clocks['forage'][robot] = None
 
-            # Regenerate resource
-            if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
-                res.quantity += 1
+        # Regenerate resources
+        if clocks['regen'][res].query() and res.quantity < lp['patches']['qtty_max']:
+            res.quantity += 1
 
-            logs['patches'].log([res._json.replace(" ", "")])
+        logs['patches'].log([res._json.replace(" ", "")])
 
 def post_step():
     global startFlag, clocks, accums, resource_counter

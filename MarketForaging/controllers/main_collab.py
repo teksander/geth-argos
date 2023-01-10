@@ -777,6 +777,9 @@ def controlstep():
 
                 finished = tripList[-1].update(robot.variables.get_attribute("quantity"))
 
+                if int(robot.variables.get_attribute("quantity")) >= cp['max_load']:
+                    finished = True
+
             else:
                 nav.navigate_with_obstacle_avoidance(rb.best._pr)
 

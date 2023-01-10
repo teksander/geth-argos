@@ -9,6 +9,7 @@ params['buy_duration']   = 30
 params['explore_mu']     = float(os.environ["ARENADIM"])/params['scout_speed']*100
 params['explore_sg']     = 2
 params['max_forages']    = 3
+params['max_load']       = 10
 
 params['gsFreq']     = 20
 params['erbtFreq']   = 10
