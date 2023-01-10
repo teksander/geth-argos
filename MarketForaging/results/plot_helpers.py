@@ -89,7 +89,14 @@ def get_param(group, name, param_dict, param, alias):
             group[param] = param_dict[param]
     return group
 
+def get_config_dicts(exp,cfg,rep):
+    configfile = '%s/experiment_%s/%s/%s/config.py' % (datadir, exp, cfg, rep)
+#     print(open(configfile).read())
+    with open(configfile) as f:
+        for line in f:
+            print(line)
 
+    
 def perform_corrections(df):
 
     if 'DIST' in df.columns:

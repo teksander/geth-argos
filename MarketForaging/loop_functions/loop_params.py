@@ -53,8 +53,8 @@ params['patches']['y'] = [0.25*params['generic']['arena_size']]
 params['patches']['respawn']   = False
 params['patches']['known']     = True
 params['patches']['radius']    = 0.30
-params['patches']['qtty_min']  = 50
-params['patches']['qtty_max']  = 50
+params['patches']['qtty_min']  = 100
+params['patches']['qtty_max']  = 100
 params['patches']['dist_min']  = 1.5 * params['cache']['r'] 
 params['patches']['dist_max']  = 5 * params['cache']['r']
 
@@ -63,17 +63,17 @@ params['patches']['counts'] = {'red': 0, 'green': 0 , 'blue': 1, 'yellow': 0}
 params['patches']['radii']  = {k: params['patches']['radius'] for k in params['patches']['qualities']}
 
 # Parameters for resource economy
-params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 25, 'yellow': 1}
+params['patches']['utility']     = {'red': 1, 'green':  1, 'blue': 17, 'yellow': 1}
 params['patches']['forage_rate'] = {'red': 10, 'green':  8, 'blue': 0.5, 'yellow': 4}
-params['patches']['regen_rate']  = {'red': 1, 'green':  2, 'blue': 5, 'yellow': 6}
+params['patches']['regen_rate']  = {'red': 1, 'green':  2, 'blue': "on_drop", 'yellow': 6}
 
 params['patches']['dec_returns'] = dict()
 params['patches']['dec_returns']['func']   = 'linear'                       # constant, linear or logarithmic decreasing returns
 params['patches']['dec_returns']['thresh'] = params['patches']['qtty_max']  # qqty of resource before dec returns starts
-params['patches']['dec_returns']['slope']  = 1 
+params['patches']['dec_returns']['slope']  = 0.5
 
 params['patches']['dec_returns']['func_robot']  = 'linear'                  # seconds each resource is slower than previous
-params['patches']['dec_returns']['slope_robot'] = 3
+params['patches']['dec_returns']['slope_robot'] = 0
 
 # params['patches']['dec_returns']['func_robot']  = 'exp'                  # seconds each resource is slower than previous
 # params['patches']['dec_returns']['slope_robot'] = 3

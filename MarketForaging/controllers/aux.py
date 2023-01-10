@@ -132,7 +132,10 @@ class Timer:
             return False
 
     def remaining(self):
-        return self.rate - (time.time() - self.tick)
+        if type(self.rate) is int or type(self.rate) is float:
+            return self.rate - (time.time() - self.tick)
+        else:
+            return 1
 
     def set(self, rate, reset = True):
         if not self.isLocked:

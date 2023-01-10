@@ -626,8 +626,8 @@ def controlstep():
                         AP = res.utility*epochs[-1]['price']-sum(epochs[-1]['ATC'])/len(epochs[-1]['ATC'])
                     
                         # Parameters
-                        K = 0
-                        # K = 0.4/20000
+                        # K = 0
+                        K = 0.4/20000
 
                         # Linear
                         P = K * AP

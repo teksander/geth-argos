@@ -68,9 +68,9 @@ run() {
 
 
 EXP=207_decision
-CFG=linear_20_test
+CFG=linear_20_ondrop
 
-config "REPS" 4
+config "REPS" 8
 wait
 run    "${EXP}/${CFG}" $1
 

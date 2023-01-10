@@ -67,7 +67,6 @@ accums['collection'] = [Accumulator() for i in range(lp['generic']['num_robots']
 
 clocks['block']      = Timer(lp['generic']['block_period'])
 clocks['regen']      = dict()
-clocks['ready']      = dict()
 clocks['forage']     = dict()
 other['foragers']    = dict()
 
@@ -155,7 +154,6 @@ def generate_resource(n = 1, qualities = None, max_attempts = 500):
         allresources.append(Resource({'x':x, 'y':y, 'radius':radius, 'quantity':quantity, 'quality':quality, 'utility':lp['patches']['utility'][quality]}))
 
         clocks['regen'][allresources[-1]] = Timer(lp['patches']['regen_rate'][allresources[-1].quality])
-        clocks['ready'][allresources[-1]] = Timer(lp['patches']['forage_rate'][allresources[-1].quality])
         other['foragers'][allresources[-1]] = set()
 
         # print('Created Resource: ' + allresources[-1]._json)
@@ -179,7 +177,6 @@ def forage_rate(res, carried = 0):
         cost_robot = qtty_carried*lp['patches']['dec_returns']['slope_robot']
 
     return cost_patch + cost_robot
-
 
 def init():
 
@@ -258,6 +255,9 @@ def pre_step():
                 accums['collection'][robot.id].acc(lp['patches']['utility'][resource_quality])
 
                 logs['collection'].log([robot.id, resource_quality, resource_counter[resource_quality]])
+
+                if clocks['regen'][res].rate == "on_drop":
+                    res.quantity += int(robot.variables.get_attribute("quantity"))
 
                 robot.variables.set_attribute("hasResource", "")
                 robot.variables.set_attribute("quantity", "0")
