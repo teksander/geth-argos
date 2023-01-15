@@ -166,7 +166,6 @@ class ResourceBuffer(object):
         return self.buffer[self.getValues().index(value)]
 
 
-txList = []
 class Transaction(object):
 
     def __init__(self, txHash, name = "", query_latency = 2):
@@ -245,6 +244,8 @@ class Trip(object):
         self.MC     = []
         self.TC     = 0
         self.ATC    = 0
+        patch  = tcp_sc.request(data = 'getPatch')
+        self.price = patch['util']*patch['epoch']['price']
         tripList.append(self)
 
     @property
@@ -257,11 +258,18 @@ class Trip(object):
         if self.FC == 0:
             self.FC = self.timedelta
 
+        C  = self.timedelta-self.FC
+        
+        if len(self.C) >= 1 and C-self.C[-1] > self.price:
+            robot.log.info("Finished before collection %s" % (C-self.C[-1]))
+            finished = True
+
         if int(Q) > self.Q:
-            patch  = tcp_sc.request(data = 'getPatch')
-            self.price = patch['util']*patch['epoch']['price']
+            finished = False
+            # patch  = tcp_sc.request(data = 'getPatch')
+            # self.price = patch['util']*patch['epoch']['price']
             self.Q = int(Q)
-            self.C.append(self.timedelta-self.FC)
+            self.C.append(C)
 
             if len(self.C) > 1:
                 MC = self.C[-1]-self.C[-2]
@@ -438,8 +446,6 @@ def controlstep():
         my_eff = int(float(robot.variables.get_attribute("eff"))*100)
         w3.sc.functions.register(my_eff).transact()
 
-
-
     else:
 
         ###########################
@@ -452,7 +458,6 @@ def controlstep():
                 s.sendall("hi from robot %s" % me.id)
                 data = s.recv(1024)
                 print(data)
-
 
         def peering():
             global geth_peer_count
@@ -550,33 +555,27 @@ def controlstep():
 
                     return res
 
-        ##########################
-        ###### MODULE STEPS ######
-        ##########################
+        ##############################
+        ##### STATE-MACHINE STEP #####
+        ##############################
 
+        #########################################################################################################
+        #### State::EVERY
+        #########################################################################################################
+        
+        # Perform submodules step
         for module in [erb, rs, odo]:
             module.step()
 
+        # Perform file logging step
         if logs['resources'].query():
             logs['resources'].log([len(rb)])
 
         if logs['fsm'].query():
             logs['fsm'].log([round(fsm.accumTime[state], 3) if state in fsm.accumTime else 0 for state in stateList ])
 
-        if me.id == '1':
-            with open(lp['files']['position'], 'w+') as f:
-                f.write('%s, %s \n' % (repr(gps.getPosition()), repr(odo.getPosition())))
-        else:
-            with open(lp['files']['position'], 'a') as f:
-                f.write('%s, %s \n' % (repr(gps.getPosition()), repr(odo.getPosition())))
-
-        ##############################
-        ##### STATE-MACHINE STEP #####
-        ##############################
-
-        #########################################################################################################
-        #### Any.STATE
-        #########################################################################################################
+        with open(lp['files']['position'], 'w+' if me.id == '1' else 'a') as f:
+            f.write('%s, %s \n' % (repr(gps.getPosition()), repr(odo.getPosition())))
 
         # Perform the blockchain peering step
         peering()
@@ -586,14 +585,14 @@ def controlstep():
             odo.setPosition()
 
         #########################################################################################################
-        #### States.IDLE
+        #### State::IDLE
         #########################################################################################################
         if fsm.query(States.IDLE):
 
             fsm.setState(States.PLAN, message = "Planning")
 
         #########################################################################################################
-        #### States.PLAN  
+        #### State::PLAN  
         ######################################################################################################### 
 
         elif fsm.query(States.PLAN):
@@ -627,7 +626,8 @@ def controlstep():
                     
                         # Parameters
                         # K = 0
-                        K = 0.4/20000
+                        # K = 0.4/20000
+                        K = 0.4/(res.utility*epochs[-1]['price'])
 
                         # Linear
                         P = K * AP
@@ -667,7 +667,7 @@ def controlstep():
                 fsm.setState(States.HOMING, message = None, pass_along = 'homing')
 
         #########################################################################################################
-        #### States.HOMING  
+        #### State::HOMING  
         #########################################################################################################
 
         elif fsm.query(States.HOMING):
@@ -684,7 +684,7 @@ def controlstep():
                 fsm.setState(States.PLAN, message = None)
 
         #########################################################################################################
-        #### States.ASSIGN  
+        #### State::ASSIGN  
         #########################################################################################################
 
         elif fsm.query(States.ASSIGN):
@@ -707,7 +707,7 @@ def controlstep():
 
 
         #########################################################################################################
-        #### States.JOIN  
+        #### State::JOIN  
         #########################################################################################################
 
         elif fsm.query(States.JOIN):
@@ -722,12 +722,12 @@ def controlstep():
 
             elif txs['buy'].hash == None:
                 res = fsm.pass_along
-                txHash = w3.sc.functions.joinPatch(*res._calldata).transact()
+                txHash = w3.sc.functions.joinPatch(*res._calldata[:2]).transact()
                 txs['buy'] = Transaction(txHash)
                 robot.log.info("Joining patch") 
 
         #########################################################################################################
-        #### States.LEAVE  
+        #### State::LEAVE  
         #########################################################################################################
 
         elif fsm.query(States.LEAVE):
@@ -744,12 +744,12 @@ def controlstep():
 
             elif txs['buy'].hash == None:
                 res = fsm.pass_along
-                txHash = w3.sc.functions.leavePatch(*res._calldata).transact()
+                txHash = w3.sc.functions.leavePatch(*res._calldata[:2]).transact()
                 txs['buy'] = Transaction(txHash)
                 robot.log.info("Leaving patch") 
 
         #########################################################################################################
-        #### States.FORAGE
+        #### State::FORAGE
         #########################################################################################################
         elif fsm.query(States.FORAGE):
 
@@ -777,7 +777,7 @@ def controlstep():
 
                 finished = tripList[-1].update(robot.variables.get_attribute("quantity"))
 
-                if int(robot.variables.get_attribute("quantity")) >= cp['max_load']:
+                if int(robot.variables.get_attribute("quantity")) >= cp['max_Q']:
                     finished = True
 
             else:
@@ -793,7 +793,7 @@ def controlstep():
                 fsm.setState(States.DROP, message = "Collected %s // Profit: %s" % (tripList[-1].Q, round(tripList[-1].profit,2)))
 
         #########################################################################################################
-        #### States.DROP
+        #### State::DROP
         #########################################################################################################
         elif fsm.query(States.DROP):
 

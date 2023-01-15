@@ -54,7 +54,7 @@ def draw_resources_on_robots():
 			robotID, x, y, quantity, quality = eval(line)
 
 			# Draw carried quantity
-			environment.qt_draw.cylinder([x, y, 0.08],[], rob_diam * (quantity/cp['maxQ']), res_height, quality)
+			environment.qt_draw.cylinder([x, y, 0.08],[], rob_diam * (quantity/cp['max_Q']), res_height, quality)
 
 
 def DrawInWorld():

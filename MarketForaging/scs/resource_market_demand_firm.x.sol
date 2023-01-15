@@ -18,12 +18,12 @@ contract MarketForaging {
   }
 
   function Robot_key() public pure returns (string[5] memory){
-    return ["isRegistered", "efficiency", "income", "balance", "task"];
+    return ["isRegistered", "efficiency", "revenue", "balance", "task"];
   }
   struct Robot {
     bool isRegistered;
     uint efficiency;
-    uint income;
+    uint revenue;
     uint balance;
     uint task;
   }
@@ -74,11 +74,11 @@ contract MarketForaging {
   // Epoch private epoch0 = ; 
   uint id_nonce;
 
-  function linearDemand(uint Q) public returns (uint){
+  function linearDemand(uint Q) public pure returns (uint){
     uint P = 0;
     if (demandB>demandA*Q) {
       P = demandB-demandA*Q;
-    }
+    } 
     return P;
   }
 
@@ -86,7 +86,7 @@ contract MarketForaging {
     if (!robot[msg.sender].isRegistered) {
       robot[msg.sender].isRegistered = true;
       robot[msg.sender].efficiency   = eff;
-      robot[msg.sender].income       = 0;
+      robot[msg.sender].revenue       = 0;
       robot[msg.sender].balance      = 20000;
       token.supply += 20000;
       token.robots += 1;
@@ -155,11 +155,20 @@ contract MarketForaging {
       robot[msg.sender].balance = 0;
     }
     else {
-      token.supply -= tokens_consumed;
       robot[msg.sender].balance -= tokens_consumed;
+      token.supply -= tokens_consumed;
     }
   }
     
+  function sellUnits(uint patch_index, uint _Q) internal {
+
+    uint i = patch_index;
+
+    uint payout = _Q*patches[i].util*patches[i].epoch.price;
+    robot[msg.sender].revenue += payout;
+    robot[msg.sender].balance += payout;
+    token.supply              += payout;
+  }
 
   function dropResource(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json, uint _Q, uint _TC) public {
 
@@ -171,51 +180,39 @@ contract MarketForaging {
       updatePatch(_x, _y, _qtty, _util, _qlty, _json);
 
       // Pay the robot
-      uint payout = _Q*patches[i].util*patches[i].epoch.price;
-      robot[msg.sender].income  += payout;
-      robot[msg.sender].balance += payout;
-      token.supply += payout;
+      sellUnits(i, _Q);
+
+      // Fuel purchase
+      buyFuel(_TC);
 
       // Robot deposits the item and purchases more fuel
       patches[i].epoch.Q.push(_Q);
       patches[i].epoch.TC.push(_TC);
       patches[i].epoch.ATC.push(_TC/_Q);
 
-      buyFuel(_TC);
+      if (patches[i].epoch.Q.length >= patches[i].totw) {
 
-      // // Buy the fuel and update firm analysis
-      // uint duration = (block.number - patches[i].epoch.start);
-      // patches[i].epoch.C.push(duration);
-
-      // if (patches[i].epoch.C.length > 1) {
-      //   uint new_mc = duration-patches[i].epoch.C[patches[i].epoch.C.length-1];
-      //   patches[i].epoch.MC.push(new_mc);
-      // }
-
-      if (patches[i].epoch.Q.length == patches[i].totw) {
-
-        // // Rules for increasing number of workers
-        // if (patches[i].epoch.consumption < quota) {
-        //   patches[i].maxw++;
-        // }
-        uint total_Q = 0;
+        uint TQ = 0;
         for (uint j=0; j < patches[i].epoch.Q.length; j++) {
-          total_Q += patches[i].epoch.Q[j];
+          TQ += patches[i].epoch.Q[j];
         }
 
         // Init new epoch
         epochs.push(patches[i].epoch);
         patches[i].epoch.number++;
-        patches[i].epoch.start = block.number+5;
+        patches[i].epoch.start = block.number;
         patches[i].epoch.Q     = new uint[](0);
         patches[i].epoch.TC    = new uint[](0);
         patches[i].epoch.ATC   = new uint[](0);
-        patches[i].epoch.price  = linearDemand(total_Q);
+        patches[i].epoch.price  = linearDemand(TQ);
+
+        // Establish entry in market
+        // 
       }
     }
   }
 
-  function joinPatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
+  function joinPatch(int _x, int _y) public {
 
     uint i = findByPos(_x, _y);
 
@@ -227,7 +224,7 @@ contract MarketForaging {
     }
   }
 
-  function leavePatch(int _x, int _y, uint _qtty, uint _util, string memory _qlty, string memory _json) public {
+  function leavePatch(int _x, int _y) public {
 
     uint i = findByPos(_x, _y);
 
@@ -292,7 +289,7 @@ contract MarketForaging {
   }
 
   function getPatch() public view returns (Patch memory){
-
+    
     for (uint i=0; i < patches.length; i++) {
       if (patches[i].id == robot[msg.sender].task) return patches[i];
     }   

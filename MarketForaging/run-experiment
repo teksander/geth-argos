@@ -67,12 +67,25 @@ run() {
 }
 
 
-EXP=207_decision
-CFG=linear_20_ondrop
 
-config "REPS" 8
+EXP=208
+config "REPS" 3
+
+CFG=linear_20_limassign_50_regen_10
+config "LIMITASSIGN" 50
+config "NOTES" "\"Testing maxload 12 and resource params; limassign vs no limassign; regen 5 vs regen 10\""
+
 wait
 run    "${EXP}/${CFG}" $1
+
+
+CFG=linear_20_limassign_0_regen_10
+config "LIMITASSIGN" 0
+config "NOTES" "\"Testing maxload 12 and new resource regen/forage; limassign 50 vs limassign 0; regen 5 vs regen 10\""
+
+wait
+run    "${EXP}/${CFG}" $1
+
 
 
 

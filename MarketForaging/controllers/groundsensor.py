@@ -108,7 +108,7 @@ class Resource(object):
     def _calldata(self):
         return (int(self.x * 100), 
                 int(self.y * 100),  
-                int(self.quantity),
+                int(max(0,self.quantity)),
                 int(self.utility), 
                 str(self.quality), 
                 str(self._json))
