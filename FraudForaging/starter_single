@@ -36,24 +36,11 @@ sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|ARENADIMY|$ARENADIMY|g"\
   $ARGOSTEMPLATE > $ARGOSFILE
 
-if [[ $1 == "--reset-geth" ]]; then
-
-    echo "+-----------------------------------------------------------+"
-    echo "Resetting Geth..."
-    ./reset-geth
-
-    echo "+-----------------------------------------------------------+"
-    echo "Waiting web3 to respond..."
-
-    while [[ $ready != $NUMROBOTS ]]; do
-        . test-tcp 4000
-        sleep 0.5
-    done
-fi
 
 
 echo "+-----------------------------------------------------------+"
 echo "Cleaning logs folder..."
+source experimentconfig_single.sh
 
 # Keep files 0-$NUMROBOTS in order to prevent having to reopen logs
 eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")

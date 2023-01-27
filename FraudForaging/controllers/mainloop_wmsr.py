@@ -79,6 +79,12 @@ residual_list = []
 source_pos_list = []
 counters['velocity_test'] = 0
 my_speed = 0
+global my_group_id
+my_group_id = 0
+
+global verify_count
+verify_count = 0
+
 previous_pos = [0, 0]
 pos_to_verify = [0, 0]
 idx_to_verity = -1
@@ -90,81 +96,15 @@ latest_reading = [0,0]
 i_have_measure = False
 my_measures = [[0,0] for idx in range(num_normal+num_faulty+num_malicious)]
 
-class Transaction(object):
-
-    def __init__(self, txHash, name="", query_latency=2, verified_idx=-1, myID=-1):
-        self.name = name
-        self.tx = None
-        self.hash = txHash
-        self.receipt = None
-        self.fail = False
-        self.block = w3.eth.blockNumber()
-        self.last = 0
-        self.timer = Timer(query_latency)
-        self.verify = verified_idx
-        self.myID = myID
-        if self.hash:
-            self.getTransaction()
-        txList.append(self)
-
-    def query(self, min_confirmations=0):
-        confirmations = 0
-
-        if not self.hash:
-            return False
-
-        if self.timer.query():
-            self.getTransaction()
-            self.getTransactionReceipt()
-            self.block = w3.eth.blockNumber()
-
-        if not self.tx:
-            robot.log.warning('Failed: not found')
-            self.fail = True
-            return False
-
-        elif not self.receipt:
-            return False
-
-        elif not self.receipt['status']:
-            robot.log.warning('Failed: Status 0')
-            self.fail = True
-            return False
-
-        else:
-            confirmations = self.block - self.receipt['blockNumber']
-
-            if self.last < confirmations:
-                self.last = confirmations
-                robot.log.info('Confirming: %s/%s', confirmations, min_confirmations)
-                print(self.myID, ' Confirming: ', confirmations, min_confirmations)
-            if confirmations >= min_confirmations:
-                self.last = 0
-                return True
-            else:
-                return False
-
-    def getTransactionReceipt(self):
-        try:
-            self.receipt = w3.eth.getTransactionReceipt(self.hash)
-        except Exception as e:
-            self.receipt = None
-
-    def getTransaction(self):
-        try:
-            self.tx = w3.eth.getTransaction(self.hash)
-        except Exception as e:
-            self.tx = None
-
 
 
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure
+    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_group_id
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
-    robotIP = identifersExtract(robotID, 'IP')
     print(num_normal + num_faulty)
     if int(robotID) > num_normal + num_faulty:
         typeflag = "malicious"  # malicious robot
+        my_group_id = int(robotID) - num_normal - num_faulty - 1
     elif int(robotID) > num_normal:
         typeflag = "faulty"
     else:
@@ -172,6 +112,7 @@ def init():
 
     robot.variables.set_attribute("id", str(robotID))
     robot.variables.set_attribute("type", typeflag)
+    robot.variables.set_attribute("has_readings", "0")
     print("Robot: ", robotID, "state set to: ", typeflag)
     robot.variables.set_attribute("state", "")
 
@@ -202,12 +143,8 @@ def init():
 
     # /* Initialize Sub-modules */
     #######################################################################
-    # # /* Init web3.py */
-    robot.log.info('Initialising Python Geth Console...')
-    w3 = init_web3(robotID)
 
     # /* Init an instance of peer for this Pi-Puck */
-    me = Peer(robotID, robotIP, w3.enode, w3.key)
 
     # /* Init E-RANDB __listening process and transmit function
     robot.log.info('Initialising RandB board...')
@@ -246,16 +183,14 @@ def init():
     fsm = FiniteStateMachine(robot, start=Idle.IDLE)
 
     # List of submodules --> iterate .start() to start all
-    submodules = [w3.geth.miner, gs, erb]
-
-    txs['report'] = Transaction(None)
+    submodules = [gs, erb]
 
     previous_pos = robot.position.get_position()[0:2]
     robot.epuck_wheels.set_speed(navSpeed / 2, navSpeed / 2)
 
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_measures, use_wmsr
+    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_measures, use_wmsr, my_group_id, verify_count
     if not startFlag:
         ##########################
         #### FIRST STEP ##########
@@ -288,34 +223,6 @@ def controlstep():
 
         #if logs['consensus_status'].queryTimer():
         #    logs['consensus_status'].log([belief_pos, params['source']['positions'][0], my_measures])
-
-        ###########################
-        #### MAIN-MODULE STEPS ####
-        ###########################
-        gethPeers_count = 0
-        if clocks['buffer'].query():
-
-            peer_IPs = dict()
-            peers = erb.getNew()
-            for peer in peers:
-                peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
-
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((me.ip, 9898))
-                s.sendall(str(peer_IPs).encode())
-                data = s.recv(1024)
-                gethPeers_count = int(data)
-
-            # Turn on LEDs according to geth Peers
-            if gethPeers_count == 0:
-                rgb.setLED(rgb.all, 3 * ['black'])
-            elif gethPeers_count == 1:
-                rgb.setLED(rgb.all, ['red', 'black', 'black'])
-            elif gethPeers_count == 2:
-                rgb.setLED(rgb.all, ['red', 'black', 'red'])
-            elif gethPeers_count > 2:
-                rgb.setLED(rgb.all, 3 * ['red'])
-
 
 
         ##############################
@@ -467,8 +374,11 @@ def controlstep():
 
                 vec_to_center=[source_pos[0]-real_pos[0], source_pos[1]-real_pos[1]]
                 i_have_measure = True
+                robot.variables.set_attribute("has_readings", str(1))
+
                 #my_measures[int(robotID) - 1] = [pos_state[0][0]+vec_to_center[0], pos_state[1][0]+vec_to_center[1]]
                 latest_reading = [pos_state[0][0]+vec_to_center[0], pos_state[1][0]+vec_to_center[1]]
+                print(robotID, "get measure in scout: ", latest_reading)
 
                 belief_pos[0] = latest_reading[0]
                 belief_pos[1] = latest_reading[1]
@@ -491,7 +401,6 @@ def controlstep():
                         valid_robot_count+=1
                         measure_set.append(this_measure)
 
-
                 if use_wmsr>0 and belief_pos[0] !=0: #this value represents F
                     set_larger = []
                     set_smaller = []
@@ -504,8 +413,6 @@ def controlstep():
                             set_smaller.append([euclidean_distance(this_measure, belief_pos), this_measure[0], this_measure[1]])
                         else:
                             set_equal.append([this_measure[0], this_measure[1]])
-
-
                     #sorting
                     set_larger_sort = sortingFirstElement(set_larger)
                     set_smaller_sort = sortingFirstElement(set_smaller)
@@ -536,7 +443,9 @@ def controlstep():
                     #    erb.setData(int((belief_pos[1]+2)*DECIMAL_FACTOR),2)
                     #    erb.setData(0, 3)
                     pos_to_verify = [belief_pos[0], belief_pos[1]]
-                    fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
+                    if random.random()<0.05 and verify_count<10:
+                        fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
+                        verify_count+=1
                 elif i_have_measure and len(measure_set)>0:
                     last_beliefx = belief_pos[0]
                     last_beliefy = belief_pos[1]
@@ -562,6 +471,7 @@ def controlstep():
             # execute driving cmd
             arrived = going(pos_to_verify)
 
+
             if arrived:
                 fsm.setState(Scout.Query, message="return to random walk")
 
@@ -574,7 +484,8 @@ def controlstep():
                 #my_measures[int(robotID) - 1] = [pos_state[0][0] + vec_to_center[0], pos_state[1][0] + vec_to_center[1]]
                 lastest_measure = [pos_state[0][0] + vec_to_center[0], pos_state[1][0] + vec_to_center[1]]
                 i_have_measure = True
-                print(robotID, "get measure in verification: ", lastest_measure)
+                robot.variables.set_attribute("has_readings", str(1))
+                print(robotID, "gets measure in verification: ", lastest_measure)
                 belief_pos[0] = lastest_measure[0]
                 belief_pos[1] = lastest_measure[1]
                 erb.setData(int((belief_pos[0] + 2) * DECIMAL_FACTOR), 1)
@@ -597,6 +508,7 @@ def controlstep():
                     if this_measure[0] !=0 or this_measure[1]!=0:
                         valid_robot_count+=1
                         measure_set.append(this_measure)
+                #robot.variables.set_attribute("has_readings", str(valid_robot_count))
 
                 if use_wmsr>0 and belief_pos[0] !=0: #this value represents F
                     set_larger = []
@@ -661,9 +573,10 @@ def controlstep():
 
         elif fsm.query(Faulty.Pending):
             rw.step()
-            fake_pos = params['source']['fake_positions'][0]
-            erb.setData(fake_pos[0], 1)
-            erb.setData(fake_pos[1], 2)
+            robot.variables.set_attribute("has_readings", str(1))
+            fake_pos = params['source']['fake_positions'][my_group_id]
+            erb.setData(int((fake_pos[0] + 2) * DECIMAL_FACTOR), 1)
+            erb.setData(int((fake_pos[1] + 2) * DECIMAL_FACTOR), 2)
             erb.setData(0, 3)
 
 
@@ -674,13 +587,9 @@ def reset():
 
 
 def destroy():
-    if startFlag:
-        w3.geth.miner.stop()
-        # for enode in getEnodes():
-        #     w3.geth.admin.removePeer(enode)
-
-    variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
+    robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
+    variables_file = experimentFolder + '/logs/' + robotID + '/variables.txt'
     with open(variables_file, 'w+') as vf:
         vf.write(repr(fsm.getTimers()))
 
-    print('Killed robot ' + me.id)
+    print('Killed robot ' + robotID)

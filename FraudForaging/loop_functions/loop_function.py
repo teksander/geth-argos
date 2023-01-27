@@ -31,8 +31,9 @@ open(rays_file, 'w+').close()
 #######################################################################
 
 # Other inits
-global startFlag, startTime
+global startFlag, startTime, allHaveReadings
 startFlag = False
+allHaveReadings = False
 startTime = time.time()
 
 global resource_list, resource_counter
@@ -95,7 +96,7 @@ def init():
 
             
 def pre_step():
-    global startFlag, startTime, clocks, resource_counter
+    global startFlag, startTime, clocks, resource_counter, allHaveReadings
 
     if not startFlag:
         startTime = time.time()
@@ -136,22 +137,27 @@ def pre_step():
 
 
 def post_step():
-    global startFlag, clocks, accums, resource_counter
+    global startFlag, clocks, accums, resource_counter, allHaveReadings
     global RAM, CPU
 
     if not startFlag:
         startFlag = True
-
-    # Record the carried resourced to be drawn to a file
-    with open(robot_file, 'w', buffering=1) as f:
+    if int(os.environ["EXPTYPE"]) == 2:
+        allHaveReadings = True
         for robot in allrobots:
-            if robot.variables.get_attribute("hasResource"):
-                robotID = str(int(robot.variables.get_id()[2:])+1)
-                x = str(robot.position.get_position()[0])
-                y = str(robot.position.get_position()[1])
-                f.write(robotID + ', ' + x + ', ' + y + ', ' + repr(robot.variables.get_attribute("hasResource")) + '\n')
+            if robot.variables.get_attribute("has_readings") == "0":
+                allHaveReadings = False
+                startFlag = False #turn of start flag
+    elif int(os.environ["EXPTYPE"]) == 3:
+        robot_have_reading = 0
+        for robot in allrobots:
+            if robot.variables.get_attribute("has_readings") == "1":
+                robot_have_reading+=1
+        if robot_have_reading > float(len(allrobots))/2:
+            allHaveReadings = True
 
     # Record the rays to be drawn for each robot
+
     for robot in allrobots:
         p = 'a'
         if robot.variables.get_attribute("id") == "1":
@@ -185,9 +191,12 @@ def post_step():
 
 
 def is_experiment_finished():
-  
-    finished = time.time() - startTime > generic_params['time_limit']
-
+    global allHaveReadings
+    finished=False
+    if int(os.environ["EXPTYPE"]) == 2: #lsa and wmsr baseline experiments
+        finished = time.time() - startTime > generic_params['time_limit']
+    elif int(os.environ["EXPTYPE"]) == 3 and allHaveReadings:
+        finished = True #sc experiment terminates when more than the half of population gets 5 confirmed sources
     if finished:
         print("Experiment has finished")
 

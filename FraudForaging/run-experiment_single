@@ -50,14 +50,42 @@ run() {
 
 		# Collect data
 		if [ $# -eq 1 ]; then
-		    bash collect-logs ${1}
+		    bash collect-logs_single ${1}
 		fi
 		
 	done
 }
 
+export USEWMSR=0 #use lca
+export NUM2=5
+config "REPS" 20
+run "SingleSourceSupp/lca_0_5"
+
+export USEWMSR=3 #wmsr excluding 3 pts
+export NUM2=5
+config "REPS" 20
+run "SingleSourceSupp/wmsr_3_5"
 
 
-config "REPS" 50
-run "SingleSourceSupp/exp_wmsr_3_cos"
+export USEWMSR=0 #use lca
+export NUM2=3
+config "REPS" 20
+run "SingleSourceSupp/lca_0_3"
+
+export USEWMSR=3 #wmsr excluding 3 pts
+export NUM2=3
+config "REPS" 20
+run "SingleSourceSupp/wmsr_3_3"
+
+export USEWMSR=0 #use lca
+export NUM2=0
+config "REPS" 20
+run "SingleSourceSupp/lca_0_0"
+
+export USEWMSR=3 #wmsr excluding 3 pts
+export NUM2=0
+config "REPS" 20
+run "SingleSourceSupp/wmsr_3_0"
+
+
 

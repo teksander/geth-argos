@@ -1,7 +1,7 @@
 #!/bin/bash  
 # Short script to extract and store log files
 
-source experimentconfig_single.sh
+source experimentconfig_single_sc.sh
 
 LOGSFOLDER="$EXPERIMENTFOLDER/logs/"
 DATAFOLDER="$EXPERIMENTFOLDER/results/data/experiment_$1/"
@@ -16,7 +16,7 @@ new_rep=$(printf "%03d\n" $(($last_rep+1)))
 
 # Collect experiment configuration into /logs/
 python3 collect-config.py
-cp experimentconfig_single.sh $LOGSFOLDER
+cp experimentconfig_single_sc.sh $LOGSFOLDER
 cp $EXPERIMENTFOLDER/loop_functions/loop_function_params.py $LOGSFOLDER
 cp $EXPERIMENTFOLDER/controllers/controller_params.py $LOGSFOLDER
 

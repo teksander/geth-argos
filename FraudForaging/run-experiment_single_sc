@@ -49,7 +49,7 @@ run() {
 
 		# Collect data
 		if [ $# -eq 1 ]; then
-		    bash collect-logs ${1}
+		    bash collect-logs_single_sc ${1}
 		fi
 		
 	done
@@ -58,5 +58,14 @@ run() {
 
 
 config "REPS" 20
-run "SingleSourceSupp/exp_sc_cos_10"
+export NUM2=5
+run "SingleSourceSupp/sc_5"
+
+config "REPS" 20
+export NUM2=3
+run "SingleSourceSupp/sc_3"
+
+config "REPS" 20
+export NUM2=0
+run "SingleSourceSupp/sc_0"
 

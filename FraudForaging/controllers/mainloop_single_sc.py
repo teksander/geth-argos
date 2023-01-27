@@ -49,8 +49,17 @@ use_wmsr = generic_params['use_wmsr']
 global startFlag
 startFlag = False
 
+global pending_report
+pending_report = [0,0]
+
+global is_pending_report
+is_pending_report = False
+
 global txList
 txList = []
+
+global my_group_id
+my_group_id = 0
 
 global submodules
 submodules = []
@@ -70,7 +79,7 @@ clocks['buffer'] = Timer(0.5)
 clocks['query_sc'] = Timer(5)
 clocks['block'] = Timer(2)
 clocks['explore'] = Timer(1)
-clocks['faulty_report'] = Timer(21)
+clocks['faulty_report'] = Timer(5)
 clocks['gs'] = Timer(0.02)
 clocks['log_cluster'] = Timer(30)
 clocks['clean_vidx'] = Timer(300)
@@ -136,8 +145,8 @@ class Transaction(object):
 
             if self.last < confirmations:
                 self.last = confirmations
-                robot.log.info('Confirming: %s/%s', confirmations, min_confirmations)
-                print(self.myID, ' Confirming: ', confirmations, min_confirmations)
+                #robot.log.info('Confirming: %s/%s', confirmations, min_confirmations)
+                #print(self.myID, ' Confirming: ', confirmations, min_confirmations)
             if confirmations >= min_confirmations:
                 self.last = 0
                 return True
@@ -159,12 +168,13 @@ class Transaction(object):
 
 
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure
+    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_group_id, pending_report, is_pending_report
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifersExtract(robotID, 'IP')
     print(num_normal + num_faulty)
     if int(robotID) > num_normal + num_faulty:
         typeflag = "malicious"  # malicious robot
+        my_group_id = int(robotID) - num_normal - num_faulty -1
     elif int(robotID) > num_normal:
         typeflag = "faulty"
     else:
@@ -174,6 +184,8 @@ def init():
     robot.variables.set_attribute("type", typeflag)
     print("Robot: ", robotID, "state set to: ", typeflag)
     robot.variables.set_attribute("state", "")
+
+    robot.variables.set_attribute("has_readings", "0")
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
@@ -255,7 +267,7 @@ def init():
 
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_measures, use_wmsr
+    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_measures, use_wmsr, my_group_id, pending_report, is_pending_report
     if not startFlag:
         ##########################
         #### FIRST STEP ##########
@@ -468,16 +480,20 @@ def controlstep():
                 #unverified clusters:
                 source_list = w3.sc.functions.getSourceList().call()
                 unverified_count = 0
+                confirmed_count = 0
                 for idx, cluster in enumerate(source_list):
                     if cluster[3] == 0:  # exists cluster needs verification
                         unverified_count+=1
+                    if cluster[3] != 0:
+                        pos_rate = float(cluster[6])/float(cluster[5])
+                        if pos_rate>0.5:
+                            confirmed_count+=1
                 if unverified_count==0: #no too many unverified nodes
                     pos_state, _ = posUncertaintyEst() # estimated pos
                     source_pos = params['source']['positions'][0]
                     real_pos = robot.position.get_position()[0:2]
 
                     vec_to_center=[source_pos[0]-real_pos[0], source_pos[1]-real_pos[1]]
-                    i_have_measure = True
                     #my_measures[int(robotID) - 1] = [pos_state[0][0]+vec_to_center[0], pos_state[1][0]+vec_to_center[1]]
                     latest_reading = [pos_state[0][0]+vec_to_center[0], pos_state[1][0]+vec_to_center[1]]
 
@@ -496,47 +512,87 @@ def controlstep():
                              'gasPrice': gasprice})
 
                         print('Robot ', robot.variables.get_id(), ' report source point: ',
-                              int(pos_state[0][0] * DECIMAL_FACTOR),
-                              int(pos_state[1][0] * DECIMAL_FACTOR), int(realType))
+                              int(latest_reading[0] * DECIMAL_FACTOR),
+                              int(latest_reading[1] * DECIMAL_FACTOR), int(realType))
 
                         txs['report'] = Transaction(transactHash)
+                else:
+                    pos_state, _ = posUncertaintyEst()  # estimated pos
+                    source_pos = params['source']['positions'][0]
+                    real_pos = robot.position.get_position()[0:2]
+                    vec_to_center = [source_pos[0] - real_pos[0], source_pos[1] - real_pos[1]]
+                    pending_report = [pos_state[0][0] + vec_to_center[0], pos_state[1][0] + vec_to_center[1]]
+                    is_pending_report = True
 
                 logs['consensus_status'].log([params['source']['positions'][0], source_list])
+                print("confirmed_count: ", confirmed_count)
+                if confirmed_count>5:
+                    robot.variables.set_attribute("has_readings", "1")
 
             elif clocks['query_sc'].query() and txs['report'].hash == None: #communiction period
-                source_list = w3.sc.functions.getSourceList().call()
-                clusterInfo = w3.sc.functions.getClusterInfo().call()
-                points_list = w3.sc.functions.getPointListInfo().call()
+                if is_pending_report:
+                    if random.random() < 0.2:
+                        ticketPrice = depoValueEst()
+                        # realType, real_loc = is_at_food([avgx[int(len(avgx)/2)], avgy[int(len(avgy)/2)]])
+                        realType, real_loc = is_at_food([pending_report[0], pending_report[1]])
+                        print('real info: ', real_loc)
+                        print("last_reading: ", pending_report)
+                        if ticketPrice > 0:  # report if has money
+                            transactHash = w3.sc.functions.reportNewPt(int(pending_report[0] * DECIMAL_FACTOR),
+                                                                       int(pending_report[1] * DECIMAL_FACTOR), 1,
+                                                                       w3.toWei(ticketPrice, 'ether'),
+                                                                       int(realType), 0).transact(
+                                {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
+                                 'gasPrice': gasprice})
 
-                if len(source_list) > 0:
-                    print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
-                    print('Robot ', robot.variables.get_id(), ' cluster info get: ', clusterInfo)
-                candidate_cluster = []
-                for idx, cluster in enumerate(source_list):
-                    verified_by_me = False
-                    for point_rec in points_list:
-                        if point_rec[5] == w3.exposed_key and int(point_rec[4]) == idx:
-                            verified_by_me = True
-                    if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
-                        candidate_cluster.append((cluster, idx))
+                            print('Robot ', robot.variables.get_id(), ' report source point: ',
+                                  int(pending_report[0] * DECIMAL_FACTOR),
+                                  int(pending_report[1] * DECIMAL_FACTOR), int(realType))
 
-                if len(candidate_cluster) > 0:
-                    # randomly select a cluster to verify
-                    none_verified_idx = []
-                    # idx_to_verity = random.randrange(len(candidate_cluster))
+                            txs['report'] = Transaction(transactHash)
+                    is_pending_report = False
+                else:
+                    source_list = w3.sc.functions.getSourceList().call()
+                    clusterInfo = w3.sc.functions.getClusterInfo().call()
+                    points_list = w3.sc.functions.getPointListInfo().call()
 
-                    for idx_to_verity in range(len(candidate_cluster)):
-                        none_verified_idx.append(idx_to_verity) # add all points
+                    confirmed_count = 0
 
-                    if len(none_verified_idx) > 0:
-                        select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
-                        cluster = candidate_cluster[select_idx][0]
-                        fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
-                        pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
-                        pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+                    if len(source_list) > 0:
+                        print('Robot ', robot.variables.get_id(), ' query list get: ', source_list)
+                        print('Robot ', robot.variables.get_id(), ' cluster info get: ', clusterInfo)
+                    candidate_cluster = []
+                    for idx, cluster in enumerate(source_list):
+                        verified_by_me = False
+                        for point_rec in points_list:
+                            if point_rec[5] == w3.exposed_key and int(point_rec[4]) == idx:
+                                verified_by_me = True
+                        if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
+                            candidate_cluster.append((cluster, idx))
+                        if cluster[3] != 0:
+                            pos_rate = float(cluster[6]) / float(cluster[5])
+                            if pos_rate > 0.5:
+                                confirmed_count += 1
 
-                logs['consensus_status'].log([params['source']['positions'][0], source_list])
+                    if len(candidate_cluster) > 0:
+                        # randomly select a cluster to verify
+                        none_verified_idx = []
+                        # idx_to_verity = random.randrange(len(candidate_cluster))
 
+                        for idx_to_verity in range(len(candidate_cluster)):
+                            none_verified_idx.append(idx_to_verity) # add all points
+
+                        if len(none_verified_idx) > 0:
+                            select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
+                            cluster = candidate_cluster[select_idx][0]
+                            fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
+                            pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
+                            pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+
+                    logs['consensus_status'].log([params['source']['positions'][0], source_list])
+                    print("confirmed_count: ", confirmed_count)
+                    if confirmed_count>5:
+                        robot.variables.set_attribute("has_readings", "1")
 
         elif fsm.query(Scout.GotoCenter):
             robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
@@ -547,7 +603,6 @@ def controlstep():
             arrived = going(pos_to_verify)
 
             if arrived:
-
                 sourceFlag = 0
                 if robot.variables.get_attribute("at") == 'source':
                     sourceFlag = 1
@@ -578,6 +633,7 @@ def controlstep():
 
                 fsm.setState(Scout.Query, message="return to random walk")
                 source_list = w3.sc.functions.getSourceList().call()
+
                 logs['consensus_status'].log([params['source']['positions'][0], source_list])
 
 
@@ -585,11 +641,39 @@ def controlstep():
 
         elif fsm.query(Faulty.Pending):
             rw.step()
-            fake_pos = params['source']['fake_positions'][0]
-            erb.setData(fake_pos[0], 1)
-            erb.setData(fake_pos[1], 2)
-            erb.setData(0, 3)
+            # unverified clusters:
+            if clocks['faulty_report'].query() and txs['report'].hash == None:
+                if random.random()<0.1:
+                    source_list = w3.sc.functions.getSourceList().call()
+                    unverified_count = 0
+                    confirmed_count = 0
+                    for idx, cluster in enumerate(source_list):
+                        if cluster[3] == 0:  # exists cluster needs verification
+                            unverified_count += 1
+                        if cluster[3] != 0:
+                            pos_rate = float(cluster[6]) / float(cluster[5])
+                            if pos_rate > 0.5:
+                                confirmed_count += 1
+                    if unverified_count == 0:
+                        pos_to_report = params['source']['fake_positions'][my_group_id]
 
+                        ticketPrice = depoValueEst()
+                        if ticketPrice > 0:  # report if has money
+                            transactHash = w3.sc.functions.reportNewPt(int(pos_to_report[0] * DECIMAL_FACTOR),
+                                                                       int(pos_to_report[1] * DECIMAL_FACTOR), 1,
+                                                                       w3.toWei(ticketPrice, 'ether'),
+                                                                       int(0), 0).transact(
+                                {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
+                                 'gasPrice': gasprice})
+
+                            print('Robot ', robot.variables.get_id(), ' report fake point: ',
+                                  int(pos_to_report[0] * DECIMAL_FACTOR),
+                                  int(pos_to_report[0] * DECIMAL_FACTOR), int(0))
+                            txs['report'] = Transaction(transactHash)
+                    logs['consensus_status'].log([params['source']['positions'][0], source_list])
+                    print("confirmed_count: ", confirmed_count)
+                    if confirmed_count > 5:
+                        robot.variables.set_attribute("has_readings", "1")
 
 
 

@@ -25,16 +25,16 @@ export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/kmeans_estimation.sol"
 export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/single_source_exp.argos"
 export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/single_source_exp.argosx"
 
-#experiment type 1=normal, 2=onesource
+#experiment type 1=normal, 2=onesource lsa/wmsr 3=onesource sc
 
-export EXPTYPE=2
+export EXPTYPE=3
 export NUMFOOD=1
 
 # [ARGOS]
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_single_sc.py"
 export NUM1A=15
 export NUM1B=0
-export NUM2=0
+# export NUM2=0
 export RABRANGE="0.3"
 
 export USEWMSR=0

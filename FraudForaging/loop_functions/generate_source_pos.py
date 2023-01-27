@@ -30,10 +30,11 @@ def load(path):
     return fs_list
 
 fs_list=[]
+
 while len(fs_list)<(generic_params['num_food_source']+num_malicious):
     print(len(fs_list))
     fs=[0,0]
-    minIntSrcDist = 0.5
+    minIntSrcDist = 0.7
     interSource = False
     if generic_params['exp_type'] == 1:
         while distance(fs,params['home']['position'])<0.6 or distance(fs,params['home']['position'])>0.8 or not interSource:
@@ -43,10 +44,15 @@ while len(fs_list)<(generic_params['num_food_source']+num_malicious):
             for pt in fs_list:
                 if distance(fs,pt)<minIntSrcDist:
                     interSource=False
-    elif generic_params['exp_type'] == 2:
-        while distance(fs, params['home']['position']) < 0.5:
+    elif generic_params['exp_type'] == 2 or generic_params['exp_type'] == 3:
+        while distance(fs, params['home']['position']) < 0.5 or not interSource:
             fs = [(random.random() - 0.5) * eval(params['environ']['ARENADIMX']) * 0.6,
                   (random.random() - 0.5) * eval(params['environ']['ARENADIMY']) * 0.6]
+            interSource = True
+            if fs_list:
+                pt = fs_list[0] #only sufficiently far from source
+                if distance(fs, pt) < minIntSrcDist:
+                    interSource = False
         print('generate: ', fs,  params['environ']['ARENADIMX'])
     fs_list.append(fs)
 
