@@ -1,10 +1,9 @@
 #!/bin/bash
  
-source experimentconfig.sh
+source experimentconfig_single.sh
 
 
-#Generate source point file
-python ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
+
 
 echo "+-----------------------------------------------------------+"
 echo "Updating the Smart Contract"

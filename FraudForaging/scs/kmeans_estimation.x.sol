@@ -33,6 +33,8 @@ contract ForagingPtManagement{
         uint256 realType; //real food/non food type of the Initially reported Point of the cluster, for experimental purpose only
         address init_reporter;
         uint256 intention; //intention = 0 initial report, intention = 1 verification, avoid verification req to be listed as init report
+        int xo;
+        int yo;
     }
 
     struct clusterInfo{
@@ -44,6 +46,7 @@ contract ForagingPtManagement{
         uint minClusterIdx;
         uint foundCluster;
         uint minClusterStatus;
+
     }
     Point[] pointList;
     Cluster[] clusterList;
@@ -78,8 +81,11 @@ contract ForagingPtManagement{
         info.foundCluster = 0;
         int256 x_avg = 0;
         int256 y_avg = 0;
+        int256 x_pos_avg = 0;
+        int256 y_pos_avg = 0;
         int256 this_distance = 0;
         //recluster all points // can be skept in certain task configuration
+        /*
         for (uint k=0; k<pointList.length; k++){
             for (uint i=0; i<clusterList.length; i++){
                 //Process cluster expirationamount
@@ -119,6 +125,7 @@ contract ForagingPtManagement{
             }
 
         }
+        */
 
         //unique rep
         for (uint i=0; i<clusterList.length; i++){
@@ -146,9 +153,11 @@ contract ForagingPtManagement{
         info.foundCluster = 0;
         x_avg = 0;
         y_avg = 0;
+        x_pos_avg = 0;
+        y_pos_avg = 0;
         this_distance = 0;
         if (category==1 && clusterList.length == 0){
-            clusterList.push(Cluster(x,y, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention));
+            clusterList.push(Cluster(x,y, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention, x,y));
             pointList.push(Point(x,y,amount, category, 0, msg.sender, realType));
         }
         else{
@@ -163,6 +172,10 @@ contract ForagingPtManagement{
                 if (clusterList[i].verified!=2){ //Not abandoned cluster
                     x_avg = (int256(clusterList[i].x)*int256(clusterList[i].total_credit)+ int256(x)*int256(amount))/int256(clusterList[i].total_credit+amount);
                     y_avg = (int256(clusterList[i].y)*int256(clusterList[i].total_credit)+ int256(y)*int256(amount))/int256(clusterList[i].total_credit+amount);
+                    if(category==1){
+                        x_pos_avg = (int256(clusterList[i].xo)*int256(clusterList[i].total_credit_food)+ int256(x)*int256(amount))/int256(clusterList[i].total_credit_food+amount);
+                        y_pos_avg = (int256(clusterList[i].yo)*int256(clusterList[i].total_credit_food)+ int256(y)*int256(amount))/int256(clusterList[i].total_credit_food+amount);
+                    }
                     this_distance = getDistance(x_avg, x, y_avg,  y);
                     if (this_distance<=radius && this_distance<info.minDistance){
                         info.minDistance = this_distance;
@@ -170,8 +183,8 @@ contract ForagingPtManagement{
                         info.foundCluster = 1;
                         info.x=x_avg;
                         info.y=y_avg;
-                        info.xo = x;
-                        info.yo = y;
+                        info.xo = x_pos_avg;
+                        info.yo = y_pos_avg;
                         info.minClusterStatus = clusterList[i].verified;
                     }
                     else if (info.foundCluster == 0){
@@ -181,8 +194,8 @@ contract ForagingPtManagement{
                         info.foundCluster = 0;
                         info.x=x_avg;
                         info.y=y_avg;
-                        info.xo = x;
-                        info.yo = y;
+                        info.xo = x_pos_avg;
+                        info.yo = y_pos_avg;
                         info.minClusterStatus = clusterList[i].verified;
                     }
                 }
@@ -196,10 +209,13 @@ contract ForagingPtManagement{
                 //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
                 if (category==1){
                     clusterList[info.minClusterIdx].total_credit_food+=amount;
+                    clusterList[info.minClusterIdx].xo = info.xo;
+                    clusterList[info.minClusterIdx].yo = info.yo;
                 }
 
                 clusterList[info.minClusterIdx].x = info.x;
                 clusterList[info.minClusterIdx].y = info.y;
+
                 //ADD CORRESPONDING POINT
                 pointList.push(Point(x,y,amount, category, int256(info.minClusterIdx), msg.sender, realType));
                 //Remove redundant reporters from the pointList
@@ -300,7 +316,7 @@ contract ForagingPtManagement{
             }
             else if (category==1 && info.foundCluster==0 && intention==0 && clusterList[info.minClusterIdx].init_reporter != msg.sender){
                 //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster, this is only for experimental purpose
-                clusterList.push(Cluster(x,y,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention));
+                clusterList.push(Cluster(x,y,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,x,y));
                 pointList.push(Point(x,y,amount, category, int256(clusterList.length-1), msg.sender, realType));
             }
             else{

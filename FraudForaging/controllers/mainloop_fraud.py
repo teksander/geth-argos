@@ -421,6 +421,7 @@ def controlstep():
                 robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
                 log_folder = experimentFolder + '/logs/' + robotID + '/'
                 logs['cluster'] = Logger(log_folder + filename, header, 30, ID=robotID)
+                logs['cluster'] = Logger(log_folder + filename, header, 30, ID=robotID)
 
                 for c in source_list:
                     realType, _ = is_at_food([c[0] / DECIMAL_FACTOR, c[1]/DECIMAL_FACTOR])

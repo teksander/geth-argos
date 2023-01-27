@@ -1,7 +1,7 @@
 #!/bin/bash  
 
 # [PATHS]
-export MAINFOLDER="/home/hzhao/blockchain_robots/geth-argos"
+export MAINFOLDER="/home/hzhao/blockchain-robots/geth-argos"
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/FraudForaging"
@@ -26,6 +26,8 @@ export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
 
+export EXPTYPE=1
+export NUMFOOD=3
 
 # [ARGOS]
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"

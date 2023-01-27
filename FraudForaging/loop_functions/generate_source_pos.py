@@ -35,13 +35,19 @@ while len(fs_list)<(generic_params['num_food_source']+num_malicious):
     fs=[0,0]
     minIntSrcDist = 0.5
     interSource = False
-    while distance(fs,params['home']['position'])<0.6 or distance(fs,params['home']['position'])>0.8 or not interSource:
-        fs = [(random.random()-0.5)*eval(params['environ']['ARENADIMX'])*0.9,
-          (random.random() - 0.5) * eval(params['environ']['ARENADIMY'])*0.9]
-        interSource = True
-        for pt in fs_list:
-            if distance(fs,pt)<minIntSrcDist:
-                interSource=False
+    if generic_params['exp_type'] == 1:
+        while distance(fs,params['home']['position'])<0.6 or distance(fs,params['home']['position'])>0.8 or not interSource:
+            fs = [(random.random()-0.5)*eval(params['environ']['ARENADIMX'])*0.9,
+              (random.random() - 0.5) * eval(params['environ']['ARENADIMY'])*0.9]
+            interSource = True
+            for pt in fs_list:
+                if distance(fs,pt)<minIntSrcDist:
+                    interSource=False
+    elif generic_params['exp_type'] == 2:
+        while distance(fs, params['home']['position']) < 0.5:
+            fs = [(random.random() - 0.5) * eval(params['environ']['ARENADIMX']) * 0.6,
+                  (random.random() - 0.5) * eval(params['environ']['ARENADIMY']) * 0.6]
+        print('generate: ', fs,  params['environ']['ARENADIMX'])
     fs_list.append(fs)
 
 

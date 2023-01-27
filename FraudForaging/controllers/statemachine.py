@@ -8,6 +8,7 @@ class Idle(Enum):
 class Scout(Enum):
     Query    = 2
     PrepSend = 3
+    GotoCenter = 12
 
 class Verify(Enum):
     DriveTo = 4

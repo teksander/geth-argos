@@ -38,7 +38,8 @@ run() {
 
 	# Configure experiment
 	. experimentconfig.sh
-
+  #Generate source point file
+  python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
 	for REP in $(seq 1 ${REPS}); do
 
 		# Perform experiment

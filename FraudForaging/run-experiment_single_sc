@@ -1,0 +1,62 @@
+#!/bin/bash
+# Iterate over experimental settings and start experiments
+source experimentconfig_single_sc.sh
+DATAFOLDER="$EXPERIMENTFOLDER/results/data"
+
+##################################################################################
+### EXAMPLE: config "NUMROBOTS" 10 
+config() {
+	sed -i "s/^export ${1}=.*/export ${1}=${2}/" experimentconfig_single_sc.sh
+}
+
+##################################################################################
+### EXAMPLE: copy "test116_patchy/20_blockchain1"
+copy() {
+	# Collect the config from results
+	cp $DATAFOLDER/experiment_${1}/001/experimentconfig_single_sc.sh .
+	cp $DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
+	cp $DATAFOLDER/experiment_${1}/001/loop_function_params.py loop_functions/
+}
+
+##################################################################################
+### EXAMPLE: import "test116_patchy/20_blockchain1"
+import() {
+	# Collect the config from results
+	SSHHOST="eksander@esme"
+	SSHSOCKET=~/.ssh/$SSHHOST
+	
+	ssh -M -f -N -o ControlPath=$SSHSOCKET $SSHHOST
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/experimentconfig_single_sc.sh .
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/experimentconfig_single_sc.sh .
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/loop_function_params.py loop_functions/
+	ssh -S $SSHSOCKET -O exit $SSHHOST
+}
+
+##################################################################################
+### EXAMPLE: run "test116_patchy/20_blockchain1"
+run() {
+
+	# Configure experiment
+	. experimentconfig_single_sc.sh
+  #Generate source point file
+  python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
+	for REP in $(seq 1 ${REPS}); do
+
+		# Perform experiment
+		#. starter --reset-geth --start-novis
+		. starter_single_sc --reset-geth --start-novis
+
+		# Collect data
+		if [ $# -eq 1 ]; then
+		    bash collect-logs ${1}
+		fi
+		
+	done
+}
+
+
+
+config "REPS" 20
+run "SingleSourceSupp/exp_sc_cos_10"
+

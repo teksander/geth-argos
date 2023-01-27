@@ -37,8 +37,9 @@ def init():
 def DrawInWorld():
 
 	# Draw home
-	rh = params['home']['radius']
-	environment.qt_draw.circle(params['home']['position']+[0.01], [], rh,'green', True)
+	if generic_params['exp_type']  == 1:
+		rh = params['home']['radius']
+		environment.qt_draw.circle(params['home']['position']+[0.01], [], rh,'green', True)
 
 	rs = params['source']['radius']
 	for fs in  params['source']['positions']:
