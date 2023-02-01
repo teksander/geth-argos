@@ -339,43 +339,29 @@ def controlstep():
         amRegistered = tcp_calls.request(data = 'amRegistered')
         ubi = tcp_calls.request(data = 'askForUBI')
         payout = tcp_calls.request(data = 'askForPayout')
+        newRound = tcp_calls.request(data = 'isNewRound')
         mean = tcp_calls.request(data = 'mean')
         balance = tcp_calls.request(data = 'balance')
 
         print(ticket_price, ubi, payout, balance, mean)
         
+        # Just for security we register again (e.g. if the first tx got lost)
         if not amRegistered:
-            amRegistered = w3.call2('robot',me.key, {})[0]
-            # print(amRegistered)
-            eventlogger.debug(amRegistered)
-            if amRegistered:
-                eventlogger.debug('Registered on-chain')
+            w3.sc.functions.registerRobot().transact()
 
         if amRegistered:
 
-            try:
-                scHandle()
-            except Exception as e:
-                eventlogger.warning(e)
-            else:
-                if ubi != 0:
-                    ubiHash = w3.transact1('askForUBI', {'gas':gasLimit})
-                    eventlogger.debug('Asked for UBI: %s', ubi)
-                    txList.append(ubiHash)
+            if ubi != 0:
+                ubiHash = w3.functions.askForUBI().transact()
 
-                if payout != 0:
-                    payHash = w3.transact1('askForPayout', {'gas':gasLimit})
-                    eventlogger.debug('Asked for payout: %s', payout)
-                    txList.append(payHash)
+            if payout != 0:
+                payHash = w3.functions.askForPayout().transact()
 
-                if newRound:
-                    try:
-                        updateHash = w3.transact1('updateMean', {'gas':gasLimit})
-                        txList.append(updateHash)
-                        eventlogger.debug('Updated mean')
-                    except Exception as e:
-                        eventlogger.debug(str(e))
-
+            if newRound:
+                try:
+                    updateHash = w3.functions.updateMean().transact()
+                except Exception as e:
+                    print(str(e))
         
         if balance > (ticket_price + 0.5) and ticket_price > 0:
             vote(ticket_price_wei)

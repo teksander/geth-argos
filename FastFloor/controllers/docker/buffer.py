@@ -238,6 +238,7 @@ def blockHandle():
         
 	ubi = sc.functions.askForUBI().call()
 	payout = sc.functions.askForPayout().call()
+	newRound = sc.functions.isNewRound().call()
 	mean = sc.functions.mean().call()
 	balance = w3.fromWei(w3.eth.get_balance(w3.eth.coinbase), 'ether')
 	
@@ -250,6 +251,7 @@ def blockHandle():
 		'amRegistered': am_registered,
 		'askForUBI': ubi,
 		'askForPayout': payout,
+		'isNewRound': newRound, 
 		'block': block,
 		'mean': mean,
 		'balance': balance
