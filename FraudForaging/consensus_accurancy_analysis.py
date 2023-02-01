@@ -20,8 +20,8 @@ def extract_all_consensus(consensus_str):
 
 experiment_main_foler = './results/data/experiment_SingleSourceSupp'
 
-this_exps = ['exp_wmsr_0_cos','exp_wmsr_3_cos','exp_sc_cos_10']
-blockchain_num_consensus = [0,3]
+this_exps = ['sc_3', 'wmsr_3_3', 'lca_0_3_2','lca_0_5_2']
+blockchain_num_consensus = [0]
 num_robots = 15
 
 exp_data_ens = []
@@ -39,11 +39,14 @@ for exp_name in this_exps:
                 with open(this_csv_path, 'r') as file:
                     data = file.readlines()
                     lastRow = data[-1]
-                    if len(lastRow.split(' '))>5 and len(lastRow.split(' '))< 50 and this_num == blockchain_num_consensus[0]: #is a baseline exp data
-                        this_consensus = np.array([float(lastRow.split(' ')[2][1:-1]), float(lastRow.split(' ')[3][1:-1])])
-                        ground_truth = np.array([float(lastRow.split(' ')[4][1:-1]), float(lastRow.split(' ')[5][1:-2])])
-                        this_data.append(np.linalg.norm(this_consensus-ground_truth))
-                    elif len(lastRow.split(' '))>50 and num_robot==1:
+                    if not exp_name.startswith('sc'): #is a baseline exp data
+                        try:
+                            this_consensus = np.array([float(lastRow.split(' ')[2][1:-1]), float(lastRow.split(' ')[3][1:-1])])
+                            ground_truth = np.array([float(lastRow.split(' ')[4][1:-1]), float(lastRow.split(' ')[5][1:-2])])
+                            this_data.append(np.linalg.norm(this_consensus-ground_truth))
+                        except:
+                            pass
+                    else:
                         ground_truth = np.array([float(lastRow.split(' [')[1].split(', ')[0]), float(lastRow.split(' [')[1].split(', ')[1][:-1])])
                         consensus_list = extract_all_consensus(lastRow.split(' [')[2])
                         this_consensus = np.array([float(consensus_list[this_num][0]), float(consensus_list[this_num][1])])

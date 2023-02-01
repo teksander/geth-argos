@@ -34,7 +34,7 @@ fs_list=[]
 while len(fs_list)<(generic_params['num_food_source']+num_malicious):
     print(len(fs_list))
     fs=[0,0]
-    minIntSrcDist = 0.7
+    minIntSrcDist = 1.0
     interSource = False
     if generic_params['exp_type'] == 1:
         while distance(fs,params['home']['position'])<0.6 or distance(fs,params['home']['position'])>0.8 or not interSource:

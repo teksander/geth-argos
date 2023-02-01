@@ -39,10 +39,10 @@ run() {
 
 	# Configure experiment
 	. experimentconfig_single_sc.sh
-  #Generate source point file
-  python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
-	for REP in $(seq 1 ${REPS}); do
 
+	for REP in $(seq 1 ${REPS}); do
+    #Generate source point file
+    python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
 		# Perform experiment
 		#. starter --reset-geth --start-novis
 		. starter_single_sc --reset-geth --start-novis

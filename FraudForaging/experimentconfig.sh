@@ -57,8 +57,8 @@ export MAXRECRUITS=2
 #On chain estimator
 export NUMPT=100
 export MAXLIFE=5
-export MINREP=15
-export RADIUS=10000 # 0.1
+export MINREP=10
+export RADIUS=17000 # 0.1
 export DECIMAL_FACTOR=100000 # 1e5
 export MINBALANCE=28000000000000000000
 #export MINBALANCE=0

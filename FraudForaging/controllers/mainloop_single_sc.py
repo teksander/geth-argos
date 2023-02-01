@@ -523,9 +523,7 @@ def controlstep():
                     vec_to_center = [source_pos[0] - real_pos[0], source_pos[1] - real_pos[1]]
                     pending_report = [pos_state[0][0] + vec_to_center[0], pos_state[1][0] + vec_to_center[1]]
                     is_pending_report = True
-
                 logs['consensus_status'].log([params['source']['positions'][0], source_list])
-                print("confirmed_count: ", confirmed_count)
                 if confirmed_count>5:
                     robot.variables.set_attribute("has_readings", "1")
 
@@ -590,7 +588,6 @@ def controlstep():
                             pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
 
                     logs['consensus_status'].log([params['source']['positions'][0], source_list])
-                    print("confirmed_count: ", confirmed_count)
                     if confirmed_count>5:
                         robot.variables.set_attribute("has_readings", "1")
 
@@ -643,7 +640,7 @@ def controlstep():
             rw.step()
             # unverified clusters:
             if clocks['faulty_report'].query() and txs['report'].hash == None:
-                if random.random()<0.1:
+                if random.random()<0.5:
                     source_list = w3.sc.functions.getSourceList().call()
                     unverified_count = 0
                     confirmed_count = 0
@@ -671,7 +668,6 @@ def controlstep():
                                   int(pos_to_report[0] * DECIMAL_FACTOR), int(0))
                             txs['report'] = Transaction(transactHash)
                     logs['consensus_status'].log([params['source']['positions'][0], source_list])
-                    print("confirmed_count: ", confirmed_count)
                     if confirmed_count > 5:
                         robot.variables.set_attribute("has_readings", "1")
 

@@ -85,6 +85,9 @@ my_group_id = 0
 global verify_count
 verify_count = 0
 
+global verified_pos
+verified_pos = []
+
 previous_pos = [0, 0]
 pos_to_verify = [0, 0]
 idx_to_verity = -1
@@ -190,7 +193,7 @@ def init():
 
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_measures, use_wmsr, my_group_id, verify_count
+    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_measures, use_wmsr, my_group_id, verify_count, verified_pos
     if not startFlag:
         ##########################
         #### FIRST STEP ##########
@@ -419,6 +422,7 @@ def controlstep():
                     #print(set_larger_sort)
                     measure_set = [] #measures set is being reset here!
                     if len(set_larger_sort)>use_wmsr:
+                        print(set_larger_sort)
                         for this_measure in set_larger_sort[:len(set_larger_sort)-use_wmsr]:
                             measure_set.append([this_measure[1], this_measure[2]])
                     if len(set_smaller_sort) > use_wmsr:
@@ -432,20 +436,26 @@ def controlstep():
 
                 #LSA belief pos
                 if i_have_measure == False and valid_robot_count>0: #idont have measure, but i see others have
-                    belief_pos = [0,0]
+                    temp_belief_pos = [0,0]
                     for valid_measure in measure_set:
-                        belief_pos[0] += valid_measure[0]
-                        belief_pos[1] += valid_measure[1]
-                    belief_pos[0] /= len(measure_set)
-                    belief_pos[1] /= len(measure_set)
+                        temp_belief_pos[0] += valid_measure[0]
+                        temp_belief_pos[1] += valid_measure[1]
+                    temp_belief_pos[0] /= len(measure_set)
+                    temp_belief_pos[1] /= len(measure_set)
                     #if valid_robot_count > 3:
                     #    erb.setData(int((belief_pos[0]+2)*DECIMAL_FACTOR),1)
                     #    erb.setData(int((belief_pos[1]+2)*DECIMAL_FACTOR),2)
                     #    erb.setData(0, 3)
-                    pos_to_verify = [belief_pos[0], belief_pos[1]]
-                    if random.random()<0.05 and verify_count<10:
+                    pos_to_verify = [temp_belief_pos[0], temp_belief_pos[1]]
+                    belief_pos = [0, 0] #still no belief
+                    worth_verify = True
+                    for verified_pt in verified_pos:
+                        if euclidean_distance(pos_to_verify, verified_pt)<0.2:
+                            worth_verify=False
+                            #print("distance to the pt:", euclidean_distance(pos_to_verify, verified_pt))
+                    if worth_verify:
+                        verified_pos.append(pos_to_verify)
                         fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
-                        verify_count+=1
                 elif i_have_measure and len(measure_set)>0:
                     last_beliefx = belief_pos[0]
                     last_beliefy = belief_pos[1]
@@ -541,13 +551,14 @@ def controlstep():
 
                 #LSA belief pos"
                 if i_have_measure == False and valid_robot_count>0: #idont have measure, but i see others have
-                    belief_pos = [0,0]
+                    temp_belief_pos = [0,0]
                     for valid_measure in measure_set:
-                        belief_pos[0] += valid_measure[0]
-                        belief_pos[1] += valid_measure[1]
-                    belief_pos[0] /= len(measure_set)
-                    belief_pos[1] /= len(measure_set)
-                    pos_to_verify = [belief_pos[0], belief_pos[1]]
+                        temp_belief_pos[0] += valid_measure[0]
+                        temp_belief_pos[1] += valid_measure[1]
+                    temp_belief_pos[0] /= len(measure_set)
+                    temp_belief_pos[1] /= len(measure_set)
+                    pos_to_verify = [temp_belief_pos[0], temp_belief_pos[1]]
+                    belief_pos = [0, 0] #no belief
                     #if valid_robot_count > 0:
                     #    erb.setData(int((belief_pos[0] + 2) * DECIMAL_FACTOR), 1)
                     #    erb.setData(int((belief_pos[1] + 2) * DECIMAL_FACTOR), 2)

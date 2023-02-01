@@ -39,10 +39,10 @@ run() {
 	# Configure experiment
 	. experimentconfig_single.sh
 
-	#Generate source point file
-  python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
 
 	for REP in $(seq 1 ${REPS}); do
+	  #Generate source point file
+    python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
 
 		# Perform experiment
 		#. starter --reset-geth --start-novis
@@ -57,35 +57,37 @@ run() {
 }
 
 export USEWMSR=0 #use lca
-export NUM2=5
+export NUM2=6
 config "REPS" 20
-run "SingleSourceSupp/lca_0_5"
+run "SingleSourceSupp/lca_0_6_3"
 
 export USEWMSR=3 #wmsr excluding 3 pts
-export NUM2=5
+export NUM2=6
 config "REPS" 20
-run "SingleSourceSupp/wmsr_3_5"
+run "SingleSourceSupp/wmsr_3_6_3"
+
+export USEWMSR=3 #wmsr excluding 3 pts
+export NUM2=3
+config "REPS" 20
+run "SingleSourceSupp/wmsr_3_3_3"
 
 
 export USEWMSR=0 #use lca
 export NUM2=3
 config "REPS" 20
-run "SingleSourceSupp/lca_0_3"
+run "SingleSourceSupp/lca_0_3_3"
 
-export USEWMSR=3 #wmsr excluding 3 pts
-export NUM2=3
-config "REPS" 20
-run "SingleSourceSupp/wmsr_3_3"
+
 
 export USEWMSR=0 #use lca
 export NUM2=0
 config "REPS" 20
-run "SingleSourceSupp/lca_0_0"
+run "SingleSourceSupp/lca_0_0_3"
 
 export USEWMSR=3 #wmsr excluding 3 pts
 export NUM2=0
 config "REPS" 20
-run "SingleSourceSupp/wmsr_3_0"
+run "SingleSourceSupp/wmsr_3_0_3"
 
 
 
