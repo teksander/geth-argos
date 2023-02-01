@@ -131,16 +131,6 @@ def init():
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifiersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
-    robot.variables.set_attribute("scresources", "[]")
-    robot.variables.set_attribute("foraging", "")
-    robot.variables.set_attribute("dropResource", "")
-    robot.variables.set_attribute("hasResource", "")
-    robot.variables.set_attribute("resourceCount", "0")
-    robot.variables.set_attribute("state", "")
-    robot.variables.set_attribute("forageTimer", "0")
-    robot.variables.set_attribute("quantity", "0")
-    robot.variables.set_attribute("block", "")
-    robot.variables.set_attribute("groupSize", "1")
 
     # /* Initialize Console Logging*/
     #######################################################################
