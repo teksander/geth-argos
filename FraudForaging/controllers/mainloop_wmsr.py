@@ -404,7 +404,7 @@ def controlstep():
                         valid_robot_count+=1
                         measure_set.append(this_measure)
 
-                if use_wmsr>0 and belief_pos[0] !=0: #this value represents F
+                if use_wmsr>0 and belief_pos[0] !=0 and valid_robot_count>10: #this value represents F
                     set_larger = []
                     set_smaller = []
                     set_equal = []
@@ -456,7 +456,7 @@ def controlstep():
                     if worth_verify:
                         verified_pos.append(pos_to_verify)
                         fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
-                elif i_have_measure and len(measure_set)>0:
+                elif i_have_measure and len(measure_set)>(10-use_wmsr):
                     last_beliefx = belief_pos[0]
                     last_beliefy = belief_pos[1]
                     belief_pos = [0, 0]
@@ -520,7 +520,7 @@ def controlstep():
                         measure_set.append(this_measure)
                 #robot.variables.set_attribute("has_readings", str(valid_robot_count))
 
-                if use_wmsr>0 and belief_pos[0] !=0: #this value represents F
+                if use_wmsr>0 and belief_pos[0] !=0 and valid_robot_count>10: #this value represents F
                     set_larger = []
                     set_smaller = []
                     set_equal = []
@@ -563,7 +563,7 @@ def controlstep():
                     #    erb.setData(int((belief_pos[0] + 2) * DECIMAL_FACTOR), 1)
                     #    erb.setData(int((belief_pos[1] + 2) * DECIMAL_FACTOR), 2)
                     #    erb.setData(0, 3)
-                elif i_have_measure and len(measure_set)>0:
+                elif i_have_measure and len(measure_set)>(10-use_wmsr):
                     last_beliefx = belief_pos[0]
                     last_beliefy = belief_pos[1]
                     belief_pos = [0, 0]
