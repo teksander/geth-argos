@@ -27,6 +27,8 @@ export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
 export NUM1=4
+export NUMBYZANTINE=2
+export BYZANTINESWARMSTYLE=1
 export CON1="${EXPERIMENTFOLDER}/controllers/main.py"
 
 export RABRANGE="0.13"

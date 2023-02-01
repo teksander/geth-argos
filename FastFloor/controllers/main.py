@@ -152,10 +152,6 @@ def init():
     # /* Init an instance of peer for this Pi-Puck */
     me = Peer(robotID, robotIP, w3.enode, w3.key)
 
-    # /* Init an instance of the buffer for resources  */
-    robot.log.info('Initialising resource buffer...')
-    rb = ResourceBuffer()
-
     # /* Init E-RANDB __listening process and transmit function
     robot.log.info('Initialising RandB board...')
     erb = ERANDB(robot, cp['erbDist'] , cp['erbtFreq'])
@@ -237,7 +233,7 @@ def controlstep():
         ###########################
 
         # Send current estimate (but only if the previous one was valid)
-        def vote():
+        def vote(ether):
 
             if txs['vote'].query():
                 txs['vote'] = Transaction(None)
@@ -247,9 +243,15 @@ def controlstep():
 
             # Everything fine, ready to vote!
             elif txs['vote'].hash == None:
-                txHash = w3.sc.functions.sendVote(estimate*1e7).transact()
-                txs['vote'] = Transaction(txHash)
-                robot.log.info("Voting") 
+                print("TICKET PRICE IS")
+                print(ether)
+
+                try:
+                    txHash = w3.sc.functions.sendVote(int(estimate*1e7)).transact({'value':ether})
+                    txs['vote'] = Transaction(txHash)
+                except Exception as e:
+                    print('Failed to vote: (Unexpected)', e)
+                    
 
         def send_to_docker():
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -298,11 +300,10 @@ def controlstep():
         for module in [erb, rs, rw]:
             module.step()
 
-
         # Get Byzantine style and perform according acction
         byzantine_style = robot.variables.get_attribute("byzantine_style")
 
-        elif byzantine_style == 1:
+        if byzantine_style == 1:
             estimate = 0
         elif byzantine_style == 2:
             estimate = 1        
@@ -333,16 +334,51 @@ def controlstep():
 
 
         ticket_price = tcp_calls.request(data = 'getTicketPrice')
+        ticket_price_wei = w3.toWei(ticket_price, 'ether')
+        print("Calculated ticket price is ", ticket_price_wei)
+        amRegistered = tcp_calls.request(data = 'amRegistered')
         ubi = tcp_calls.request(data = 'askForUBI')
         payout = tcp_calls.request(data = 'askForPayout')
         mean = tcp_calls.request(data = 'mean')
         balance = tcp_calls.request(data = 'balance')
 
         print(ticket_price, ubi, payout, balance, mean)
+        
+        if not amRegistered:
+            amRegistered = w3.call2('robot',me.key, {})[0]
+            # print(amRegistered)
+            eventlogger.debug(amRegistered)
+            if amRegistered:
+                eventlogger.debug('Registered on-chain')
 
-        # TODO!
-        if balance > (ticket_price + 0.5):
-            vote()
+        if amRegistered:
+
+            try:
+                scHandle()
+            except Exception as e:
+                eventlogger.warning(e)
+            else:
+                if ubi != 0:
+                    ubiHash = w3.transact1('askForUBI', {'gas':gasLimit})
+                    eventlogger.debug('Asked for UBI: %s', ubi)
+                    txList.append(ubiHash)
+
+                if payout != 0:
+                    payHash = w3.transact1('askForPayout', {'gas':gasLimit})
+                    eventlogger.debug('Asked for payout: %s', payout)
+                    txList.append(payHash)
+
+                if newRound:
+                    try:
+                        updateHash = w3.transact1('updateMean', {'gas':gasLimit})
+                        txList.append(updateHash)
+                        eventlogger.debug('Updated mean')
+                    except Exception as e:
+                        eventlogger.debug(str(e))
+
+        
+        if balance > (ticket_price + 0.5) and ticket_price > 0:
+            vote(ticket_price_wei)
 
         # Perform the blockchain peering step
         peering()

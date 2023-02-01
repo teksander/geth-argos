@@ -72,9 +72,9 @@ other['foragers']    = dict()
 
 def init():
     # Determine which robots are Byzantines
-    byzantines = random.sample(allrobots, k=lfp.num_byzantine)
+    byzantines = random.sample(allrobots, k=int(lp['environ']['NUMBYZANTINE']))
     for robot in byzantines:
-        robot.variables.set_attribute("byzantine_style", lfp.byzantine_swarm_style)
+        robot.variables.set_attribute("byzantine_style", lp['environ']['BYZANTINESWARMSTYLE'])
         print("Making robot", robot.variables.get_attribute("id"), "Byzantine.")
         robot.variables.set_attribute("isByz","True")
 

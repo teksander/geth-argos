@@ -101,9 +101,9 @@ contract MarketForaging {
   }  
 
   function askForUBI() public returns (uint) {
-    // require(robot[msg.sender].isRegistered, "Robot must register first");
+    //require(robot[msg.sender].isRegistered, "Robot must register first");
     if (!robot[msg.sender].isRegistered) {
-    	return 200;
+      return 0;
     }
     uint16[15] memory myBlocksUBI = [0,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384];
 
@@ -129,15 +129,11 @@ contract MarketForaging {
 
 
   function askForPayout() public returns (uint) {
-    // require(robot[msg.sender].isRegistered, "Robot must register first");
+      //require(robot[msg.sender].isRegistered, "Robot must register first");
 
     if (!robot[msg.sender].isRegistered) {
-    	return 200;
+     	return 0;
     }
-
-    // if (!robot[msg.sender].isRegistered) {
-    //    return 0;
-    // }
 
     // Update the payout due
     uint payout = robot[msg.sender].payout;
@@ -150,8 +146,12 @@ contract MarketForaging {
  
   function sendVote(int estimate) public payable {
 
-    require(msg.value >= 39 ether, "Robot must pay the ticket price");
-       
+      require(msg.value >= 39 ether, "Robot must pay the ticket price");
+
+      /* if (msg.value < 39 ether) { */
+      /* 	  return 0; */
+      /* } else { */
+      
     voteCount += 1;
 
     round[roundCount].push(voteInfo(msg.sender, estimate));
@@ -162,6 +162,7 @@ contract MarketForaging {
     }
 
     robot[msg.sender].myVoteCounter += 1;
+      
   }
    
   function updateMean() public {  

@@ -233,10 +233,14 @@ def blockHandle():
 
 	block      = dict(w3.eth.getBlock('latest'))
 	ticket_price = sc.functions.getTicketPrice().call()
+        am_registered = sc.functions.robot(w3.key).call()[0]
+
+        print("I am registered", am_registered)
+        
 	ubi = sc.functions.askForUBI().call()
 	payout = sc.functions.askForPayout().call()
-	mean = sc.functions.mean.call()
-	balance = w3.eth.getBalance()
+	mean = sc.functions.mean().call()
+	balance = w3.fromWei(w3.eth.get_balance(w3.eth.coinbase), 'ether')
 	
 	for key, value in block.items():
 		if type(value)==HexBytes:
@@ -244,6 +248,7 @@ def blockHandle():
 
 	tcp_calls.setData({
 		'getTicketPrice': ticket_price,
+                'amRegistered': am_registered,
 		'askForUBI': ubi,
 		'askForPayout': payout,
 		'block': block,
