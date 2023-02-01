@@ -30,7 +30,7 @@ def scHandle():
     # _task   = 3
 
 
-    resources = sc.functions.getPatches().call()
+    #resources = sc.functions.getPatches().call()
     robot = sc.functions.robot(w3.key).call()
     
     # # Write to a file used for qt_draw in ARGoS
@@ -67,33 +67,18 @@ def blockHandle():
 if __name__ == '__main__':
 
 
-    pass 
-    # w3 = init_web3()
-    # sc = registerSC(w3)
-    # bf = w3.eth.filter('latest')
+    w3 = init_web3()
+    sc = registerSC(w3)
+    bf = w3.eth.filter('latest')
 
-    # robotID = sys.argv[1]
+    robotID = sys.argv[1]
 
-    # logfolder = '/root/logs/%s/' % robotID
-    # os.system("rm -rf " + logfolder)
+    logfolder = '/root/logs/%s/' % robotID
+    os.system("rm -rf " + logfolder)
 
-    # scresourcesfile = logfolder + 'scresources.txt'
-    # os.makedirs(os.path.dirname(scresourcesfile), exist_ok=True)
-    # os.system("touch " + scresourcesfile)
-
-    # screcruitsfile = logfolder + 'screcruits.txt'
-    # os.makedirs(os.path.dirname(screcruitsfile), exist_ok=True)
-    # os.system("touch " + screcruitsfile)
-
-
-    # # Experiment data logs (recorded to file)
-    # name          = 'block.csv'
-    # header        = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
-    # logs['block'] = Logger(logfolder+name, header, ID=robotID)
-
-    # name        = 'sc.csv'  
-    # header      = ['BLOCK', 'HASH', 'PHASH', 'X', 'Y', 'QTTY', 'UTIL', 'QLTY', 'MEANQ', 'WCOUNT', 'RCOUNT']   
-    # logs['sc']  = Logger(logfolder+name, header, ID=robotID)
+    name        = 'sc.csv'  
+    header      = ['BLOCK', 'HASH', 'PHASH', 'MEAN']   
+    logs['sc']  = Logger(logfolder+name, header, ID=robotID)
 
     # name          = 'extra.csv'
     # header        = ['MB']
@@ -107,44 +92,44 @@ if __name__ == '__main__':
     # # log_filename = log_folder + 'tx.csv'     
     # # logs['tx']   = Logger(log_filename, header)
 
-    # startFlag = False
-    # mining = False
+    startFlag = False
+    mining = False
 
-    # while True:
+    while True:
 
-    #     if not startFlag:
-    #         mining = w3.eth.mining
+        if not startFlag:
+            mining = w3.eth.mining
 
-    #     if mining or startFlag:
+        if mining or startFlag:
 
-    #         # Actions to perform on the first step
-    #         if not startFlag:
-    #             startFlag = True
+            # Actions to perform on the first step
+            if not startFlag:
+                startFlag = True
 
-    #             for log in logs.values():
-    #                 log.start()
+                for log in logs.values():
+                    log.start()
 
-    #         # Actions to perform continuously
-    #         else:
+            # Actions to perform continuously
+            else:
 
-    #             if logs['extra'].query():
-    #                 logs['extra'].log([getFolderSize('/root/.ethereum/devchain/geth/chaindata')])
+                if logs['extra'].query():
+                    logs['extra'].log([getFolderSize('/root/.ethereum/devchain/geth/chaindata')])
 
-    #             newBlocks = bf.get_new_entries()
-    #             if newBlocks:
+                newBlocks = bf.get_new_entries()
+                if newBlocks:
 
-    #                 # 1) Log relevant block details 
-    #                 for blockHex in newBlocks:
+                    # 1) Log relevant block details 
+                    for blockHex in newBlocks:
 
-    #                     scHandle()
+                        scHandle()
 
-    #                     block = w3.eth.getBlock(blockHex)
+                        block = w3.eth.getBlock(blockHex)
 
-    #                     blockHandle()
+                        blockHandle()
 
 
 
-    #     time.sleep(0.1)
+        time.sleep(0.1)
 
 
 

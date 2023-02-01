@@ -71,7 +71,12 @@ clocks['forage']     = dict()
 other['foragers']    = dict()
 
 def init():
-    pass
+    # Determine which robots are Byzantines
+    byzantines = random.sample(allrobots, k=lfp.num_byzantine)
+    for robot in byzantines:
+        robot.variables.set_attribute("byzantine_style", lfp.byzantine_swarm_style)
+        print("Making robot", robot.variables.get_attribute("id"), "Byzantine.")
+        robot.variables.set_attribute("isByz","True")
 
 def pre_step():
     pass

@@ -127,7 +127,7 @@ class Transaction(object):
 ####################################################################################################################################################################################
 
 def init():
-    global clocks,counters, logs, submodules, me, rw, nav, odo, gps, w3, fsm, rs, erb, tcp_calls, rgb
+    global clocks,counters, logs, submodules, me, rw, nav, gps, w3, rs, erb, tcp_calls, rgb
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifiersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
@@ -186,10 +186,6 @@ def init():
     robot.log.info('Initialising navigation...')
     nav = Navigate(robot, cp['recruit_speed'])
 
-    # /* Init odometry sensor */
-    robot.log.info('Initialising odometry...')
-    odo = OdoCompass(robot)
-
     # /* Init GPS sensor */
     robot.log.info('Initialising gps...')
     gps = GPS(robot)
@@ -197,44 +193,13 @@ def init():
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
 
-    # /* Init Finite-State-Machine */
-    fsm = FiniteStateMachine(robot, start = States.VOLKER)
-
     # List of submodules --> iterate .start() to start all
     submodules = [w3.geth.miner, erb]
 
     # /* Initialize logmodules*/
     #######################################################################
     # Experiment data logs (recorded to file)
-    name   = 'resource.csv'
-    header = ['COUNT']
-    logs['resources'] = Logger(log_folder+name, header, rate = 5, ID = me.id)
 
-    name   = 'firm.csv'
-    header = ['FC', 'Q', 'C', 'MC', 'TC', 'ATC', 'PROFIT']
-    logs['firm'] = Logger(log_folder+name, header, ID = me.id)
-
-    # name   = 'epoch.csv'
-    # # header = ['NUMBER', 'BSTART', 'Q', 'TC', 'ATC', 'price']
-    # header =w3.sc.functions.Epoch_key().call()
-    # logs['epoch'] = Logger(log_folder+name, header, ID = me.id)
-
-    # name   = 'robot_sc.csv'
-    # # header = ["isRegistered", "efficiency", "income", "balance", "task"]
-    # header = w3.sc.functions.Robot_key().call()
-    # logs['robot_sc'] = Logger(log_folder+name, header, ID = me.id)
-
-    name   = 'fsm.csv'
-    header = stateList
-    logs['fsm'] = Logger(log_folder+name, header, rate = 10, ID = me.id)
-
-    name   =  'odometry.csv'
-    header = ['DIST']
-    logs['odometry'] = Logger(log_folder+name, header, rate = 10, ID = me.id)
-
-    txs['sell'] = Transaction(None)
-    txs['buy']  = Transaction(None)
-    txs['drop'] = Transaction(None)
     txs['vote'] = Transaction(None)
 
 #########################################################################################################################
@@ -271,7 +236,6 @@ def controlstep():
 
         # Startup transactions
 
-        # my_eff = 100
         w3.sc.functions.registerRobot().transact()
 
         totalWhite = totalBlack = 0        
@@ -282,6 +246,7 @@ def controlstep():
         ######## ROUTINES ########
         ###########################
 
+        # Send current estimate (but only if the previous one was valid)
         def vote():
 
             if txs['vote'].query():
@@ -290,8 +255,9 @@ def controlstep():
             elif txs['vote'].fail:
                 txs['vote'] = Transaction(None)
 
+            # Everything fine, ready to vote!
             elif txs['vote'].hash == None:
-                txHash = w3.sc.functions.sendVote(estimate).transact()
+                txHash = w3.sc.functions.sendVote(estimate*1e7).transact()
                 txs['vote'] = Transaction(txHash)
                 robot.log.info("Voting") 
 
@@ -342,36 +308,55 @@ def controlstep():
         for module in [erb, rs, rw]:
             module.step()
 
-        # Sense environment for resources
-        if clocks['sensing'].query(): 
-            newValues = rs.getNew()
 
-            print([newValue for newValue in newValues])
-    
-            for value in newValues:
-                if value != 0:
-                    totalWhite += 1
-                else:
-                    totalBlack += 1
-            estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
+        # Get Byzantine style and perform according acction
+        byzantine_style = robot.variables.get_attribute("byzantine_style")
 
+        elif byzantine_style == 1:
+            estimate = 0
+        elif byzantine_style == 2:
+            estimate = 1        
+        elif byzantine_style == 3:
+            # 50% chance white, 50% change black
+            p = random.uniform(0, 1)
+            if p < 0.5:
+                estimate = 0
+            else:
+                estimate = 1
+        elif byzantine_style == 4:
+            estimate = random.uniform(0, 1)        
         
-        # print(totalWhite, totalBlack, estimate)
+        # Non-Byzantine robots
+        else:
+            if clocks['sensing'].query(): 
+                newValues = rs.getNew()
+
+                print([newValue for newValue in newValues])
+        
+                for value in newValues:
+                    if value != 0:
+                        totalWhite += 1
+                    else:
+                        totalBlack += 1
+                estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
+
+
 
         ticket_price = tcp_calls.request(data = 'getTicketPrice')
         ubi = tcp_calls.request(data = 'askForUBI')
         payout = tcp_calls.request(data = 'askForPayout')
-        # balance = tcp_calls.request(data = 'balance')
+        mean = tcp_calls.request(data = 'mean')
+        balance = tcp_calls.request(data = 'balance')
 
-        print(ticket_price, ubi, payout)
+        print(ticket_price, ubi, payout, balance, mean)
 
         # TODO!
-        if balance > ticket_price:
+        if balance > (ticket_price + 0.5):
             vote()
 
         # Perform the blockchain peering step
         peering()
-            
+
         
 
 #########################################################################################################################
@@ -386,17 +371,6 @@ def destroy():
         w3.geth.miner.stop()
         for enode in getEnodes():
             w3.geth.admin.removePeer(enode)
-
-    # variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
-    # with open(variables_file, 'w+') as vf:
-    #     vf.write(repr(fsm.getTimers())) 
-
-    # epochs = tcp_sc.request(data = 'getEpochs')
-    # for epoch in epochs:
-    #     logs['epoch'].log([str(x).replace(" ","") for x in epoch.values()])
-
-    # robot.sc  = tcp_sc.request(data = 'getRobot')
-    # logs['robot_sc'].log(list(robot.sc.values()))
 
     print('Killed robot '+ me.id)
 

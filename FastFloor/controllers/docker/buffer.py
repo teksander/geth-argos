@@ -235,6 +235,8 @@ def blockHandle():
 	ticket_price = sc.functions.getTicketPrice().call()
 	ubi = sc.functions.askForUBI().call()
 	payout = sc.functions.askForPayout().call()
+	mean = sc.functions.mean.call()
+	balance = w3.eth.getBalance()
 	
 	for key, value in block.items():
 		if type(value)==HexBytes:
@@ -244,7 +246,9 @@ def blockHandle():
 		'getTicketPrice': ticket_price,
 		'askForUBI': ubi,
 		'askForPayout': payout,
-		'block': block
+		'block': block,
+		'mean': mean,
+		'balance': balance
 		})
 
 if __name__ == '__main__':
