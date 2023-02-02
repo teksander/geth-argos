@@ -40,6 +40,7 @@ global clocks, counters, logs, txs
 clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
 clocks['peering'] = Timer(0.5)
+clocks['voting'] = Timer(3)
 clocks['sensing'] = Timer(1)
 clocks['newround'] = Timer(15) # Prevents spamming of newround transactions, 15 is the block time
 clocks['block'] = Timer(lp['generic']['block_period'])
@@ -49,7 +50,7 @@ global rwSpeed
 rwSpeed = 250
 
 # Some experiment variables
-global estimate, totalWhite, totalBlack
+global estimate, totalWhite, totalBlack, byzantine_style
 estimate = 0
 totalWhite = 0
 totalBlack = 0
@@ -128,10 +129,11 @@ class Transaction(object):
 ####################################################################################################################################################################################
 
 def init():
-    global clocks,counters, logs, submodules, me, rw, nav, gps, w3, rs, erb, tcp_calls, rgb
+    global clocks,counters, logs, submodules, me, rw, nav, gps, w3, rs, erb, tcp_calls, rgb, byzantine_style
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifiersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
+    robot.variables.set_attribute("byzantine_style", str(0))    
 
     # /* Initialize Console Logging*/
     #######################################################################
@@ -189,6 +191,7 @@ def init():
 
     txs['vote'] = Transaction(None)
 
+
 #########################################################################################################################
 #### CONTROL STEP #######################################################################################################
 #########################################################################################################################
@@ -196,7 +199,7 @@ global pos
 pos = [0,0]
 def controlstep():
     global pos, clocks, counters, startFlag, startTime
-    global estimate, totalWhite, totalBlack
+    global estimate, totalWhite, totalBlack, byzantine_style
     
     if not startFlag:
         ##########################
@@ -223,7 +226,9 @@ def controlstep():
 
         # Startup transactions
 
+        byzantine_style = int(robot.variables.get_attribute("byzantine_style"))
         w3.sc.functions.registerRobot().transact()
+
 
         totalWhite = totalBlack = 0        
 
@@ -245,11 +250,12 @@ def controlstep():
             # Everything fine, ready to vote!
             elif txs['vote'].hash == None:
 
-                mean = tcp_calls.request(data = 'mean')
-                print("Voting with ", estimate)
-                print("Mean is ", mean / 1e5)                
-                print("voteCount is ", voteCount)
-                print("voteOkCount", voteOkCount)                
+                #mean = tcp_calls.request(data = 'mean')
+                print("Byzantine style ", byzantine_style, "Voting with ", estimate)
+                
+                #print("Mean is ", mean / 1e5)                
+                #print("voteCount is ", voteCount)
+                #print("voteOkCount", voteOkCount)                
                 try:
                     txHash = w3.sc.functions.sendVote(int(estimate*1e7)).transact({'value':ether})
                     txs['vote'] = Transaction(txHash)
@@ -305,8 +311,7 @@ def controlstep():
             module.step()
 
         # Get Byzantine style and perform according acction
-        byzantine_style = robot.variables.get_attribute("byzantine_style")
-
+        
         if byzantine_style == 1:
             estimate = 0
         elif byzantine_style == 2:
@@ -323,11 +328,8 @@ def controlstep():
         
         # Non-Byzantine robots
         else:
-            #if clocks['sensing'].query(): 
             newValues = rs.getNew()
 
-                #print([newValue for newValue in newValues])
-        
             for value in newValues:
                 if value != 0:
                     totalWhite += 1
@@ -335,29 +337,28 @@ def controlstep():
                     totalBlack += 1
             estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
 
-                
         ticket_price = tcp_calls.request(data = 'getTicketPrice')
         ticket_price_wei = w3.toWei(ticket_price, 'ether')
         #print("Calculated ticket price is ", ticket_price_wei)
-        amRegistered = tcp_calls.request(data = 'amRegistered')
+
+
         ubi = tcp_calls.request(data = 'askForUBI')
-        voteCount = tcp_calls.request(data = 'voteCount')
-        voteOkCount = tcp_calls.request(data = 'voteOkCount')
         payout = tcp_calls.request(data = 'askForPayout')
         newRound = tcp_calls.request(data = 'isNewRound')
-        mean = tcp_calls.request(data = 'mean')
         balance = tcp_calls.request(data = 'balance')
+
+        amRegistered = tcp_calls.request(data = 'amRegistered')
         
         # Just for security we register again (e.g. if the first tx got lost)
-        if not amRegistered:
+        if not amRegistered and clocks['newround'].query():
             w3.sc.functions.registerRobot().transact()
 
         if amRegistered:
 
-            if ubi != 0:
+            if ubi != 0 and clocks['newround'].query():
                 ubiHash = w3.sc.functions.askForUBI().transact()
 
-            if payout != 0:
+            if payout != 0 and clocks['newround'].query():
                 payHash = w3.sc.functions.askForPayout().transact()
 
 
@@ -369,7 +370,8 @@ def controlstep():
                     print(str(e))
         
         if balance > (ticket_price + 0.5) and ticket_price > 0:
-            vote(ticket_price_wei)
+            if clocks['voting'].query():
+                vote(ticket_price_wei)
 
         # Perform the blockchain peering step
         peering()

@@ -18,7 +18,7 @@ from control_params import params as cp
 from loop_params import params as lp
 from loop_helpers import *
 
-random.seed(lp['generic']['seed'])
+#random.seed(lp['generic']['seed'])
 
 log_folder = lp['environ']['EXPERIMENTFOLDER'] + '/logs/0/'
 os.makedirs(os.path.dirname(log_folder), exist_ok=True)   

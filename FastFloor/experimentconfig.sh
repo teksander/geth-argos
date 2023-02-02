@@ -29,13 +29,13 @@ export CONTAINERBASE=${SWARMNAME}_eth
 
 export REALTIME=true
 export FLOORFILE=22.png
-export NUM1=8
-export NUMBYZANTINE=0
+export NUM1=24
+export NUMBYZANTINE=6
 export BYZANTINESWARMSTYLE=1
-export CON1="/home/volker/geth-argos-docker-inside/FastFloor/controllers/main.py"
+export CON1="/home/ubuntu/geth-argos-docker-inside/FastFloor/controllers/main.py"
 
 
-export RABRANGE=0.60
+export RABRANGE=0.13
 export WHEELNOISE="0"
 export TPS=1
 export DENSITY="1"

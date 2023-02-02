@@ -17,12 +17,12 @@
   <controllers>
 
    
-    <python_controller id="collab" library="/home/volker/geth-argos-docker-inside/argos-python/build/libpy_controller_interface.so">
+    <python_controller id="collab" library="/home/ubuntu/geth-argos-docker-inside/argos-python/build/libpy_controller_interface.so">
       <!-- Normal actuator/sensor configuration follows -->
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" noise_std_dev="0"/>
-        <epuck_range_and_bearing implementation="medium" range="0.60"/>
+        <epuck_range_and_bearing implementation="medium" range="0.13"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />
@@ -34,16 +34,16 @@
       <!-- No required configuration -->
       
       <!-- Optionally, you can pass a script as a controller parameter: -->
-      <params script="/home/volker/geth-argos-docker-inside/FastFloor/controllers/main.py"
+      <params script="/home/ubuntu/geth-argos-docker-inside/FastFloor/controllers/main.py"
       timeRate="1" />
     </python_controller>
 
 
   </controllers>
 
-    <loop_functions library="/home/volker/geth-argos-docker-inside/argos-python/build/libpy_loop_function_interface.so"
+    <loop_functions library="/home/ubuntu/geth-argos-docker-inside/argos-python/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
-    <params script="/home/volker/geth-argos-docker-inside/FastFloor/loop_functions/loop_function.py"/>
+    <params script="/home/ubuntu/geth-argos-docker-inside/FastFloor/loop_functions/loop_function.py"/>
   </loop_functions>
 
 
@@ -52,7 +52,7 @@
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="1.20, 1.20, 5" center="0,0,0.5">
- <floor id="f" source="image" path="/home/volker/geth-argos-docker-inside/FastFloor/experiments/floors/22.png" />
+ <floor id="f" source="image" path="/home/ubuntu/geth-argos-docker-inside/FastFloor/experiments/floors/22.png" />
     <box id="wall_north" size="1.20,0.10,0.1" movable="false">
       <body position="0,0.60,0" orientation="0,0,0" />
     </box>
@@ -69,7 +69,7 @@
     <distribute>
       <position method="uniform" min="-0.60,-0.60,0" max="0.60,0.60,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="8" max_trials="15"> 
+      <entity quantity="24" max_trials="15"> 
         <e-puck id="fb" 
                   rab_range = "1">
           <controller config="collab" />
@@ -103,7 +103,7 @@
     <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
     <!-- ************************************************************************ -->
   <qt-opengl autoplay="true">
-      <!-- <user_functions library="/home/volker/geth-argos-docker-inside/argos-python/build/libpy_qtuser_function_interface.so" -->
+      <!-- <user_functions library="/home/ubuntu/geth-argos-docker-inside/argos-python/build/libpy_qtuser_function_interface.so" -->
       <!--                 label="py_qtuser_function" /> -->
     <camera>
       <placements>

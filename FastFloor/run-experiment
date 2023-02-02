@@ -71,10 +71,11 @@ run() {
 
 
 
-EXP=208
+EXP=8rob-2byz
 CFG=basic_volker_test
 config "REPS" 1
-config "NUM1" 8
+config "NUM1" 24
+config "NUMBYZANTINE" 6
 config "FLOORFILE" 22.png
 config "ARENADIM" 1.20
 config "ARENADIMH" 0.60
@@ -86,7 +87,7 @@ if [[ $1 = "--no-blockchain" || $1 = "-n" ]]; then
 	config "CON1" "\"/home/volker/geth-argos-docker-inside/FastFloor/controllers/main_no_blockchain.py\""
 	config "REALTIME" "false"
 else
-	config "CON1" "\"/home/volker/geth-argos-docker-inside/FastFloor/controllers/main.py\""
+	config "CON1" "\"/home/ubuntu/geth-argos-docker-inside/FastFloor/controllers/main.py\""
 	config "REALTIME" "true"	
 fi
 
