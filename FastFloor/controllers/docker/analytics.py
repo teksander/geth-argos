@@ -19,8 +19,6 @@ def scHandle(block):
     # Write to the log file used data analysis
     logs['sc'].log([
         block['number'], 
-        block['hash'].hex(), 
-        block['parentHash'].hex(),
         mean,
         voteCount,
         voteOkCount
