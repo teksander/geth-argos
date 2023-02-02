@@ -630,7 +630,7 @@ class Logger(object):
                 self.latest = self.tStamp
             except:
                 pass
-                logger.warning('Failed to log data to file')
+                logger.warning('Failed to log data to file', data)
 
     def query(self):
         return time.time()-self.tStamp > self.rate
@@ -787,8 +787,11 @@ def identifersExtract(robotID, query = 'IP'):
                     return line.split()[-2]
                 if query == 'IP_DOCKER':
                     return line.split()[-1]
+                # This does not return the enode but the dockerid, I kept it for legacy reasons    
                 if query == 'ENODE':
                     return line.split()[1]
+                if query == 'DOCKERID':
+                    return line.split()[1]                    
 
 def getFolderSize(folder):
     # Return the size of a folder

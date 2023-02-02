@@ -32,18 +32,6 @@ allresources = []
 resource_counter = {'red': 0, 'green': 0 , 'blue': 0, 'yellow': 0}
 # position_previous = dict()
 
-if 'radii' and 'counts' in lp['patches']:
-    radii  = lp['patches']['radii']
-    counts = lp['patches']['counts']
-else:
-    # Calculate the number and radius of resources to generate
-    frequency = mydict(lp['patches']['frequency'])
-    areas = frequency * lp['patches']['abundancy'] * lp['generic']['arena_size']**2
-    counts = (areas/(lp['patches']['radius']**2*math.pi)).round(0)
-    single_areas = mydict({k: areas[k]/counts[k] for k in areas if counts[k] != 0})
-    single_areas.update({k: 0 for k in areas if counts[k] == 0})
-    radii = (single_areas/math.pi).root(2).round(2)
-
 # Other inits
 global startFlag, stopFlag, startTime
 startFlag = False

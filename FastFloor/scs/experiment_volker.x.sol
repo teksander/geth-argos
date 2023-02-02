@@ -169,7 +169,10 @@ contract MarketForaging {
 
     require(robot[msg.sender].isRegistered, "Robot must register first");
 
-    require(lastUpdate < roundCount, "Mean has been updated already");
+    if (lastUpdate >= roundCount) {
+	newRound = false;
+    } else {
+    //require(lastUpdate < roundCount, "Mean has been updated already");
 
     int oldMean = mean;  
     uint r = lastUpdate;
@@ -230,5 +233,6 @@ contract MarketForaging {
     lastUpdate += 1;
     newRound = false;
     delete robotsToPay;
+  }
   }
 }

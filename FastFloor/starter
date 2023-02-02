@@ -10,14 +10,14 @@
 source experimentconfig.sh
 
 
-echo $BLOCKPERIOD
 echo "+-----------------------------------------------------------+"
 echo "MAINFOLDER IS $MAINFOLDER"
 
 echo "+-----------------------------------------------------------+"
 echo "Updating the ARGoS XML file"
 
-sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
+sed -e "s|REALTIME|$REALTIME|g"\
+    -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|WHEELNOISE|$WHEELNOISE|g"\
     -e "s|CON1|$CON1|g"\
     -e "s|NUM1|$NUM1|g"\

@@ -7,7 +7,7 @@
   <framework>
     <system threads="1" method="balance_quantity" />
     <experiment length="0"
-      ticks_per_second="10"
+      ticks_per_second="1"
       real_time="true"/>
   </framework>
 
@@ -22,7 +22,7 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" noise_std_dev="0"/>
-        <epuck_range_and_bearing implementation="medium" range="0.13"/>
+        <epuck_range_and_bearing implementation="medium" range="0.60"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />
@@ -47,35 +47,35 @@
   </loop_functions>
 
 
+
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="2.000, 2.000, 1.5" center="0,0,0">
-
+  <arena size="1.20, 1.20, 5" center="0,0,0.5">
  <floor id="f" source="image" path="/home/volker/geth-argos-docker-inside/FastFloor/experiments/floors/22.png" />
-
-    <box id="wall_north" size="2.000,0.06,0.1" movable="false">
-      <body position="0,1.000,0" orientation="0,0,0" />
+    <box id="wall_north" size="1.20,0.10,0.1" movable="false">
+      <body position="0,0.60,0" orientation="0,0,0" />
     </box>
-    <box id="wall_south" size="2.000,0.06,0.1" movable="false">
-      <body position="0,-1.000,0" orientation="0,0,0" />
+    <box id="wall_south" size="1.20,0.10,0.1" movable="false">
+      <body position="0,-0.60,0" orientation="0,0,0" />
     </box>
-    <box id="wall_east" size="0.06,2.000,0.1" movable="false">
-      <body position="1.000,0,0" orientation="0,0,0" />
+    <box id="wall_east" size="0.10,1.20,0.1" movable="false">
+      <body position="0.60,0,0" orientation="0,0,0" />
     </box>
-    <box id="wall_west" size="0.06,2.000,0.1" movable="false">
-      <body position="-1.000,0,0" orientation="0,0,0" />
+    <box id="wall_west" size="0.10,1.20,0.1" movable="false">
+      <body position="-0.60,0,0" orientation="0,0,0" />
     </box>
 
     <distribute>
-      <position method="uniform" min="-.400,-.400,0" max=".400,.400,0" /> 
+      <position method="uniform" min="-0.60,-0.60,0" max="0.60,0.60,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="4" max_trials="15"> 
-        <e-puck id="bc" >
+      <entity quantity="8" max_trials="15"> 
+        <e-puck id="fb" 
+                  rab_range = "1">
           <controller config="collab" />
         </e-puck>
       </entity> 
-    </distribute>
+    </distribute> 
 
   </arena>
 

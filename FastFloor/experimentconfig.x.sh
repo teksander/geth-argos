@@ -27,22 +27,22 @@ export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
 
-export REALTIME=true
+export REALTIME="false"
 export FLOORFILE=22.png
 export NUM1=8
 export NUMBYZANTINE=0
 export BYZANTINESWARMSTYLE=1
-export CON1="/home/volker/geth-argos-docker-inside/FastFloor/controllers/main.py"
+export CON1="${EXPERIMENTFOLDER}/controllers/main.py"
 
 
-export RABRANGE=0.60
+export RABRANGE="0.13"
 export WHEELNOISE="0"
 export TPS=1
 export DENSITY="1"
 
 export NUMROBOTS=$(echo $NUM1 | bc)
-export ARENADIM=1.20
-export ARENADIMH=0.60
+export ARENADIM=1.10
+export ARENADIMH=0.55
 export STARTDIM=1.10
 
 # [GETH]
@@ -54,8 +54,8 @@ export BLOCKPERIOD=15
 export SEED=1500
 export TIMELIMIT=100
 export SLEEPTIME=5
-export REPS=1
-export NOTES="Basic long-term experiment with 8 robots and a run-time of 600 minutes"
+export REPS=4
+export NOTES=""
 
 
 

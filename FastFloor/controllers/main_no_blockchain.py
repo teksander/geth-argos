@@ -39,6 +39,7 @@ txList,  submodules = [], []
 global clocks, counters, logs, txs
 clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
+clocks['estimate'] = Timer(10)
 clocks['peering'] = Timer(0.5)
 clocks['sensing'] = Timer(1)
 clocks['newround'] = Timer(15) # Prevents spamming of newround transactions, 15 is the block time
@@ -223,8 +224,6 @@ def controlstep():
 
         # Startup transactions
 
-        w3.sc.functions.registerRobot().transact()
-
         totalWhite = totalBlack = 0        
 
     else:
@@ -326,8 +325,8 @@ def controlstep():
             #if clocks['sensing'].query(): 
             newValues = rs.getNew()
 
-                #print([newValue for newValue in newValues])
-        
+            #print([newValue for newValue in newValues])
+    
             for value in newValues:
                 if value != 0:
                     totalWhite += 1
@@ -335,45 +334,10 @@ def controlstep():
                     totalBlack += 1
             estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
 
-                
-        ticket_price = tcp_calls.request(data = 'getTicketPrice')
-        ticket_price_wei = w3.toWei(ticket_price, 'ether')
-        #print("Calculated ticket price is ", ticket_price_wei)
-        amRegistered = tcp_calls.request(data = 'amRegistered')
-        ubi = tcp_calls.request(data = 'askForUBI')
-        voteCount = tcp_calls.request(data = 'voteCount')
-        voteOkCount = tcp_calls.request(data = 'voteOkCount')
-        payout = tcp_calls.request(data = 'askForPayout')
-        newRound = tcp_calls.request(data = 'isNewRound')
-        mean = tcp_calls.request(data = 'mean')
-        balance = tcp_calls.request(data = 'balance')
-        
-        # Just for security we register again (e.g. if the first tx got lost)
-        if not amRegistered:
-            w3.sc.functions.registerRobot().transact()
-
-        if amRegistered:
-
-            if ubi != 0:
-                ubiHash = w3.sc.functions.askForUBI().transact()
-
-            if payout != 0:
-                payHash = w3.sc.functions.askForPayout().transact()
-
-
-            if newRound and clocks['newround'].query():
-                try:
-                    print("newRound is ", newRound)                    
-                    updateHash = w3.sc.functions.updateMean().transact()
-                except Exception as e:
-                    print(str(e))
-        
-        if balance > (ticket_price + 0.5) and ticket_price > 0:
-            vote(ticket_price_wei)
-
-        # Perform the blockchain peering step
-        peering()
-
+        if clocks['estimate'].query():
+            print("Estimate is", estimate)
+            print("totalWhite", totalWhite)
+            print("totalBlack", totalBlack)
         
 
 #########################################################################################################################
@@ -384,10 +348,6 @@ def reset():
     pass
 
 def destroy():
-    if startFlag:
-        w3.geth.miner.stop()
-        for enode in getEnodes():
-            w3.geth.admin.removePeer(enode)
 
     print('Killed robot '+ me.id)
 

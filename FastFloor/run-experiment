@@ -6,7 +6,7 @@ DATAFOLDER="$EXPERIMENTFOLDER/results/data"
 ##################################################################################
 ### EXAMPLE: config "NUMROBOTS" 10 
 config() {
-	sed -i "s/^export ${1}=.*/export ${1}=${2}/" experimentconfig.sh
+	sed -i "s|^export ${1}=.*|export ${1}=${2}|" experimentconfig.sh
 }
 
 ##################################################################################
@@ -49,7 +49,10 @@ run() {
 	if  [[ $2 = "--test" || $2 = "-t" ]]; then
 		echo "Running test ${1}"
 		. starter -r -s
-
+		    bash collect-logs ${1}
+	elif [[ $2 = "--no-blockchain" || $2 = "-n" ]]; then
+		echo "Running blockchain free test ${1}"
+		. starter -s
 	else
 		for REP in $(seq 1 ${REPS}); do
 			echo "Runing experiment ${1}"
@@ -69,22 +72,34 @@ run() {
 
 
 EXP=208
-config "REPS" 3
+CFG=basic_volker_test
+config "REPS" 1
+config "NUM1" 8
+config "FLOORFILE" 22.png
+config "ARENADIM" 1.20
+config "ARENADIMH" 0.60
+config "RABRANGE" 0.13
+config "NOTES" "\"Basic long-term experiment with 8 robots and a run-time of 600 minutes\""
 
-CFG=linear_20_limassign_50_regen_10
-config "LIMITASSIGN" 50
-config "NOTES" "\"Testing maxload 12 and resource params; limassign vs no limassign; regen 5 vs regen 10\""
+if [[ $1 = "--no-blockchain" || $1 = "-n" ]]; then
+	echo "TEST"
+	config "CON1" "\"/home/volker/geth-argos-docker-inside/FastFloor/controllers/main_no_blockchain.py\""
+	config "REALTIME" "false"
+else
+	config "CON1" "\"/home/volker/geth-argos-docker-inside/FastFloor/controllers/main.py\""
+	config "REALTIME" "true"	
+fi
 
 wait
 run    "${EXP}/${CFG}" $1
 
 
-CFG=linear_20_limassign_0_regen_10
-config "LIMITASSIGN" 0
-config "NOTES" "\"Testing maxload 12 and new resource regen/forage; limassign 50 vs limassign 0; regen 5 vs regen 10\""
+# CFG=linear_20_limassign_0_regen_10
+# config "LIMITASSIGN" 0
+# config "NOTES" "\"Testing maxload 12 and new resource regen/forage; limassign 50 vs limassign 0; regen 5 vs regen 10\""
 
-wait
-run    "${EXP}/${CFG}" $1
+# wait
+# run    "${EXP}/${CFG}" $1
 
 
 

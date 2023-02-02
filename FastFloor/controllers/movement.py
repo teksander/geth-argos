@@ -450,8 +450,10 @@ class RandomWalk(object):
         self.thresh = math.radians(70)    # Wait before moving
 
         # Obstacle avoidance parameters
-        self.thresh_ir = 0
+        self.thresh_ir = 0.2
         self.weights  = 50 * [-10, -10, 0, 0, 0, 0, 10, 10]
+        self.weights_left  = 50*[-10, -10, -5, 0, 0, 5, 10, 10]
+        self.weights_right = 50*[-1 * x for x in self.weights_left]        
 
         # Vectorial obstacle avoidance parameters
         self.vec_avoid = []
@@ -469,7 +471,7 @@ class RandomWalk(object):
             left, right = self.random()
 
             # Avoid Obstacles
-            left, right = self.avoid_argos3_example(left, right)
+            left, right = self.avoid(left, right)
 
             # Saturate wheel actuators
             left, right = self.saturate(left, right)
@@ -550,17 +552,25 @@ class RandomWalk(object):
         # Obstacle avoidance
         readings = self.robot.epuck_proximity.get_readings()
         self.ir = [reading.value for reading in readings]
-                
+
+
         # Find Wheel Speed for Obstacle Avoidance
         for i, reading in enumerate(self.ir):
-            if reading > self.thresh_ir:
-                obstacle = True
-                avoid_left  += self.weights[i] * reading
-                avoid_right -= self.weights[i] * reading
+            if(reading > 0.2 ):
+                left  = self.MAX_SPEED/2 + self.weights_left[i] * reading
+                right = self.MAX_SPEED/2 + self.weights_right[i] * reading
+                # robot.epuck_leds.set_all_colors("red")                
 
-        if obstacle:
-            left  = self.MAX_SPEED/2 + avoid_left
-            right = self.MAX_SPEED/2 + avoid_right
+        # Saturate Speeds greater than MAX_SPEED
+        if left > self.MAX_SPEED:
+            left = self.MAX_SPEED
+        elif left < -self.MAX_SPEED:
+            left = -self.MAX_SPEED
+
+        if right > self.MAX_SPEED:
+            right = self.MAX_SPEED
+        elif right < -self.MAX_SPEED:
+            right = -self.MAX_SPEED
 
         if move:
             self.robot.epuck_wheels.set_speed(right, left)
