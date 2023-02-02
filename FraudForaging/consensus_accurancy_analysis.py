@@ -20,7 +20,7 @@ def extract_all_consensus(consensus_str):
 
 experiment_main_foler = './results/data/experiment_SingleSourceSupp'
 
-this_exps = ['sc_3', 'wmsr_3_3', 'lca_0_3_2','lca_0_5_2']
+this_exps = ['lca_0_6_3', 'wmsr_3_6_3', 'wmsr_3_3_3']
 blockchain_num_consensus = [0]
 num_robots = 15
 
