@@ -32,7 +32,7 @@ export NUMFOOD=1
 
 # [ARGOS]
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_single_sc.py"
-export NUM1A=15
+#export NUM1A=15
 export NUM1B=0
 # export NUM2=0
 export RABRANGE="0.3"

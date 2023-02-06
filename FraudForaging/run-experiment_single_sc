@@ -58,14 +58,17 @@ run() {
 
 
 config "REPS" 20
-export NUM2=5
-run "SingleSourceSupp/sc_5"
+export NUM1A=10
+export NUM2=6
+run "SingleSourceSupp/sc_5_16"
 
 config "REPS" 20
+export NUM1A=13
 export NUM2=3
-run "SingleSourceSupp/sc_3"
+run "SingleSourceSupp/sc_3_16"
 
 config "REPS" 20
+export NUM1A=16
 export NUM2=0
-run "SingleSourceSupp/sc_0"
+run "SingleSourceSupp/sc_0_16"
 

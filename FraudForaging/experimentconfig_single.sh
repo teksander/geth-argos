@@ -32,7 +32,7 @@ export NUMFOOD=1
 
 # [ARGOS]
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_wmsr.py"
-export NUM1A=15
+#export NUM1A=15
 export NUM1B=0
 #export NUM2=0
 export RABRANGE="0.3"
@@ -69,7 +69,7 @@ export MINBALANCE=28000000000000000000
 # [OTHER]
 export SEED=350
 export TIMELIMIT=5 #10min after all have reading
-export REPS=20
+export REPS=15
 
 
 

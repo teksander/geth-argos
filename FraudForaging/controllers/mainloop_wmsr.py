@@ -52,6 +52,9 @@ startFlag = False
 global txList
 txList = []
 
+global num_all_robots
+num_all_robots = num_normal+num_faulty+num_malicious
+
 global submodules
 submodules = []
 
@@ -102,7 +105,7 @@ my_measures = [[0,0] for idx in range(num_normal+num_faulty+num_malicious)]
 
 
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_group_id
+    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_group_id, num_all_robots
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     print(num_normal + num_faulty)
     if int(robotID) > num_normal + num_faulty:
@@ -171,9 +174,11 @@ def init():
         odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * 50)
     elif robot.variables.get_attribute("type") == 'malicious':
         print('malicious agent, odo noise set to, ', int(num_normal/2))
-        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(num_normal/2))
+        #odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(num_normal/2))
+        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'])
     else:
-        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(robotID))
+        #odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(robotID))
+        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'])
 
     # /* Init Ground-Sensors, __mapping process and vote function */
     robot.log.info('Initialising ground-sensors...')
@@ -193,7 +198,7 @@ def init():
 
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_measures, use_wmsr, my_group_id, verify_count, verified_pos
+    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance, belief_pos, latest_reading, i_have_measure, my_measures, use_wmsr, my_group_id, verify_count, verified_pos, num_all_robots
     if not startFlag:
         ##########################
         #### FIRST STEP ##########
@@ -404,7 +409,9 @@ def controlstep():
                         valid_robot_count+=1
                         measure_set.append(this_measure)
 
-                if use_wmsr>0 and belief_pos[0] !=0 and valid_robot_count>=14: #this value represents F
+                if use_wmsr>0 and belief_pos[0] !=0 and valid_robot_count>=(num_all_robots-1): #this value represents F
+                #if use_wmsr > 0 and belief_pos[
+                #        0] != 0 and valid_robot_count >= use_wmsr + 1:  # this value represents F
                     set_larger = []
                     set_smaller = []
                     set_equal = []
@@ -417,12 +424,13 @@ def controlstep():
                         else:
                             set_equal.append([this_measure[0], this_measure[1]])
                     #sorting
+
                     set_larger_sort = sortingFirstElement(set_larger)
                     set_smaller_sort = sortingFirstElement(set_smaller)
                     #print(set_larger_sort)
+                    #print("sorted_list: ", set_larger_sort)
                     measure_set = [] #measures set is being reset here!
                     if len(set_larger_sort)>use_wmsr:
-                        print(set_larger_sort)
                         for this_measure in set_larger_sort[:len(set_larger_sort)-use_wmsr]:
                             measure_set.append([this_measure[1], this_measure[2]])
                     if len(set_smaller_sort) > use_wmsr:
@@ -456,7 +464,7 @@ def controlstep():
                     if worth_verify:
                         verified_pos.append(pos_to_verify)
                         fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
-                elif i_have_measure and len(measure_set)>=(14-use_wmsr):
+                elif i_have_measure and len(measure_set)>=(num_all_robots-1-use_wmsr):
                     last_beliefx = belief_pos[0]
                     last_beliefy = belief_pos[1]
                     belief_pos = [0, 0]
@@ -520,7 +528,8 @@ def controlstep():
                         measure_set.append(this_measure)
                 #robot.variables.set_attribute("has_readings", str(valid_robot_count))
 
-                if use_wmsr>0 and belief_pos[0] !=0 and valid_robot_count>=14: #this value represents F
+                if use_wmsr>0 and belief_pos[0] !=0 and valid_robot_count>=(num_all_robots-1): #this value represents F
+                #if use_wmsr > 0 and belief_pos[0] != 0 and valid_robot_count >= use_wmsr+1:  # this value represents F
                     set_larger = []
                     set_smaller = []
                     set_equal = []
@@ -537,6 +546,7 @@ def controlstep():
                     #sorting
                     set_larger_sort = sortingFirstElement(set_larger)
                     set_smaller_sort = sortingFirstElement(set_smaller)
+                    print("sorted list: ", set_larger_sort)
                     #print(set_larger_sort)
                     measure_set = [] #measures set is being reset here!
                     if len(set_larger_sort)>use_wmsr:
@@ -563,7 +573,7 @@ def controlstep():
                     #    erb.setData(int((belief_pos[0] + 2) * DECIMAL_FACTOR), 1)
                     #    erb.setData(int((belief_pos[1] + 2) * DECIMAL_FACTOR), 2)
                     #    erb.setData(0, 3)
-                elif i_have_measure and len(measure_set)>=(14-use_wmsr):
+                elif i_have_measure and len(measure_set)>=(num_all_robots-1-use_wmsr):
                     last_beliefx = belief_pos[0]
                     last_beliefy = belief_pos[1]
                     belief_pos = [0, 0]
