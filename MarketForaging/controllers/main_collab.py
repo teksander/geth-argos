@@ -624,13 +624,8 @@ def controlstep():
 
                         AP = res.utility*epochs[-1]['price']-sum(epochs[-1]['ATC'])/len(epochs[-1]['ATC'])
                     
-                        # Parameters
-                        # K = 0
-                        # K = 0.4/20000
-                        K = 0.4/(res.utility*epochs[-1]['price'])
-
                         # Linear
-                        P = K * AP
+                        P = cp['entry_K'] * 1/(res.utility*epochs[-1]['price']) * AP
                         
                         # Sigmoid
 
