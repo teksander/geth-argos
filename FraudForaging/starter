@@ -36,21 +36,24 @@ sed -e "s|NUMROBOTS|$NUMROBOTS|g"\
     -e "s|ARENADIMY|$ARENADIMY|g"\
   $ARGOSTEMPLATE > $ARGOSFILE
 
-if [[ $1 == "--reset-geth" ]]; then
+for opt in "$@"
+do
+if [[ $opt == "--reset" || $opt == "-r" ]]; then
 
     echo "+-----------------------------------------------------------+"
     echo "Resetting Geth..."
     ./reset-geth
-
-    echo "+-----------------------------------------------------------+"
-    echo "Waiting web3 to respond..."
-
-    while [[ $ready != $NUMROBOTS ]]; do
-        . test-tcp 4000
-        sleep 0.5
-    done
 fi
+done
 
+echo "+-----------------------------------------------------------+"
+echo "Waiting web3 to respond..."
+
+ready=0
+while [[ $ready != $NUMROBOTS ]]; do
+    . test-tcp 4000
+    sleep 0.5
+done
 
 echo "+-----------------------------------------------------------+"
 echo "Cleaning logs folder..."
@@ -58,16 +61,28 @@ echo "Cleaning logs folder..."
 # Keep files 0-$NUMROBOTS in order to prevent having to reopen logs
 eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
 
-if [[ $2 == "--start" ]]; then
+
+for opt in "$@"
+do
+if [[ $opt == "--start" || $opt == "-s" ]]; then
     echo "+-----------------------------------------------------------+"
     echo "Starting Experiment-GUI"
 
     argos3 -c $ARGOSFILE
 fi
 
-if [[ $2 == "--start-novis" ]]; then
+if [[ $opt == "--start-novis" || $opt == "-sz" ]]; then
     echo "+-----------------------------------------------------------+"
     echo "Starting Experiment"
 
     argos3 -z -c $ARGOSFILE
 fi
+
+if [[ $opt == "--logs" || $opt == "-l" ]]; then
+    ./tmux-all -l monitor.log
+fi
+
+if [[ $opt == "--python" || $opt == "-p" ]]; then
+    ./tmux-all -s python
+fi
+done
