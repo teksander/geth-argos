@@ -1,0 +1,20 @@
+[3 INFO main 35] Initialising Python Geth Console...
+[3 INFO main 39] Initialising RandB board...
+[3 INFO main 39] Initialising navigation...
+[3 INFO main 39] Initialising random-walk...
+[3 INFO main 39] Initialising odometry...
+[3 INFO main 39] Initialising ground-sensors...
+[3 INFO main 1071] --//-- Starting Experiment --//--
+[3 INFO main 2323] Idle.IDLE -> Scout.Query | Duration: 29.91
+[3 INFO main 49186] Scout.Query -> Scout.PrepSend | Homing
+[3 INFO main 54235] Scout.PrepSend -> Verify.Homing | Homing
+[3 INFO main 68089] Verify.Homing -> Scout.Query | Arrived home
+[3 INFO main 77297] Confirming: 1/9
+[3 INFO main 79397] Confirming: 2/9
+[3 INFO main 81497] Confirming: 3/9
+[3 INFO main 83597] Confirming: 4/9
+[3 INFO main 87797] Confirming: 6/9
+[3 INFO main 89900] Confirming: 7/9
+[3 INFO main 91953] Confirming: 8/9
+[3 INFO main 94097] Confirming: 9/9
+[3 INFO main 94316] Scout.Query -> Verify.DriveTo | Go to unverified source

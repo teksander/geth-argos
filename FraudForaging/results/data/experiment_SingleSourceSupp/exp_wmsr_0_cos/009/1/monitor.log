@@ -1,0 +1,794 @@
+[1 INFO main 37] Initialising Python Geth Console...
+[1 INFO main 41] Initialising RandB board...
+[1 INFO main 41] Initialising navigation...
+[1 INFO main 41] Initialising random-walk...
+[1 INFO main 41] Initialising odometry...
+[1 INFO main 41] Initialising ground-sensors...
+[1 INFO main 855] --//-- Starting Experiment --//--
+[1 INFO main 1957] Idle.IDLE -> Scout.Query | Duration: 22.29
+[1 INFO main 89269] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 102886] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 103288] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 103386] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 104289] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 109093] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 109394] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 109493] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 110395] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 114297] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 114599] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 114698] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 115600] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 122308] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 122610] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 122709] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 123611] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 139329] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 139631] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 139730] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 140632] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 153750] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 154751] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 154850] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 155752] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 156853] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 157755] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 157954] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 158756] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 158955] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 159758] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 159856] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 160759] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 160857] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 161760] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 163661] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 163861] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 163961] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 164862] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 164962] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 165864] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 165964] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 166864] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 169065] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 169866] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 169965] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 170867] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 171767] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 171868] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 171967] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 172869] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 172968] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 173870] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 175671] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 175871] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 175970] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 176874] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 176971] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 177972] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 178072] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 178973] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 179073] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 179974] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 180073] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 180978] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 182078] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 182981] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 183079] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 184082] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 184180] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 185083] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 185182] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 186185] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 186984] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 187186] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 187285] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 188187] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 188286] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 189189] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 189287] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 190290] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 190389] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 191292] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 191390] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 192293] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 192391] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 193294] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 193392] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 194295] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 194394] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 195297] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 195395] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 196298] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 196396] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 197299] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 197398] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 198300] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 198399] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 199402] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 199500] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 200403] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 200602] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 201404] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 203407] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 204408] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 204507] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 205410] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 205508] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 206411] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 206509] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 207412] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 207510] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 208413] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 210416] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 211417] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 211515] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 212417] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 212516] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 213517] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 214020] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 214520] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 214619] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 215521] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 215620] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 216523] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 216621] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 217524] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 217622] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 218525] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 218624] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 219526] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 219625] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 220527] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 222029] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 222629] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 222729] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 223630] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 225032] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 225633] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 225733] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 226634] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 226734] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 227635] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 229838] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 230639] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 230739] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 231740] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 231841] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 232741] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 233843] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 234744] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 234845] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 235745] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 237948] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 238749] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 238850] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 239751] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 239851] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 240752] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 240852] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 241753] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 241853] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 242754] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 242854] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 243755] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 243856] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 244756] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 244857] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 245759] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 245858] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 246759] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 248361] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 248761] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 249162] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 249763] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 249863] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 250765] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 250864] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 251766] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 254570] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 254769] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 254869] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 255771] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 255870] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 256771] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 256871] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 257773] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 257971] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 258774] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 258874] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 259775] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 260076] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 260777] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 260877] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 261778] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 261878] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 262779] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 262879] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 263780] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 263881] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 264782] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 264880] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 265784] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 268587] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 268788] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 268887] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 269790] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 269888] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 270791] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 271792] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 272794] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 272892] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 273795] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 273894] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 274796] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 276997] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 277800] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 277999] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 278801] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 278900] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 279802] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 279901] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 280803] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 282604] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 282806] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 282905] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 283807] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 284106] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 284809] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 284907] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 285810] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 285908] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 286811] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 286910] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 287813] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 290316] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 290816] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 290915] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 291818] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 291916] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 292818] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 293016] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 293819] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 293918] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 294821] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 296521] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 296823] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 296922] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 297825] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 297923] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 298825] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 299525] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 299827] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 300026] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 300828] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 300927] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 301830] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 301928] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 302830] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 302929] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 303832] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 307034] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 307837] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 308338] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 308938] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 310238] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 310941] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 311039] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 312041] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 312641] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 313043] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 313242] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 314044] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 314343] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 315046] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 315547] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 316047] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 316145] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 317048] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 317247] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 318049] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 318148] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 319051] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 319248] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 320052] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 320150] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 321053] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 321152] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 322055] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 322453] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 323055] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 323556] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 324057] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 324156] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 325058] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 325657] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 326060] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 327160] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 328062] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 328361] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 329064] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 329362] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 330065] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 330263] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 331066] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 331164] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 332067] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 332265] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 333068] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 333166] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 334168] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 335869] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 336271] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 336570] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 337274] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 337773] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 338372] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 338471] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 339374] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 340475] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 341376] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 341476] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 342378] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 342978] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 343379] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 344180] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 344380] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 344782] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 345381] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 345682] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 346384] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 346483] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 347385] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 347484] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 348387] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 348485] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 349388] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 349487] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 350390] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 350488] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 351391] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 351891] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 352393] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 352491] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 353393] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 353492] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 354395] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 354493] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 355396] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 355495] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 356398] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 356497] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 357496] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 357596] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 358497] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 358899] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 359501] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 359900] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 360502] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 361202] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 361504] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 362604] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 363506] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 363605] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 364507] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 364807] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 365509] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 365608] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 366510] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 368311] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 368512] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 368912] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 369514] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 369913] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 370515] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 370614] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 371517] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 371614] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 372518] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 373718] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 374520] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 374919] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 375522] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 375820] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 376523] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 376721] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 377524] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 378124] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 378625] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 379126] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 379626] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 379925] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 380628] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 380726] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 381628] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 384732] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 385634] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 386034] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 386635] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 386734] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 387637] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 387735] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 388638] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 388737] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 389639] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 389939] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 390641] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 392442] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 392645] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 392842] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 393645] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 393744] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 394647] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 394745] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 395648] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 395747] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 396650] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 396747] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 397749] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 397849] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 398750] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 398851] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 399752] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 399852] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 400753] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 400953] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 401754] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 401854] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 402756] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 402855] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 403757] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 403857] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 404758] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 405160] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 405759] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 406059] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 406760] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 406860] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 407761] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 409363] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 409764] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 409864] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 410765] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 411066] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 411766] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 411866] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 412768] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 412868] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 413770] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 413869] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 414771] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 414870] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 415773] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 416273] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 416774] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 417474] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 417776] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 417973] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 418777] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 419076] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 419779] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 420279] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 420780] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 421679] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 421781] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 422180] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 422782] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 423382] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 423784] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 423983] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 424785] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 425685] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 425887] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 426586] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 426988] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 427087] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 427989] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 428289] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 428991] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 429891] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 429992] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 431793] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 431995] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 432495] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 432995] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 433497] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 433997] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 434498] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 434999] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 435198] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 436000] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 436098] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 437002] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 437502] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 438003] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 439004] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 440005] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 440104] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 441105] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 441206] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 442108] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 443208] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 444111] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 445112] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 446113] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 446212] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 447114] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 447213] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 448116] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 449216] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 450118] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 450217] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 451119] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 451619] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 452121] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 452219] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 453222] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 454435] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 455238] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 455637] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 456240] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 456438] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 457240] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 457940] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 458242] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 458841] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 459243] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 459442] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 460244] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 460944] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 461246] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 462247] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 463248] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 463347] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 464249] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 465850] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 466252] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 466351] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 467253] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 467352] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 468255] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 468354] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 469256] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 469355] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 470258] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 470357] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 471259] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 473261] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 474263] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 475264] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 476265] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 476766] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 477266] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 477565] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 478268] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 478367] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 479269] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 479368] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 480271] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 480369] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 481272] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 481370] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 482273] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 483573] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 484276] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 484374] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 485277] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 485375] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 486278] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 486377] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 487279] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 487378] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 488281] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 488680] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 489382] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 489481] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 490383] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 490482] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 491384] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 491483] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 492386] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 492484] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 493387] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 494385] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 494489] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 494587] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 495490] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 495789] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 496491] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 496590] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 497492] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 497791] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 498494] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 498592] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 499495] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 499794] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 500496] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 500595] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 501497] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 501696] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 502499] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 502597] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 503500] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 503699] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 504501] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 504600] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 505503] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 505601] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 506504] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 506803] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 507506] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 507704] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 508506] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 508605] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 509507] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 510107] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 510509] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 510707] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 511610] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 511709] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 512611] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 512710] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 513613] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 513711] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 514614] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 514712] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 515615] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 515714] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 516616] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 516715] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 517618] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 518217] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 518619] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 518818] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 519620] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 519719] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 520622] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 520921] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 521622] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 521721] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 522624] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 522723] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 523625] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 523724] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 524627] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 524725] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 525627] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 525726] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 526629] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 526728] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 527630] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 527829] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 528631] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 528730] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 529632] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 529731] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 530634] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 531032] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 531635] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 532234] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 532636] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 532735] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 533738] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 533836] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 534739] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 534838] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 535741] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 535839] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 536742] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 536840] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 537743] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 537841] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 538744] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 538841] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 539845] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 540145] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 540847] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 542349] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 542849] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 543249] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 543851] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 544250] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 544852] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 544951] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 545853] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 546251] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 546955] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 547053] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 547956] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 548255] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 548957] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 549056] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 549959] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 550459] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 550960] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 551158] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 551961] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 553061] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 553963] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 554062] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 554965] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 555064] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 555966] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 556165] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 556968] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 557468] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 558069] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 558167] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 559070] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 559169] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 560071] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 560572] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 561073] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 562371] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 563075] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 563174] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 564076] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 564175] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 565078] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 565176] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 566079] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 566580] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 567081] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 567179] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 568082] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 568181] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 569083] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 569182] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 570084] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 570183] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 571086] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 571285] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 572087] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 572186] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 573089] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 573188] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 574190] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 575090] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 575192] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 575891] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 576193] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 576292] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 577292] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 577394] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 578296] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 578395] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 579298] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 579596] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 580399] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 581098] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 581400] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 581498] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 582400] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 582501] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 583401] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 583502] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 584402] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 585104] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 585403] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 585503] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 586405] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 586607] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 587406] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 588006] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 588407] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 589208] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 589409] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 590410] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 591411] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 591711] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 592412] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 592512] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 593414] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 593514] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 594415] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 594515] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 595416] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 596818] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 597419] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 597819] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 598420] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 598520] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 599421] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 599521] Scout.GotoCenter -> Scout.Query | return to random walk
+[1 INFO main 600423] Scout.Query -> Scout.GotoCenter | Drive to others reported pos
+[1 INFO main 600522] Scout.GotoCenter -> Scout.Query | return to random walk
