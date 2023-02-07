@@ -174,11 +174,11 @@ def init():
         odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * 50)
     elif robot.variables.get_attribute("type") == 'malicious':
         print('malicious agent, odo noise set to, ', int(num_normal/2))
-        #odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(num_normal/2))
-        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'])
+        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(num_normal/2))
+        #odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'])
     else:
-        #odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(robotID))
-        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'])
+        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(robotID))
+        #odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'])
 
     # /* Init Ground-Sensors, __mapping process and vote function */
     robot.log.info('Initialising ground-sensors...')
@@ -403,13 +403,11 @@ def controlstep():
                 #own belief
                 #my_measures[int(robotID) - 1] = [belief_pos[0], belief_pos[1]]
 
-                valid_robot_count = 0
                 for this_measure in my_measures:
-                    if this_measure[0] !=0 or this_measure[1]!=0:
-                        valid_robot_count+=1
+                    if this_measure[0] !=0 and this_measure[1]!=0:
                         measure_set.append(this_measure)
-
-                if use_wmsr>0 and belief_pos[0] !=0 and valid_robot_count>=(num_all_robots-1): #this value represents F
+                #print(robotID, valid_robot_count, num_all_robots-1, belief_pos)
+                if use_wmsr>0 and belief_pos[0] !=0 and len(measure_set)>use_wmsr: #this value represents F
                 #if use_wmsr > 0 and belief_pos[
                 #        0] != 0 and valid_robot_count >= use_wmsr + 1:  # this value represents F
                     set_larger = []
@@ -426,24 +424,28 @@ def controlstep():
                     #sorting
 
                     set_larger_sort = sortingFirstElement(set_larger)
+                    #print(robotID, valid_robot_count, set_larger_sort)
                     set_smaller_sort = sortingFirstElement(set_smaller)
                     #print(set_larger_sort)
                     #print("sorted_list: ", set_larger_sort)
                     measure_set = [] #measures set is being reset here!
                     if len(set_larger_sort)>use_wmsr:
                         for this_measure in set_larger_sort[:len(set_larger_sort)-use_wmsr]:
+                            #print("included: ", set_larger_sort[:len(set_larger_sort)-use_wmsr])
+                            #print("excluded: ", set_larger_sort[len(set_larger_sort) - use_wmsr:])
                             measure_set.append([this_measure[1], this_measure[2]])
                     if len(set_smaller_sort) > use_wmsr:
                         for this_measure in set_larger_sort[-(len(set_larger_sort)-use_wmsr):]:
                             measure_set.append([this_measure[1], this_measure[2]])
                     for this_measure in set_equal:
                         measure_set.append([this_measure[0], this_measure[1]])
-                    valid_robot_count = len(measure_set)
+                elif len(measure_set)<use_wmsr:
+                    measure_set=[]
 
 
 
                 #LSA belief pos
-                if i_have_measure == False and valid_robot_count>0: #idont have measure, but i see others have
+                if i_have_measure == False and len(measure_set)>0: #idont have measure, but i see others have
                     temp_belief_pos = [0,0]
                     for valid_measure in measure_set:
                         temp_belief_pos[0] += valid_measure[0]
@@ -464,7 +466,7 @@ def controlstep():
                     if worth_verify:
                         verified_pos.append(pos_to_verify)
                         fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
-                elif i_have_measure and len(measure_set)>=(num_all_robots-1-use_wmsr):
+                elif i_have_measure and len(measure_set)>=(int(math.ceil(num_all_robots/2))-1-use_wmsr):
                     last_beliefx = belief_pos[0]
                     last_beliefy = belief_pos[1]
                     belief_pos = [0, 0]
@@ -521,14 +523,12 @@ def controlstep():
                 # own belief
                 #my_measures[int(robotID) - 1] = [belief_pos[0], belief_pos[1]]
 
-                valid_robot_count = 0
                 for this_measure in my_measures:
                     if this_measure[0] !=0 or this_measure[1]!=0:
-                        valid_robot_count+=1
                         measure_set.append(this_measure)
                 #robot.variables.set_attribute("has_readings", str(valid_robot_count))
-
-                if use_wmsr>0 and belief_pos[0] !=0 and valid_robot_count>=(num_all_robots-1): #this value represents F
+                #print(robotID, valid_robot_count, num_all_robots-1, belief_pos, 'v')
+                if use_wmsr>0 and belief_pos[0] !=0 and len(measure_set)>use_wmsr: #this value represents F
                 #if use_wmsr > 0 and belief_pos[0] != 0 and valid_robot_count >= use_wmsr+1:  # this value represents F
                     set_larger = []
                     set_smaller = []
@@ -546,7 +546,7 @@ def controlstep():
                     #sorting
                     set_larger_sort = sortingFirstElement(set_larger)
                     set_smaller_sort = sortingFirstElement(set_smaller)
-                    print("sorted list: ", set_larger_sort)
+                    #print("sorted list: ", set_larger_sort)
                     #print(set_larger_sort)
                     measure_set = [] #measures set is being reset here!
                     if len(set_larger_sort)>use_wmsr:
@@ -557,10 +557,11 @@ def controlstep():
                             measure_set.append([this_measure[1], this_measure[2]])
                     for this_measure in set_equal:
                         measure_set.append([this_measure[0], this_measure[1]])
-                    valid_robot_count = len(measure_set)
+                elif len(measure_set)<=use_wmsr:
+                    measure_set=[]
 
                 #LSA belief pos"
-                if i_have_measure == False and valid_robot_count>0: #idont have measure, but i see others have
+                if i_have_measure == False and len(measure_set)>0: #idont have measure, but i see others have
                     temp_belief_pos = [0,0]
                     for valid_measure in measure_set:
                         temp_belief_pos[0] += valid_measure[0]
@@ -573,7 +574,7 @@ def controlstep():
                     #    erb.setData(int((belief_pos[0] + 2) * DECIMAL_FACTOR), 1)
                     #    erb.setData(int((belief_pos[1] + 2) * DECIMAL_FACTOR), 2)
                     #    erb.setData(0, 3)
-                elif i_have_measure and len(measure_set)>=(num_all_robots-1-use_wmsr):
+                elif i_have_measure and len(measure_set)>=(int(math.ceil(num_all_robots/2))-1-use_wmsr):
                     last_beliefx = belief_pos[0]
                     last_beliefy = belief_pos[1]
                     belief_pos = [0, 0]
