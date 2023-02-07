@@ -23,4 +23,5 @@ services:
       - ./geth/templates/:/root/templates/:ro
       - ./geth/files/genesis_poa.json:/root/files/genesis_poa.json:ro
       - ./geth/files/keystores:/root/.ethereum/devchain/keystores:rw
+      - ./geth/communication_size/:/root/communication_size/:rw
     command: '--datadir=~/.ethereum/devchain --keystore=~/.ethereum/devchain/keystores/KEYSTORE/ --lightkdf --ws --ws.addr "0.0.0.0" --ws.port 8545 --ws.api "db,personal,eth,net,web3,admin,miner" --nodiscover --verbosity 2 --syncmode full --rpcapi "db,personal,eth,net,web3,admin" --allow-insecure-unlock --rpccorsdomain="*" --networkid=456719 --rpc --rpcaddr="0.0.0.0" -miner.gasprice 1 --nat=extip:IPADDRESS'

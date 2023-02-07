@@ -10,13 +10,13 @@ EXPOSE 4000 9800-9899 8545 8546 8547 30303 30303/udp
 USER root
 WORKDIR /root/
 
-RUN apk add --no-cache --update git bash nodejs npm perl python3 python3-dev py3-pip build-base 
+RUN apk add --no-cache --update git bash nodejs npm perl python3 python3-dev py3-pip build-base linux-headers nethogs
 #RUN npm config set unsafe-perm true && npm install -g npm@next && npm config set unsafe-perm false
 RUN cd /root &&\
     npm install solc@0.8.5 &&\
     npm install web3@1.3.4
 RUN pip3 install --upgrade pip
-RUN pip3 install web3 rpyc
+RUN pip3 install web3 rpyc psutil
 
 COPY ./scripts /root/
 COPY ./files/password /root/files/password

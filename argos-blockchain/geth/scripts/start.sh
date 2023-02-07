@@ -28,10 +28,12 @@ python3 /root/python_scripts/analytics.py $SLOT&
 echo "Starting peering buffer"
 python3 /root/python_scripts/buffer.py&
 
+echo "Starting communication size logging"
+bash /root/python_scripts/communication_size.sh $ip &
+
 echo "Starting web3 wrapper hosting"
 python3 /root/python_scripts/web3wrapper_docker.py
 
-# sleep 1
 
 tail -f /dev/null
 

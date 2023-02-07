@@ -71,28 +71,120 @@ run() {
 
 
 
-EXP=8rob-2byz
-CFG=basic_volker_test
-config "REPS" 1
-config "NUM1" 24
-config "NUMBYZANTINE" 6
-config "FLOORFILE" 22.png
-config "ARENADIM" 1.20
-config "ARENADIMH" 0.60
-config "RABRANGE" 0.13
-config "NOTES" "\"Basic long-term experiment with 8 robots and a run-time of 600 minutes\""
+# EXP=8rob-2byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 8
+# config "NUMBYZANTINE" 2
+# config "FLOORFILE" 22.png
+# config "ARENADIM" 1.20
+# config "ARENADIMH" 0.60
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 8 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
 
-if [[ $1 = "--no-blockchain" || $1 = "-n" ]]; then
-	echo "TEST"
-	config "CON1" "\"/home/volker/geth-argos-docker-inside/FastFloor/controllers/main_no_blockchain.py\""
-	config "REALTIME" "false"
-else
-	config "CON1" "\"/home/ubuntu/geth-argos-docker-inside/FastFloor/controllers/main.py\""
-	config "REALTIME" "true"	
-fi
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+# EXP=16rob-4byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 16
+# config "NUMBYZANTINE" 4
+# config "FLOORFILE" 31.png
+# config "ARENADIM" 1.65
+# config "ARENADIMH" 0.825
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 16 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+
+# EXP=24rob-6byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 24
+# config "NUMBYZANTINE" 6
+# config "FLOORFILE" 38.png
+# config "ARENADIM" 2.0
+# config "ARENADIMH" 1.0
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 24 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+
+# EXP=48rob-12byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 48
+# config "NUMBYZANTINE" 12
+# config "FLOORFILE" 54.png
+# config "ARENADIM" 2.8
+# config "ARENADIMH" 1.4
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 48 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+# EXP=72rob-18byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 72
+# config "NUMBYZANTINE" 18
+# config "FLOORFILE" 66.png
+# config "ARENADIM" 3.4
+# config "ARENADIMH" 1.7
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 72 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+# EXP=96rob-24yz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 96
+# config "NUMBYZANTINE" 24
+# config "FLOORFILE" 76.png
+# config "ARENADIM" 3.9
+# config "ARENADIMH" 1.95
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 96 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+EXP=120rob-30yz
+CFG=default
+config "REPS" 20
+config "NUM1" 120
+config "NUMBYZANTINE" 30
+config "FLOORFILE" 85.png
+config "ARENADIM" 4.35
+config "ARENADIMH" 2.175
+config "RABRANGE" 0.13
+config "NOTES" "\"Basic long-term experiment with 120 robots and a run-time of 600 minutes\""
+config "REALTIME" "true"
 
 wait
 run    "${EXP}/${CFG}" $1
+
+
+
 
 
 # CFG=linear_20_limassign_0_regen_10

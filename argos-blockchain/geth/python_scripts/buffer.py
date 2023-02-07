@@ -36,7 +36,7 @@ class TCP_server2(object):
 		self.host = host
 		self.port = port  
 
-		self.__received = []                            
+		self.__received = dict()                            
 		self.__stop = False
 
 		logger.info('TCP-Server OK')
@@ -70,7 +70,7 @@ class TCP_server2(object):
 				if data:
 					self.__received = eval(data)
 				else:
-					self.__received = []
+					self.__received = dict()
 
 				# reply to data
 				__clientsocket.send(self.data)
@@ -152,46 +152,63 @@ def getIps(__enodes = None):
 
 
 
-global peered, peers, peers_geth
-peers = dict()
+global peered_IPs, peer_IPs, peers_geth
+
+# peer_IPs is the dict {id:ip} we get from argos controller that is reset every step
+peer_IPs = dict()
+
+# peers_geth is the list of IPs we get from geth.admin 
 peers_geth = []
-peered = set()
+
+# peered_IPs is our local buffer 
+peered_IPs = set()
 
 
 def peering():
 	""" Control routine for robot-to-robot dynamic peering """
-	global peered, peers, peers_geth
+	global peered_IPs, peer_IPs, peers_geth
 	
 	peers_geth_enodes = getEnodes()
 	peers_geth = set(getIps(peers_geth_enodes))
 	# print(peers_geth)
 
-	for peer in peers:
-		if peers[peer] not in peered:
-			enode = tcp_enode.request(host=peers[peer], port=5000) 
+	for peer_ID, peer_IP in peer_IPs.items():
+		if peer_IP not in peered_IPs:
+			enode = tcp_enode.request(host=peer_IP, port=5000) 
 			if 'enode' in enode:
 				w3.geth.admin.addPeer(enode)
-				peered.add(peers[peer])
-				print('Added peer: %s|%s' % (peer, enode))
+				peered_IPs.add(peer_IP)
+				print('Added peer: %s|%s' % (peer_ID, enode))
 
-	temp = copy.copy(peered)
+	temp = copy.copy(peered_IPs)
 
-	for peer in temp:
-		if peer not in peers.values():
-			enode = tcp_enode.request(host=peer, port=5000)
+	for peer_IP in temp:
+		if peer_IP not in peer_IPs.values():
+			enode = tcp_enode.request(host=peer_IP, port=5000)
 			if 'enode' in enode:
 				w3.provider.make_request("admin_removePeer",[enode])
-				peered.remove(peer)
-				print('Removed peer: %s|%s' % (peer, enode))
 
-	peers = dict()
+				peers_geth_enodes = getEnodes()
+				if enode not in peers_geth_enodes:
+					peered_IPs.remove(peer_IP)
+					print('Removed peer: %s|%s' % (peer_IP, enode))
+
+	# for enode in peers_geth_enodes:
+	# 	peer_IP = getIp(enode)
+	# 	if peer_IP not in peer_IPs.values():
+	# 		w3.provider.make_request("admin_removePeer",[enode])
+	# 		peered_IPs.remove(peer_IP)
+	# 		print('Timed out peer: %s|%s' % (peer_ID, enode))
+
+
+	peer_IPs = dict()
 	tcp_peering.setData(len(peers_geth))
 
 
-Patch_key = sc.functions.Patch_key().call()
-Epoch_key = sc.functions.Epoch_key().call()
-Robot_key = sc.functions.Robot_key().call()
-Token_key = sc.functions.Token_key().call()
+# Patch_key = sc.functions.Patch_key().call()
+# Epoch_key = sc.functions.Epoch_key().call()
+# Robot_key = sc.functions.Robot_key().call()
+# Token_key = sc.functions.Token_key().call()
 
 def l2d(l,k):
 	if l:
@@ -202,31 +219,48 @@ def l2d(l,k):
 def blockHandle():
 	""" Every time new blocks are synchronized """
 
-	patches = [l2d(x, Patch_key) for x in sc.functions.getPatches().call()]
-	for index, patch in enumerate(patches):
-		patches[index]['epoch'] = l2d(patch['epoch'], Epoch_key)
+	# patches = [l2d(x, Patch_key) for x in sc.functions.getPatches().call()]
+	# for index, patch in enumerate(patches):
+	# 	patches[index]['epoch'] = l2d(patch['epoch'], Epoch_key)
 
-	patch   = l2d(sc.functions.getPatch().call(), Patch_key)
-	patch['epoch'] = l2d(patch['epoch'], Epoch_key)
+	# patch   = l2d(sc.functions.getPatch().call(), Patch_key)
+	# patch['epoch'] = l2d(patch['epoch'], Epoch_key)
 
-	epochs  = [l2d(x, Epoch_key) for x in sc.functions.getEpochs().call()]
-	robot   = l2d(sc.functions.robot(w3.key).call(), Robot_key)
-	token   = l2d(sc.functions.token().call(), Token_key)
-	availiable = sc.functions.findAvailiable().call() < 9999
+	# epochs  = [l2d(x, Epoch_key) for x in sc.functions.getEpochs().call()]
+	# robot   = l2d(sc.functions.robot(w3.key).call(), Robot_key)
+	# token   = l2d(sc.functions.token().call(), Token_key)
+	# availiable = sc.functions.findAvailiable().call() < 9999\
+
 	block      = dict(w3.eth.getBlock('latest'))
+	ticket_price = sc.functions.getTicketPrice().call()
+	am_registered = sc.functions.robot(w3.key).call()[0]
+	print("I am registered", am_registered)
+
+	ubi = sc.functions.askForUBI().call()
+	payout = sc.functions.askForPayout().call()
+	newRound = sc.functions.isNewRound().call()
+	mean = sc.functions.mean().call()
+	voteCount = sc.functions.getVoteCount().call()
+	voteOkCount = sc.functions.getVoteOkCount().call()
+	balance = w3.fromWei(w3.eth.get_balance(w3.key), 'ether')
+	consensus_reached = sc.functions.isConverged().call()
 
 	for key, value in block.items():
 		if type(value)==HexBytes:
 			block[key] = value.hex()
 
 	tcp_calls.setData({
-		'getAvailiable': availiable, 
-		'getPatches': patches, 
-		'getEpochs': epochs,
-		'getPatch': patch, 
-		'getRobot': robot,
-		'token':    token,
-		'block':    block
+		'getTicketPrice': ticket_price,
+		'amRegistered': am_registered,
+		'askForUBI': ubi,
+		'askForPayout': payout,
+		'isNewRound': newRound,
+		'voteCount': voteCount,
+		'voteOkCount': voteOkCount,
+		'block': block,
+		'mean': mean,
+		'balance': balance,
+		'consensus_reached': consensus_reached
 		})
 
 if __name__ == '__main__':
@@ -269,9 +303,10 @@ if __name__ == '__main__':
 ################################################################################################################
 
 	while True:
-		peers = tcp_peering.getNew()
-		if peers:
-			peering()
+
+		peer_IPs = tcp_peering.getNew()
+
+		peering()
 		
 		# requests = tcp_reqs.getNew()
 		# if requests:

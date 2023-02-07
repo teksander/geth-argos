@@ -235,15 +235,16 @@ def blockHandle():
 	ticket_price = sc.functions.getTicketPrice().call()
 	am_registered = sc.functions.robot(w3.key).call()[0]
 	print("I am registered", am_registered)
-        
+
 	ubi = sc.functions.askForUBI().call()
 	payout = sc.functions.askForPayout().call()
 	newRound = sc.functions.isNewRound().call()
 	mean = sc.functions.mean().call()
 	voteCount = sc.functions.getVoteCount().call()
 	voteOkCount = sc.functions.getVoteOkCount().call()
-	balance = w3.fromWei(w3.eth.get_balance(w3.eth.coinbase), 'ether')
-	
+	balance = w3.fromWei(w3.eth.get_balance(w3.key), 'ether')
+	consensus_reached = sc.functions.isConverged().call()
+
 	for key, value in block.items():
 		if type(value)==HexBytes:
 			block[key] = value.hex()
@@ -253,12 +254,13 @@ def blockHandle():
 		'amRegistered': am_registered,
 		'askForUBI': ubi,
 		'askForPayout': payout,
-		'isNewRound': newRound, 
+		'isNewRound': newRound,
 		'voteCount': voteCount,
 		'voteOkCount': voteOkCount,
 		'block': block,
 		'mean': mean,
-		'balance': balance
+		'balance': balance,
+		'consensus_reached': consensus_reached
 		})
 
 if __name__ == '__main__':

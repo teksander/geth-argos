@@ -58,6 +58,8 @@ clocks['regen']      = dict()
 clocks['forage']     = dict()
 other['foragers']    = dict()
 
+global myclock
+
 def init():
     # Determine which robots are Byzantines
     byzantines = random.sample(allrobots, k=int(lp['environ']['NUMBYZANTINE']))
@@ -67,10 +69,23 @@ def init():
         robot.variables.set_attribute("isByz","True")
 
 def pre_step():
-    pass
+    global myclock, startFlag, startTime
+
+    if not startFlag:
+        myclock = 0
+        startTime = time.time()
+        startFlag = True
+        
+    myclock += 1
+    
+    if myclock % 10 == 0:
+        
+        print("Real", time.time() - startTime, "ARGoS", myclock)
 
 def post_step():
-    pass
+    global startFlag
+    if not startFlag:
+        startFlag = True
 
 def is_experiment_finished():
     global stopFlag

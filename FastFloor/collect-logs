@@ -5,7 +5,7 @@ source experimentconfig.sh
 
 LOGSFOLDER="$EXPERIMENTFOLDER/logs/"
 DATAFOLDER="$EXPERIMENTFOLDER/results/data/experiment_$1/"
-PLOTFOLDER="$EXPERIMENTFOLDER/results/plots/experiment_$1/"
+COMMFOLDER=""
 
 # Create the experiment directory
 mkdir -p $LOGSFOLDER $DATAFOLDER $PLOTFOLDER
@@ -22,8 +22,10 @@ cp $EXPERIMENTFOLDER/controllers/control_params.py $LOGSFOLDER
 
 # Collect geth related logs from docker folder into /logs/
 for ID in $(seq 1 $NUMROBOTS); do
-  cp -rp $DOCKERFOLDER/geth/logs/$ID/ $LOGSFOLDER
+    cp -rp $DOCKERFOLDER/geth/logs/$ID/ $LOGSFOLDER
 done
+
+cp -rp $DOCKERFOLDER/geth/communication_size/ $LOGSFOLDER
 
 # Collect data from /logs/ into /results/data
 cp -rp $LOGSFOLDER $DATAFOLDER$new_rep

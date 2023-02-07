@@ -52,6 +52,7 @@ class Transaction(object):
 		try:
 			self.tx = w3.eth.getTransaction(self.hash)
 		except Exception as e:
+                        print("Volker Error TX")                        
 			print(e)
 			self.tx = None
 
@@ -59,6 +60,7 @@ class Transaction(object):
 		try:
 			self.receipt = w3.eth.getTransactionReceipt(self.hash)
 		except Exception as e:
+                        print("Volker Error Receipt")
 			print(e)
 			self.receipt = None
 

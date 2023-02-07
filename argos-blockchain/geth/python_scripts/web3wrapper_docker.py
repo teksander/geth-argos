@@ -54,6 +54,12 @@ class Web3_Wrapper_Service(rpyc.Service):
         def exposed_getTransactionReceipt(txHash):
             return w3.eth.getTransactionReceipt(txHash)
 
+        def exposed_getGasPrice():
+            return w3.eth.gas_price
+
+        def exposed_estimateGas(tx):
+            return web3.eth.estimate_gas(tx)
+        
     class exposed_geth:
 
         class exposed_miner:
@@ -84,13 +90,25 @@ class Web3_Wrapper_Service(rpyc.Service):
 
             # Expose .functions.<function>(*args).call() and .functions.<function>(*args).transact(*args)
             for fun in funs:
+
+                # exec('class exposed_%s:\
+                #     \n\tdef __init__(self,*args):\
+                #     \n\t\tself.args = args\
+                #     \n\tdef exposed_call(self):\
+                #     \n\t\treturn sc.functions.%s(*self.args).call()\
+                #     \n\tdef exposed_transact(self, *args):\
+                #     \n\t\treturn sc.functions.%s(*self.args).transact(*args)' % (fun,fun,fun))
+                
                 exec('class exposed_%s:\
                     \n\tdef __init__(self,*args):\
                     \n\t\tself.args = args\
                     \n\tdef exposed_call(self):\
                     \n\t\treturn sc.functions.%s(*self.args).call()\
                     \n\tdef exposed_transact(self, *args):\
-                    \n\t\treturn sc.functions.%s(*self.args).transact(*args)' % (fun,fun,fun))
+                    \n\t\ttry:\
+                    \n\t\t\treturn sc.functions.%s(*self.args).transact(*args)\
+                    \n\t\texcept:\
+                    \n\t\t\tprint(\"Could not execute function\")' % (fun,fun,fun))
 
     class exposed_bf:
         def exposed_get_new_entries():

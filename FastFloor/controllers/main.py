@@ -6,6 +6,7 @@
 import random, math, copy
 import time, sys, os
 import logging
+from threading import Thread
 
 experimentFolder = os.environ['EXPERIMENTFOLDER']
 sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
@@ -38,6 +39,8 @@ txList,  submodules = [], []
 
 global clocks, counters, logs, txs
 clocks, counters, logs, txs = dict(), dict(), dict(), dict()
+
+global vote_thread
 
 clocks['peering'] = Timer(0.5)
 clocks['voting'] = Timer(3)
@@ -133,7 +136,8 @@ def init():
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifiersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
-    robot.variables.set_attribute("byzantine_style", str(0))    
+    robot.variables.set_attribute("byzantine_style", str(0))
+    robot.variables.set_attribute("consensus_reached", str("false"))
 
     # /* Initialize Console Logging*/
     #######################################################################
@@ -192,20 +196,52 @@ def init():
     txs['vote'] = Transaction(None)
 
 
+def background_ask_for_ubi():
+    w3.sc.functions.askForUBI().transact()
+
+def background_ask_for_payout():
+    w3.sc.functions.askForPayout().transact()
+
+def background_update_mean():
+    w3.sc.functions.updateMean().transact()
+
+def background_register_robot():
+    w3.sc.functions.registerRobot().transact()
+    
+def background_vote(estimate, ticket_price_wei):
+
+    if txs['vote'].query(0):
+        txs['vote'] = Transaction(None)
+
+    elif txs['vote'].fail:
+        #print("TX failed")
+        txs['vote'] = Transaction(None)
+    
+    # Everything fine, ready to vote!
+    elif txs['vote'].hash == None:
+        #print("Voting as usual")
+        
+        txHash = w3.sc.functions.sendVote(int(estimate*1e7)).transact({'value': ticket_price_wei})
+        txs['vote'] = Transaction(txHash)
+
+    
 #########################################################################################################################
 #### CONTROL STEP #######################################################################################################
 #########################################################################################################################
 global pos
 pos = [0,0]
 def controlstep():
-    global pos, clocks, counters, startFlag, startTime
+    global pos, clocks, counters, startFlag, startTime, ticket_price_wei
     global estimate, totalWhite, totalBlack, byzantine_style
+    global vote_thread
     
     if not startFlag:
         ##########################
         #### FIRST STEP ##########
         ##########################
 
+        vote_thread = None
+        
         startFlag = True 
         startTime = time.time()
 
@@ -226,12 +262,19 @@ def controlstep():
 
         # Startup transactions
 
-        byzantine_style = int(robot.variables.get_attribute("byzantine_style"))
-        w3.sc.functions.registerRobot().transact()
-
-
         totalWhite = totalBlack = 0        
 
+        ubi = payout = balance = 0
+        newRound = amRegistered = False
+
+        ticket_price_wei = w3.toWei(40, 'ether')
+        
+        byzantine_style = int(robot.variables.get_attribute("byzantine_style"))
+        register_robot_thread = Thread(target=background_register_robot)
+        register_robot_thread.start()
+
+
+        
     else:
 
         ###########################
@@ -239,30 +282,9 @@ def controlstep():
         ###########################
 
         # Send current estimate (but only if the previous one was valid)
-        def vote(ether):
-
-            if txs['vote'].query():
-                txs['vote'] = Transaction(None)
-
-            elif txs['vote'].fail:
-                txs['vote'] = Transaction(None)
-
-            # Everything fine, ready to vote!
-            elif txs['vote'].hash == None:
-
-                #mean = tcp_calls.request(data = 'mean')
-                print("Byzantine style ", byzantine_style, "Voting with ", estimate)
-                
-                #print("Mean is ", mean / 1e5)                
-                #print("voteCount is ", voteCount)
-                #print("voteOkCount", voteOkCount)                
-                try:
-                    txHash = w3.sc.functions.sendVote(int(estimate*1e7)).transact({'value':ether})
-                    txs['vote'] = Transaction(txHash)
-                except Exception as e:
-                    print('Failed to vote: (Unexpected)', e)
-                    
-
+        def vote():
+            pass
+            
         def send_to_docker():
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((me.ip, 9898))
@@ -337,41 +359,49 @@ def controlstep():
                     totalBlack += 1
             estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
 
-        ticket_price = tcp_calls.request(data = 'getTicketPrice')
-        ticket_price_wei = w3.toWei(ticket_price, 'ether')
-        #print("Calculated ticket price is ", ticket_price_wei)
+        if clocks['newround'].query():
+            ubi = tcp_calls.request(data = 'askForUBI')
+            payout = tcp_calls.request(data = 'askForPayout')
+            newRound = tcp_calls.request(data = 'isNewRound')
+            balance = tcp_calls.request(data = 'balance')
+            amRegistered = tcp_calls.request(data = 'amRegistered')            
+            consensus_reached = tcp_calls.request(data = 'consensus_reached')
 
+            # Check if a consensus was reached
+            if consensus_reached:
+                robot.variables.set_attribute("consensus_reached", str("true"))
+            
+            if not amRegistered:
+                # Just for security we register again (e.g. if the first tx got lost)                
+                w3.sc.functions.registerRobot().transact()
 
-        ubi = tcp_calls.request(data = 'askForUBI')
-        payout = tcp_calls.request(data = 'askForPayout')
-        newRound = tcp_calls.request(data = 'isNewRound')
-        balance = tcp_calls.request(data = 'balance')
+            if amRegistered:
 
-        amRegistered = tcp_calls.request(data = 'amRegistered')
-        
-        # Just for security we register again (e.g. if the first tx got lost)
-        if not amRegistered and clocks['newround'].query():
-            w3.sc.functions.registerRobot().transact()
+                if ubi != 0 and balance > 0.01:
+                    ubi_thread = Thread(target=background_ask_for_ubi)
+                    ubi_thread.start()
+                    
+                if payout != 0 and balance > 0.01:
+                    payout_thread = Thread(target=background_ask_for_payout)
+                    payout_thread.start()
 
-        if amRegistered:
+                if newRound and balance > 0.01:
+                    try:
+                        update_mean_thread = Thread(target=background_update_mean)
+                        update_mean_thread.start()
+                    except Exception as e:
+                        print(str(e))
+            
 
-            if ubi != 0 and clocks['newround'].query():
-                ubiHash = w3.sc.functions.askForUBI().transact()
+        if clocks['voting'].query():
+            balance = tcp_calls.request(data = 'balance')
 
-            if payout != 0 and clocks['newround'].query():
-                payHash = w3.sc.functions.askForPayout().transact()
-
-
-            if newRound and clocks['newround'].query():
-                try:
-                    print("newRound is ", newRound)                    
-                    updateHash = w3.sc.functions.updateMean().transact()
-                except Exception as e:
-                    print(str(e))
-        
-        if balance > (ticket_price + 0.5) and ticket_price > 0:
-            if clocks['voting'].query():
-                vote(ticket_price_wei)
+            if balance is not None and balance > 40.5:
+                if vote_thread == None or not vote_thread.is_alive():
+                    vote_thread = Thread(target=background_vote, args=(estimate,ticket_price_wei,))
+                    vote_thread.start()
+                else:
+                    print("vote_thread still running")
 
         # Perform the blockchain peering step
         peering()

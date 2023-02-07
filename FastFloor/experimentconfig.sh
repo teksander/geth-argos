@@ -28,9 +28,9 @@ export CONTAINERBASE=${SWARMNAME}_eth
 # [ARGOS]
 
 export REALTIME=true
-export FLOORFILE=22.png
-export NUM1=24
-export NUMBYZANTINE=6
+export FLOORFILE=85.png
+export NUM1=120
+export NUMBYZANTINE=30
 export BYZANTINESWARMSTYLE=1
 export CON1="/home/ubuntu/geth-argos-docker-inside/FastFloor/controllers/main.py"
 
@@ -41,9 +41,9 @@ export TPS=1
 export DENSITY="1"
 
 export NUMROBOTS=$(echo $NUM1 | bc)
-export ARENADIM=1.20
-export ARENADIMH=0.60
-export STARTDIM=1.10
+export ARENADIM=4.35
+export ARENADIMH=2.175
+export STARTDIM=0.6
 
 # [GETH]
 export BLOCKPERIOD=15
@@ -54,8 +54,8 @@ export BLOCKPERIOD=15
 export SEED=1500
 export TIMELIMIT=100
 export SLEEPTIME=5
-export REPS=1
-export NOTES="Basic long-term experiment with 8 robots and a run-time of 600 minutes"
+export REPS=20
+export NOTES="Basic long-term experiment with 120 robots and a run-time of 600 minutes"
 
 
 
