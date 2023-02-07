@@ -245,6 +245,9 @@ def init():
     previous_pos = robot.position.get_position()[0:2]
     robot.epuck_wheels.set_speed(navSpeed / 2, navSpeed / 2)
 
+    # robot.colored_blob_omnidirectional_camera.enable()
+    a = w3.sc.functions.reportNewPt([1,1,1],0,0,0,0).transact()
+    print(a)
 
 def controlstep():
     global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance
@@ -425,6 +428,9 @@ def controlstep():
                 for c in source_list:
                     realType, _ = is_at_food([c[0] / DECIMAL_FACTOR, c[1]/DECIMAL_FACTOR])
                     logs['cluster'].log_force([c, realType])
+
+        # print(me.id)
+        # print(robot.colored_blob_omnidirectional_camera.get_readings())
         #########################################################################################################
         #### Idle.IDLE
         #######################################num_malicious##################################################################
@@ -540,8 +546,10 @@ def controlstep():
                 realType,_ = is_at_food([pos_state[0][0], pos_state[1][0]])
                 if ticketPrice > 0:
                     print('robot ', robot.variables.get_id(), ' vote: ', sourceFlag)
-                    transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
-                                                               int(pos_state[1][0] * DECIMAL_FACTOR), sourceFlag,
+                    transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
+                                                               int(pos_state[1][0] * DECIMAL_FACTOR), 
+                                                               int(1) * DECIMAL_FACTOR],
+                                                               sourceFlag,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType),
                                                                1).transact(
@@ -602,10 +610,13 @@ def controlstep():
                 print('real info: ', real_loc)
                 print("sp_lgh: ", len(source_pos_list))
                 if ticketPrice > 0 and real_loc[1]<10000 and (real_loc[1]<(params['source']['radius']*0.7)**2): #this report condition is only for the BCD experiments
-                    transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
-                                                               int(pos_state[1][0] * DECIMAL_FACTOR), 1,
+                    transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
+                                                               int(pos_state[1][0] * DECIMAL_FACTOR),
+                                                               int(1) * DECIMAL_FACTOR],
+                                                               1,
                                                                w3.toWei(ticketPrice, 'ether'),
-                                                               int(realType), 0).transact(
+                                                               int(realType), 
+                                                               0).transact(
                         {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
                          'gasPrice': gasprice})
 
@@ -665,8 +676,10 @@ def controlstep():
 
                 ticketPrice = depoValueEst()
                 realType, _ = is_at_food([pos_state[0][0], pos_state[1][0]])
-                transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
-                                                           int(pos_state[1][0] * DECIMAL_FACTOR), 1,
+                transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
+                                                           int(pos_state[1][0] * DECIMAL_FACTOR), 
+                                                           int(1) * DECIMAL_FACTOR],
+                                                           1,
                                                            w3.toWei(ticketPrice, 'ether'),
                                                            int(realType), 0).transact(
                     {'from': me.key, 'value': w3.toWei(ticketPrice, 'ether'), 'gas': gasLimit,
@@ -691,8 +704,10 @@ def controlstep():
                 ticketPrice = depoValueEst()
                 realType = is_at_food([pos_state[0][0], pos_state[1][0]])
                 if ticketPrice > 0:
-                    transactHash = w3.sc.functions.reportNewPt(int(pos_state[0][0] * DECIMAL_FACTOR),
-                                                               int(pos_state[1][0] * DECIMAL_FACTOR), sourceFlag,
+                    transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
+                                                               int(pos_state[1][0] * DECIMAL_FACTOR), 
+                                                               int(1) * DECIMAL_FACTOR],
+                                                               sourceFlag,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType),
                                                                1).transact(

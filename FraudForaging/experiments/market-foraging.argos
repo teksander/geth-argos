@@ -27,7 +27,8 @@
         <epuck_proximity implementation="default" show_rays="false" />
         <epuck_ground implementation="rot_z_only" />
         <differential_steering implementation="default" bias_stddev="2" />
-        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
+        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="false"/>
+        <colored_blob_omnidirectional_camera implementation="rot_z_only" medium="resources" show_rays="true"/>
       </sensors>
       <params script="/home/eksander/geth-argos/FraudForaging/controllers/mainloop_fraud.py"
               timeRate="1" />
@@ -42,7 +43,7 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="2, 2, 1" center="0,0,0.5">
+  <arena size="2.25, 2.25, 1" center="0,0,0.5">
     <floor id="f" source="image" path="/home/eksander/geth-argos/FraudForaging/experiments/floors/market.png" />
     <box id="wall_north" size="2,0.06,0.1" movable="false">
       <body position="0,1.00,0" orientation="0,0,0" />
@@ -66,6 +67,35 @@
         </e-puck>
       </entity> 
     </distribute>
+
+    <light id="light_1"
+           position="1.00,0,0.1"
+           orientation="0,0,0"
+           color="red"
+           intensity="1"
+           medium="resources" />
+
+    <light id="light_2"
+           position="0,1.00,0.1"
+           orientation="0,0,0"
+           color="green"
+           intensity="1"
+           medium="resources" />
+
+    <light id="light_3"
+           position="-1.00,0,0.1"
+           orientation="0,0,0"
+           color="blue"
+           intensity="1"
+           medium="resources" />
+
+    <light id="light_4"
+           position="0,-1.00,0.1"
+           orientation="0,0,0"
+           color="yellow"
+           intensity="1"
+           medium="resources" />
+
   </arena>
 
   <!-- ******************* -->
@@ -81,6 +111,7 @@
   <media>
     <range_and_bearing id="rab" index="grid" grid_size="1,1,1" />
     <led id="leds" />
+    <led id="resources"/>
   </media>
 
   <!-- ****************** -->

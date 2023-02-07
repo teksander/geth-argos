@@ -9,18 +9,19 @@ python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
 echo "+-----------------------------------------------------------+"
 echo "Updating the Smart Contract"
 
-sed -e "s|MAXRECRUITS|$MAXRECRUITS|g"\
-  $SCFILE > $SCTEMPLATE
-
-sed -e "s|NUMPT|$NUMPT|g;s|MAXLIFE|$MAXLIFE|g;s|MINREP|$MINREP|g;s|RADIUS|$RADIUS|g;s|MINBALANCE|$MINBALANCE|g"\
-  $SCFILE > $SCTEMPLATE
-
+sed -e "s|DIMS|$DIMS|g"\
+    -e "s|NUMPT|$NUMPT|g"\
+    -e "s|MAXLIFE|$MAXLIFE|g"\
+    -e "s|MINREP|$MINREP|g"\
+    -e "s|RADIUS|$RADIUS|g"\
+    -e "s|MINBALANCE|$MINBALANCE|g"\
+  $SCTEMPLATE > $SCFILE
 
 echo "+-----------------------------------------------------------+"
 echo "Compiling the Smart Contract"
 
 # Compile smart contract
-solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCTEMPLATE
+solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCFILE
 cp -r "${EXPERIMENTFOLDER}/scs/build/." "${DOCKERFOLDER}/geth/deployed_contract/"
 
 BINDATA=`cat ${CONTRACTBIN}`

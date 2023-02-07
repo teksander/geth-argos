@@ -130,65 +130,65 @@ if __name__ == '__main__':
     mining = False
 
     while True:
+        pass
+        # if not startFlag:
+        #     mining = w3.eth.mining
 
-        if not startFlag:
-            mining = w3.eth.mining
-
-        if mining or startFlag:
-            # Actions to perform on the first step
-            if not startFlag:
+        # if mining or startFlag:
+        #     # Actions to perform on the first step
+        #     if not startFlag:
                 
-                for log in logs:
-                    log.start()
-                startFlag = True
+        #         for log in logs:
+        #             log.start()
+        #         startFlag = True
 
-            else:
-                newBlocks = bf.get_new_entries()
-                if newBlocks:
+        #     else:
+        #         newBlocks = bf.get_new_entries()
+        #         if newBlocks:
 
-                    resources = sc.functions.getResources().call()
-                    json_list = [x[3] for x in resources]
-                    recruits_list = [repr(x[1]) for x in resources]
+        #             resources = sc.functions.getResources().call()
+        #             json_list = [x[3] for x in resources]
+        #             recruits_list = [repr(x[1]) for x in resources]
 
-                    with open(scresourcesfile, 'w+', buffering=1) as f:
-                        for json in json_list:
-                            f.write(json+'\n')
+        #             with open(scresourcesfile, 'w+', buffering=1) as f:
+        #                 for json in json_list:
+        #                     f.write(json+'\n')
 
-                    with open(screcruitsfile, 'w+', buffering=1) as f:
-                        for recruits in recruits_list:
-                            f.write(recruits+'\n')
+        #             with open(screcruitsfile, 'w+', buffering=1) as f:
+        #                 for recruits in recruits_list:
+        #                     f.write(recruits+'\n')
 
-                    synclog.log([len(newBlocks)])
+        #             synclog.log([len(newBlocks)])
 
-                    sclog.log([w3.eth.blockNumber, 
-                               round(w3.fromWei(w3.eth.getBalance(w3.key), 'ether'), 2),
-                               len(resources) 
-                               ])
+        #             sclog.log([w3.eth.blockNumber, 
+        #                        round(w3.fromWei(w3.eth.getBalance(w3.key), 'ether'), 2),
+        #                        len(resources) 
+        #                        ])
 
-                    # 1) Log relevant block details 
-                    for blockHex in newBlocks:
+        #             # 1) Log relevant block details 
+        #             for blockHex in newBlocks:
                         
-                        block = w3.eth.getBlock(blockHex)
+        #                 block = w3.eth.getBlock(blockHex)
 
-                        blocklog.log([time.time()-block['timestamp'], 
-                                    block['timestamp'], 
-                                    block['number'], 
-                                    block['hash'].hex(), 
-                                    block['parentHash'].hex(), 
-                                    block['difficulty'],
-                                    block['totalDifficulty'], 
-                                    block['size'], 
-                                    len(block['transactions']), 
-                                    len(block['uncles'])
-                                    ])
+        #                 blocklog.log([time.time()-block['timestamp'], 
+        #                             block['timestamp'], 
+        #                             block['number'], 
+        #                             block['hash'].hex(), 
+        #                             block['parentHash'].hex(), 
+        #                             block['difficulty'],
+        #                             block['totalDifficulty'], 
+        #                             block['size'], 
+        #                             len(block['transactions']), 
+        #                             len(block['uncles'])
+        #                             ])
 
 
-                if extralog.isReady():
-                    extralog.log([getFolderSize('/root/.ethereum/devchain/geth/chaindata')])
-        else:
-            time.sleep(0.5)
+        #         if extralog.isReady():
+        #             extralog.log([getFolderSize('/root/.ethereum/devchain/geth/chaindata')])
+        # else:
+        #     time.sleep(0.5)
 
-        time.sleep(0.5)
+        # time.sleep(0.5)
 
 
 
