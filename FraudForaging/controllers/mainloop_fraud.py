@@ -612,7 +612,7 @@ def controlstep():
                 if ticketPrice > 0 and real_loc[1]<10000 and (real_loc[1]<(params['source']['radius']*0.7)**2): #this report condition is only for the BCD experiments
                     transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
                                                                int(pos_state[1][0] * DECIMAL_FACTOR),
-                                                               int(1) * DECIMAL_FACTOR],
+                                                               int(1 * DECIMAL_FACTOR)],
                                                                1,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType), 
@@ -678,7 +678,7 @@ def controlstep():
                 realType, _ = is_at_food([pos_state[0][0], pos_state[1][0]])
                 transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
                                                            int(pos_state[1][0] * DECIMAL_FACTOR), 
-                                                           int(1) * DECIMAL_FACTOR],
+                                                           int(1 * DECIMAL_FACTOR)],
                                                            1,
                                                            w3.toWei(ticketPrice, 'ether'),
                                                            int(realType), 0).transact(
@@ -706,7 +706,7 @@ def controlstep():
                 if ticketPrice > 0:
                     transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
                                                                int(pos_state[1][0] * DECIMAL_FACTOR), 
-                                                               int(1) * DECIMAL_FACTOR],
+                                                               int(1 * DECIMAL_FACTOR)],
                                                                sourceFlag,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType),

@@ -109,7 +109,7 @@ contract ForagingPtManagement{
                     }
                 }
             }
-            // TODO: Comment what this is doing
+            // Update the membership to the nearest cluster of point[k]
             if (info.minClusterIdx != uint(pointList[k].cluster)){
                 clusterList[uint(pointList[k].cluster)].num_rep-=1;
                 clusterList[uint(pointList[k].cluster)].total_credit-=pointList[k].credit;

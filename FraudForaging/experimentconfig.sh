@@ -1,7 +1,7 @@
 #!/bin/bash  
 
 # [PATHS]
-export MAINFOLDER="$HOME/geth-argos"
+export MAINFOLDER="$HOME/blockchain-robots/geth-argos"
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/FraudForaging"
