@@ -18,6 +18,7 @@ from movement import RandomWalk, Navigate, NoisyOdometry
 from groundsensor import GroundSensor
 from erandb import ERANDB
 from rgbleds import RGBLEDs
+from omnicam import OmniCam
 from console import *
 from aux import *
 from statemachine import *
@@ -152,7 +153,7 @@ class Transaction(object):
 
 
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance
+    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, cam, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifersExtract(robotID, 'IP')
     print(num_normal + num_faulty)
@@ -231,6 +232,9 @@ def init():
     robot.log.info('Initialising ground-sensors...')
     gs = GroundSensor(robot, gsFreq)
 
+    # /* Init OmniCam */
+    cam = OmniCam(robot, fov = 45)
+
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
 
@@ -238,16 +242,12 @@ def init():
     fsm = FiniteStateMachine(robot, start=Idle.IDLE)
 
     # List of submodules --> iterate .start() to start all
-    submodules = [w3.geth.miner, gs, erb]
+    submodules = [w3.geth.miner, gs, erb, cam]
 
     txs['report'] = Transaction(None)
 
     previous_pos = robot.position.get_position()[0:2]
     robot.epuck_wheels.set_speed(navSpeed / 2, navSpeed / 2)
-
-    # robot.colored_blob_omnidirectional_camera.enable()
-    a = w3.sc.functions.reportNewPt([1,1,1],0,0,0,0).transact()
-    print(a)
 
 def controlstep():
     global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance
@@ -260,7 +260,7 @@ def controlstep():
         startTime = time.time()
 
         robot.log.info('--//-- Starting Experiment --//--')
-        # Starting miner and ERANDB
+
         for module in submodules:
             try:
                 module.start()
@@ -274,8 +274,9 @@ def controlstep():
         for clock in clocks.values():
             clock.reset()
     else:
-        for module in [erb, gs, odo]:
+        for module in [erb, gs, odo, cam]:
             module.step()
+
         ##########################
         #### LOG-MODULE STEPS ####
         ##########################
@@ -430,7 +431,7 @@ def controlstep():
                     logs['cluster'].log_force([c, realType])
 
         # print(me.id)
-        # print(robot.colored_blob_omnidirectional_camera.get_readings())
+        print(cam.getNew())
         #########################################################################################################
         #### Idle.IDLE
         #######################################num_malicious##################################################################
