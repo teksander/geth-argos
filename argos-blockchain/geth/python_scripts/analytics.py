@@ -86,51 +86,51 @@ def scHandle():
 
 
 if __name__ == '__main__':
+    pass
+    # wsAddr = 'localhost'
+    # w3 = init_web3()
+    # sc = registerSC(w3)
+    # bf = w3.eth.filter('latest')
 
-    wsAddr = 'localhost'
-    w3 = init_web3()
-    sc = registerSC(w3)
-    bf = w3.eth.filter('latest')
+    # robotID = sys.argv[1]
+    # logfolder = '/root/logs/%s/' % robotID
 
-    robotID = sys.argv[1]
-    logfolder = '/root/logs/%s/' % robotID
+    # scresourcesfile = logfolder + 'scresources.txt'
+    # os.system("rm -rf " + logfolder)
+    # os.makedirs(os.path.dirname(scresourcesfile), exist_ok=True)
+    # os.system("touch " + scresourcesfile)
 
-    scresourcesfile = logfolder + 'scresources.txt'
-    os.system("rm -rf " + logfolder)
-    os.makedirs(os.path.dirname(scresourcesfile), exist_ok=True)
-    os.system("touch " + scresourcesfile)
+    # screcruitsfile = logfolder + 'screcruits.txt'
+    # os.makedirs(os.path.dirname(screcruitsfile), exist_ok=True)
+    # os.system("touch " + screcruitsfile)
 
-    screcruitsfile = logfolder + 'screcruits.txt'
-    os.makedirs(os.path.dirname(screcruitsfile), exist_ok=True)
-    os.system("touch " + screcruitsfile)
+    # header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
+    # logfile = logfolder + 'block.csv'
+    # blocklog = Logger(logfile, header, ID=robotID)
 
-    header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
-    logfile = logfolder + 'block.csv'
-    blocklog = Logger(logfile, header, ID=robotID)
+    # header = ['BLOCK', 'BALANCE', '#RESOURCES']
+    # logfile = logfolder + 'sc.csv'     
+    # sclog = Logger(logfile, header, ID=robotID)
 
-    header = ['BLOCK', 'BALANCE', '#RESOURCES']
-    logfile = logfolder + 'sc.csv'     
-    sclog = Logger(logfile, header, ID=robotID)
+    # header = ['#BLOCKS']
+    # logfile = logfolder + 'sync.csv' 
+    # synclog = Logger(logfile, header, ID=robotID)
 
-    header = ['#BLOCKS']
-    logfile = logfolder + 'sync.csv' 
-    synclog = Logger(logfile, header, ID=robotID)
+    # header = ['MB']
+    # logfile = logfolder + 'extra.csv'
+    # extralog = Logger(logfile, header, 10, ID=robotID)
 
-    header = ['MB']
-    logfile = logfolder + 'extra.csv'
-    extralog = Logger(logfile, header, 10, ID=robotID)
+    # logs = [blocklog, sclog, synclog, extralog]
 
-    logs = [blocklog, sclog, synclog, extralog]
+    # # header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
+    # # log_filename = log_folder + 'tx.csv'     
+    # # txlog = Logger(log_filename, header)
 
-    # header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
-    # log_filename = log_folder + 'tx.csv'     
-    # txlog = Logger(log_filename, header)
+    # startFlag = False
+    # mining = False
 
-    startFlag = False
-    mining = False
-
-    while True:
-        pass
+    # while True:
+    #     pass
         # if not startFlag:
         #     mining = w3.eth.mining
 
