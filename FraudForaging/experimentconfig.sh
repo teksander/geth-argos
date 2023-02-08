@@ -1,7 +1,13 @@
 #!/bin/bash  
 
 # [PATHS]
-export MAINFOLDER="$HOME/blockchain-robots/geth-argos"
+if [ $USER == "eksander" ]; then
+	export MAINFOLDER="$HOME/geth-argos"
+
+elif [ $USER == "hzhao" ]; then
+	export MAINFOLDER="$HOME/blockchain-robots/geth-argos"
+fi
+
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/FraudForaging"

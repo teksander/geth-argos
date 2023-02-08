@@ -28,7 +28,7 @@
         <epuck_ground implementation="rot_z_only" />
         <differential_steering implementation="default" bias_stddev="2" />
         <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="false"/>
-        <colored_blob_omnidirectional_camera implementation="rot_z_only" medium="resources" show_rays="true"/>
+        <colored_blob_omnidirectional_camera implementation="rot_z_only" medium="resources" show_rays="false"/>
       </sensors>
       <params script="CONTROLLER"
               timeRate="1" />
