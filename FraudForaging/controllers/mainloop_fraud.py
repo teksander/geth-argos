@@ -548,7 +548,7 @@ def controlstep():
                     print('robot ', robot.variables.get_id(), ' vote: ', sourceFlag)
                     transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
                                                                int(pos_state[1][0] * DECIMAL_FACTOR), 
-                                                               int(1) * DECIMAL_FACTOR],
+                                                               int(1 * DECIMAL_FACTOR)],
                                                                sourceFlag,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType),
