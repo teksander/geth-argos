@@ -246,8 +246,8 @@ def init():
     robot.epuck_wheels.set_speed(navSpeed / 2, navSpeed / 2)
 
     # robot.colored_blob_omnidirectional_camera.enable()
-    a = w3.sc.functions.reportNewPt([1,1,1],0,0,0,0).transact()
-    print(a)
+    #a = w3.sc.functions.reportNewPt([1,1,1],0,0,0,0).transact()
+    #print(a)
 
 def controlstep():
     global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance
@@ -384,33 +384,7 @@ def controlstep():
 
         def depoValueEst(sourceList=None, myCertainty=None, num_cluster=-1):
             # if num_cluster >0 estimate according to deposited value in the specific cluster
-            '''
-            if len(sourceList)==0:
-                myAmount = 0
-            elif num_cluster==-1:
-                total_amount = 0
-                total_certainty = 0
-                for cluster in sourceList:
-                    total_amount += float(cluster[5])/1e18
-                    total_certainty += float(cluster[7])/DECIMAL_FACTOR
-            elif num_cluster>=0:
-                cluster = sourceList[num_cluster]
-                total_amount = float(cluster[5]) / 1e18
-                total_certainty = float(cluster[7]) / DECIMAL_FACTOR
-            myAmount = total_amount * (myCertainty / total_certainty)
 
-            myBalance = float(w3.exposed_balance)
-            points_list = w3.sc.functions.getPointListInfo().call()
-            source_list = w3.sc.functions.getSourceList().call()
-
-            source_buffer = [0 for _ in range(len(source_list))]
-            #add up all non-suttled funds on chain
-            for point_rec in points_list:
-                if point_rec[5] == w3.exposed_key and source_list[int(point_rec[4])][3] == 0:
-                    if source_buffer[int(point_rec[4])]==0:
-                        myBalance += float(point_rec[2]) / 1e18
-                        source_buffer[int(point_rec[4])] = 1
-            '''
             myBalance = w3.exposed_balance
             myAmount = max((myBalance - 1) / 3, 0)
             print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
@@ -426,7 +400,7 @@ def controlstep():
                 logs['cluster'] = Logger(log_folder + filename, header, 30, ID=robotID)
 
                 for c in source_list:
-                    realType, _ = is_at_food([c[0] / DECIMAL_FACTOR, c[1]/DECIMAL_FACTOR])
+                    realType, _ = is_at_food([c[0][0] / DECIMAL_FACTOR, c[0][1]/DECIMAL_FACTOR])
                     logs['cluster'].log_force([c, realType])
 
         # print(me.id)
@@ -496,9 +470,20 @@ def controlstep():
             pos_state, _ = posUncertaintyEst()
             # If encountered food source:
             if robot.variables.get_attribute("at") == 'source' and txs['report'].hash == None:
-                source_pos_list = []
-                source_pos_list.append([pos_state[0][0], pos_state[1][0]])
-                fsm.setState(Scout.PrepSend, message="Homing")
+                source_list = w3.sc.functions.getSourceList().call()
+                unverified_count = 0
+                confirmed_count = 0
+                for idx, cluster in enumerate(source_list):
+                    if cluster[2] == 0:  # exists cluster needs verification
+                        unverified_count += 1
+                    if cluster[2] != 0:
+                        pos_rate = float(cluster[6]) / float(cluster[5])
+                        if pos_rate > 0.5:
+                            confirmed_count += 1
+                if unverified_count==0: #if not too many unverified points
+                    source_pos_list = []
+                    source_pos_list.append([pos_state[0][0], pos_state[1][0]])
+                    fsm.setState(Scout.PrepSend, message="Prepare to send new finding")
             elif clocks['query_sc'].query() and txs['report'].hash == None:
                 source_list = w3.sc.functions.getSourceList().call()
                 clusterInfo = w3.sc.functions.getClusterInfo().call()
@@ -508,7 +493,7 @@ def controlstep():
                     print('Robot ', robot.variables.get_id(), ' cluster info get: ', clusterInfo)
                 candidate_cluster = []
                 for idx, cluster in enumerate(source_list):
-                    if cluster[3] == 0:  # exists cluster needs verification
+                    if cluster[2] == 0:  # exists cluster needs verification
                         candidate_cluster.append((cluster, idx))
                 if len(candidate_cluster) > 0:
                     # randomly select a cluster to verify
@@ -547,8 +532,7 @@ def controlstep():
                 if ticketPrice > 0:
                     print('robot ', robot.variables.get_id(), ' vote: ', sourceFlag)
                     transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
-                                                               int(pos_state[1][0] * DECIMAL_FACTOR), 
-                                                               int(1 * DECIMAL_FACTOR)],
+                                                               int(pos_state[1][0] * DECIMAL_FACTOR)],
                                                                sourceFlag,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType),
@@ -611,8 +595,7 @@ def controlstep():
                 print("sp_lgh: ", len(source_pos_list))
                 if ticketPrice > 0 and real_loc[1]<10000 and (real_loc[1]<(params['source']['radius']*0.7)**2): #this report condition is only for the BCD experiments
                     transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
-                                                               int(pos_state[1][0] * DECIMAL_FACTOR),
-                                                               int(1 * DECIMAL_FACTOR)],
+                                                               int(pos_state[1][0] * DECIMAL_FACTOR)],
                                                                1,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType), 
@@ -677,8 +660,7 @@ def controlstep():
                 ticketPrice = depoValueEst()
                 realType, _ = is_at_food([pos_state[0][0], pos_state[1][0]])
                 transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
-                                                           int(pos_state[1][0] * DECIMAL_FACTOR), 
-                                                           int(1 * DECIMAL_FACTOR)],
+                                                           int(pos_state[1][0] * DECIMAL_FACTOR)],
                                                            1,
                                                            w3.toWei(ticketPrice, 'ether'),
                                                            int(realType), 0).transact(
@@ -705,8 +687,7 @@ def controlstep():
                 realType = is_at_food([pos_state[0][0], pos_state[1][0]])
                 if ticketPrice > 0:
                     transactHash = w3.sc.functions.reportNewPt([int(pos_state[0][0] * DECIMAL_FACTOR),
-                                                               int(pos_state[1][0] * DECIMAL_FACTOR), 
-                                                               int(1 * DECIMAL_FACTOR)],
+                                                               int(pos_state[1][0] * DECIMAL_FACTOR)],
                                                                sourceFlag,
                                                                w3.toWei(ticketPrice, 'ether'),
                                                                int(realType),

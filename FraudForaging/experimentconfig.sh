@@ -54,7 +54,7 @@ export BLOCKPERIOD=2
 # [SC]
 export MAXRECRUITS=2
 #On chain estimator
-export DIMS=3
+export DIMS=2
 export NUMPT=100
 export MAXLIFE=5
 export MINREP=15
