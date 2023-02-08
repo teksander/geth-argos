@@ -314,7 +314,6 @@ def controlstep():
                 rgb.setLED(rgb.all, 3 * ['red'])
 
 
-
         ##############################
         #### STATE-MACHINE STEPS ####
         ##############################

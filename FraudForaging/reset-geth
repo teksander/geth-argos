@@ -17,6 +17,11 @@ sed -e "s|DIMS|$DIMS|g"\
     -e "s|MINBALANCE|$MINBALANCE|g"\
   $SCTEMPLATE > $SCFILE
 
+# echo "+-----------------------------------------------------------+"
+# echo "Sending python scripts"
+# cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
+# rm $DOCKERFOLDER/geth/python_scripts/upload
+
 echo "+-----------------------------------------------------------+"
 echo "Compiling the Smart Contract"
 
@@ -48,9 +53,8 @@ sed -ie "0,/\"0x1236efcbcbb340000\"/s//\"0x2000000000000000000000000000000000000
 echo "+-----------------------------------------------------------+"
 echo "Restarting the docker containers"
 
-
 ## Restart docker
-docker service scale ethereum_eth=0
+docker service scale ${CONTAINERBASE}=0
 echo "Shuting down docker process..."
 bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
 
@@ -62,14 +66,19 @@ echo "+-----------------------------------------------------------+"
 echo "Creating the identifier file"
 
 ## Create identifiers file
+
 # Get IDs
-seq 1 $NUMROBOTS > temp0.txt
+seq 1 $NUMROBOTS > temp1.txt
+
 # Get containers
-docker ps --format '{{.Names}} {{.ID}}' > temp1.txt
-sort -o temp1.txt temp1.txt
-# Get IPs
-./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp2.txt
-./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "10.0.1" | grep -v ".255" > temp3.txt
+docker ps --format '{{.Names}} {{.ID}}' | sort -V > temp2.txt
+
+# Get external IP @ 172.
+./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp3.txt
+
+# Get internal IP @ 10.0. or 10.1.
+./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "10."  | grep -v "10.0.0" | grep -v ".255" > temp4.txt
+
 # Save to identifiers file
-paste temp0.txt temp1.txt temp2.txt temp3.txt > identifiers.txt
-rm temp0.txt temp1.txt temp2.txt temp3.txt
+paste temp1.txt temp2.txt temp3.txt temp4.txt > identifiers.txt
+rm temp1.txt temp2.txt temp3.txt temp4.txt

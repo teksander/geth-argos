@@ -178,8 +178,9 @@ contract ForagingPtManagement{
                     for (uint j=0; j<space_size; j++){
                         position_avg[j] = (int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
                                          + int256(position[j])*int256(amount))/int256(clusterList[i].total_credit+amount);
-                    } 
+                    }
                     this_distance = getDistance(position_avg, position);
+                    
 
                     if (this_distance<=radius && this_distance<info.minDistance){
                         info.minDistance = this_distance;
@@ -337,7 +338,6 @@ contract ForagingPtManagement{
     function getSourceList() public view returns(Cluster[] memory){
         return clusterList;
     }
-
     function getClusterInfo() public view returns(clusterInfo memory){
         return info;
     }
@@ -353,7 +353,7 @@ contract ForagingPtManagement{
     }
 
     function getDistance(int256[space_size] memory _p1, int256[space_size] memory _p2) private pure returns(int256) {
-        // Return a distance measure in RGB space
+        // Return a distance measure in generic dimensions
         int256 sqsum = 0;
         for (uint j=0; j<space_size; j++){
             sqsum += (_p2[j]-_p1[j])**2;
@@ -362,14 +362,17 @@ contract ForagingPtManagement{
     }
 
     function sqrt(int256 _kx) private pure returns (int256 _ky) {
-      int256 _kz = (_kx + 1) / 2;
+        // Return an approximation of the sqrt
+        int256 _kz = (_kx + 1) / 2;
         _ky = _kx;
         while (_kz < _ky) {
             _ky = _kz;
             _kz = (_kx / _kz + _kz) / 2;
         }
-      }
+    }
+
     function abs(int256 _k) private pure returns (int256) {
+        // Return the absolute value
         return _k >= 0 ? _k : -_k;
     }
 }
