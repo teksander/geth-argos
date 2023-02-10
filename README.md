@@ -33,3 +33,4 @@ To-do-list:
 Improvements to argos-python:
 -(DONE) Implement the positioning sensor
 -(DONE) Implement E-puck ring LEDs
+-(Urgent) Fix hardcoded qt-user script
