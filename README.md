@@ -48,7 +48,7 @@ $ cmake ..
 $ make
 ```
 
-Step 3: Create Docker image
+Step 3: Compile Docker image
 
 ```
 $ cd geth-argos/argos-blockchain/geth/
