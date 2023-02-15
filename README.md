@@ -19,17 +19,17 @@ This guide assumes a previously clean installation of Ubuntu20.04
 ## ARGoS
 
 Step 1: Download and compile ARGoS version 59 
-(follow instructions at https://github.com/ilpincy/argos3)
+(instructions at https://github.com/ilpincy/argos3)
 
 Step 2: Download and compile E-puck plugin 
-(follow instructions at https://github.com/demiurge-project/argos3-epuck)
+(instructions at https://github.com/demiurge-project/argos3-epuck)
 
 ## Docker
 Step 1: Install docker
-(follow instructions at https://docs.docker.com/engine/install/ubuntu/)
+(instructions at https://docs.docker.com/engine/install/ubuntu/)
 
 Step 2: Run docker as non-root user
-(follow instructions at  https://docs.docker.com/engine/install/linux-postinstall)
+(instructions at  https://docs.docker.com/engine/install/linux-postinstall)
 
 ## Put it all together
 
