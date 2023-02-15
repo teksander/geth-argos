@@ -13,26 +13,24 @@ export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/FraudForaging"
 export BLOCKCHAINPATH="$HOME/eth_data_para/data"
 
-
 # [FILES]
 export ARGOSNAME="market-foraging"
-export CONTAINERNAMEBASE="ethereum_eth."
 export GENESISNAME="genesis_poa"
 export CONTRACTNAME="ForagingPtManagement"
+export SCNAME="kmeans_estimation_3D"
 
-export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/kmeans_estimation.sol" # <- this is the smart contract you want to use
 export GENESISFILE="${DOCKERFOLDER}/geth/files/$GENESISNAME.json"
 export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
 export CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
 export CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
-
-export SCFILE="${EXPERIMENTFOLDER}/scs/kmeans_estimation_3D.sol"
-export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/kmeans_estimation_3D.x.sol"
-
+export SCFILE="${EXPERIMENTFOLDER}/scs/$SCNAME.sol"
+export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/$SCNAME.x.sol"
 export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/market-foraging.argos"
 export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/market-foraging.argosx"
 
-
+# [DOCKER]
+export SWARMNAME=ethereum
+export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"

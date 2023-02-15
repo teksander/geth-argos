@@ -10,7 +10,6 @@
                 ticks_per_second="TPS"
                 real_time="true"/>
   </framework>
-/s/RABRANsGE/e/
 
   <!-- *************** -->
   <!-- * Controllers * -->
@@ -120,7 +119,9 @@
   <visualization>
     <qt-opengl autoplay="true">
       <user_functions library="ARGOSFOLDER/build/libpy_qtuser_function_interface.so"
-                      label="py_qtuser_function" />
+                      label="py_qtuser_function" >
+      <params script="EXPERIMENTFOLDER/loop_functions/qtuser_function.py"/>
+      </user_functions>
     <camera>
       <placements>
         <placement index="0" position="0,-3,3" up="0,1,0" look_at="0,0,0" lens_focal_length="30" />

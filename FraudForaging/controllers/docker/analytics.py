@@ -9,45 +9,7 @@ clocks, counters, logs, txs = dict(), dict(), dict(), dict()
 
 def scHandle():
     """ Interact with SC every time new blocks are synchronized """
-
-
-    # resource index map
-    _x       = 0
-    _y       = 1
-    _qtty    = 2
-    _util    = 3
-    _qlty    = 4
-    _json    = 5
-    _id      = 6
-    _max_w   = 7
-    _tot_w   = 8
-    _epoch   = 9
-
-    # robot index map
-    _reg    = 0
-    _eff    = 1
-    _bal    = 2
-    _task   = 3
-
-
-    resources = sc.functions.getPatches().call()
-    robot = sc.functions.robot(w3.key).call()
-    
-    # # Write to a file used for qt_draw in ARGoS
-    # with open(scresourcesfile, 'w+', buffering=1) as f:
-    #     for res in resources:
-    #         f.write('%s\n' % (res[_json]))
-
-    # Write to the log file used data analysis
-    for res in resources:        
-        logs['sc'].log([
-            block['number'], 
-            block['hash'].hex(), 
-            block['parentHash'].hex(), 
-            robot[_reg],
-            robot[_bal],
-            robot[_task],
-            ])
+    pass
 
 def blockHandle():
     """ Every time new blocks are synchronized """
@@ -62,7 +24,7 @@ def blockHandle():
             block['size'], 
             len(block['transactions']), 
             len(block['uncles'])
-            ])
+            ])  
 
 if __name__ == '__main__':
 
@@ -75,13 +37,13 @@ if __name__ == '__main__':
     logfolder = '/root/logs/%s/' % robotID
     os.system("rm -rf " + logfolder)
 
-    scresourcesfile = logfolder + 'scresources.txt'
-    os.makedirs(os.path.dirname(scresourcesfile), exist_ok=True)
-    os.system("touch " + scresourcesfile)
+    # scresourcesfile = logfolder + 'scresources.txt'
+    # os.makedirs(os.path.dirname(scresourcesfile), exist_ok=True)
+    # os.system("touch " + scresourcesfile)
 
-    screcruitsfile = logfolder + 'screcruits.txt'
-    os.makedirs(os.path.dirname(screcruitsfile), exist_ok=True)
-    os.system("touch " + screcruitsfile)
+    # screcruitsfile = logfolder + 'screcruits.txt'
+    # os.makedirs(os.path.dirname(screcruitsfile), exist_ok=True)
+    # os.system("touch " + screcruitsfile)
 
 
     # Experiment data logs (recorded to file)
@@ -89,21 +51,9 @@ if __name__ == '__main__':
     header        = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
     logs['block'] = Logger(logfolder+name, header, ID=robotID)
 
-    name        = 'sc.csv'  
-    header      = ['BLOCK', 'HASH', 'PHASH', 'X', 'Y', 'QTTY', 'UTIL', 'QLTY', 'MEANQ', 'WCOUNT', 'RCOUNT']   
-    logs['sc']  = Logger(logfolder+name, header, ID=robotID)
-
     name          = 'extra.csv'
     header        = ['MB']
     logs['extra'] = Logger(logfolder+name, header, 10, ID=robotID)
-
-    # name         = 'sync.csv' 
-    # header       = ['#BLOCKS']
-    # logs['sync'] = Logger(logfolder+name, header, ID=robotID)
-    
-    # header       = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
-    # log_filename = log_folder + 'tx.csv'     
-    # logs['tx']   = Logger(log_filename, header)
 
     startFlag = False
     mining = False
@@ -130,14 +80,11 @@ if __name__ == '__main__':
 
                 newBlocks = bf.get_new_entries()
                 if newBlocks:
-
-                    # 1) Log relevant block details 
                     for blockHex in newBlocks:
 
                         scHandle()
 
                         block = w3.eth.getBlock(blockHex)
-
                         blockHandle()
 
 

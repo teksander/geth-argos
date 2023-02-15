@@ -2,7 +2,6 @@
  
 source experimentconfig.sh
 
-
 #Generate source point file
 python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
 
@@ -17,17 +16,18 @@ sed -e "s|DIMS|$DIMS|g"\
     -e "s|MINBALANCE|$MINBALANCE|g"\
   $SCTEMPLATE > $SCFILE
 
-# echo "+-----------------------------------------------------------+"
-# echo "Sending python scripts"
-# cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
-# rm $DOCKERFOLDER/geth/python_scripts/upload
+echo "+-----------------------------------------------------------+"
+echo "Sending python scripts"
+cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
+# cp -r $EXPERIMENTFOLDER/controllers/aux.py   $DOCKERFOLDER/geth/python_scripts/
 
 echo "+-----------------------------------------------------------+"
 echo "Compiling the Smart Contract"
 
 # Compile smart contract
 solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCFILE
-cp -r "${EXPERIMENTFOLDER}/scs/build/." "${DOCKERFOLDER}/geth/deployed_contract/"
+cp -r "${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime" "${DOCKERFOLDER}/geth/contracts/deploy.bin-runtime"
+cp -r "${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi" "${DOCKERFOLDER}/geth/contracts/deploy.abi"
 
 BINDATA=`cat ${CONTRACTBIN}`
 
@@ -53,19 +53,14 @@ sed -ie "0,/\"0x1236efcbcbb340000\"/s//\"0x2000000000000000000000000000000000000
 echo "+-----------------------------------------------------------+"
 echo "Restarting the docker containers"
 
-## Restart docker
-docker service scale ${CONTAINERBASE}=0
 echo "Shuting down docker process..."
-bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
+bash ${DOCKERFOLDER}/local/stop-network ${CONTAINERBASE} ${SWARMNAME}
 
 echo "Starting new docker process..."
-sudo systemctl restart docker.service
-bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
+bash ${DOCKERFOLDER}/local/start-network $NUMROBOTS
 
 echo "+-----------------------------------------------------------+"
 echo "Creating the identifier file"
-
-## Create identifiers file
 
 # Get IDs
 seq 1 $NUMROBOTS > temp1.txt

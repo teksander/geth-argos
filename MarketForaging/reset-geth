@@ -22,8 +22,7 @@ sed -e "s|MAXSTAKERS|$MAXSTAKERS|g"\
 
 echo "+-----------------------------------------------------------+"
 echo "Sending python scripts"
-cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
-# cp -r $EXPERIMENTFOLDER/controllers/aux.py   $DOCKERFOLDER/geth/python_scripts/
+bash $EXPERIMENTFOLDER/controllers/docker/send-all
 
 echo "+-----------------------------------------------------------+"
 echo "Compiling the Smart Contract"
@@ -57,19 +56,14 @@ sed -ie "0,/\"0x1236efcbcbb340000\"/s//\"0x2000000000000000000000000000000000000
 echo "+-----------------------------------------------------------+"
 echo "Restarting the docker containers"
 
-## Restart docker
-docker service scale ${CONTAINERBASE}=0
 echo "Shuting down docker process..."
-bash ${DOCKERFOLDER}/local/stop-network
+bash ${DOCKERFOLDER}/local/stop-network ${CONTAINERBASE} ${SWARMNAME}
 
 echo "Starting new docker process..."
-# sudo systemctl restart docker.service
 bash ${DOCKERFOLDER}/local/start-network $NUMROBOTS
 
 echo "+-----------------------------------------------------------+"
 echo "Creating the identifier file"
-
-## Create identifiers file
 
 # Get IDs
 seq 1 $NUMROBOTS > temp1.txt

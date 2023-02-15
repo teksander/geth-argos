@@ -449,15 +449,8 @@ def controlstep():
     else:
 
         ###########################
-        ######## ROUTINES ########
+        ######## ROUTINES #########
         ###########################
-
-        def send_to_docker():
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((me.ip, 9898))
-                s.sendall("hi from robot %s" % me.id)
-                data = s.recv(1024)
-                print(data)
 
         def peering():
             global geth_peer_count

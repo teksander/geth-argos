@@ -227,18 +227,19 @@ class TCP_mp(object):
         # Setup the listener
         listener = Listener((self.host, self.port))
 
-        print('TCP server OK')  
-
         while True:
+
             try:
                 __conn = listener.accept()
                 __call  = __conn.recv()
                 __conn.send(self.data[__call])
+
             except Exception as e:
-                print('Connection error')
+                print('TCP error: %s' % str(e))
 
             if self.__stop:
                 __conn.close()
+                self.running = False
                 break 
 
             time.sleep(0.00001)
@@ -263,7 +264,7 @@ class TCP_mp(object):
             __conn.close()
 
         except Exception as e:
-            print('TCP connection failed: %s' % e.args)
+            print('TCP connection failed: %s' % str(e))
 
 
         return msg
@@ -283,21 +284,20 @@ class TCP_mp(object):
     def start(self):
         """ This method is called to start __hosting a TCP server """
 
-        if not self.running:
+        if self.running:
+            print('TCP server is ON')
+        else:
             # Initialize background daemon thread
             thread = threading.Thread(target=self.__hosting, args=())
             thread.daemon = True 
 
             # Start the execution                         
             thread.start()   
-            self.running = True
-        else:
-            print('TCP server already ON')  
+            self.running = True          
 
     def stop(self):
         """ This method is called before a clean exit """   
         self.__stop  = True
-        self.running = False
         print('TCP server is OFF') 
 
 class TCP_server(object):
@@ -372,30 +372,6 @@ class TCP_server(object):
                 __socket.close()
                 break 
 
-    # def request(self, data = None, host = None, port = None):
-    #     """ This method is used to request data from a running TCP server """
-
-    #     msg = ""
-    #     if not data:
-    #         data = self.data
-    #     if not host:
-    #         host = self.host
-    #     if not port:
-    #         port = self.port
-  
-    #     try:
-    #         __conn = Client((host, port))
-    #         # __conn.send(data)
-
-    #         msg = __conn.recv()
-            
-    #         __conn.close()
-
-    #     except Exception as e:
-    #         print('TCP connection failed: %s' % e.args)
-
-    #     return msg
-
     def request(self, host, port):
         """ This method is used to request data from a running TCP server """
 
@@ -466,7 +442,139 @@ class TCP_server(object):
         self.__stop = 1
         logger.info('TCP Server OFF') 
 
+class TCP_server2(object):
+    """ Set up TCP_server on a background thread
+    The __hosting() method will be started and it will run in the background
+    until the application exits.
+    """
 
+    def __init__(self, data, host, port):
+        """ Constructor
+        :type data: str
+        :param data: Data to be sent back upon request
+        :type ip: str
+        :param ip: IP address to host TCP server at
+        :type port: int
+        :param port: TCP listening port for enodes
+        """
+        
+        self.data = str(data).encode()
+        self.host = host
+        self.port = port  
+
+        self.__received = []                            
+        self.__stop = False
+
+        logger.info('TCP-Server OK')
+
+    def __hosting(self):
+        """ This method runs in the background until program is closed """ 
+
+         # create a socket object
+        __socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        # set important options
+        __socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # bind to the port
+        __socket.bind((self.host, self.port))
+        # listen on the port
+        __socket.listen()
+
+        print('TCP Server OK')  
+
+        while True:
+
+            if self.__stop:
+                __socket.close()
+                break 
+
+            else:
+                # establish a connection
+                __clientsocket, addr = __socket.accept()   
+
+                # read the data
+                data = __clientsocket.recv(1024)
+                if data:
+                    self.__received = eval(data)
+                else:
+                    self.__received = []
+
+                # reply to data
+                __clientsocket.send(self.data)
+
+
+    def getNew(self):
+        if self.__stop:
+            return None
+            print('TCP is OFF')
+        else:
+            return self.__received
+
+    def setData(self, data):
+        self.data = str(data).encode()    
+
+    def request(self, host, port):
+        msg = ""
+
+        try:
+            """ This method is used to request data from a running TCP server """
+            # create the client socket
+            __socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+            # set the connection timeout
+            __socket.settimeout(5)
+            # connect to hostname on the port
+            __socket.connect((host, port))                               
+            # Receive no more than 1024 bytes
+            msg = __socket.recv(1024)  
+            msg = msg.decode('ascii') 
+            __socket.close()
+
+        except:
+            print('TCP connection failed')
+
+        return msg
+
+
+    def start(self):
+        """ This method is called to start __hosting a TCP server """
+        if self.__stop:
+            print('TCP Server already ON')  
+
+        else:
+            # Initialize background daemon thread
+            thread = threading.Thread(target=self.__hosting, args=())
+            thread.daemon = True 
+
+            # Start the execution                         
+            thread.start()   
+
+    def stop(self):
+        """ This method is called before a clean exit """   
+        self.__stop = True
+        print('TCP is OFF') 
+
+
+def getEnodes():
+    return [peer['enode'] for peer in w3.geth.admin.peers()]
+
+def getEnodeById(__id, gethEnodes = None):
+    if not gethEnodes:
+        gethEnodes = getEnodes() 
+
+    for enode in gethEnodes:
+        if readEnode(enode, output = 'id') == __id:
+            return enode
+
+def getIds(__enodes = None):
+    if __enodes:
+        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
+    else:
+        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
+
+def getIps(__enodes = None):
+    if __enodes:
+        return [enode.split('@',2)[1].split(':',2)[0] for enode in __enodes]
+    else:
+        return [enode.split('@',2)[1].split(':',2)[0] for enode in getEnodes()]
 
 class Peer(object):
     """ Establish the Peer class 
@@ -775,6 +883,12 @@ class mydict(dict):
         if n == 0:
             return mydict([[key, round(self[key])] for key in self])
         return mydict([[key, round(self[key], n)] for key in self])
+
+def l2d(l,k):
+    if l:
+        return {a: l[i] for i, a in enumerate(k)}
+    else:
+        return None
 
 def identifersExtract(robotID, query = 'IP'):
 

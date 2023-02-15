@@ -18,8 +18,6 @@ def init_web3(_ip):
 
     return w3
 
+if __name__=='__main__':
 
-
-# if __name__=='__main__':
-
-#     w3 = init_web3(robotID = 3)
+    w3 = init_web3(robotID = 3)

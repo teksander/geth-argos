@@ -11,7 +11,6 @@
                 real_time="true"/>
   </framework>
 
-
   <!-- *************** -->
   <!-- * Controllers * -->
   <!-- *************** -->
@@ -120,7 +119,9 @@
   <visualization>
     <qt-opengl autoplay="true">
       <user_functions library="/home/eksander/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
-                      label="py_qtuser_function" />
+                      label="py_qtuser_function" >
+      <params script="/home/eksander/geth-argos/FraudForaging/loop_functions/qtuser_function.py"/>
+      </user_functions>
     <camera>
       <placements>
         <placement index="0" position="0,-3,3" up="0,1,0" look_at="0,0,0" lens_focal_length="30" />
