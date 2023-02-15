@@ -406,6 +406,22 @@ def controlstep():
                 for this_measure in my_measures:
                     if this_measure[0] !=0 and this_measure[1]!=0:
                         measure_set.append(this_measure)
+                        # update belief pos when seeing more than 10 mesures:
+                if len(measure_set) >= 10 and belief_pos[0] == 0:
+                    i_have_measure = True
+                    temp_belief_pos = [0, 0]
+                    for valid_measure in measure_set:
+                        temp_belief_pos[0] += valid_measure[0]
+                        temp_belief_pos[1] += valid_measure[1]
+                    temp_belief_pos[0] /= len(measure_set)
+                    temp_belief_pos[1] /= len(measure_set)
+                    robot.variables.set_attribute("has_readings", str(1))
+                    print(robotID, "gets measure in neighbour average: ", temp_belief_pos)
+                    belief_pos[0] = temp_belief_pos[0]
+                    belief_pos[1] = temp_belief_pos[1]
+                    erb.setData(int((belief_pos[0] + 2) * DECIMAL_FACTOR), 1)
+                    erb.setData(int((belief_pos[1] + 2) * DECIMAL_FACTOR), 2)
+                    erb.setData(0, 3)
                 #print(robotID, valid_robot_count, num_all_robots-1, belief_pos)
                 if use_wmsr>0 and belief_pos[0] !=0 and len(measure_set)>use_wmsr: #this value represents F
                 #if use_wmsr > 0 and belief_pos[
@@ -528,6 +544,23 @@ def controlstep():
                         measure_set.append(this_measure)
                 #robot.variables.set_attribute("has_readings", str(valid_robot_count))
                 #print(robotID, valid_robot_count, num_all_robots-1, belief_pos, 'v')
+
+                #update belief pos when seeing more than 10 mesures:
+                if len(measure_set)>=10 and belief_pos[0] ==0 :
+                    i_have_measure = True
+                    temp_belief_pos = [0, 0]
+                    for valid_measure in measure_set:
+                        temp_belief_pos[0] += valid_measure[0]
+                        temp_belief_pos[1] += valid_measure[1]
+                    temp_belief_pos[0] /= len(measure_set)
+                    temp_belief_pos[1] /= len(measure_set)
+                    robot.variables.set_attribute("has_readings", str(1))
+                    print(robotID, "gets measure in neighbour average: ", temp_belief_pos)
+                    belief_pos[0] = temp_belief_pos[0]
+                    belief_pos[1] = temp_belief_pos[1]
+                    erb.setData(int((belief_pos[0] + 2) * DECIMAL_FACTOR), 1)
+                    erb.setData(int((belief_pos[1] + 2) * DECIMAL_FACTOR), 2)
+                    erb.setData(0, 3)
                 if use_wmsr>0 and belief_pos[0] !=0 and len(measure_set)>use_wmsr: #this value represents F
                 #if use_wmsr > 0 and belief_pos[0] != 0 and valid_robot_count >= use_wmsr+1:  # this value represents F
                     set_larger = []

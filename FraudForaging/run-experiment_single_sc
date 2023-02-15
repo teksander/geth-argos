@@ -57,18 +57,39 @@ run() {
 
 
 
-config "REPS" 20
-export NUM1A=10
-export NUM2=6
-run "SingleSourceSupp/sc_5_16"
+#config "REPS" 15
+#export NUM1A=10
+#export NUM2=5
+#export MINREP=10
+#run "SingleSourceSupp/sc_5_15_lnb03"
 
-config "REPS" 20
-export NUM1A=13
+config "REPS" 15
+export NUM1A=11
+export NUM2=4
+export MINREP=0
+run "SingleSourceSupp/sc_4_15_lnb03"
+
+config "REPS" 15
+export NUM1A=12
 export NUM2=3
-run "SingleSourceSupp/sc_3_16"
+export MINREP=0
+run "SingleSourceSupp/sc_3_15_lnb03"
 
-config "REPS" 20
-export NUM1A=16
-export NUM2=0
-run "SingleSourceSupp/sc_0_16"
+config "REPS" 15
+export NUM1A=13
+export NUM2=2
+export MINREP=0
+run "SingleSourceSupp/sc_2_15_lnb03"
+
+config "REPS" 15
+export NUM1A=14
+export NUM2=1
+export MINREP=0
+run "SingleSourceSupp/sc_1_15_lnb03"
+
+#config "REPS" 15
+#export NUM1A=15
+#export NUM2=0
+#export MINREP=10
+#run "SingleSourceSupp/sc_0_15_lnb03"
 

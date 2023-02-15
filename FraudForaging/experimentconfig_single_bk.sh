@@ -60,7 +60,7 @@ export MAXRECRUITS=2
 #On chain estimator
 export NUMPT=100
 export MAXLIFE=5
-export MINREP=13
+#export MINREP=13
 export RADIUS=10000 # 0.1
 export DECIMAL_FACTOR=100000 # 1e5
 export MINBALANCE=28000000000000000000
@@ -69,7 +69,7 @@ export MINBALANCE=28000000000000000000
 # [OTHER]
 export SEED=350
 export TIMELIMIT=5 #10min after all have reading
-export REPS=15
+export REPS=10
 
 
 
