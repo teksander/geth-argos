@@ -1,8 +1,4 @@
-============ geth-argos ===============
-==                                   ==
-== ARGoS Blockchain Python Interface ==
-==                                   ==
-=======================================
+# ARGoS-Blockchain Interface in Python
 
 AUTHOR: 
 
@@ -14,23 +10,71 @@ Ken Hasselmann for argos-python wrapper <https://github.com/KenN7/argos-python>
 
 Volker Strobel for docker-geth setup <https://github.com/Pold87/blockchain-swarm-robotics>
 
-DATE: 22/06/2021
+DATE: 15/02/2023
 
 
-To-do-list:
-- (DONE) fix Event 
-- (DONE) Trigger experiment finish from criteria; restart automatically; iterate experimental parameters
-- (DONE) Move peering to docker
-- (DONE) Make RPYC server hosted in docker containers (one web3.py instance per container)
-- - (DONE) open geth console with ./tmux-all for all docker containers
-- (medium) Create "reset-geth.sh" which does not reinialize docker but rather reset geth folder and process in every container (if faster/more efficient)
-- (medium) Improve "stop_network.sh" since docker stop and docker rm is not working properly
-- (HALF-DONE) Create data recording files consistent with real robots (fix timestamp in simulation, add hash to sc.csv)
-- (low) Link robot ID to docker IP (preferably 172.27.1.xxx where xxx is robotId)
-- (low) Understand why the logging package messes up... They say its fixed in 3.8, so maybe exploit that in simulation although the robots have 3.6
-- (low) Expose entire w3 instance in RPYC rather than individual functions
+# Installation guide
+This guide assumes a previously clean installation of Ubuntu20.04
 
-Improvements to argos-python:
--(DONE) Implement the positioning sensor
--(DONE) Implement E-puck ring LEDs
--(Urgent) Fix hardcoded qt-user script
+## ARGoS
+
+Step 1: Download and compile ARGoS version 59 
+(follow instructions at https://github.com/ilpincy/argos3)
+
+Step 2: Download and compile E-puck plugin 
+(follow instructions at https://github.com/demiurge-project/argos3-epuck)
+
+## Docker
+Step 1: Install docker
+(follow instructions at https://docs.docker.com/engine/install/ubuntu/)
+
+Step 2: Run docker as non-root user
+(follow instructions at  https://docs.docker.com/engine/install/linux-postinstall)
+
+## Put it all together
+
+Step 1: Clone the repo
+
+```git clone --recurse-submodules https://github.com/teksander/geth-argos.git```
+
+Step 2: Compile ARGoS-Python
+
+```
+$ cd geth-argos/argos-python
+$ git checkout temp
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+```
+
+Step 3: Create Docker image
+
+```
+$ cd geth-argos/argos-blockchain/geth/
+$ docker build -t mygeth .
+$ docker swarm init
+```
+
+Step 4: Other packages and reqs
+
+```
+$ sudo add-apt-repository ppa:ethereum/ethereum
+$ sudo apt-get update
+$ sudo apt-get install solc
+```
+
+```
+$ sudo apt install python3-pip
+$ pip3 install rpyc psutil
+```
+
+Step 5: Configuration and Run
+
+Edit ```experimentconfig.sh``` and ```blockchainconfig``` files to match your paths\
+Then run an experiment (HelloNeighbor is a good starting point (Not ready yet))
+
+```
+cd geth-argos/<ExperimentFolderName>
+./starter -r -s
+```
