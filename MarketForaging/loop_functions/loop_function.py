@@ -214,7 +214,6 @@ def init():
     for log in logs.values():
         log.start()
 
-
 def pre_step():
     global startFlag, startTime, resource_counter
 

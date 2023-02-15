@@ -61,7 +61,6 @@
 
 
   </controllers>
-
     <loop_functions library="/home/eksander/geth-argos/argos-python/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
     <params script="/home/eksander/geth-argos/MarketForaging/loop_functions/loop_function.py"/>
@@ -134,7 +133,10 @@
     <!-- ************************************************************************ -->
   <qt-opengl autoplay="true">
       <user_functions library="/home/eksander/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
-                      label="py_qtuser_function" />
+                      label="py_qtuser_function" >
+      <params script="/home/eksander/geth-argos/MarketForaging/loop_functions/qtuser_function.py"/>
+      </user_functions>
+      
     <camera>
       <placements>
         <placement index="0" position="0,0,8" up="1,0,0" look_at="0,0,0" lens_focal_length="50" />

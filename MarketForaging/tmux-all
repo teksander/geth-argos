@@ -116,7 +116,7 @@ if [[ "$SCRIPT" = "python" ]]; then
 	echo "Opening console: $SCRIPT "
 	tmux kill-session -t PYTHON >/dev/null 2>&1
 	tmux_ALL "PYTHON"
-	tmux send-keys -t PYTHON "python3 -i /root/python_scripts/console_robot.py ${CONTRACTNAME}.abi" Enter
+	tmux send-keys -t PYTHON "python3 -i /root/python_scripts/console.py" Enter
 
 elif [[ "$SCRIPT" = "bash" ]]; then 
 	echo "Opening console: $SCRIPT "

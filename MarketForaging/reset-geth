@@ -23,14 +23,15 @@ sed -e "s|MAXSTAKERS|$MAXSTAKERS|g"\
 echo "+-----------------------------------------------------------+"
 echo "Sending python scripts"
 cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
-rm $DOCKERFOLDER/geth/python_scripts/upload
+# cp -r $EXPERIMENTFOLDER/controllers/aux.py   $DOCKERFOLDER/geth/python_scripts/
 
 echo "+-----------------------------------------------------------+"
 echo "Compiling the Smart Contract"
 
 # Compile smart contract
 solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCFILE
-cp -r "${EXPERIMENTFOLDER}/scs/build/." "${DOCKERFOLDER}/geth/deployed_contract/"
+cp -r "${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime" "${DOCKERFOLDER}/geth/contracts/deploy.bin-runtime"
+cp -r "${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi" "${DOCKERFOLDER}/geth/contracts/deploy.abi"
 
 BINDATA=`cat ${CONTRACTBIN}`
 
@@ -59,11 +60,11 @@ echo "Restarting the docker containers"
 ## Restart docker
 docker service scale ${CONTAINERBASE}=0
 echo "Shuting down docker process..."
-bash ${DOCKERFOLDER}/local_scripts/stop_network.sh $NUMROBOTS
+bash ${DOCKERFOLDER}/local/stop-network
 
 echo "Starting new docker process..."
-sudo systemctl restart docker.service
-bash ${DOCKERFOLDER}/local_scripts/start_network.sh $NUMROBOTS
+# sudo systemctl restart docker.service
+bash ${DOCKERFOLDER}/local/start-network $NUMROBOTS
 
 echo "+-----------------------------------------------------------+"
 echo "Creating the identifier file"

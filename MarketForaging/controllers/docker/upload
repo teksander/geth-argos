@@ -1,6 +1,0 @@
-#!/bin/bash
-source ../../experimentconfig.sh
-
-# Send all the files in this folder to the docker volume
-cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
-rm $DOCKERFOLDER/geth/python_scripts/upload

@@ -30,13 +30,12 @@ res_height = 0.015
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['r']})
 cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['r']})
 
-def init():
-	pass
+# /* Global Functions */
+#######################################################################
 
 def draw_market():
 	environment.qt_draw.circle([market.x, market.y, 0.001],[], market.radius, 'custom2', True)
 	environment.qt_draw.circle([cache.x, cache.y, 0.001],[], cache.radius, 'custom2', False)
-
 
 def draw_patches():
 
@@ -56,6 +55,11 @@ def draw_resources_on_robots():
 			# Draw carried quantity
 			environment.qt_draw.cylinder([x, y, 0.08],[], rob_diam * (quantity/cp['max_Q']), res_height, quality)
 
+# /* ARGoS Functions */
+#######################################################################
+
+def init():
+	pass
 
 def DrawInWorld():
 
@@ -77,6 +81,20 @@ def DrawInWorld():
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
 	
+def destroy():
+	print('Closing the QT window')
+
+
+
+
+
+
+
+
+
+
+
+
 	# # Draw the odometry position error
 	# if lp['generic']['show_pos']:
 	# 	with open(lp['files']['position'], 'r') as f:
@@ -121,7 +139,3 @@ def DrawInWorld():
 	# 	environment.qt_draw.circle([res.x, res.y, 0.0015],[], frac*res.radius, 'gray80', True)
 	# 	for i in range(res.quantity):
 	# 		environment.qt_draw.circle([res.x+1.1*res.radius, res.y+res.radius-0.01*2*i-0.001, 0.001],[], 0.01, 'black', True)
-
-
-def destroy():
-	print('Closing the QT window')
