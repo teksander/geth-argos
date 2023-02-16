@@ -6,13 +6,9 @@
 import sys, os
 
 experimentFolder = os.environ["EXPERIMENTFOLDER"]
-maxlife = os.environ["MAXLIFE"]
-num_normal = int(os.environ["NUM1A"])
-num_faulty = int(os.environ["NUM1B"])
-num_malicious = int(os.environ["NUM2"])
+sys.path.insert(1, experimentFolder)
 sys.path.insert(1, experimentFolder + '/controllers')
 sys.path.insert(1, experimentFolder + '/loop_functions')
-sys.path.insert(1, experimentFolder)
 
 from movement import RandomWalk, Navigate, NoisyOdometry
 from groundsensor import GroundSensor
@@ -22,8 +18,9 @@ from omnicam import OmniCam
 from console import *
 from aux import *
 from statemachine import *
+
 from helpers import *
-from loop_function_params import *
+from loop_function_params import params, generic_params
 from controller_params import *
 import decimal
 
@@ -32,8 +29,6 @@ import decimal
 loglevel = 10
 logtofile = False
 
-typeflag = "normal"  # type of current robot
-DECIMAL_FACTOR = generic_params['decimal_factor']
 # /* Experiment Parameters */
 #######################################################################
 erbDist = 175
@@ -42,6 +37,14 @@ gsFreq = 20
 rwSpeed = controller_params['scout_speed']
 navSpeed = controller_params['recruit_speed']
 friction = generic_params['frictionUncertainty']
+
+maxlife = os.environ["MAXLIFE"]
+num_normal = int(os.environ["NUM1A"])
+num_faulty = int(os.environ["NUM1B"])
+num_malicious = int(os.environ["NUM2"])
+
+typeflag = "normal"  # type of current robot
+DECIMAL_FACTOR = generic_params['decimal_factor']
 
 # /* Global Variables */
 #######################################################################
@@ -73,18 +76,21 @@ clocks['faulty_report'] = Timer(21)
 clocks['gs'] = Timer(0.02)
 clocks['log_cluster'] = Timer(30)
 clocks['clean_vidx'] = Timer(300)
-txList = []
-residual_list = []
-source_pos_list = []
+
 counters['velocity_test'] = 0
+
 my_speed = 0
 previous_pos = [0, 0]
 pos_to_verify = [0, 0]
+fault_behaviour =  False
+residual_list = []
+source_pos_list = []
 idx_to_verity = -1
 verified_idx = []
 myBalance = 0
-fault_behaviour =  False
 
+
+txList = []
 class Transaction(object):
 
     def __init__(self, txHash, name="", query_latency=2, verified_idx=-1, myID=-1):
@@ -151,12 +157,13 @@ class Transaction(object):
         except Exception as e:
             self.tx = None
 
-
 def init():
-    global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, cam, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance
+    global clocks, counters, logs, txs, me, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, cam, submodules
+    global friction, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, idx_to_verity, verified_idx, myBalance
+
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifiersExtract(robotID, 'IP')
-    print(robotID,robotIP)
+
     print(num_normal + num_faulty)
     if int(robotID) > num_normal + num_faulty:
         typeflag = "malicious"  # malicious robot
@@ -198,29 +205,28 @@ def init():
     # /* Initialize Sub-modules */
     #######################################################################
     # # /* Init web3.py */
-    robot.log.info('Initialising Python Geth Console...')
+    robot.log.info('Initialising submodules')
     w3 = init_web3(robotIP)
 
     # /* Init an instance of peer for this Pi-Puck */
     me = Peer(robotID, robotIP, w3.enode, w3.key)
 
-    # /* Init E-RANDB __listening process and transmit function
-    robot.log.info('Initialising RandB board...')
+    # /* Init E-RANDB */
     erb = ERANDB(robot, erbDist, erbtFreq)
+
+    # /* Init Navigation */
     my_friction = friction * int(robotID)
     if robot.variables.get_attribute("type") == 'faulty':
         my_friction = friction * 20
     elif robot.variables.get_attribute("type") == 'malicious':
         my_friction = friction * int(num_normal/2)
-    robot.log.info('Initialising navigation...')
+
     nav = Navigate(robot, navSpeed, withKF=True, fric=my_friction)
 
-    # /* Init Random-Walk, __walking process */
-    robot.log.info('Initialising random-walk...')
+    # /* Init Random-Walk */
     rw = RandomWalk(robot, rwSpeed, fric=my_friction)
 
-    # /* Init Navigation, __navigate process */
-    robot.log.info('Initialising odometry...')
+    # /* Init Odometry */
     if robot.variables.get_attribute("type") == 'faulty':
         odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * 50)
     elif robot.variables.get_attribute("type") == 'malicious':
@@ -229,8 +235,7 @@ def init():
     else:
         odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(robotID))
 
-    # /* Init Ground-Sensors, __mapping process and vote function */
-    robot.log.info('Initialising ground-sensors...')
+    # /* Init Ground-Sensors */
     gs = GroundSensor(robot, gsFreq)
 
     # /* Init OmniCam */
@@ -251,7 +256,9 @@ def init():
     robot.epuck_wheels.set_speed(navSpeed / 2, navSpeed / 2)
 
 def controlstep():
-    global startFlag, startTime, clocks, counters, my_speed, previous_pos, pos_to_verify, residual_list,fault_behaviour, source_pos_list, idx_to_verity, verified_idx, myBalance
+    global startFlag, startTime, clocks, counters
+    global my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, idx_to_verity, verified_idx, myBalance
+
     if not startFlag:
         ##########################
         #### FIRST STEP ##########
@@ -285,6 +292,7 @@ def controlstep():
 
         if logs['noisy_odometry'].queryTimer():
             logs['noisy_odometry'].log([odo.getNew()])
+
         if logs['balance'].queryTimer():
             logs['balance'].log([w3.exposed_balance])
 
@@ -429,15 +437,17 @@ def controlstep():
 
 
         ##############################
-        #### STATE-MACHINE STEPS ####
+        #### STATE-MACHINE STEP ######
         ##############################
-        # print(cam.getNew())
+
+        #########################################################################################################
+        #### State::EVERY
+        #########################################################################################################
+        
+        print(cam.getNew())
 
         peering()
 
-        #########################################################################################################
-        #### Idle.IDLE
-        #########################################################################################################
         # Transaction check every step
         if txs['report'].query(9):
             txs['report'] = Transaction(None)
@@ -461,6 +471,10 @@ def controlstep():
                     if found:
                         verified_idx.append(idx)
             '''
+
+        #########################################################################################################
+        #### Idle.IDLE
+        #########################################################################################################
 
         if fsm.query(Idle.IDLE):
             # State transition: Scout.EXPLORE
@@ -491,6 +505,12 @@ def controlstep():
                 print("current balance:")
                 myBalance = w3.exposed_balance
                 print(w3.exposed_balance)
+
+
+        #########################################################################################################
+        #### Scout.QUERY
+        #########################################################################################################
+
         elif fsm.query(Scout.Query):
             # Query smart contract
 
@@ -533,6 +553,11 @@ def controlstep():
                         fsm.setState(Verify.DriveTo, message="Go to unverified source")
                         pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
                         pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+
+        #########################################################################################################
+        #### Verify.DriveTo
+        #########################################################################################################
+
         elif fsm.query(Verify.DriveTo):
             # estimate position
             pos_state, _ = posUncertaintyEst()
@@ -562,6 +587,11 @@ def controlstep():
                     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
                     txs['report'] = Transaction(transactHash, verified_idx=idx_to_verity, myID=int(robotID))
                 fsm.setState(Verify.Homing, message="Homing")
+
+        #########################################################################################################
+        #### Verify.Homing
+        #########################################################################################################
+      
         elif fsm.query(Verify.Homing):
             # post-transaction homing
             arrived = homing()
@@ -588,7 +618,10 @@ def controlstep():
             if arrived:
                 fsm.setState(Scout.Query, message="Arrived home")
 
-
+        #########################################################################################################
+        #### Scout.PrepSend
+        #########################################################################################################
+      
         elif fsm.query(Scout.PrepSend):
             # continue last action to verify exact food source position
             pos_state, _ = posUncertaintyEst()
@@ -630,6 +663,11 @@ def controlstep():
 
                     txs['report'] = Transaction(transactHash)
                 fsm.setState(Verify.Homing, message="Homing")
+
+        #########################################################################################################
+        #### Faulty.Pending
+        #########################################################################################################
+      
         elif fsm.query(Faulty.Pending):
             rw.step()
             if clocks['faulty_report'].query() or fault_behaviour: #Malicious behaviour
@@ -670,6 +708,10 @@ def controlstep():
                         pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
                         pos_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
 
+        #########################################################################################################
+        #### Faulty.DriveTo
+        #########################################################################################################
+
         elif fsm.query(Faulty.DriveTo):
             pos_state, _ = posUncertaintyEst()
             # execute driving cmd
@@ -693,6 +735,11 @@ def controlstep():
                       int(pos_state[1][0] * DECIMAL_FACTOR), int(realType))
                 txs['report'] = Transaction(transactHash)
                 fsm.setState(Faulty.Homing, message="Homing")
+
+        #########################################################################################################
+        #### Faulty.DriveToReal
+        #########################################################################################################
+
         elif fsm.query(Faulty.DriveToReal):
             pos_state, _ = posUncertaintyEst()
 
@@ -721,6 +768,10 @@ def controlstep():
                     txs['report'] = Transaction(transactHash, verified_idx=idx_to_verity, myID=int(robotID))
                 fsm.setState(Faulty.Homing, message="Homing")
 
+        #########################################################################################################
+        #### Faulty.Homing
+        #########################################################################################################
+
         elif fsm.query(Faulty.Homing):
             # post-transaction homing
             arrived = homing()
@@ -741,16 +792,12 @@ def controlstep():
                 #clocks['faulty_report'].reset()
                 fsm.setState(Faulty.Pending, message="Pending random walk")
 
-
 def reset():
     pass
-
 
 def destroy():
     if startFlag:
         w3.geth.miner.stop()
-        # for enode in getEnodes():
-        #     w3.geth.admin.removePeer(enode)
 
     variables_file = experimentFolder + '/logs/' + me.id + '/variables.txt'
     with open(variables_file, 'w+') as vf:

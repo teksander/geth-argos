@@ -14,41 +14,32 @@ sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder+'/loop_functions')
 sys.path.insert(1, experimentFolder)
 
-from loop_function_params import *
+from loop_function_params import params as lp
 from controller_params import *
-generic_params['show_rays'] = False
+lp['generic']['show_rays'] = False
 
 # /* Global Variables */
 #######################################################################
 
 def init():
-	global item_list, stone_list
-
-	# Create a list of random quarry stones
-	stone_list = []
-	for i in range(0,50):
-		dx = params['quarry']['width']/2
-		dy = params['quarry']['height']/2
-		x  = random.uniform(params['quarry']['position'][0]-dx, params['quarry']['position'][0]+dx)
-		y  = random.uniform(params['quarry']['position'][1]-dy, params['quarry']['position'][1]+dy)
-
-		stone_list.append((x, y))
+	pass
 
 def DrawInWorld():
 
 	# Draw home
-	rh = params['home']['radius']
-	environment.qt_draw.circle(params['home']['position']+[0.01], [], rh,'green', True)
+	rh = lp['home']['radius']
+	environment.qt_draw.circle(lp['home']['position']+[0.01], [], rh,'green', True)
 
-	rs = params['source']['radius']
-	for fs in  params['source']['positions']:
+	rs = lp['source']['radius']
+	for fs in  lp['source']['positions']:
 		environment.qt_draw.circle(fs + [0.01], [], rs, 'blue', True)
 
-	rs = params['source']['radius']
-	for fs in params['source']['fake_positions']:
+	rs = lp['source']['radius']
+	for fs in lp['source']['fake_positions']:
 		environment.qt_draw.circle(fs + [0.01], [], rs, 'red', True)
+
 	# Draw rays
-	if generic_params['show_rays']:
+	if lp['generic']['show_rays']:
 		with open(rays_file, 'r') as f:
 			for line in f:
 				robotID, pos, vec_target, vec_avoid, vec_desired = eval(line)
@@ -58,4 +49,3 @@ def DrawInWorld():
 
 def destroy():
 	print('Closing the QT window')
-	# environment.qt_draw.close_window()

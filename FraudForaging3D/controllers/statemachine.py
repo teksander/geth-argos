@@ -67,8 +67,6 @@ class FiniteStateMachine(object):
         if message != None:
             self.robot.log.info("%s -> %s%s", self._currState, state, ' | '+ message)
         
-        self.robot.variables.set_attribute("grabStone", "")
-        self.robot.variables.set_attribute("dropStone", "")
         self.robot.variables.set_attribute("state", str(state))
 
 

@@ -10,7 +10,7 @@ fi
 
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain-sm"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
-export EXPERIMENTFOLDER="$MAINFOLDER/FraudForaging"
+export EXPERIMENTFOLDER="$MAINFOLDER/FraudForaging3D"
 export BLOCKCHAINPATH="$HOME/eth_data_para/data"
 
 # [FILES]
