@@ -237,7 +237,7 @@ contract ForagingPtManagement{
                 }
 
              }
-            else if (category==1 && info.foundCluster==0 && clusterList[info.minClusterIdx].init_reporter != msg.sender && unverfied_clusters<2){
+            else if (category==1 && info.foundCluster==0 && clusterList[info.minClusterIdx].init_reporter != msg.sender && unverfied_clusters<3){
                 //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster, this is only for experimental purpose
                 clusterList.push(Cluster(x,y,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,x,y));
                 pointList.push(Point(x,y,amount, category, int256(clusterList.length-1), msg.sender, realType));
@@ -253,7 +253,7 @@ contract ForagingPtManagement{
         uint256 total_non_food_credit = 0;
         uint256 bonus_credit = 0;
         for (uint i=0; i<clusterList.length; i++){
-            if (clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=min_balance && clusterList[i].total_credit_food>(clusterList[i].total_credit-clusterList[i].total_credit_food)){
+            if (clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=min_balance && clusterList[i].total_credit_food>=(clusterList[i].total_credit-clusterList[i].total_credit_food)){
             clusterList[i].verified=1; //cluster verified
             clusterList[i].life = curtime+max_life;
             total_non_food_credit = clusterList[i].total_credit-clusterList[i].total_credit_food;

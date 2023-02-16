@@ -245,7 +245,8 @@ def init():
         print('malicious agent, odo noise set to, ', int(num_normal/2))
         odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(num_normal/2))
     else:
-        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * int(robotID))
+        print('normal agent, odo noise set to, ', (int(robotID)/num_normal)*10)
+        odo = NoisyOdometry(robot, generic_params['unitPositionUncertainty'] * (int(robotID)/num_normal)*10)
 
     # /* Init Ground-Sensors, __mapping process and vote function */
     robot.log.info('Initialising ground-sensors...')
@@ -396,21 +397,22 @@ def controlstep():
             return pos_state, math.tanh((1 / myUncertainty) * generic_params['unitPositionUncertainty'])
 
         def depoValueEst():
-            myBalance = w3.exposed_balance
+            myBalance = float(w3.exposed_balance)
+            points_list = w3.sc.functions.getPointListInfo().call()
+            source_list = w3.sc.functions.getSourceList().call()
+            for idx, cluster in enumerate(source_list):
+                if cluster[3] == 0:
+                    for point_rec in points_list:
+                        if point_rec[5] == w3.exposed_key and int(point_rec[4]) == idx:
+                            myBalance+=float(point_rec[2])/1e18
             myAmount = max((myBalance - 1) / 2, 0)
-            print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
-            return myAmount
 
-        def sortingFirstElement(data_list):
-            new_list = []
-            while data_list:
-                minimum = data_list[0] # arbitrary number in list
-                for x in data_list:
-                    if x[0] < minimum[0]:
-                        minimum = x
-                new_list.append(minimum)
-                data_list.remove(minimum)
-            return new_list
+            if myAmount<=float(w3.exposed_balance)-1:
+                print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
+                return myAmount
+            else:
+                return -1
+
 
         def is_at_food(point):
             at_Food = 0
@@ -548,7 +550,7 @@ def controlstep():
                                   int(pending_report[1] * DECIMAL_FACTOR), int(realType))
 
                             txs['report'] = Transaction(transactHash)
-                    is_pending_report = False
+                        is_pending_report = False
                 else:
                     source_list = w3.sc.functions.getSourceList().call()
                     clusterInfo = w3.sc.functions.getClusterInfo().call()
@@ -581,7 +583,8 @@ def controlstep():
                             none_verified_idx.append(idx_to_verity) # add all points
 
                         if len(none_verified_idx) > 0:
-                            select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
+                            #select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
+                            select_idx = none_verified_idx[0]
                             cluster = candidate_cluster[select_idx][0]
                             fsm.setState(Scout.GotoCenter, message="Drive to others reported pos")
                             pos_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR

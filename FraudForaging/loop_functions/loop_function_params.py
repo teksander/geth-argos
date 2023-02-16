@@ -19,7 +19,7 @@ generic_params['seed']       = 350 # None for randomgen
 generic_params['decimal_factor'] = float(os.environ["DECIMAL_FACTOR"])
 generic_params['use_wmsr'] = int(os.environ["USEWMSR"])
 generic_params['num_food_source'] = int(os.environ["NUMFOOD"])
-generic_params['unitPositionUncertainty'] = 0.02 #reduced unit pos uncertainty, default =0.03
+generic_params['unitPositionUncertainty'] = 0.03 #reduced unit pos uncertainty, default =0.03
 generic_params['frictionUncertainty'] = 0.00
 num_malicious = int(os.environ["NUM2"])
 def load(path):

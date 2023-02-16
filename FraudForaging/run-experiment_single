@@ -56,45 +56,83 @@ run() {
 	done
 }
 
+export USEWMSR=3 #wmsr excluding 3 pts
+export NUM1A=15
+export NUM2=0
+config "REPS" 10
+run "SingleSourceSupp/wmsr_3_0_15_lnb"
 
-export USEWMSR=0 #use lca
-export NUM1A=10
-export NUM2=6
-config "REPS" 15
-run "SingleSourceSupp/lca_0_6_16_ln"
+
 
 export USEWMSR=3 #wmsr excluding 3 pts
-export NUM1A=10
-export NUM2=6
-config "REPS" 15
-run "SingleSourceSupp/wmsr_3_6_16_ln"
+export NUM1A=14
+export NUM2=1
+config "REPS" 10
+run "SingleSourceSupp/wmsr_3_1_15_lnb"
 
 export USEWMSR=3 #wmsr excluding 3 pts
 export NUM1A=13
-export NUM2=3
-config "REPS" 15
-run "SingleSourceSupp/wmsr_3_3_16_ln"
-
-
-export USEWMSR=0 #use lca
-export NUM1A=13
-export NUM2=3
-config "REPS" 15
-run "SingleSourceSupp/lca_0_3_16_ln"
-
-
-
-export USEWMSR=0 #use lca
-export NUM1A=16
-export NUM2=0
-config "REPS" 15
-run "SingleSourceSupp/lca_0_0_16_ln"
+export NUM2=2
+config "REPS" 10
+run "SingleSourceSupp/wmsr_3_2_15_lnb"
 
 export USEWMSR=3 #wmsr excluding 3 pts
-export NUM1A=16
-export NUM2=0
-config "REPS" 15
-run "SingleSourceSupp/wmsr_3_0_16_ln"
+export NUM1A=12
+export NUM2=3
+config "REPS" 10
+run "SingleSourceSupp/wmsr_3_3_15_lnb"
+
+export USEWMSR=3 #wmsr excluding 3 pt#s
+export NUM1A=11
+export NUM2=4
+config "REPS" 10
+run "SingleSourceSupp/wmsr_3_4_15_lnb"
+
+#export USEWMSR=3 #wmsr excluding 3 pts
+#export NUM1A=10
+#export NUM2=5
+#config "REPS" 15
+#run "SingleSourceSupp/wmsr_3_5_15_lnb"
+#
+#
+#export USEWMSR=0 #wmsr excluding 3 pts
+#export NUM1A=15
+#export NUM2=0
+#config "REPS" 15
+#run "SingleSourceSupp/lca_3_0_15_lnb"
+
+
+export USEWMSR=0
+export NUM1A=14
+export NUM2=1
+config "REPS" 10
+run "SingleSourceSupp/lca_3_1_15_lnb"
+
+export USEWMSR=0
+export NUM1A=13
+export NUM2=2
+config "REPS" 10
+run "SingleSourceSupp/lca_3_2_15_lnb"
+
+export USEWMSR=0
+export NUM1A=12
+export NUM2=3
+config "REPS" 10
+run "SingleSourceSupp/lca_3_3_15_lnb"
+
+export USEWMSR=0
+export NUM1A=11
+export NUM2=4
+config "REPS" 10
+run "SingleSourceSupp/lca_3_4_15_lnb"
+#
+#export USEWMSR=0
+#export NUM1A=10
+#export NUM2=5
+#config "REPS" 15
+#run "SingleSourceSupp/lca_3_5_15_lnb"
+
+
 
 
 
