@@ -1,7 +1,0 @@
-#!/bin/bash
-# Short script to send experiment-dependent docker scripts
-
-source experimentconfig.sh
-
-cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts
-rm $DOCKERFOLDER/geth/python_scripts/send-all

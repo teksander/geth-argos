@@ -1,0 +1,247 @@
+#!/bin/bash
+# Iterate over experimental settings and start experiments
+source experimentconfig.sh
+DATAFOLDER="$EXPERIMENTFOLDER/results/data"
+
+##################################################################################
+### EXAMPLE: config "NUMROBOTS" 10 
+config() {
+	sed -i "s|^export ${1}=.*|export ${1}=${2}|" experimentconfig.sh
+}
+
+##################################################################################
+### EXAMPLE: loopconfig "patches" "radius" 0.05 
+loopconfig() {
+	sed -i "/\['${1}'\]\['${2}'\]/ s/=.*/= ${3}/" loop_functions/loop_params.py
+}
+
+##################################################################################
+### EXAMPLE: copy "test116_patchy/20_blockchain1"
+copy() {
+	# Collect the config from results
+	cp $DATAFOLDER/experiment_${1}/001/experimentconfig.sh .
+	cp $DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
+	cp $DATAFOLDER/experiment_${1}/001/loop_function_params.py loop_functions/
+}
+
+##################################################################################
+### EXAMPLE: import "test116_patchy/20_blockchain1"
+import() {
+	# Collect the config from results
+	SSHHOST="eksander@esme"
+	SSHSOCKET=~/.ssh/$SSHHOST
+	
+	ssh -M -f -N -o ControlPath=$SSHSOCKET $SSHHOST
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/experimentconfig.sh .
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/loop_function_params.py loop_functions/
+	ssh -S $SSHSOCKET -O exit $SSHHOST
+}
+
+##################################################################################
+### EXAMPLE: run "test116_patchy/20_blockchain1"
+run() {
+
+	# Configure experiment
+	. experimentconfig.sh
+
+	# If is a testrun
+	if  [[ $2 = "--test" || $2 = "-t" ]]; then
+		echo "Running test ${1}"
+		. starter -r -s
+		    bash collect-logs ${1}
+	elif [[ $2 = "--no-blockchain" || $2 = "-n" ]]; then
+		echo "Running blockchain free test ${1}"
+		. starter -s
+	else
+		for REP in $(seq 1 ${REPS}); do
+			echo "Runing experiment ${1}"
+
+			# Perform experiment
+			. starter -r -sz
+
+			# Collect data
+			if [ $# -eq 1 ]; then
+			    bash collect-logs ${1}
+			fi
+			
+		done
+	fi
+}
+
+
+
+# EXP=8rob-2byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 8
+# config "NUMBYZANTINE" 2
+# config "FLOORFILE" 22.png
+# config "ARENADIM" 1.20
+# config "ARENADIMH" 0.60
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 8 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+# EXP=16rob-4byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 16
+# config "NUMBYZANTINE" 4
+# config "FLOORFILE" 31.png
+# config "ARENADIM" 1.65
+# config "ARENADIMH" 0.825
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 16 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+
+# EXP=24rob-6byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 24
+# config "NUMBYZANTINE" 6
+# config "FLOORFILE" 38.png
+# config "ARENADIM" 2.0
+# config "ARENADIMH" 1.0
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 24 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+
+# EXP=48rob-12byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 48
+# config "NUMBYZANTINE" 12
+# config "FLOORFILE" 54.png
+# config "ARENADIM" 2.8
+# config "ARENADIMH" 1.4
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 48 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+# EXP=72rob-18byz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 72
+# config "NUMBYZANTINE" 18
+# config "FLOORFILE" 66.png
+# config "ARENADIM" 3.4
+# config "ARENADIMH" 1.7
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 72 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+# EXP=96rob-24yz
+# CFG=default
+# config "REPS" 1
+# config "NUM1" 96
+# config "NUMBYZANTINE" 24
+# config "FLOORFILE" 76.png
+# config "ARENADIM" 3.9
+# config "ARENADIMH" 1.95
+# config "RABRANGE" 0.13
+# config "NOTES" "\"Basic long-term experiment with 96 robots and a run-time of 600 minutes\""
+# config "REALTIME" "true"
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+EXP=120rob-30yz
+CFG=default
+config "REPS" 20
+config "NUM1" 120
+config "NUMBYZANTINE" 30
+config "FLOORFILE" 85.png
+config "ARENADIM" 4.35
+config "ARENADIMH" 2.175
+config "RABRANGE" 0.13
+config "NOTES" "\"Basic long-term experiment with 120 robots and a run-time of 600 minutes\""
+config "REALTIME" "true"
+
+wait
+run    "${EXP}/${CFG}" $1
+
+
+
+
+
+# CFG=linear_20_limassign_0_regen_10
+# config "LIMITASSIGN" 0
+# config "NOTES" "\"Testing maxload 12 and new resource regen/forage; limassign 50 vs limassign 0; regen 5 vs regen 10\""
+
+# wait
+# run    "${EXP}/${CFG}" $1
+
+
+
+
+
+# EXP=115_patch_size
+
+# config "REPS" 3
+# config "NUM1" 10
+
+# #-----------------------
+# config "SCNAME" "resource_market_limit" 
+# config "MAXWORKERS" 2
+
+# declare -a arr=(0.20 0.16 0.12 0.08 0.04)
+# for patch_radius in "${arr[@]}"; do 
+# 	loopconfig "patches" "radius" patch_radius	
+# 	wait
+# 	run    "${EXP}/limit_2" $1
+# done	
+
+# #-----------------------
+# config "SCNAME" "resource_market_egreedy" 
+# config "EPSILON" 50
+
+# declare -a arr=(0.20 0.16 0.12 0.08 0.04)
+# for patch_radius in "${arr[@]}"; do 
+# 	loopconfig "patches" "radius" patch_radius	
+# 	wait
+# 	run    "${EXP}/egreedy_50" $1
+# done
+
+# #-----------------------
+# config "SCNAME" "resource_market_egreedy"
+
+# CFG=limit_3
+# config "EPSILON" 50
+# wait
+# run    "${EXP}/${CFG}" $1
+
+# CFG=egreedy_20
+# config "EPSILON" 20
+# wait
+# run    "${EXP}/${CFG}"
+
+
+# for EPSILON in $(seq 0 10 100); do 
+# 	CFG=egreedy_${EPSILON}
+# 	config "EPSILON" ${EPSILON}
+# 	wait
+# 	run    "${EXP}/${CFG}"
+# done

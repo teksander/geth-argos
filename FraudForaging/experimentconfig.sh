@@ -8,7 +8,7 @@ elif [ $USER == "hzhao" ]; then
 	export MAINFOLDER="$HOME/blockchain-robots/geth-argos"
 fi
 
-export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
+export DOCKERFOLDER="$MAINFOLDER/argos-blockchain-sm"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/FraudForaging"
 export BLOCKCHAINPATH="$HOME/eth_data_para/data"

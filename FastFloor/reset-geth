@@ -2,18 +2,22 @@
  
 source experimentconfig.sh
 
-#Generate source point file
-python3 ${EXPERIMENTFOLDER}/loop_functions/generate_source_pos.py
-
 echo "+-----------------------------------------------------------+"
 echo "Updating the Smart Contract"
 
-sed -e "s|DIMS|$DIMS|g"\
-    -e "s|NUMPT|$NUMPT|g"\
-    -e "s|MAXLIFE|$MAXLIFE|g"\
-    -e "s|MINREP|$MINREP|g"\
-    -e "s|RADIUS|$RADIUS|g"\
-    -e "s|MINBALANCE|$MINBALANCE|g"\
+sed -e "s|MAXSTAKERS|$MAXSTAKERS|g"\
+    -e "s|MAXWORKERS|$MAXWORKERS|g"\
+    -e "s|DEMAND_A|$DEMAND_A|g"\
+    -e "s|DEMAND_B|$DEMAND_B|g"\
+    -e "s|LIMITASSIGN|$LIMITASSIGN|g"\
+    -e "s|QUOTA|$QUOTA|g"\
+    -e "s|FUELCOST|$FUELCOST|g"\
+    -e "s|BLOCKPERIOD|$BLOCKPERIOD|g"\
+    -e "s|REGENRATE|$REGENRATE|g"\
+    -e "s|STAKERSHARE|$STAKERSHARE|g"\
+    -e "s|WORKERSHARE|$WORKERSHARE|g"\
+    -e "s|EPSILON|$EPSILON|g"\
+    -e "s|WINSIZE|$WINSIZE|g"\
   $SCTEMPLATE > $SCFILE
 
 echo "+-----------------------------------------------------------+"
@@ -61,17 +65,25 @@ bash ${DOCKERFOLDER}/local/start-network $NUMROBOTS
 echo "+-----------------------------------------------------------+"
 echo "Creating the identifier file"
 
+## Create identifiers file
+
 # Get IDs
 seq 1 $NUMROBOTS > temp1.txt
 
 # Get containers
 docker ps --format '{{.Names}} {{.ID}}' | sort -V > temp2.txt
 
+wait
+
 # Get external IP @ 172.
-./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172." | grep -v ".255" > temp3.txt
+./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "172\." | grep -v "\.255" > temp3.txt
+
+wait
 
 # Get internal IP @ 10.0. or 10.1.
-./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "10."  | grep -v "10.0.0" | grep -v ".255" > temp4.txt
+./bash-all -s "ip a" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | grep "10\."  | grep -v "10\.0\.0" | grep -v "\.255" > temp4.txt
+
+wait
 
 # Save to identifiers file
 paste temp1.txt temp2.txt temp3.txt temp4.txt > identifiers.txt

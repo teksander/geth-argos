@@ -1,0 +1,17 @@
+#!/bin/bash
+ready=0
+    for host in $(awk '{print $4}' identifiers.txt); do
+        responded=true
+        for port in "$@"; do
+            if ! echo -e '\x1dclose\x0d' | telnet $host $port 2>/dev/null | grep -q Connected ; then
+                responded=false
+            fi
+        done
+
+        if $responded; then
+            let "ready=ready+1"
+            echo "$host responded @ $@"
+        fi
+
+    done
+    echo "Total responded: $ready"
