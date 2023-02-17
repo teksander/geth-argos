@@ -72,7 +72,7 @@ $ pip3 install rpyc psutil
 Step 5: Configuration and Run
 
 Edit ```experimentconfig.sh``` and ```blockchainconfig``` files to match your paths\
-Then run an experiment (HelloNeighbor is a good starting point (Not ready yet))
+Then run an experiment (HelloNeighbor and FloorEstimation are not implemented currently))
 
 ```
 cd geth-argos/<ExperimentFolderName>
