@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import time
 import subprocess
 import copy
@@ -7,11 +6,6 @@ from hexbytes import HexBytes
 
 from console import *
 from aux import TCP_mp, TCP_server, TCP_server2, l2d
-
-global peered, peers, peers_geth
-peers = dict()
-peers_geth = []
-peered = set()
 
 def getEnodes():
     return [peer['enode'] for peer in w3.geth.admin.peers()]
@@ -22,32 +16,49 @@ def getIps(__enodes = None):
     else:
         return [enode.split('@',2)[1].split(':',2)[0] for enode in getEnodes()]
 
-def peering():
-	""" Control routine for robot-to-robot dynamic peering """
-	global peered, peers, peers_geth
+# peers_geth is the set [ips] we get from geth.admin 
+# peers_buffer is our local buffer set [ips]
+global peers_geth, peers_buffer
+peers_geth, peers_buffer = set(), set()
+
+def peering(peer_IPs):
+	""" Control routine for robot-to-robot dynamic peering 
+	argument: dict {id:ip} comes from ARGoS controller
+	"""
+
+	global peers_geth, peers_buffer
 	
 	peers_geth_enodes = getEnodes()
 	peers_geth = set(getIps(peers_geth_enodes))
 
-	for peer in peers:
-		if peers[peer] not in peered:
-			enode = tcp_enode.request(host=peers[peer], port=5000) 
+	for peer_ID, peer_IP in peer_IPs.items():
+		if peer_IP not in peers_buffer:
+			enode = tcp_enode.request(host=peer_IP, port=5000) 
 			if 'enode' in enode:
 				w3.geth.admin.addPeer(enode)
-				peered.add(peers[peer])
-				print('Added peer: %s|%s' % (peer, enode))
+				peers_buffer.add(peer_IP)
+				print('Added peer: %s|%s' % (peer_ID, enode))
 
-	temp = copy.copy(peered)
+	temp = copy.copy(peers_buffer)
 
-	for peer in temp:
-		if peer not in peers.values():
-			enode = tcp_enode.request(host=peer, port=5000)
+	for peer_IP in temp:
+		if peer_IP not in peer_IPs.values():
+			enode = tcp_enode.request(host=peer_IP, port=5000)
 			if 'enode' in enode:
 				w3.provider.make_request("admin_removePeer",[enode])
-				peered.remove(peer)
-				print('Removed peer: %s|%s' % (peer, enode))
 
-	peers = dict()
+				peers_geth_enodes = getEnodes()
+				if enode not in peers_geth_enodes:
+					peers_buffer.remove(peer_IP)
+					print('Removed peer: %s|%s' % (peer_IP, enode))
+
+	# for enode in peers_geth_enodes:
+	# 	peer_IP = getIp(enode)
+	# 	if peer_IP not in peer_IPs.values():
+	# 		w3.provider.make_request("admin_removePeer",[enode])
+	# 		peers_buffer.remove(peer_IP)
+	# 		print('Timed out peer: %s|%s' % (peer_ID, enode))
+
 	tcp_peering.setData(len(peers_geth))
 
 
@@ -132,7 +143,9 @@ if __name__ == '__main__':
 
 		peers = tcp_peering.getNew()
 		if peers:
-			peering()
+			peering(peers)
+		else:
+			peering({})
 
 		newBlocks = bf.get_new_entries()
 		if newBlocks:

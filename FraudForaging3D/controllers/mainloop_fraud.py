@@ -51,9 +51,6 @@ DECIMAL_FACTOR = generic_params['decimal_factor']
 global startFlag
 startFlag = False
 
-global txList
-txList = []
-
 global submodules
 submodules = []
 
@@ -89,8 +86,6 @@ idx_to_verity = -1
 verified_idx = []
 myBalance = 0
 
-
-txList = []
 class Transaction(object):
 
     def __init__(self, txHash, name="", query_latency=2, verified_idx=-1, myID=-1):
@@ -106,7 +101,6 @@ class Transaction(object):
         self.myID = myID
         if self.hash:
             self.getTransaction()
-        txList.append(self)
 
     def query(self, min_confirmations=0):
         confirmations = 0
@@ -247,6 +241,9 @@ def init():
     # /* Init Finite-State-Machine */
     fsm = FiniteStateMachine(robot, start=Idle.IDLE)
 
+    #/* Init SC TCP query */
+    tcp_sc = TCP_mp('balance', me.ip, 9899)
+
     # List of submodules --> iterate .start() to start all
     submodules = [w3.geth.miner, gs, erb, cam]
 
@@ -290,11 +287,11 @@ def controlstep():
         #### LOG-MODULE STEPS ####
         ##########################
 
-        if logs['noisy_odometry'].queryTimer():
+        if logs['noisy_odometry'].query():
             logs['noisy_odometry'].log([odo.getNew()])
 
-        if logs['balance'].queryTimer():
-            logs['balance'].log([w3.exposed_balance])
+        if logs['balance'].query():
+            logs['balance'].log([myBalance])
 
         ###########################
         ######## ROUTINES #########
@@ -306,9 +303,8 @@ def controlstep():
             if clocks['peering'].query(): 
 
                 peer_IPs = dict()
-                peers = erb.getNew()
-                for peer in peers:
-                    peer_IPs[peer] = identifiersExtract(peer, 'IP_DOCKER')
+                for peer in erb.peers:
+                    peer_IPs[peer.id] = identifiersExtract(peer.id, 'IP_DOCKER')
 
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.connect((me.ip, 9898))
@@ -417,7 +413,7 @@ def controlstep():
                         myBalance += float(point_rec[2]) / 1e18
                         source_buffer[int(point_rec[4])] = 1
             '''
-            myBalance = w3.exposed_balance
+            myBalance = tcp_sc.request(data = 'balance')
             myAmount = max((myBalance - 1) / 3, 0)
             print('robot ', robot.variables.get_id(), ' amount to pay: ', myAmount)
 
@@ -444,7 +440,7 @@ def controlstep():
         #### State::EVERY
         #########################################################################################################
         
-        print(cam.getNew())
+        # print(cam.getNew())
 
         peering()
 

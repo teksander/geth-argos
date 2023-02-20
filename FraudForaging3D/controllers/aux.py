@@ -198,7 +198,103 @@ class TicToc(object):
         else:
             # logger.warning('{} Pendulum too Slow. Elapsed: {}'.format(self.name,dtime))
             pass
+            
+class TCP_mp(object):
+    """ Set up TCP_server on a background thread
+    The __hosting() method will be started and it will run in the background
+    until the application exits.
+    """
 
+    def __init__(self, data = None, host = None, port = None):
+        """ Constructor
+        :type data: any
+        :param data: Data to be sent back upon request
+        :type host: str
+        :param host: IP address to host TCP server at
+        :type port: int
+        :param port: TCP listening port for enodes
+        """
+        
+        self.data = data
+        self.host = host
+        self.port = port  
+
+        self.running  = False
+        self.received = []
+
+    def __hosting(self):
+        """ This method runs in the background until program is closed """ 
+        logger.info('TCP server running')
+
+        # Setup the listener
+        listener = Listener((self.host, self.port))
+
+        while True:
+            try:
+                __conn = listener.accept()
+                __call = __conn.recv()
+                __conn.send(self.data[__call])
+
+            except Exception as e:
+                print('TCP send failed')
+
+            if not self.running:
+                __conn.close()
+                break 
+                
+    def request(self, data = None, host = None, port = None):
+        """ This method is used to request data from a running TCP server """
+
+        __msg = ""
+
+        if not data:
+            data = self.data
+        if not host:
+            host = self.host
+        if not port:
+            port = self.port
+  
+        try:
+            __conn = Client((host, port))
+            __conn.send(data)
+            __msg  = __conn.recv()
+            __conn.close()
+
+            return __msg
+
+        except:
+            logger.error('TCP request failed')
+
+    def getNew(self):
+        if self.running:
+            temp = self.received
+            self.received = []
+            return temp
+        else:
+            print('TCP server is OFF')
+            return []
+
+    def setData(self, data):
+        self.data = data   
+
+    def start(self):
+        """ This method is called to start __hosting a TCP server """
+
+        if not self.running:
+            # Initialize background daemon thread
+            thread = threading.Thread(target=self.__hosting, args=())
+            thread.daemon = True 
+
+            # Start the execution                         
+            thread.start()   
+            self.running = True
+        else:
+            print('TCP server already ON')  
+
+    def stop(self):
+        """ This method is called before a clean exit """   
+        self.running = False
+        logger.info('TCP server is OFF') 
 class TCP_server(object):
     """ Set up TCP_server on a background thread
     The __hosting() method will be started and it will run in the background
@@ -490,7 +586,7 @@ class Logger(object):
         :type data: list
         """ 
         
-        if self.queryTimer():
+        if self.query():
             self.tStamp = time.time()
             try:
                 tString = str(round(self.tStamp-self.tStart, 3))
@@ -518,7 +614,7 @@ class Logger(object):
             pass
             logger.warning('Failed to log data to file')
 
-    def queryTimer(self):
+    def query(self):
         return time.time()-self.tStamp > self.rate
 
     def start(self):

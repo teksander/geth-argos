@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import time
 import subprocess
 import copy
@@ -18,12 +17,10 @@ def getIps(__enodes = None):
         return [enode.split('@',2)[1].split(':',2)[0] for enode in getEnodes()]
 
 
-global peers_geth, peers_buffer
 # peers_geth is the set [ips] we get from geth.admin 
 # peers_buffer is our local buffer set [ips]
-
-peers_geth = set()
-peers_buffer = set()
+global peers_geth, peers_buffer
+peers_geth, peers_buffer = set(), set()
 
 def peering(peer_IPs):
 	""" Control routine for robot-to-robot dynamic peering 
@@ -70,9 +67,8 @@ def peering(peer_IPs):
 def blockHandle():
 	""" Every time new blocks are synchronized """
 
-	pass
-
-	tcp_calls.setData({})
+	balance = w3.fromWei(w3.eth.getBalance(w3.eth.coinbase), 'ether')
+	tcp_calls.setData({'balance':balance})
 
 if __name__ == '__main__':
 
@@ -95,13 +91,13 @@ if __name__ == '__main__':
 ### TCP for calls ###
 ################################################################################################################
 
-	# data = ""
-	# port = 9899    
+	data = ""
+	port = 9899    
 
-	# tcp_calls = TCP_mp(data, host, port)
-	# tcp_calls.start()   
+	tcp_calls = TCP_mp(data, host, port)
+	tcp_calls.start()   
 
-	# blockHandle()
+	blockHandle()
 
 ################################################################################################################
 ### TCP for enodes ###
@@ -124,8 +120,8 @@ if __name__ == '__main__':
 		else:
 			peering({})
 
-		# newBlocks = bf.get_new_entries()
-		# if newBlocks:
-		# 	blockHandle()
+		newBlocks = bf.get_new_entries()
+		if newBlocks:
+			blockHandle()
 
 		time.sleep(0.25)
