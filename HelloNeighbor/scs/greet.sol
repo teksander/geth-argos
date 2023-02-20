@@ -5,11 +5,11 @@ contract HelloNeighbor {
     string public greeting;
     uint public greetingCount;
 
+
     // function append(memory string a, memory string b) internal pure returns (memory string) {
     // return string(abi.encodePacked(a, b));
     
     function setGreeting() public {
-        greetingCount = 0;
         greeting = "Hello neighbor";
     }
 

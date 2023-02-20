@@ -16,7 +16,7 @@ from movement import RandomWalk, Navigate, Odometry, OdoCompass, GPS
 from groundsensor import GroundSensor, ResourceVirtualSensor, Resource
 from erandb import ERANDB
 from rgbleds import RGBLEDs
-from console import *
+from console import init_web3, Transaction
 from aux import *
 from statemachine import *
 
@@ -164,74 +164,6 @@ class ResourceBuffer(object):
 
     def getResourceByValue(self, value):
         return self.buffer[self.getValues().index(value)]
-
-
-class Transaction(object):
-
-    def __init__(self, txHash, name = "", query_latency = 2):
-        self.name      = name
-        self.hash      = txHash
-        self.tx        = None
-        self.receipt   = None
-
-        self.fail      = False
-        self.block     = w3.eth.blockNumber()
-        self.last      = 0
-        self.timer     = Timer(query_latency)
-
-        if self.hash:
-            self.getTransaction()
-        txList.append(self)
-
-    def query(self, min_confirmations = 0):
-        confirmations = 0
-
-        if not self.hash:
-            return False
-
-        if self.timer.query():
-            self.getTransaction()
-            self.getTransactionReceipt()
-            self.block = w3.eth.blockNumber()
-
-        if not self.tx:
-            robot.log.warning('Fail: Not found')
-            self.fail = True
-            return False
-
-        elif not self.receipt:
-            return False
-
-        elif not self.receipt['status']:
-            robot.log.warning('Fail: Status 0')
-            self.fail = True
-            return False
-
-        else:
-            confirmations = self.block - self.receipt['blockNumber']
-
-            if self.last < confirmations:
-                self.last = confirmations
-                robot.log.info('Confirming: %s/%s', confirmations, min_confirmations)
-                
-            if confirmations >= min_confirmations:
-                self.last = 0
-                return True
-            else:
-                return False
-
-    def getTransaction(self):
-        try:
-            self.tx = w3.eth.getTransaction(self.hash)
-        except Exception as e:
-            self.tx = None
-
-    def getTransactionReceipt(self):
-        try:
-            self.receipt = w3.eth.getTransactionReceipt(self.hash)
-        except Exception as e:
-            self.receipt = None
-
 
 
 class Trip(object):
@@ -400,15 +332,16 @@ def init():
     header = ['DIST']
     logs['odometry'] = Logger(log_folder+name, header, rate = 10, ID = me.id)
 
-    txs['sell'] = Transaction(None)
-    txs['buy']  = Transaction(None)
-    txs['drop'] = Transaction(None)
+    txs['sell'] = Transaction(w3, None)
+    txs['buy']  = Transaction(w3, None)
+    txs['drop'] = Transaction(w3, None)
 
 #########################################################################################################################
 #### CONTROL STEP #######################################################################################################
 #########################################################################################################################
 global pos
 pos = [0,0]
+
 def controlstep():
     global pos, clocks, counters, startFlag, startTime
 
@@ -458,9 +391,8 @@ def controlstep():
             if clocks['peering'].query(): 
 
                 peer_IPs = dict()
-                peers = erb.getNew()
-                for peer in peers:
-                    peer_IPs[peer] = identifiersExtract(peer, 'IP_DOCKER')
+                for peer in erb.peers:
+                    peer_IPs[peer.id] = identifiersExtract(peer.id, 'IP_DOCKER')
 
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.connect((me.ip, 9898))
@@ -643,7 +575,7 @@ def controlstep():
                 if leave:
                     fsm.setState(States.LEAVE, message = "Leaving: %s" % res._desc, pass_along = res)
                 else:
-                    fsm.setState(States.HOMING, message = "")
+                    fsm.setState(States.HOMING, message = None)
                         
             elif availiable:
                 fsm.setState(States.ASSIGN, message = "Assigning")
@@ -680,17 +612,16 @@ def controlstep():
             homing()
 
             if txs['buy'].query(3):
-                txs['buy'] = Transaction(None)
+                txs['buy'].reset(None)
                 fsm.setState(States.PLAN, message = "Assign success")
 
-            elif txs['buy'].fail == True:    
-                txs['buy'] = Transaction(None)
+            elif txs['buy'].failed():    
                 fsm.setState(States.PLAN, message = "Assign failed")
 
             elif txs['buy'].hash == None:
                 res = fsm.pass_along
                 txHash = w3.sc.functions.assignPatch().transact()
-                txs['buy'] = Transaction(txHash)
+                txs['buy'].reset(txHash)
                 robot.log.info("Assigning patch")     
 
 
@@ -701,18 +632,21 @@ def controlstep():
         elif fsm.query(States.JOIN):
 
             if txs['buy'].query(3):
-                txs['buy'] = Transaction(None)
+                txs['buy'].reset(None)
                 fsm.setState(States.PLAN, message = "Join success")
 
-            elif txs['buy'].fail == True:    
-                txs['buy'] = Transaction(None)
+            elif txs['buy'].failed():   
                 fsm.setState(States.PLAN, message = "Join failed")
+                robot.log.warning(txs['buy'].msg)
 
             elif txs['buy'].hash == None:
                 res = fsm.pass_along
                 txHash = w3.sc.functions.joinPatch(*res._calldata[:2]).transact()
-                txs['buy'] = Transaction(txHash)
+                txs['buy'].reset(txHash)
                 robot.log.info("Joining patch") 
+
+            elif txs['buy'].msg:
+                robot.log.info(txs['buy'].msg)
 
         #########################################################################################################
         #### State::LEAVE  
@@ -723,18 +657,21 @@ def controlstep():
             homing()
 
             if txs['buy'].query(3):
-                txs['buy'] = Transaction(None)
+                txs['buy'].reset(None)
                 fsm.setState(States.PLAN, message = "Leave success")
 
-            elif txs['buy'].fail == True:    
-                txs['buy'] = Transaction(None)
+            elif txs['buy'].failed():  
                 fsm.setState(States.PLAN, message = "Leave failed")
+                robot.log.warning(txs['buy'].msg)
 
             elif txs['buy'].hash == None:
                 res = fsm.pass_along
                 txHash = w3.sc.functions.leavePatch(*res._calldata[:2]).transact()
-                txs['buy'] = Transaction(txHash)
+                txs['buy'].reset(txHash)
                 robot.log.info("Leaving patch") 
+
+            elif txs['buy'].msg:
+                robot.log.info(txs['buy'].msg)
 
         #########################################################################################################
         #### State::FORAGE
@@ -794,8 +731,8 @@ def controlstep():
                 if not txs['drop'].hash:
 
                     robot.log.info('Dropping. TC:%s ATC:%s' % (tripList[-1].TC, tripList[-1].ATC))
-                    dropHash = w3.sc.functions.dropResource(*rb.best._calldata, tripList[-1].Q, tripList[-1].TC).transact()
-                    txs['drop'] = Transaction(dropHash)
+                    txHash = w3.sc.functions.dropResource(*rb.best._calldata, tripList[-1].Q, tripList[-1].TC).transact()
+                    txs['drop'].reset(txHash)
    
                 # Transition state  
                 else:
@@ -803,18 +740,22 @@ def controlstep():
                         robot.variables.set_attribute("dropResource", "True")
 
                         if not robot.variables.get_attribute("hasResource"):
-                            txs['drop'] = Transaction(None)
+                            txs['drop'].reset(None)
                             robot.variables.set_attribute("dropResource", "")   
                             fsm.setState(States.PLAN, message = "Dropped: %s" % rb.best._desc)
 
                     elif txs['drop'].fail == True: 
                         robot.log.info('Drop fail: %s', rb.best._desc)     
-                        txs['drop'] = Transaction(None)
+                        txs['drop'].reset(None)
+                        robot.log.warning(txs['drop'].msg)
 
                     elif txs['drop'].hash == None:
                         robot.log.info('Drop lost: %s', rb.best._desc)
-                        txs['drop'] = Transaction(None)
+                        txs['drop'].reset(None)
 
+                    elif txs['drop'].msg:
+                        robot.log.info(txs['drop'].msg)
+                        
 
 #########################################################################################################################
 #### RESET-DESTROY STEPS ################################################################################################

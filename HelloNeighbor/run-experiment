@@ -1,0 +1,139 @@
+#!/bin/bash
+# Iterate over experimental settings and start experiments
+source experimentconfig.sh
+DATAFOLDER="$EXPERIMENTFOLDER/results/data"
+
+##################################################################################
+### EXAMPLE: config "NUMROBOTS" 10 
+config() {
+	sed -i "s/^export ${1}=.*/export ${1}=${2}/" experimentconfig.sh
+}
+
+##################################################################################
+### EXAMPLE: loopconfig "patches" "radius" 0.05 
+loopconfig() {
+	sed -i "/\['${1}'\]\['${2}'\]/ s/=.*/= ${3}/" loop_functions/loop_params.py
+}
+
+##################################################################################
+### EXAMPLE: copy "test116_patchy/20_blockchain1"
+copy() {
+	# Collect the config from results
+	cp $DATAFOLDER/experiment_${1}/001/experimentconfig.sh .
+	cp $DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
+	cp $DATAFOLDER/experiment_${1}/001/loop_function_params.py loop_functions/
+}
+
+##################################################################################
+### EXAMPLE: import "test116_patchy/20_blockchain1"
+import() {
+	# Collect the config from results
+	SSHHOST="eksander@esme"
+	SSHSOCKET=~/.ssh/$SSHHOST
+	
+	ssh -M -f -N -o ControlPath=$SSHSOCKET $SSHHOST
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/experimentconfig.sh .
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/controller_params.py controllers/
+	scp -o ControlPath=$SSHSOCKET $SSHHOST:$DATAFOLDER/experiment_${1}/001/loop_function_params.py loop_functions/
+	ssh -S $SSHSOCKET -O exit $SSHHOST
+}
+
+##################################################################################
+### EXAMPLE: run "test116_patchy/20_blockchain1"
+run() {
+
+	# Configure experiment
+	. experimentconfig.sh
+
+	# If is a testrun
+	if  [[ $2 = "--test" || $2 = "-t" ]]; then
+		echo "Running test ${1}"
+		. starter -r -s
+
+	else
+		for REP in $(seq 1 ${REPS}); do
+			echo "Runing experiment ${1}"
+
+			# Perform experiment
+			. starter -r -sz
+
+			# Collect data
+			if [ $# -eq 1 ]; then
+			    bash collect-logs ${1}
+			fi
+			
+		done
+	fi
+}
+
+
+
+EXP=208
+config "REPS" 3
+
+CFG=linear_20_limassign_50_regen_10
+config "LIMITASSIGN" 50
+config "NOTES" "\"Testing maxload 12 and resource params; limassign vs no limassign; regen 5 vs regen 10\""
+
+wait
+run    "${EXP}/${CFG}" $1
+
+
+CFG=linear_20_limassign_0_regen_10
+config "LIMITASSIGN" 0
+config "NOTES" "\"Testing maxload 12 and new resource regen/forage; limassign 50 vs limassign 0; regen 5 vs regen 10\""
+
+wait
+run    "${EXP}/${CFG}" $1
+
+
+
+
+
+# EXP=115_patch_size
+
+# config "REPS" 3
+# config "NUM1" 10
+
+# #-----------------------
+# config "SCNAME" "resource_market_limit" 
+# config "MAXWORKERS" 2
+
+# declare -a arr=(0.20 0.16 0.12 0.08 0.04)
+# for patch_radius in "${arr[@]}"; do 
+# 	loopconfig "patches" "radius" patch_radius	
+# 	wait
+# 	run    "${EXP}/limit_2" $1
+# done	
+
+# #-----------------------
+# config "SCNAME" "resource_market_egreedy" 
+# config "EPSILON" 50
+
+# declare -a arr=(0.20 0.16 0.12 0.08 0.04)
+# for patch_radius in "${arr[@]}"; do 
+# 	loopconfig "patches" "radius" patch_radius	
+# 	wait
+# 	run    "${EXP}/egreedy_50" $1
+# done
+
+# #-----------------------
+# config "SCNAME" "resource_market_egreedy"
+
+# CFG=limit_3
+# config "EPSILON" 50
+# wait
+# run    "${EXP}/${CFG}" $1
+
+# CFG=egreedy_20
+# config "EPSILON" 20
+# wait
+# run    "${EXP}/${CFG}"
+
+
+# for EPSILON in $(seq 0 10 100); do 
+# 	CFG=egreedy_${EPSILON}
+# 	config "EPSILON" ${EPSILON}
+# 	wait
+# 	run    "${EXP}/${CFG}"
+# done

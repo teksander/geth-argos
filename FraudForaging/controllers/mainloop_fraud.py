@@ -298,9 +298,8 @@ def controlstep():
             if clocks['peering'].query(): 
 
                 peer_IPs = dict()
-                peers = erb.getNew()
-                for peer in peers:
-                    peer_IPs[peer] = identifiersExtract(peer, 'IP_DOCKER')
+                for peer in erb.peers:
+                    peer_IPs[peer.id] = identifiersExtract(peer.id, 'IP_DOCKER')
 
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.connect((me.ip, 9898))

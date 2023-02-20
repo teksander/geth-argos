@@ -1,24 +1,52 @@
-
-export MAINFOLDER="$HOME/alex-stuff/geth-argos"
-export DOCKERFOLDER="$MAINFOLDER/argos-blockchain"
+# [PATHS]
+export HOMEFOLDER=$HOME
+export MAINFOLDER="$HOMEFOLDER/geth-argos"
+export DOCKERFOLDER="$MAINFOLDER/argos-blockchain-sm"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/HelloNeighbor"
+export BLOCKCHAINPATH="$HOMEFOLDER/eth_data_para/data"
 
-BLOCKCHAINPATH="$HOME/eth_data_para/data"
-CONTAINERNAMEBASE="ethereum_eth."
+# [FILES]
+export ARGOSNAME="greeter"
+export GENESISNAME="genesis_poa"
+export CONTRACTNAME="HelloNeighbor"
+export SCNAME="greet"
 
-GENESISFILE="${DOCKERFOLDER}/geth/files/genesis_poa.json"
-SCTEMPLATE="${DOCKERFOLDER}/geth/shared/greet.sol" # <- this is the smart contract you want to use
-CONTRACTADDRESS="${DOCKERFOLDER}/geth/deployed_contract/contractAddress.txt"
-CONTRACTABI="${DOCKERFOLDER}/geth/deployed_contract/HelloNeighbor.abi"
+export GENESISFILE="${DOCKERFOLDER}/geth/files/$GENESISNAME.json"
+export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
+export CONTRACTABI="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi"
+export CONTRACTBIN="${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime"
+export SCFILE="${EXPERIMENTFOLDER}/scs/${SCNAME}.sol" 
+export SCTEMPLATE="${EXPERIMENTFOLDER}/scs/${SCNAME}.sol" 
+export ARGOSFILE="${EXPERIMENTFOLDER}/experiments/${ARGOSNAME}.argos"
+export ARGOSTEMPLATE="${EXPERIMENTFOLDER}/experiments/${ARGOSNAME}.argosx"
 
-# EXPERIMENT FILES AND PARAMETERS
+# [DOCKER]
+export SWARMNAME=ethereum
+export CONTAINERBASE=${SWARMNAME}_eth
 
-ARGOSTEMPLATE="$EXPERIMENTFOLDER/experiments/greeter.argosx"
-ARGOSFILE="$EXPERIMENTFOLDER/experiments/greeter.argos"
+# [ARGOS]
+export NUM1=5
+export CON1="${EXPERIMENTFOLDER}/controllers/main.py"
 
-NUMROBOTS=100
-REPETITIONS=1
-VISUALIZATION=visualization # visualization or none
-ARENASIZE="3.0"
+export TPS=10
+export DENSITY="3"
+
+export NUMROBOTS=$(echo $NUM1 | bc)
+export ARENADIM=$(echo "scale=3 ; sqrt($NUMROBOTS/$DENSITY)" | bc)
+export ARENADIMH=$(echo "scale=3 ; $ARENADIM/2" | bc)
+export STARTDIM=$(echo "scale=3 ; $ARENADIM/5" | bc)
+
+# [GETH]
+export BLOCKPERIOD=2
+
+# [OTHER]
+export SEED=0
+export TIMELIMIT=100
+export SLEEPTIME=5
+export REPS=4
+export NOTES=""
+
+
+
 

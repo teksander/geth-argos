@@ -16,7 +16,6 @@ def getIps(__enodes = None):
     else:
         return [enode.split('@',2)[1].split(':',2)[0] for enode in getEnodes()]
 
-
 # peers_geth is the set [ips] we get from geth.admin 
 # peers_buffer is our local buffer set [ips]
 global peers_geth, peers_buffer
@@ -34,7 +33,6 @@ def peering(peer_IPs):
 
 	for peer_ID, peer_IP in peer_IPs.items():
 		if peer_IP not in peers_buffer:
-			print(peer_IP)
 			enode = tcp_enode.request(host=peer_IP, port=5000) 
 			if 'enode' in enode:
 				w3.geth.admin.addPeer(enode)
@@ -64,13 +62,9 @@ def peering(peer_IPs):
 	tcp_peering.setData(len(peers_geth))
 
 
-
 def blockHandle():
 	""" Every time new blocks are synchronized """
-
 	pass
-
-	tcp_calls.setData({})
 
 if __name__ == '__main__':
 
@@ -93,13 +87,13 @@ if __name__ == '__main__':
 ### TCP for calls ###
 ################################################################################################################
 
-	# data = ""
-	# port = 9899    
+	data = ""
+	port = 9899    
 
-	# tcp_calls = TCP_mp(data, host, port)
-	# tcp_calls.start()   
+	tcp_calls = TCP_mp(data, host, port)
+	tcp_calls.start()   
 
-	# blockHandle()
+	blockHandle()
 
 ################################################################################################################
 ### TCP for enodes ###
@@ -122,8 +116,8 @@ if __name__ == '__main__':
 		else:
 			peering({})
 
-		# newBlocks = bf.get_new_entries()
-		# if newBlocks:
-		# 	blockHandle()
+		newBlocks = bf.get_new_entries()
+		if newBlocks:
+			blockHandle()
 
 		time.sleep(0.25)
