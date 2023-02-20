@@ -8,9 +8,9 @@ CREDITS:
 
 Ken Hasselmann for argos-python wrapper <https://github.com/KenN7/argos-python>
 
-Volker Strobel for docker-geth setup <https://github.com/Pold87/blockchain-swarm-robotics>
+Ulysse Denis for implementing a mockup blockchain in python <https://github.com/uldenis/PROJH402>
 
-DATE: 15/02/2023
+DATE: 20/02/2023
 
 
 # Installation guide
@@ -24,18 +24,11 @@ Step 1: Download and compile ARGoS version 59
 Step 2: Download and compile E-puck plugin 
 (instructions at https://github.com/demiurge-project/argos3-epuck)
 
-## Docker
-Step 1: Install docker
-(instructions at https://docs.docker.com/engine/install/ubuntu/)
-
-Step 2: Run docker as non-root user
-(instructions at  https://docs.docker.com/engine/install/linux-postinstall)
-
 ## Put it all together
 
 Step 1: Clone the repo
 
-```git clone --recurse-submodules https://github.com/teksander/geth-argos.git```
+```git clone --recurse-submodules https://github.com/teksander/toychain-argos.git```
 
 Step 2: Compile ARGoS-Python
 
@@ -48,31 +41,10 @@ $ cmake ..
 $ make
 ```
 
-Step 3: Compile Docker image
-
-```
-$ cd geth-argos/argos-blockchain/geth/
-$ docker build -t mygeth .
-$ docker swarm init
-```
-
-Step 4: Other packages and reqs
-
-```
-$ sudo add-apt-repository ppa:ethereum/ethereum
-$ sudo apt-get update
-$ sudo apt-get install solc
-```
-
-```
-$ sudo apt install python3-pip
-$ pip3 install rpyc psutil
-```
-
-Step 5: Configuration and Run
+Step 3: Configuration and Run
 
 Edit ```experimentconfig.sh``` and ```blockchainconfig``` files to match your paths\
-Then run an experiment (Tip: Start with HelloNeighbor. FloorEstimation is not implemented currently))
+Then run an experiment
 
 ```
 cd geth-argos/HelloNeighbor
