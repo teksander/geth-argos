@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import time
 import subprocess
 import copy
@@ -18,12 +17,10 @@ def getIps(__enodes = None):
         return [enode.split('@',2)[1].split(':',2)[0] for enode in getEnodes()]
 
 
-global peers_geth, peers_buffer
 # peers_geth is the set [ips] we get from geth.admin 
 # peers_buffer is our local buffer set [ips]
-
-peers_geth = set()
-peers_buffer = set()
+global peers_geth, peers_buffer
+peers_geth, peers_buffer = set(), set()
 
 def peering(peer_IPs):
 	""" Control routine for robot-to-robot dynamic peering 
@@ -37,6 +34,7 @@ def peering(peer_IPs):
 
 	for peer_ID, peer_IP in peer_IPs.items():
 		if peer_IP not in peers_buffer:
+			print(peer_IP)
 			enode = tcp_enode.request(host=peer_IP, port=5000) 
 			if 'enode' in enode:
 				w3.geth.admin.addPeer(enode)
