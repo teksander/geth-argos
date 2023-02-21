@@ -65,7 +65,9 @@ gasLimit = 0x9000000
 gasprice = 0x000000
 gas = 0x00000
 
+
 clocks['buffer'] = Timer(0.5)
+clocks['peering'] = Timer(0.5)
 clocks['query_sc'] = Timer(1)
 clocks['block'] = Timer(2)
 clocks['explore'] = Timer(1)
@@ -156,6 +158,8 @@ def init():
     global clocks, counters, logs, me, imusensor, rw, nav, odo, rb, w3, fsm, gs, erb, tcp, tcpr, rgb, cam, estimatelogger, bufferlogger, submodules, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, friction, idx_to_verity, verified_idx, myBalance
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifersExtract(robotID, 'IP')
+    robotIP = identifiersExtract(robotID, 'IP')
+    print(robotID,robotIP)
     print(num_normal + num_faulty)
     if int(robotID) > num_normal + num_faulty:
         typeflag = "malicious"  # malicious robot
@@ -199,7 +203,7 @@ def init():
     # # /* Init web3.py */
     robot.log.info('Initialising Python Geth Console...')
     w3 = init_web3(robotID)
-
+    w3 = init_web3(robotIP)
     # /* Init an instance of peer for this Pi-Puck */
     me = Peer(robotID, robotIP, w3.enode, w3.key)
 
@@ -287,6 +291,7 @@ def controlstep():
             logs['balance'].log([w3.exposed_balance])
 
         ###########################
+
         #### MAIN-MODULE STEPS ####
         ###########################
         gethPeers_count = 0
@@ -319,6 +324,34 @@ def controlstep():
         ##############################
 
         # Routines to be used in state machine steps:
+
+        ######## ROUTINES #########
+        ###########################
+
+        def peering():
+            global geth_peer_count
+            geth_peer_count = 0
+            if clocks['peering'].query(): 
+
+                peer_IPs = dict()
+                for peer in erb.peers:
+                    peer_IPs[peer.id] = identifiersExtract(peer.id, 'IP_DOCKER')
+
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((me.ip, 9898))
+                    s.sendall(str(peer_IPs).encode())
+                    data = s.recv(1024)
+                    geth_peer_count = int(data)
+
+                 # Turn on LEDs according to geth Peers
+                if geth_peer_count == 0: 
+                    rgb.setLED(rgb.all, 3* ['black'])
+                elif geth_peer_count == 1:
+                    rgb.setLED(rgb.all, ['red', 'black', 'black'])
+                elif geth_peer_count == 2:
+                    rgb.setLED(rgb.all, ['red', 'black', 'red'])
+                elif geth_peer_count > 2:
+                    rgb.setLED(rgb.all, 3*['red'])
 
         def homing():
             # Navigate to home position
@@ -429,11 +462,25 @@ def controlstep():
                     realType, _ = is_at_food([c[0] / DECIMAL_FACTOR, c[1]/DECIMAL_FACTOR])
                     logs['cluster'].log_force([c, realType])
 
+
         # print(me.id)
         print(cam.getNew())
         #########################################################################################################
         #### Idle.IDLE
         #######################################num_malicious##################################################################
+
+
+        ##############################
+        #### STATE-MACHINE STEPS ####
+        ##############################
+        # print(cam.getNew())
+
+        peering()
+
+        #########################################################################################################
+        #### Idle.IDLE
+        #########################################################################################################
+
         # Transaction check every step
         if txs['report'].query(9):
             txs['report'] = Transaction(None)

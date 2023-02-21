@@ -1,5 +1,6 @@
 #!/bin/bash
 # Start an experiment
+<<<<<<< HEAD
 source experimentconfig.sh
 
 # argos_configuration() {
@@ -12,6 +13,16 @@ source experimentconfig.sh
 #     done
 #    # sed -e "s|${marker}match${marker}|$match|g" $ARGOSTEMPLATE > $ARGOSFILE
 # }
+=======
+# Options:
+# --reset    or -r  : will reset everything blockchain related
+# --start    or -s  : will start the experiment
+# --startz   or -sz : will start with no visualization
+# --logs     or -l  : will display monitor.log for all robots
+# --python   or -p  : will display python console for all robots
+
+source experimentconfig.sh
+>>>>>>> bc61d6d3386d960c32a609a8fdd94847f72cf512
 
 echo "+-----------------------------------------------------------+"
 echo "MAINFOLDER IS $MAINFOLDER"
@@ -63,7 +74,10 @@ echo "Cleaning logs folder..."
 # Keep files 0-$NUMROBOTS in order to prevent having to reopen logs
 eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> bc61d6d3386d960c32a609a8fdd94847f72cf512
 for opt in "$@"
 do
 if [[ $opt == "--start" || $opt == "-s" ]]; then

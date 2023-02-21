@@ -1,0 +1,878 @@
+[15 INFO main 27] Initialising Python Geth Console...
+[15 INFO main 84] Initialising RandB board...
+[15 INFO main 84] Initialising navigation...
+[15 INFO main 84] Initialising random-walk...
+[15 INFO main 84] Initialising odometry...
+[15 INFO main 84] Initialising ground-sensors...
+[15 INFO main 110] --//-- Starting Experiment --//--
+[15 INFO main 1615] Idle.IDLE -> Faulty.Pending | 
+[15 INFO main 17282] Faulty.Pending -> Faulty.DriveToReal | Go to real unverified source
+[15 INFO main 58642] Faulty.DriveToReal -> Faulty.Homing | Homing
+[15 INFO main 75253] Confirming: 2/9
+[15 INFO main 77535] Confirming: 3/9
+[15 INFO main 79558] Confirming: 4/9
+[15 INFO main 81436] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 81641] Confirming: 5/9
+[15 INFO main 81641] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 83707] Confirming: 6/9
+[15 INFO main 85765] Confirming: 7/9
+[15 INFO main 87977] Confirming: 8/9
+[15 INFO main 90005] Confirming: 9/9
+[15 INFO main 139092] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 165226] Confirming: 1/9
+[15 INFO main 165472] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 166393] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 167286] Confirming: 2/9
+[15 INFO main 169421] Confirming: 3/9
+[15 INFO main 171599] Confirming: 4/9
+[15 INFO main 173629] Confirming: 5/9
+[15 INFO main 175647] Confirming: 6/9
+[15 INFO main 177671] Confirming: 7/9
+[15 INFO main 179676] Confirming: 8/9
+[15 INFO main 181890] Confirming: 9/9
+[15 INFO main 185959] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 196582] Confirming: 1/9
+[15 INFO main 198586] Confirming: 3/9
+[15 INFO main 200735] Confirming: 4/9
+[15 INFO main 202788] Confirming: 5/9
+[15 INFO main 202818] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 202914] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 204797] Confirming: 6/9
+[15 INFO main 206858] Confirming: 7/9
+[15 INFO main 208937] Confirming: 8/9
+[15 INFO main 211350] Confirming: 9/9
+[15 INFO main 228495] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 243705] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 243747] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 255100] Confirming: 1/9
+[15 INFO main 257178] Confirming: 2/9
+[15 INFO main 259196] Confirming: 3/9
+[15 INFO main 261251] Confirming: 4/9
+[15 INFO main 263201] Confirming: 5/9
+[15 INFO main 267371] Confirming: 7/9
+[15 INFO main 269384] Confirming: 8/9
+[15 INFO main 271493] Confirming: 9/9
+[15 INFO main 272376] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 287851] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 287956] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 288867] Confirming: 3/9
+[15 INFO main 290875] Confirming: 4/9
+[15 INFO main 292928] Confirming: 5/9
+[15 INFO main 294945] Confirming: 6/9
+[15 INFO main 297010] Confirming: 7/9
+[15 INFO main 299196] Confirming: 8/9
+[15 INFO main 301266] Confirming: 9/9
+[15 INFO main 311239] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 325986] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 326076] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 346526] Confirming: 1/9
+[15 INFO main 348553] Confirming: 3/9
+[15 INFO main 352660] Confirming: 4/9
+[15 INFO main 354752] Confirming: 6/9
+[15 INFO main 358813] Confirming: 8/9
+[15 INFO main 362963] Confirming: 10/9
+[15 INFO main 363366] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 375895] Confirming: 1/9
+[15 INFO main 376713] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 376784] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 377943] Confirming: 2/9
+[15 INFO main 379939] Confirming: 3/9
+[15 INFO main 382009] Confirming: 4/9
+[15 INFO main 384048] Confirming: 5/9
+[15 INFO main 386267] Confirming: 6/9
+[15 INFO main 388399] Confirming: 8/9
+[15 INFO main 392560] Confirming: 9/9
+[15 INFO main 408128] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 423183] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 423280] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 435064] Confirming: 1/9
+[15 INFO main 437180] Confirming: 2/9
+[15 INFO main 439288] Confirming: 3/9
+[15 INFO main 441367] Confirming: 4/9
+[15 INFO main 443422] Confirming: 5/9
+[15 INFO main 445478] Confirming: 6/9
+[15 INFO main 447630] Confirming: 7/9
+[15 INFO main 449666] Confirming: 8/9
+[15 INFO main 451829] Confirming: 9/9
+[15 INFO main 454337] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 464847] Confirming: 1/9
+[15 INFO main 466855] Confirming: 2/9
+[15 INFO main 469014] Confirming: 3/9
+[15 INFO main 471071] Confirming: 4/9
+[15 INFO main 472304] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 472399] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 473096] Confirming: 5/9
+[15 INFO main 475171] Confirming: 6/9
+[15 INFO main 477217] Confirming: 7/9
+[15 INFO main 481314] Confirming: 9/9
+[15 INFO main 501894] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 515865] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 515969] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 527141] Confirming: 2/9
+[15 INFO main 529157] Confirming: 3/9
+[15 INFO main 533253] Confirming: 4/9
+[15 INFO main 535302] Confirming: 6/9
+[15 INFO main 539388] Confirming: 8/9
+[15 INFO main 541476] Confirming: 9/9
+[15 INFO main 561035] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 578716] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 578855] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 592332] Confirming: 1/9
+[15 INFO main 596542] Confirming: 2/9
+[15 INFO main 598617] Confirming: 4/9
+[15 INFO main 602806] Confirming: 5/9
+[15 INFO main 605053] Confirming: 7/9
+[15 INFO main 607092] Confirming: 8/9
+[15 INFO main 609103] Confirming: 9/9
+[15 INFO main 611344] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 627893] Confirming: 2/9
+[15 INFO main 629899] Confirming: 3/9
+[15 INFO main 631049] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 631577] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 632088] Confirming: 4/9
+[15 INFO main 634262] Confirming: 6/9
+[15 INFO main 638354] Confirming: 8/9
+[15 INFO main 640379] Confirming: 9/9
+[15 INFO main 650807] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 665522] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 665621] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 682327] Confirming: 3/9
+[15 INFO main 684369] Confirming: 4/9
+[15 INFO main 686455] Confirming: 5/9
+[15 INFO main 688533] Confirming: 7/9
+[15 INFO main 692654] Confirming: 9/9
+[15 INFO main 719569] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 742544] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 742579] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 748383] Confirming: 1/9
+[15 INFO main 750477] Confirming: 2/9
+[15 INFO main 752584] Confirming: 3/9
+[15 INFO main 756952] Confirming: 5/9
+[15 INFO main 759026] Confirming: 6/9
+[15 INFO main 761115] Confirming: 7/9
+[15 INFO main 763145] Confirming: 8/9
+[15 INFO main 767323] Confirming: 10/9
+[15 INFO main 775185] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 794598] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 794682] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 808481] Confirming: 1/9
+[15 INFO main 810530] Confirming: 2/9
+[15 INFO main 814661] Confirming: 4/9
+[15 INFO main 816738] Confirming: 5/9
+[15 INFO main 818908] Confirming: 6/9
+[15 INFO main 820929] Confirming: 7/9
+[15 INFO main 822960] Confirming: 8/9
+[15 INFO main 824909] Confirming: 9/9
+[15 INFO main 838313] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 856833] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 856890] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 871541] Confirming: 2/9
+[15 INFO main 873588] Confirming: 3/9
+[15 INFO main 875845] Confirming: 4/9
+[15 INFO main 879956] Confirming: 6/9
+[15 INFO main 882016] Confirming: 7/9
+[15 INFO main 884068] Confirming: 8/9
+[15 INFO main 886221] Confirming: 9/9
+[15 INFO main 897967] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 917810] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 917929] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 921520] Confirming: 1/9
+[15 INFO main 923654] Confirming: 2/9
+[15 INFO main 925722] Confirming: 3/9
+[15 INFO main 927769] Confirming: 4/9
+[15 INFO main 929908] Confirming: 5/9
+[15 INFO main 931969] Confirming: 6/9
+[15 INFO main 934028] Confirming: 7/9
+[15 INFO main 936458] Confirming: 9/9
+[15 INFO main 954746] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 972187] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 972433] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 990217] Confirming: 2/9
+[15 INFO main 994620] Confirming: 4/9
+[15 INFO main 996669] Confirming: 5/9
+[15 INFO main 998740] Confirming: 6/9
+[15 INFO main 1000848] Confirming: 7/9
+[15 INFO main 1002864] Confirming: 8/9
+[15 INFO main 1004994] Confirming: 9/9
+[15 INFO main 1007810] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1018553] Confirming: 1/9
+[15 INFO main 1020732] Confirming: 2/9
+[15 INFO main 1022734] Confirming: 3/9
+[15 INFO main 1024844] Confirming: 4/9
+[15 INFO main 1026969] Confirming: 5/9
+[15 INFO main 1027827] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1027952] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1029182] Confirming: 6/9
+[15 INFO main 1031350] Confirming: 7/9
+[15 INFO main 1033425] Confirming: 8/9
+[15 INFO main 1035444] Confirming: 9/9
+[15 INFO main 1066384] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1079246] Confirming: 1/9
+[15 INFO main 1081281] Confirming: 2/9
+[15 INFO main 1083333] Confirming: 3/9
+[15 INFO main 1085361] Confirming: 4/9
+[15 INFO main 1087536] Confirming: 5/9
+[15 INFO main 1089646] Confirming: 6/9
+[15 INFO main 1091822] Confirming: 7/9
+[15 INFO main 1093223] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1093662] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1093924] Confirming: 8/9
+[15 INFO main 1095996] Confirming: 9/9
+[15 INFO main 1110949] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1127771] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1127785] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1136060] Confirming: 1/9
+[15 INFO main 1138253] Confirming: 2/9
+[15 INFO main 1140329] Confirming: 3/9
+[15 INFO main 1142504] Confirming: 4/9
+[15 INFO main 1145086] Confirming: 6/9
+[15 INFO main 1147123] Confirming: 7/9
+[15 INFO main 1149186] Confirming: 8/9
+[15 INFO main 1151276] Confirming: 9/9
+[15 INFO main 1170942] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1193715] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1193811] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1199916] Confirming: 1/9
+[15 INFO main 1202085] Confirming: 2/9
+[15 INFO main 1204148] Confirming: 3/9
+[15 INFO main 1206250] Confirming: 5/9
+[15 INFO main 1208292] Confirming: 6/9
+[15 INFO main 1210284] Confirming: 7/9
+[15 INFO main 1214437] Confirming: 9/9
+[15 INFO main 1231594] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1247695] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1247784] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1260404] Confirming: 1/9
+[15 INFO main 1264711] Confirming: 4/9
+[15 INFO main 1266889] Confirming: 5/9
+[15 INFO main 1269052] Confirming: 6/9
+[15 INFO main 1271073] Confirming: 7/9
+[15 INFO main 1273282] Confirming: 8/9
+[15 INFO main 1275327] Confirming: 9/9
+[15 INFO main 1340016] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1350692] Confirming: 1/9
+[15 INFO main 1352712] Confirming: 2/9
+[15 INFO main 1353959] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1354113] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1354861] Confirming: 4/9
+[15 INFO main 1356988] Confirming: 5/9
+[15 INFO main 1359021] Confirming: 6/9
+[15 INFO main 1361103] Confirming: 7/9
+[15 INFO main 1363149] Confirming: 8/9
+[15 INFO main 1365205] Confirming: 9/9
+[15 INFO main 1369388] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1378942] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1379200] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1380161] Confirming: 1/9
+[15 INFO main 1382198] Confirming: 2/9
+[15 INFO main 1384324] Confirming: 3/9
+[15 INFO main 1388530] Confirming: 5/9
+[15 INFO main 1390573] Confirming: 7/9
+[15 INFO main 1392594] Confirming: 8/9
+[15 INFO main 1394681] Confirming: 9/9
+[15 INFO main 1398897] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1409340] Confirming: 1/9
+[15 INFO main 1411383] Confirming: 2/9
+[15 INFO main 1411390] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1411550] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1413478] Confirming: 3/9
+[15 INFO main 1415624] Confirming: 4/9
+[15 INFO main 1417856] Confirming: 5/9
+[15 INFO main 1419871] Confirming: 6/9
+[15 INFO main 1421886] Confirming: 7/9
+[15 INFO main 1423956] Confirming: 8/9
+[15 INFO main 1425966] Confirming: 9/9
+[15 INFO main 1439246] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1456649] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1456681] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1470160] Confirming: 1/9
+[15 INFO main 1472197] Confirming: 3/9
+[15 INFO main 1474330] Confirming: 4/9
+[15 INFO main 1478596] Confirming: 6/9
+[15 INFO main 1480607] Confirming: 7/9
+[15 INFO main 1484757] Confirming: 9/9
+[15 INFO main 1548809] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1567631] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1568038] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1578556] Confirming: 1/9
+[15 INFO main 1580608] Confirming: 2/9
+[15 INFO main 1585003] Confirming: 3/9
+[15 INFO main 1589073] Confirming: 6/9
+[15 INFO main 1591150] Confirming: 7/9
+[15 INFO main 1593283] Confirming: 8/9
+[15 INFO main 1595385] Confirming: 9/9
+[15 INFO main 1600061] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1623159] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1623257] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1625088] Confirming: 1/9
+[15 INFO main 1627178] Confirming: 2/9
+[15 INFO main 1629305] Confirming: 4/9
+[15 INFO main 1633371] Confirming: 5/9
+[15 INFO main 1635473] Confirming: 7/9
+[15 INFO main 1637536] Confirming: 8/9
+[15 INFO main 1641613] Confirming: 10/9
+[15 INFO main 1669617] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1684033] Confirming: 1/9
+[15 INFO main 1685735] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1685800] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1686077] Confirming: 2/9
+[15 INFO main 1688178] Confirming: 3/9
+[15 INFO main 1690208] Confirming: 4/9
+[15 INFO main 1692340] Confirming: 5/9
+[15 INFO main 1694453] Confirming: 6/9
+[15 INFO main 1696529] Confirming: 7/9
+[15 INFO main 1698592] Confirming: 8/9
+[15 INFO main 1702864] Confirming: 10/9
+[15 INFO main 1710611] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1727592] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1727650] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1797820] Confirming: 1/9
+[15 INFO main 1800048] Confirming: 2/9
+[15 INFO main 1802133] Confirming: 3/9
+[15 INFO main 1804145] Confirming: 4/9
+[15 INFO main 1806238] Confirming: 5/9
+[15 INFO main 1808245] Confirming: 6/9
+[15 INFO main 1810260] Confirming: 7/9
+[15 INFO main 1814233] Confirming: 9/9
+[15 INFO main 1832974] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1850677] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1850844] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1864380] Confirming: 1/9
+[15 INFO main 1866460] Confirming: 2/9
+[15 INFO main 1868581] Confirming: 3/9
+[15 INFO main 1870501] Confirming: 4/9
+[15 INFO main 1872626] Confirming: 5/9
+[15 INFO main 1874667] Confirming: 6/9
+[15 INFO main 1876685] Confirming: 7/9
+[15 INFO main 1878721] Confirming: 8/9
+[15 INFO main 1880820] Confirming: 9/9
+[15 INFO main 1885221] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1908815] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1909004] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1920652] Confirming: 1/9
+[15 INFO main 1922726] Confirming: 2/9
+[15 INFO main 1924750] Confirming: 3/9
+[15 INFO main 1926835] Confirming: 4/9
+[15 INFO main 1928941] Confirming: 5/9
+[15 INFO main 1930979] Confirming: 6/9
+[15 INFO main 1933034] Confirming: 7/9
+[15 INFO main 1935094] Confirming: 8/9
+[15 INFO main 1937194] Confirming: 9/9
+[15 INFO main 1971844] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 1984278] Confirming: 1/9
+[15 INFO main 1986378] Confirming: 2/9
+[15 INFO main 1987915] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 1988081] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 1988421] Confirming: 3/9
+[15 INFO main 1990438] Confirming: 4/9
+[15 INFO main 1992515] Confirming: 5/9
+[15 INFO main 1994612] Confirming: 6/9
+[15 INFO main 1996625] Confirming: 7/9
+[15 INFO main 1998646] Confirming: 8/9
+[15 INFO main 2000744] Confirming: 9/9
+[15 INFO main 2006331] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2014832] Confirming: 1/9
+[15 INFO main 2016864] Confirming: 2/9
+[15 INFO main 2018903] Confirming: 3/9
+[15 INFO main 2021064] Confirming: 4/9
+[15 INFO main 2021150] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2021397] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2023119] Confirming: 5/9
+[15 INFO main 2025142] Confirming: 6/9
+[15 INFO main 2027070] Confirming: 7/9
+[15 INFO main 2029321] Confirming: 9/9
+[15 INFO main 2034543] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2044879] Confirming: 1/9
+[15 INFO main 2046915] Confirming: 2/9
+[15 INFO main 2048054] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2048103] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2049008] Confirming: 3/9
+[15 INFO main 2051074] Confirming: 4/9
+[15 INFO main 2053234] Confirming: 6/9
+[15 INFO main 2055326] Confirming: 7/9
+[15 INFO main 2057348] Confirming: 8/9
+[15 INFO main 2059437] Confirming: 9/9
+[15 INFO main 2080973] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2096788] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2097031] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2104344] Confirming: 1/9
+[15 INFO main 2106455] Confirming: 2/9
+[15 INFO main 2108490] Confirming: 3/9
+[15 INFO main 2110536] Confirming: 4/9
+[15 INFO main 2112656] Confirming: 5/9
+[15 INFO main 2114746] Confirming: 6/9
+[15 INFO main 2116789] Confirming: 7/9
+[15 INFO main 2119077] Confirming: 8/9
+[15 INFO main 2121125] Confirming: 9/9
+[15 INFO main 2137849] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2163763] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2164186] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2169209] Confirming: 1/9
+[15 INFO main 2173400] Confirming: 4/9
+[15 INFO main 2177632] Confirming: 6/9
+[15 INFO main 2179650] Confirming: 7/9
+[15 INFO main 2181738] Confirming: 8/9
+[15 INFO main 2183769] Confirming: 9/9
+[15 INFO main 2198527] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2216136] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2216247] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2223555] Confirming: 1/9
+[15 INFO main 2227738] Confirming: 3/9
+[15 INFO main 2229809] Confirming: 4/9
+[15 INFO main 2232034] Confirming: 5/9
+[15 INFO main 2234077] Confirming: 6/9
+[15 INFO main 2236324] Confirming: 7/9
+[15 INFO main 2238336] Confirming: 8/9
+[15 INFO main 2240420] Confirming: 9/9
+[15 INFO main 2259183] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2277176] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2277249] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2284258] Confirming: 1/9
+[15 INFO main 2286365] Confirming: 2/9
+[15 INFO main 2288434] Confirming: 3/9
+[15 INFO main 2290461] Confirming: 4/9
+[15 INFO main 2292526] Confirming: 5/9
+[15 INFO main 2294605] Confirming: 6/9
+[15 INFO main 2296659] Confirming: 7/9
+[15 INFO main 2300812] Confirming: 9/9
+[15 INFO main 2330323] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2348150] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2348242] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2349533] Confirming: 1/9
+[15 INFO main 2351645] Confirming: 2/9
+[15 INFO main 2353907] Confirming: 3/9
+[15 INFO main 2355961] Confirming: 4/9
+[15 INFO main 2360144] Confirming: 6/9
+[15 INFO main 2362229] Confirming: 7/9
+[15 INFO main 2364402] Confirming: 9/9
+[15 INFO main 2373542] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2391027] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2391146] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2410141] Confirming: 3/9
+[15 INFO main 2412188] Confirming: 4/9
+[15 INFO main 2414233] Confirming: 6/9
+[15 INFO main 2416307] Confirming: 7/9
+[15 INFO main 2418351] Confirming: 8/9
+[15 INFO main 2422369] Confirming: 10/9
+[15 INFO main 2443094] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2460590] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2460677] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2464666] Confirming: 1/9
+[15 INFO main 2466696] Confirming: 2/9
+[15 INFO main 2468897] Confirming: 3/9
+[15 INFO main 2470950] Confirming: 4/9
+[15 INFO main 2473135] Confirming: 5/9
+[15 INFO main 2475154] Confirming: 6/9
+[15 INFO main 2477493] Confirming: 7/9
+[15 INFO main 2479917] Confirming: 8/9
+[15 INFO main 2482018] Confirming: 9/9
+[15 INFO main 2488358] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2494600] Confirming: 1/9
+[15 INFO main 2496653] Confirming: 2/9
+[15 INFO main 2504918] Confirming: 6/9
+[15 INFO main 2506990] Confirming: 8/9
+[15 INFO main 2507130] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2507274] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2509193] Confirming: 9/9
+[15 INFO main 2573143] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2586132] Confirming: 1/9
+[15 INFO main 2588373] Confirming: 2/9
+[15 INFO main 2590443] Confirming: 3/9
+[15 INFO main 2591080] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2591263] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2592516] Confirming: 4/9
+[15 INFO main 2594553] Confirming: 5/9
+[15 INFO main 2596602] Confirming: 7/9
+[15 INFO main 2600657] Confirming: 8/9
+[15 INFO main 2602804] Confirming: 10/9
+[15 INFO main 2603292] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2613312] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2613329] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2644958] Confirming: 1/9
+[15 INFO main 2647052] Confirming: 2/9
+[15 INFO main 2649140] Confirming: 3/9
+[15 INFO main 2651189] Confirming: 4/9
+[15 INFO main 2653248] Confirming: 5/9
+[15 INFO main 2655392] Confirming: 6/9
+[15 INFO main 2659680] Confirming: 8/9
+[15 INFO main 2661697] Confirming: 9/9
+[15 INFO main 2663939] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2674396] Confirming: 1/9
+[15 INFO main 2678639] Confirming: 2/9
+[15 INFO main 2680745] Confirming: 4/9
+[15 INFO main 2681249] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2681713] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2682780] Confirming: 5/9
+[15 INFO main 2684855] Confirming: 6/9
+[15 INFO main 2688945] Confirming: 7/9
+[15 INFO main 2691069] Confirming: 9/9
+[15 INFO main 2692017] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2700633] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2700813] Faulty.Pending -> Faulty.DriveToReal | Go to real unverified source
+[15 INFO main 2735822] Confirming: 1/9
+[15 INFO main 2737851] Confirming: 2/9
+[15 INFO main 2740113] Confirming: 3/9
+[15 INFO main 2742257] Confirming: 4/9
+[15 INFO main 2744281] Confirming: 5/9
+[15 INFO main 2746425] Confirming: 7/9
+[15 INFO main 2748591] Confirming: 8/9
+[15 INFO main 2750613] Confirming: 9/9
+[15 INFO main 2751308] Faulty.DriveToReal -> Faulty.Homing | Homing
+[15 INFO main 2765890] Confirming: 1/9
+[15 INFO main 2767914] Confirming: 2/9
+[15 INFO main 2769992] Confirming: 3/9
+[15 INFO main 2774081] Confirming: 5/9
+[15 INFO main 2776102] Confirming: 6/9
+[15 INFO main 2776840] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2776932] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2778268] Confirming: 7/9
+[15 INFO main 2780293] Confirming: 8/9
+[15 INFO main 2782312] Confirming: 9/9
+[15 INFO main 2864829] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2888086] Confirming: 1/9
+[15 INFO main 2890169] Confirming: 2/9
+[15 INFO main 2892303] Confirming: 4/9
+[15 INFO main 2893379] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2893403] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2894333] Confirming: 5/9
+[15 INFO main 2896393] Confirming: 6/9
+[15 INFO main 2898535] Confirming: 7/9
+[15 INFO main 2900548] Confirming: 8/9
+[15 INFO main 2902648] Confirming: 9/9
+[15 INFO main 2926112] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 2950315] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 2950531] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 2972216] Confirming: 1/9
+[15 INFO main 2974331] Confirming: 2/9
+[15 INFO main 2978529] Confirming: 4/9
+[15 INFO main 2980601] Confirming: 5/9
+[15 INFO main 2982905] Confirming: 6/9
+[15 INFO main 2985265] Confirming: 8/9
+[15 INFO main 2987344] Confirming: 9/9
+[15 INFO main 3014101] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3039207] Confirming: 2/9
+[15 INFO main 3041354] Confirming: 3/9
+[15 INFO main 3043555] Confirming: 4/9
+[15 INFO main 3045581] Confirming: 5/9
+[15 INFO main 3047631] Confirming: 6/9
+[15 INFO main 3049665] Confirming: 7/9
+[15 INFO main 3051727] Confirming: 8/9
+[15 INFO main 3053802] Confirming: 9/9
+[15 INFO main 3062042] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3062069] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3139452] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3150829] Confirming: 1/9
+[15 INFO main 3152933] Confirming: 2/9
+[15 INFO main 3154963] Confirming: 3/9
+[15 INFO main 3156999] Confirming: 4/9
+[15 INFO main 3159154] Confirming: 5/9
+[15 INFO main 3161214] Confirming: 7/9
+[15 INFO main 3163352] Confirming: 8/9
+[15 INFO main 3165388] Confirming: 9/9
+[15 INFO main 3168066] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3168172] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3195482] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3216945] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3217035] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3218837] Confirming: 1/9
+[15 INFO main 3220931] Confirming: 2/9
+[15 INFO main 3222977] Confirming: 3/9
+[15 INFO main 3225159] Confirming: 4/9
+[15 INFO main 3227254] Confirming: 6/9
+[15 INFO main 3229275] Confirming: 7/9
+[15 INFO main 3231331] Confirming: 8/9
+[15 INFO main 3233441] Confirming: 9/9
+[15 INFO main 3274722] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3304495] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3304506] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3310177] Confirming: 2/9
+[15 INFO main 3312349] Confirming: 3/9
+[15 INFO main 3314404] Confirming: 4/9
+[15 INFO main 3316491] Confirming: 5/9
+[15 INFO main 3318519] Confirming: 6/9
+[15 INFO main 3321130] Confirming: 7/9
+[15 INFO main 3323449] Confirming: 8/9
+[15 INFO main 3325478] Confirming: 10/9
+[15 INFO main 3347947] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3368908] Confirming: 1/9
+[15 INFO main 3370988] Confirming: 2/9
+[15 INFO main 3373019] Confirming: 3/9
+[15 INFO main 3375064] Confirming: 4/9
+[15 INFO main 3377083] Confirming: 5/9
+[15 INFO main 3379145] Confirming: 6/9
+[15 INFO main 3381243] Confirming: 8/9
+[15 INFO main 3385392] Confirming: 10/9
+[15 INFO main 3390825] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3390982] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3423545] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3443717] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3443808] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3458810] Confirming: 1/9
+[15 INFO main 3460816] Confirming: 2/9
+[15 INFO main 3462888] Confirming: 3/9
+[15 INFO main 3465038] Confirming: 4/9
+[15 INFO main 3467095] Confirming: 5/9
+[15 INFO main 3469094] Confirming: 6/9
+[15 INFO main 3471190] Confirming: 7/9
+[15 INFO main 3473256] Confirming: 9/9
+[15 INFO main 3525618] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3544382] Confirming: 1/9
+[15 INFO main 3554588] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3554971] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3559304] Confirming: 3/9
+[15 INFO main 3563402] Confirming: 5/9
+[15 INFO main 3565548] Confirming: 6/9
+[15 INFO main 3567702] Confirming: 7/9
+[15 INFO main 3571813] Confirming: 9/9
+[15 INFO main 3589421] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3608383] Confirming: 1/9
+[15 INFO main 3610470] Confirming: 2/9
+[15 INFO main 3612535] Confirming: 3/9
+[15 INFO main 3614582] Confirming: 4/9
+[15 INFO main 3618815] Confirming: 6/9
+[15 INFO main 3621346] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3621442] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3633337] Confirming: 13/9
+[15 INFO main 3678794] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3689169] Confirming: 1/9
+[15 INFO main 3691215] Confirming: 2/9
+[15 INFO main 3693355] Confirming: 3/9
+[15 INFO main 3695405] Confirming: 4/9
+[15 INFO main 3697635] Confirming: 5/9
+[15 INFO main 3699888] Confirming: 6/9
+[15 INFO main 3701957] Confirming: 7/9
+[15 INFO main 3704013] Confirming: 8/9
+[15 INFO main 3705211] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3705371] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3706072] Confirming: 9/9
+[15 INFO main 3754667] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3759066] Confirming: 1/9
+[15 INFO main 3761141] Confirming: 2/9
+[15 INFO main 3763283] Confirming: 3/9
+[15 INFO main 3765333] Confirming: 4/9
+[15 INFO main 3767500] Confirming: 5/9
+[15 INFO main 3769533] Confirming: 6/9
+[15 INFO main 3771256] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3771277] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3771546] Confirming: 7/9
+[15 INFO main 3773595] Confirming: 8/9
+[15 INFO main 3775621] Confirming: 9/9
+[15 INFO main 3807299] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3819724] Confirming: 1/9
+[15 INFO main 3821802] Confirming: 2/9
+[15 INFO main 3823836] Confirming: 3/9
+[15 INFO main 3825912] Confirming: 4/9
+[15 INFO main 3827949] Confirming: 5/9
+[15 INFO main 3829984] Confirming: 6/9
+[15 INFO main 3832082] Confirming: 7/9
+[15 INFO main 3834100] Confirming: 8/9
+[15 INFO main 3834727] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3834830] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3836173] Confirming: 9/9
+[15 INFO main 3865693] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3880184] Confirming: 1/9
+[15 INFO main 3882205] Confirming: 2/9
+[15 INFO main 3884217] Confirming: 3/9
+[15 INFO main 3886433] Confirming: 4/9
+[15 INFO main 3888528] Confirming: 5/9
+[15 INFO main 3890572] Confirming: 6/9
+[15 INFO main 3892720] Confirming: 7/9
+[15 INFO main 3894748] Confirming: 8/9
+[15 INFO main 3894756] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3894777] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3896701] Confirming: 9/9
+[15 INFO main 3950729] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 3969701] Confirming: 1/9
+[15 INFO main 3971858] Confirming: 2/9
+[15 INFO main 3973987] Confirming: 3/9
+[15 INFO main 3976520] Confirming: 4/9
+[15 INFO main 3978523] Confirming: 5/9
+[15 INFO main 3980548] Confirming: 6/9
+[15 INFO main 3982633] Confirming: 7/9
+[15 INFO main 3984651] Confirming: 8/9
+[15 INFO main 3985442] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 3985557] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 3986669] Confirming: 9/9
+[15 INFO main 4011868] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4030771] Confirming: 1/9
+[15 INFO main 4033025] Confirming: 2/9
+[15 INFO main 4034086] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4034094] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4035116] Confirming: 3/9
+[15 INFO main 4037188] Confirming: 4/9
+[15 INFO main 4039265] Confirming: 6/9
+[15 INFO main 4041313] Confirming: 7/9
+[15 INFO main 4043494] Confirming: 8/9
+[15 INFO main 4047630] Confirming: 10/9
+[15 INFO main 4090691] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4116330] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4116426] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4119980] Confirming: 1/9
+[15 INFO main 4122017] Confirming: 2/9
+[15 INFO main 4124079] Confirming: 3/9
+[15 INFO main 4126647] Confirming: 4/9
+[15 INFO main 4128657] Confirming: 5/9
+[15 INFO main 4130729] Confirming: 6/9
+[15 INFO main 4132844] Confirming: 7/9
+[15 INFO main 4134932] Confirming: 8/9
+[15 INFO main 4137048] Confirming: 9/9
+[15 INFO main 4154637] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4180867] Confirming: 1/9
+[15 INFO main 4182968] Confirming: 2/9
+[15 INFO main 4185119] Confirming: 3/9
+[15 INFO main 4187250] Confirming: 4/9
+[15 INFO main 4187818] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4187837] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4189976] Confirming: 6/9
+[15 INFO main 4192011] Confirming: 7/9
+[15 INFO main 4194505] Confirming: 8/9
+[15 INFO main 4196581] Confirming: 9/9
+[15 INFO main 4383146] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4409053] Confirming: 2/9
+[15 INFO main 4411156] Confirming: 3/9
+[15 INFO main 4412214] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4412221] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4413227] Confirming: 4/9
+[15 INFO main 4415313] Confirming: 5/9
+[15 INFO main 4417475] Confirming: 6/9
+[15 INFO main 4419586] Confirming: 7/9
+[15 INFO main 4421665] Confirming: 9/9
+[15 INFO main 4449829] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4480054] Confirming: 1/9
+[15 INFO main 4480530] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4480538] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4482192] Confirming: 2/9
+[15 INFO main 4484315] Confirming: 3/9
+[15 INFO main 4486434] Confirming: 4/9
+[15 INFO main 4488478] Confirming: 5/9
+[15 INFO main 4490520] Confirming: 6/9
+[15 INFO main 4492545] Confirming: 7/9
+[15 INFO main 4494668] Confirming: 8/9
+[15 INFO main 4496757] Confirming: 9/9
+[15 INFO main 4533505] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4541896] Confirming: 1/9
+[15 INFO main 4544127] Confirming: 3/9
+[15 INFO main 4546201] Confirming: 4/9
+[15 INFO main 4548222] Confirming: 5/9
+[15 INFO main 4550351] Confirming: 6/9
+[15 INFO main 4552397] Confirming: 7/9
+[15 INFO main 4554425] Confirming: 8/9
+[15 INFO main 4556511] Confirming: 9/9
+[15 INFO main 4558981] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4559138] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4580800] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4589022] Confirming: 1/9
+[15 INFO main 4591077] Confirming: 2/9
+[15 INFO main 4593205] Confirming: 4/9
+[15 INFO main 4595290] Confirming: 5/9
+[15 INFO main 4599364] Confirming: 6/9
+[15 INFO main 4601369] Confirming: 7/9
+[15 INFO main 4603461] Confirming: 9/9
+[15 INFO main 4645334] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4645439] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4674768] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4689560] Confirming: 1/9
+[15 INFO main 4691683] Confirming: 2/9
+[15 INFO main 4695940] Confirming: 4/9
+[15 INFO main 4697971] Confirming: 5/9
+[15 INFO main 4699326] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4699357] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4700018] Confirming: 6/9
+[15 INFO main 4702058] Confirming: 7/9
+[15 INFO main 4704164] Confirming: 8/9
+[15 INFO main 4706257] Confirming: 9/9
+[15 INFO main 4730528] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4751696] Confirming: 1/9
+[15 INFO main 4753748] Confirming: 2/9
+[15 INFO main 4755814] Confirming: 3/9
+[15 INFO main 4758001] Confirming: 5/9
+[15 INFO main 4758794] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4758955] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4760045] Confirming: 6/9
+[15 INFO main 4762033] Confirming: 7/9
+[15 INFO main 4764135] Confirming: 8/9
+[15 INFO main 4766198] Confirming: 9/9
+[15 INFO main 4800828] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4827741] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4827754] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4829553] Confirming: 1/9
+[15 INFO main 4831584] Confirming: 2/9
+[15 INFO main 4835773] Confirming: 4/9
+[15 INFO main 4839822] Confirming: 6/9
+[15 INFO main 4841932] Confirming: 7/9
+[15 INFO main 4843973] Confirming: 8/9
+[15 INFO main 4846046] Confirming: 9/9
+[15 INFO main 4847833] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4868314] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4868325] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4870853] Confirming: 1/9
+[15 INFO main 4872893] Confirming: 2/9
+[15 INFO main 4874973] Confirming: 3/9
+[15 INFO main 4877510] Confirming: 4/9
+[15 INFO main 4879619] Confirming: 6/9
+[15 INFO main 4881623] Confirming: 7/9
+[15 INFO main 4883756] Confirming: 8/9
+[15 INFO main 4887725] Confirming: 10/9
+[15 INFO main 4915162] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 4929873] Confirming: 1/9
+[15 INFO main 4931902] Confirming: 2/9
+[15 INFO main 4934102] Confirming: 3/9
+[15 INFO main 4940269] Confirming: 6/9
+[15 INFO main 4941385] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 4941480] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 4942530] Confirming: 7/9
+[15 INFO main 4944627] Confirming: 8/9
+[15 INFO main 4946700] Confirming: 9/9
+[15 INFO main 4997011] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 5012022] Confirming: 2/9
+[15 INFO main 5014033] Confirming: 3/9
+[15 INFO main 5016111] Confirming: 4/9
+[15 INFO main 5018206] Confirming: 5/9
+[15 INFO main 5019711] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 5019727] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 5020261] Confirming: 6/9
+[15 INFO main 5022349] Confirming: 7/9
+[15 INFO main 5024393] Confirming: 8/9
+[15 INFO main 5026466] Confirming: 9/9
+[15 INFO main 5096800] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 5111650] Confirming: 1/9
+[15 INFO main 5113719] Confirming: 3/9
+[15 INFO main 5115792] Confirming: 4/9
+[15 INFO main 5117832] Confirming: 5/9
+[15 INFO main 5120007] Confirming: 6/9
+[15 INFO main 5122099] Confirming: 7/9
+[15 INFO main 5124234] Confirming: 8/9
+[15 INFO main 5126259] Confirming: 9/9
+[15 INFO main 5129069] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 5129244] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 5232056] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 5253000] Confirming: 1/9
+[15 INFO main 5255157] Confirming: 2/9
+[15 INFO main 5257342] Confirming: 3/9
+[15 INFO main 5259369] Confirming: 5/9
+[15 INFO main 5263446] Confirming: 7/9
+[15 INFO main 5265593] Confirming: 8/9
+[15 INFO main 5265601] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 5265629] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 5267680] Confirming: 9/9
+[15 INFO main 5299901] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 5321204] Confirming: 2/9
+[15 INFO main 5323320] Confirming: 3/9
+[15 INFO main 5327595] Confirming: 5/9
+[15 INFO main 5329728] Confirming: 6/9
+[15 INFO main 5330375] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 5330382] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point
+[15 INFO main 5331764] Confirming: 7/9
+[15 INFO main 5333881] Confirming: 8/9
+[15 INFO main 5335953] Confirming: 9/9
+[15 INFO main 5357697] Faulty.DriveTo -> Faulty.Homing | Homing
+[15 INFO main 5368605] Confirming: 1/9
+[15 INFO main 5370630] Confirming: 2/9
+[15 INFO main 5372856] Confirming: 3/9
+[15 INFO main 5374914] Confirming: 4/9
+[15 INFO main 5377057] Confirming: 5/9
+[15 INFO main 5379133] Confirming: 6/9
+[15 INFO main 5381186] Confirming: 7/9
+[15 INFO main 5383244] Confirming: 9/9
+[15 INFO main 5391061] Faulty.Homing -> Faulty.Pending | Pending random walk
+[15 INFO main 5391141] Faulty.Pending -> Faulty.DriveTo | Drive to fake source point

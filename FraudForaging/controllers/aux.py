@@ -679,6 +679,7 @@ class mydict(dict):
             return mydict([[key, round(self[key])] for key in self])
         return mydict([[key, round(self[key], n)] for key in self])
 
+<<<<<<< HEAD
 def identifersExtract(robotID, query = 'IP'):
     namePrefix = 'ethereum_eth.' + str(robotID) + '.'
     containersFile = open(experimentFolder+'/identifiers.txt', 'r')
@@ -690,3 +691,17 @@ def identifersExtract(robotID, query = 'IP'):
                 return line.split()[-2]
             if query == 'ENODE':
                 return line.split()[1]
+=======
+
+def identifiersExtract(robotID, query = 'IP'):
+
+    identifier = os.environ['CONTAINERBASE'] + '.' + str(robotID) + '.'
+
+    with open(os.environ['EXPERIMENTFOLDER']+'/identifiers.txt', 'r') as identifiersFile:
+        for line in identifiersFile.readlines():
+            if line.__contains__(identifier):
+                if query == 'IP':
+                    return line.split()[-2]
+                if query == 'IP_DOCKER':
+                    return line.split()[-1]
+>>>>>>> bc61d6d3386d960c32a609a8fdd94847f72cf512

@@ -1,0 +1,596 @@
+[8 INFO main 26] Initialising Python Geth Console...
+[8 INFO main 31] Initialising RandB board...
+[8 INFO main 31] Initialising navigation...
+[8 INFO main 31] Initialising random-walk...
+[8 INFO main 31] Initialising odometry...
+[8 INFO main 31] Initialising ground-sensors...
+[8 INFO main 435] --//-- Starting Experiment --//--
+[8 INFO main 1861] Idle.IDLE -> Scout.Query | Duration: 26.25
+[8 INFO main 28495] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 74202] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 82910] Confirming: 2/9
+[8 INFO main 85015] Confirming: 3/9
+[8 INFO main 87051] Confirming: 4/9
+[8 INFO main 89101] Confirming: 5/9
+[8 INFO main 91217] Confirming: 6/9
+[8 INFO main 93396] Confirming: 7/9
+[8 INFO main 95425] Confirming: 8/9
+[8 INFO main 97476] Confirming: 9/9
+[8 INFO main 99306] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 99425] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 132002] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 140293] Confirming: 1/9
+[8 INFO main 142319] Confirming: 2/9
+[8 INFO main 144466] Confirming: 3/9
+[8 INFO main 146549] Confirming: 4/9
+[8 INFO main 150663] Confirming: 6/9
+[8 INFO main 152734] Confirming: 7/9
+[8 INFO main 154812] Confirming: 8/9
+[8 INFO main 156818] Confirming: 9/9
+[8 INFO main 158160] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 158342] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 234725] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 242963] Confirming: 1/9
+[8 INFO main 245109] Confirming: 2/9
+[8 INFO main 247201] Confirming: 3/9
+[8 INFO main 249260] Confirming: 4/9
+[8 INFO main 251316] Confirming: 5/9
+[8 INFO main 253657] Confirming: 6/9
+[8 INFO main 255593] Confirming: 7/9
+[8 INFO main 257779] Confirming: 9/9
+[8 INFO main 272817] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 273167] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 321684] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 344303] Confirming: 1/9
+[8 INFO main 346495] Confirming: 2/9
+[8 INFO main 348507] Confirming: 3/9
+[8 INFO main 350906] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 352648] Confirming: 5/9
+[8 INFO main 354656] Confirming: 6/9
+[8 INFO main 356981] Confirming: 7/9
+[8 INFO main 359070] Confirming: 8/9
+[8 INFO main 361096] Confirming: 9/9
+[8 INFO main 361609] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 428929] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 435127] Confirming: 1/9
+[8 INFO main 437227] Confirming: 2/9
+[8 INFO main 439462] Confirming: 3/9
+[8 INFO main 441475] Confirming: 4/9
+[8 INFO main 443631] Confirming: 5/9
+[8 INFO main 445713] Confirming: 6/9
+[8 INFO main 447694] Confirming: 7/9
+[8 INFO main 448693] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 449818] Confirming: 8/9
+[8 INFO main 451924] Confirming: 9/9
+[8 INFO main 452042] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 487678] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 502551] Confirming: 1/9
+[8 INFO main 504618] Confirming: 2/9
+[8 INFO main 506680] Confirming: 3/9
+[8 INFO main 508701] Confirming: 4/9
+[8 INFO main 512095] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 521059] Confirming: 5/9
+[8 INFO main 523062] Confirming: 6/9
+[8 INFO main 525169] Confirming: 7/9
+[8 INFO main 527206] Confirming: 8/9
+[8 INFO main 529263] Confirming: 9/9
+[8 INFO main 529291] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 626036] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 659145] Confirming: 2/9
+[8 INFO main 661152] Confirming: 3/9
+[8 INFO main 663226] Confirming: 4/9
+[8 INFO main 664096] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 665324] Confirming: 5/9
+[8 INFO main 667373] Confirming: 6/9
+[8 INFO main 669458] Confirming: 7/9
+[8 INFO main 671530] Confirming: 8/9
+[8 INFO main 673592] Confirming: 9/9
+[8 INFO main 673897] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 709587] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 717845] Confirming: 1/9
+[8 INFO main 719902] Confirming: 2/9
+[8 INFO main 721995] Confirming: 3/9
+[8 INFO main 723994] Confirming: 4/9
+[8 INFO main 726080] Confirming: 5/9
+[8 INFO main 728140] Confirming: 6/9
+[8 INFO main 730206] Confirming: 7/9
+[8 INFO main 732223] Confirming: 8/9
+[8 INFO main 734238] Confirming: 9/9
+[8 INFO main 749395] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 749521] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 798603] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 808906] Confirming: 1/9
+[8 INFO main 810929] Confirming: 2/9
+[8 INFO main 812935] Confirming: 3/9
+[8 INFO main 814994] Confirming: 4/9
+[8 INFO main 817084] Confirming: 5/9
+[8 INFO main 819179] Confirming: 6/9
+[8 INFO main 821253] Confirming: 7/9
+[8 INFO main 823281] Confirming: 8/9
+[8 INFO main 825297] Confirming: 9/9
+[8 INFO main 850415] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 850544] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 945219] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 959557] Confirming: 1/9
+[8 INFO main 961639] Confirming: 2/9
+[8 INFO main 963673] Confirming: 3/9
+[8 INFO main 965719] Confirming: 4/9
+[8 INFO main 967792] Confirming: 5/9
+[8 INFO main 969792] Confirming: 7/9
+[8 INFO main 971850] Confirming: 8/9
+[8 INFO main 973909] Confirming: 9/9
+[8 INFO main 979100] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 979249] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1053023] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1078886] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1080098] Confirming: 2/9
+[8 INFO main 1082191] Confirming: 3/9
+[8 INFO main 1084415] Confirming: 4/9
+[8 INFO main 1086960] Confirming: 5/9
+[8 INFO main 1088948] Confirming: 6/9
+[8 INFO main 1091190] Confirming: 7/9
+[8 INFO main 1093270] Confirming: 8/9
+[8 INFO main 1095330] Confirming: 9/9
+[8 INFO main 1095662] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1127535] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1158844] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1165009] Confirming: 1/9
+[8 INFO main 1167025] Confirming: 2/9
+[8 INFO main 1169136] Confirming: 3/9
+[8 INFO main 1171193] Confirming: 4/9
+[8 INFO main 1173199] Confirming: 5/9
+[8 INFO main 1177326] Confirming: 7/9
+[8 INFO main 1179424] Confirming: 8/9
+[8 INFO main 1181421] Confirming: 9/9
+[8 INFO main 1181677] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1234715] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1247339] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1257371] Confirming: 1/9
+[8 INFO main 1259430] Confirming: 2/9
+[8 INFO main 1261436] Confirming: 3/9
+[8 INFO main 1263462] Confirming: 4/9
+[8 INFO main 1265523] Confirming: 5/9
+[8 INFO main 1267614] Confirming: 6/9
+[8 INFO main 1269672] Confirming: 7/9
+[8 INFO main 1271757] Confirming: 8/9
+[8 INFO main 1273820] Confirming: 9/9
+[8 INFO main 1273855] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1299100] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1310766] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1315690] Confirming: 1/9
+[8 INFO main 1317752] Confirming: 2/9
+[8 INFO main 1319842] Confirming: 4/9
+[8 INFO main 1321870] Confirming: 5/9
+[8 INFO main 1325988] Confirming: 7/9
+[8 INFO main 1327999] Confirming: 8/9
+[8 INFO main 1330070] Confirming: 9/9
+[8 INFO main 1330391] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1355660] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1369873] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1378361] Confirming: 1/9
+[8 INFO main 1380446] Confirming: 2/9
+[8 INFO main 1384630] Confirming: 4/9
+[8 INFO main 1386702] Confirming: 5/9
+[8 INFO main 1388777] Confirming: 6/9
+[8 INFO main 1390846] Confirming: 7/9
+[8 INFO main 1392942] Confirming: 8/9
+[8 INFO main 1395067] Confirming: 9/9
+[8 INFO main 1449323] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1505160] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1521266] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1530347] Confirming: 1/9
+[8 INFO main 1532422] Confirming: 2/9
+[8 INFO main 1534578] Confirming: 3/9
+[8 INFO main 1536635] Confirming: 4/9
+[8 INFO main 1538693] Confirming: 5/9
+[8 INFO main 1540714] Confirming: 6/9
+[8 INFO main 1542713] Confirming: 7/9
+[8 INFO main 1544774] Confirming: 9/9
+[8 INFO main 1545195] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1626405] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1643210] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1651026] Confirming: 1/9
+[8 INFO main 1653138] Confirming: 2/9
+[8 INFO main 1655241] Confirming: 3/9
+[8 INFO main 1657277] Confirming: 4/9
+[8 INFO main 1659338] Confirming: 5/9
+[8 INFO main 1661385] Confirming: 6/9
+[8 INFO main 1671721] Confirming: 11/9
+[8 INFO main 1671983] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1731602] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1739964] Confirming: 1/9
+[8 INFO main 1741980] Confirming: 2/9
+[8 INFO main 1744151] Confirming: 3/9
+[8 INFO main 1746211] Confirming: 4/9
+[8 INFO main 1748333] Confirming: 5/9
+[8 INFO main 1750393] Confirming: 6/9
+[8 INFO main 1752547] Confirming: 7/9
+[8 INFO main 1754725] Confirming: 8/9
+[8 INFO main 1756817] Confirming: 9/9
+[8 INFO main 1764808] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1765052] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1792503] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1799763] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1801096] Confirming: 1/9
+[8 INFO main 1803136] Confirming: 2/9
+[8 INFO main 1805173] Confirming: 3/9
+[8 INFO main 1807184] Confirming: 4/9
+[8 INFO main 1809266] Confirming: 5/9
+[8 INFO main 1811267] Confirming: 6/9
+[8 INFO main 1813350] Confirming: 7/9
+[8 INFO main 1815446] Confirming: 8/9
+[8 INFO main 1817492] Confirming: 9/9
+[8 INFO main 1818389] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1859510] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1873892] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 1890770] Confirming: 1/9
+[8 INFO main 1892778] Confirming: 2/9
+[8 INFO main 1894816] Confirming: 3/9
+[8 INFO main 1896860] Confirming: 4/9
+[8 INFO main 1898895] Confirming: 5/9
+[8 INFO main 1901001] Confirming: 6/9
+[8 INFO main 1903179] Confirming: 7/9
+[8 INFO main 1905278] Confirming: 8/9
+[8 INFO main 1907294] Confirming: 9/9
+[8 INFO main 1907941] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 1964299] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 1980854] Confirming: 1/9
+[8 INFO main 1982964] Confirming: 2/9
+[8 INFO main 1985030] Confirming: 3/9
+[8 INFO main 1987064] Confirming: 4/9
+[8 INFO main 1989189] Confirming: 5/9
+[8 INFO main 1991289] Confirming: 6/9
+[8 INFO main 1993306] Confirming: 7/9
+[8 INFO main 1995355] Confirming: 8/9
+[8 INFO main 1997408] Confirming: 9/9
+[8 INFO main 2010053] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2010126] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2036576] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2061612] Confirming: 1/9
+[8 INFO main 2061987] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2063661] Confirming: 2/9
+[8 INFO main 2065737] Confirming: 3/9
+[8 INFO main 2067813] Confirming: 4/9
+[8 INFO main 2069823] Confirming: 5/9
+[8 INFO main 2071922] Confirming: 7/9
+[8 INFO main 2073946] Confirming: 8/9
+[8 INFO main 2076044] Confirming: 9/9
+[8 INFO main 2080575] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2145028] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2161342] Confirming: 1/9
+[8 INFO main 2163546] Confirming: 2/9
+[8 INFO main 2165558] Confirming: 3/9
+[8 INFO main 2167595] Confirming: 4/9
+[8 INFO main 2169705] Confirming: 5/9
+[8 INFO main 2171851] Confirming: 6/9
+[8 INFO main 2173883] Confirming: 8/9
+[8 INFO main 2175902] Confirming: 9/9
+[8 INFO main 2193646] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2193793] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2207697] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2220264] Confirming: 1/9
+[8 INFO main 2222346] Confirming: 2/9
+[8 INFO main 2224433] Confirming: 3/9
+[8 INFO main 2226550] Confirming: 4/9
+[8 INFO main 2228832] Confirming: 5/9
+[8 INFO main 2230050] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2230993] Confirming: 6/9
+[8 INFO main 2233037] Confirming: 7/9
+[8 INFO main 2235146] Confirming: 8/9
+[8 INFO main 2237111] Confirming: 9/9
+[8 INFO main 2238153] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2282656] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2311700] Confirming: 1/9
+[8 INFO main 2313953] Confirming: 3/9
+[8 INFO main 2314376] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2316097] Confirming: 4/9
+[8 INFO main 2318141] Confirming: 5/9
+[8 INFO main 2320249] Confirming: 6/9
+[8 INFO main 2322283] Confirming: 7/9
+[8 INFO main 2324399] Confirming: 8/9
+[8 INFO main 2326437] Confirming: 9/9
+[8 INFO main 2326614] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2397700] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2416280] Confirming: 7/9
+[8 INFO main 2418357] Confirming: 8/9
+[8 INFO main 2420422] Confirming: 9/9
+[8 INFO main 2436949] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2437164] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2458892] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2483422] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2490129] Confirming: 1/9
+[8 INFO main 2492158] Confirming: 2/9
+[8 INFO main 2494284] Confirming: 3/9
+[8 INFO main 2496366] Confirming: 4/9
+[8 INFO main 2498458] Confirming: 5/9
+[8 INFO main 2500460] Confirming: 6/9
+[8 INFO main 2502581] Confirming: 7/9
+[8 INFO main 2504675] Confirming: 8/9
+[8 INFO main 2506682] Confirming: 9/9
+[8 INFO main 2506928] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2541134] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2551372] Confirming: 1/9
+[8 INFO main 2551766] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2553481] Confirming: 2/9
+[8 INFO main 2555596] Confirming: 3/9
+[8 INFO main 2557603] Confirming: 4/9
+[8 INFO main 2559654] Confirming: 5/9
+[8 INFO main 2561674] Confirming: 6/9
+[8 INFO main 2563756] Confirming: 7/9
+[8 INFO main 2565910] Confirming: 9/9
+[8 INFO main 2567085] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2676892] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2701681] Confirming: 1/9
+[8 INFO main 2702096] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2703742] Confirming: 3/9
+[8 INFO main 2707914] Confirming: 5/9
+[8 INFO main 2712097] Confirming: 7/9
+[8 INFO main 2714137] Confirming: 8/9
+[8 INFO main 2716187] Confirming: 9/9
+[8 INFO main 2716255] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2787472] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2821674] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2822548] Confirming: 1/9
+[8 INFO main 2824592] Confirming: 2/9
+[8 INFO main 2826613] Confirming: 3/9
+[8 INFO main 2828771] Confirming: 4/9
+[8 INFO main 2830847] Confirming: 6/9
+[8 INFO main 2832849] Confirming: 7/9
+[8 INFO main 2837042] Confirming: 9/9
+[8 INFO main 2837725] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 2910380] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 2941747] Confirming: 1/9
+[8 INFO main 2943750] Confirming: 2/9
+[8 INFO main 2945789] Confirming: 3/9
+[8 INFO main 2947925] Confirming: 4/9
+[8 INFO main 2950167] Confirming: 5/9
+[8 INFO main 2952272] Confirming: 6/9
+[8 INFO main 2954327] Confirming: 7/9
+[8 INFO main 2956482] Confirming: 8/9
+[8 INFO main 2957162] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 2958541] Confirming: 9/9
+[8 INFO main 2958593] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3002584] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3029479] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3032074] Confirming: 1/9
+[8 INFO main 3034090] Confirming: 2/9
+[8 INFO main 3036122] Confirming: 3/9
+[8 INFO main 3038195] Confirming: 4/9
+[8 INFO main 3040279] Confirming: 5/9
+[8 INFO main 3042575] Confirming: 6/9
+[8 INFO main 3044676] Confirming: 7/9
+[8 INFO main 3046690] Confirming: 8/9
+[8 INFO main 3048763] Confirming: 9/9
+[8 INFO main 3049588] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3099938] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3122711] Confirming: 1/9
+[8 INFO main 3124791] Confirming: 3/9
+[8 INFO main 3128943] Confirming: 4/9
+[8 INFO main 3131027] Confirming: 6/9
+[8 INFO main 3133115] Confirming: 7/9
+[8 INFO main 3135132] Confirming: 8/9
+[8 INFO main 3136116] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3139181] Confirming: 9/9
+[8 INFO main 3142844] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3227556] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3250873] Confirming: 1/9
+[8 INFO main 3252966] Confirming: 2/9
+[8 INFO main 3255051] Confirming: 3/9
+[8 INFO main 3257130] Confirming: 4/9
+[8 INFO main 3259228] Confirming: 5/9
+[8 INFO main 3261504] Confirming: 6/9
+[8 INFO main 3263548] Confirming: 7/9
+[8 INFO main 3265551] Confirming: 8/9
+[8 INFO main 3265880] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3267572] Confirming: 9/9
+[8 INFO main 3268307] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3301736] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3316325] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3331278] Confirming: 1/9
+[8 INFO main 3333295] Confirming: 2/9
+[8 INFO main 3335302] Confirming: 3/9
+[8 INFO main 3339644] Confirming: 5/9
+[8 INFO main 3341689] Confirming: 6/9
+[8 INFO main 3343710] Confirming: 7/9
+[8 INFO main 3345773] Confirming: 8/9
+[8 INFO main 3347804] Confirming: 9/9
+[8 INFO main 3347860] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3390991] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3422227] Confirming: 1/9
+[8 INFO main 3424232] Confirming: 2/9
+[8 INFO main 3426292] Confirming: 3/9
+[8 INFO main 3428371] Confirming: 4/9
+[8 INFO main 3430459] Confirming: 5/9
+[8 INFO main 3432539] Confirming: 6/9
+[8 INFO main 3434610] Confirming: 7/9
+[8 INFO main 3436620] Confirming: 8/9
+[8 INFO main 3438631] Confirming: 9/9
+[8 INFO main 3444446] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3444717] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3516155] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3543352] Confirming: 2/9
+[8 INFO main 3545054] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3545454] Confirming: 3/9
+[8 INFO main 3547573] Confirming: 4/9
+[8 INFO main 3549614] Confirming: 5/9
+[8 INFO main 3551753] Confirming: 6/9
+[8 INFO main 3553956] Confirming: 7/9
+[8 INFO main 3556111] Confirming: 8/9
+[8 INFO main 3558149] Confirming: 9/9
+[8 INFO main 3563799] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3621493] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3633877] Confirming: 1/9
+[8 INFO main 3635895] Confirming: 3/9
+[8 INFO main 3637982] Confirming: 4/9
+[8 INFO main 3640020] Confirming: 5/9
+[8 INFO main 3642037] Confirming: 6/9
+[8 INFO main 3644230] Confirming: 7/9
+[8 INFO main 3646346] Confirming: 8/9
+[8 INFO main 3648376] Confirming: 9/9
+[8 INFO main 3656442] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3656597] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3720904] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3756125] Confirming: 1/9
+[8 INFO main 3758197] Confirming: 2/9
+[8 INFO main 3760326] Confirming: 3/9
+[8 INFO main 3760448] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3762406] Confirming: 4/9
+[8 INFO main 3764466] Confirming: 5/9
+[8 INFO main 3766525] Confirming: 6/9
+[8 INFO main 3768447] Confirming: 7/9
+[8 INFO main 3770549] Confirming: 8/9
+[8 INFO main 3772630] Confirming: 9/9
+[8 INFO main 3773263] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3831584] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3846335] Confirming: 1/9
+[8 INFO main 3848406] Confirming: 2/9
+[8 INFO main 3850523] Confirming: 3/9
+[8 INFO main 3852653] Confirming: 4/9
+[8 INFO main 3854766] Confirming: 6/9
+[8 INFO main 3856827] Confirming: 7/9
+[8 INFO main 3860985] Confirming: 9/9
+[8 INFO main 3862798] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3862964] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3892455] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 3905274] Confirming: 1/9
+[8 INFO main 3907348] Confirming: 2/9
+[8 INFO main 3909426] Confirming: 3/9
+[8 INFO main 3911542] Confirming: 4/9
+[8 INFO main 3913632] Confirming: 5/9
+[8 INFO main 3916148] Confirming: 6/9
+[8 INFO main 3918244] Confirming: 7/9
+[8 INFO main 3920267] Confirming: 8/9
+[8 INFO main 3921702] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 3922425] Confirming: 9/9
+[8 INFO main 3923023] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 3992588] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4017471] Confirming: 1/9
+[8 INFO main 4019497] Confirming: 2/9
+[8 INFO main 4021590] Confirming: 3/9
+[8 INFO main 4023616] Confirming: 4/9
+[8 INFO main 4024297] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4025742] Confirming: 5/9
+[8 INFO main 4027816] Confirming: 6/9
+[8 INFO main 4029886] Confirming: 7/9
+[8 INFO main 4031943] Confirming: 8/9
+[8 INFO main 4033943] Confirming: 9/9
+[8 INFO main 4034924] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4089963] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4100753] Confirming: 2/9
+[8 INFO main 4102778] Confirming: 3/9
+[8 INFO main 4104818] Confirming: 4/9
+[8 INFO main 4106837] Confirming: 5/9
+[8 INFO main 4108989] Confirming: 6/9
+[8 INFO main 4111022] Confirming: 7/9
+[8 INFO main 4113072] Confirming: 8/9
+[8 INFO main 4117098] Confirming: 10/9
+[8 INFO main 4143360] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4143680] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4227850] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4236737] Confirming: 1/9
+[8 INFO main 4238793] Confirming: 3/9
+[8 INFO main 4240821] Confirming: 4/9
+[8 INFO main 4242963] Confirming: 5/9
+[8 INFO main 4245402] Confirming: 6/9
+[8 INFO main 4247544] Confirming: 7/9
+[8 INFO main 4249532] Confirming: 8/9
+[8 INFO main 4253799] Confirming: 10/9
+[8 INFO main 4263217] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4263452] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4293427] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4326652] Confirming: 1/9
+[8 INFO main 4328737] Confirming: 2/9
+[8 INFO main 4330830] Confirming: 4/9
+[8 INFO main 4334996] Confirming: 6/9
+[8 INFO main 4337081] Confirming: 7/9
+[8 INFO main 4339439] Confirming: 8/9
+[8 INFO main 4341563] Confirming: 9/9
+[8 INFO main 4345070] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4345303] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4415171] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4434695] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4446145] Confirming: 1/9
+[8 INFO main 4448143] Confirming: 2/9
+[8 INFO main 4450165] Confirming: 3/9
+[8 INFO main 4452192] Confirming: 4/9
+[8 INFO main 4454217] Confirming: 5/9
+[8 INFO main 4458467] Confirming: 6/9
+[8 INFO main 4460509] Confirming: 8/9
+[8 INFO main 4462566] Confirming: 9/9
+[8 INFO main 4463145] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4571105] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4595119] Confirming: 1/9
+[8 INFO main 4597290] Confirming: 2/9
+[8 INFO main 4599352] Confirming: 3/9
+[8 INFO main 4601752] Confirming: 4/9
+[8 INFO main 4603888] Confirming: 5/9
+[8 INFO main 4605941] Confirming: 6/9
+[8 INFO main 4607982] Confirming: 7/9
+[8 INFO main 4607982] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4610000] Confirming: 8/9
+[8 INFO main 4612115] Confirming: 9/9
+[8 INFO main 4612240] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4647208] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4657498] Confirming: 2/9
+[8 INFO main 4659133] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4659602] Confirming: 3/9
+[8 INFO main 4661644] Confirming: 4/9
+[8 INFO main 4663733] Confirming: 5/9
+[8 INFO main 4665870] Confirming: 6/9
+[8 INFO main 4667922] Confirming: 7/9
+[8 INFO main 4670130] Confirming: 8/9
+[8 INFO main 4672330] Confirming: 9/9
+[8 INFO main 4673018] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4744506] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4750697] Confirming: 1/9
+[8 INFO main 4752792] Confirming: 3/9
+[8 INFO main 4754870] Confirming: 4/9
+[8 INFO main 4756906] Confirming: 5/9
+[8 INFO main 4761010] Confirming: 7/9
+[8 INFO main 4763024] Confirming: 8/9
+[8 INFO main 4764929] Confirming: 9/9
+[8 INFO main 4783999] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4784442] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4861514] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 4895802] Confirming: 1/9
+[8 INFO main 4897882] Confirming: 2/9
+[8 INFO main 4899901] Confirming: 3/9
+[8 INFO main 4901970] Confirming: 4/9
+[8 INFO main 4904039] Confirming: 5/9
+[8 INFO main 4906123] Confirming: 6/9
+[8 INFO main 4908378] Confirming: 7/9
+[8 INFO main 4910540] Confirming: 8/9
+[8 INFO main 4912554] Confirming: 9/9
+[8 INFO main 4919487] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 4945294] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 4988530] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 5013325] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 5016311] Confirming: 1/9
+[8 INFO main 5018332] Confirming: 2/9
+[8 INFO main 5020360] Confirming: 3/9
+[8 INFO main 5022358] Confirming: 4/9
+[8 INFO main 5024300] Confirming: 5/9
+[8 INFO main 5026790] Confirming: 7/9
+[8 INFO main 5028942] Confirming: 8/9
+[8 INFO main 5031056] Confirming: 9/9
+[8 INFO main 5031464] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 5087628] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 5106387] Confirming: 1/9
+[8 INFO main 5108435] Confirming: 2/9
+[8 INFO main 5110449] Confirming: 3/9
+[8 INFO main 5112636] Confirming: 4/9
+[8 INFO main 5114648] Confirming: 5/9
+[8 INFO main 5116690] Confirming: 6/9
+[8 INFO main 5118733] Confirming: 8/9
+[8 INFO main 5120877] Confirming: 9/9
+[8 INFO main 5132772] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 5133003] Scout.Query -> Verify.DriveTo | Go to unverified source
+[8 INFO main 5238543] Verify.DriveTo -> Verify.Homing | Homing
+[8 INFO main 5256950] Confirming: 2/9
+[8 INFO main 5259534] Confirming: 3/9
+[8 INFO main 5261797] Confirming: 4/9
+[8 INFO main 5263887] Confirming: 5/9
+[8 INFO main 5267058] Confirming: 7/9
+[8 INFO main 5272668] Confirming: 9/9
+[8 INFO main 5310896] Verify.Homing -> Scout.Query | Arrived home
+[8 INFO main 5311054] Scout.Query -> Verify.DriveTo | Go to unverified source
