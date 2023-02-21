@@ -153,6 +153,8 @@ def post_step():
         for robot in allrobots:
             if robot.variables.get_attribute("has_readings") == "1":
                 robot_have_reading+=1
+            if robot.variables.get_attribute("has_readings") == "2":
+                robot_have_reading+=1
         if robot_have_reading > float(len(allrobots))/2:
             allHaveReadings = True
 

@@ -415,7 +415,7 @@ def controlstep():
                         temp_belief_pos[1] += valid_measure[1]
                     temp_belief_pos[0] /= len(measure_set)
                     temp_belief_pos[1] /= len(measure_set)
-                    robot.variables.set_attribute("has_readings", str(1))
+                    robot.variables.set_attribute("has_readings", str(2))
                     print(robotID, "gets measure in neighbour average: ", temp_belief_pos)
                     belief_pos[0] = temp_belief_pos[0]
                     belief_pos[1] = temp_belief_pos[1]
@@ -554,7 +554,7 @@ def controlstep():
                         temp_belief_pos[1] += valid_measure[1]
                     temp_belief_pos[0] /= len(measure_set)
                     temp_belief_pos[1] /= len(measure_set)
-                    robot.variables.set_attribute("has_readings", str(1))
+                    robot.variables.set_attribute("has_readings", str(2))
                     print(robotID, "gets measure in neighbour average: ", temp_belief_pos)
                     belief_pos[0] = temp_belief_pos[0]
                     belief_pos[1] = temp_belief_pos[1]

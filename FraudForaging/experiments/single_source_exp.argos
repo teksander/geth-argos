@@ -16,7 +16,7 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <python_controller id="blockchain" library="/home/ubuntu/blockchain_robots/geth-argos/argos-python/build/libpy_controller_interface.so">
+    <python_controller id="blockchain" library="/home/hzhao/blockchain-robots/geth-argos/argos-python/build/libpy_controller_interface.so">
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
@@ -29,21 +29,21 @@
         <differential_steering implementation="default" bias_stddev="2" />
         <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
       </sensors>
-      <params script="/home/ubuntu/blockchain_robots/geth-argos/FraudForaging/controllers/mainloop_single_sc.py"
+      <params script="/home/hzhao/blockchain-robots/geth-argos/FraudForaging/controllers/mainloop_wmsr.py"
               timeRate="1" />
     </python_controller>
   </controllers>
 
-  <loop_functions library="/home/ubuntu/blockchain_robots/geth-argos/argos-python/build/libpy_loop_function_interface.so"
+  <loop_functions library="/home/hzhao/blockchain-robots/geth-argos/argos-python/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
-    <params script="/home/ubuntu/blockchain_robots/geth-argos/FraudForaging/loop_functions/loop_function.py"/>
+    <params script="/home/hzhao/blockchain-robots/geth-argos/FraudForaging/loop_functions/loop_function.py"/>
   </loop_functions>
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="1.5, 1.5, 1" center="0,0,0.5">
-    <floor id="f" source="image" path="/home/ubuntu/blockchain_robots/geth-argos/FraudForaging/experiments/floors/market.png" />
+    <floor id="f" source="image" path="/home/hzhao/blockchain-robots/geth-argos/FraudForaging/experiments/floors/market.png" />
     <box id="wall_north" size="1.5,0.06,0.1" movable="false">
       <body position="0,.75,0" orientation="0,0,0" />
     </box>
@@ -88,7 +88,7 @@
   <!-- ****************** -->
   <visualization>
     <qt-opengl autoplay="true">
-      <user_functions library="/home/ubuntu/blockchain_robots/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
+      <user_functions library="/home/hzhao/blockchain-robots/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
                       label="py_qtuser_function" />
     <camera>
       <placements>

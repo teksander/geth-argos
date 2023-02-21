@@ -16,7 +16,7 @@ def extract_all_consensus(consensus_str):
             cory = float(this_consensus.split(', ')[11][:-2]) / 1e5
         total_deposit = float(this_consensus.split(', ')[5])
         support_deposit = float(this_consensus.split(', ')[6])
-        if support_deposit/total_deposit>=0.5:
+        if support_deposit/total_deposit>0.5 and float(this_consensus.split(', ')[3])!=3:
             consensus_list.append([corx,cory,support_deposit/total_deposit])
     return consensus_list
 
@@ -56,9 +56,10 @@ experiment_main_foler = './results/data/experiment_SingleSourceSupp'
 #this_exps = ['lca_0_6_16_lnb','lca_0_3_16_lnb', 'lca_0_0_16_lnb', 'wmsr_3_6_16_lnb', 'wmsr_3_3_16_lnb', 'wmsr_3_0_16_lnb', 'sc_5_15_lnb','sc_3_16_lnb','sc_0_16_lnb']
 #this_exps = ['sc_0_15_lnb','sc_1_15_lnb','sc_2_15_lnb','sc_3_15_lnb','sc_4_15_lnb', 'sc_5_15_lnb']
 #this_exps = ['lca_3_0_15_lnb','lca_3_1_15_lnb','lca_3_2_15_lnb','lca_3_3_15_lnb','lca_3_4_15_lnb', 'lca_3_5_15_lnb']
-lca_sample_set = ['lca_3_0_15_lnb','lca_3_1_15_lnb','lca_3_2_15_lnb','lca_3_3_15_lnb','lca_3_4_15_lnb', 'lca_3_5_15_lnb']
-wmsr_sample_set =['wmsr_3_0_15_lnb', 'wmsr_3_1_15_lnb','wmsr_3_2_15_lnb','wmsr_3_3_15_lnb','wmsr_3_4_15_lnb', 'wmsr_3_5_15_lnb']
-sc_sample_set = ['sc_0_15_lnb','sc_1_15_lnb','sc_2_15_lnb','sc_3_15_lnb','sc_4_15_lnb', 'sc_5_15_lnb']
+lca_sample_set = ['lca_0_15_lnb03','lca_1_15_lnb03','lca_2_15_lnb03','lca_3_15_lnb03','lca_4_15_lnb03', 'lca_5_15_lnb03']
+#wmsr_sample_set =['wmsr_5_0_15_lnb03', 'wmsr_3_1_15_lnb','wmsr_3_2_15_lnb','wmsr_3_3_15_lnb','wmsr_3_4_15_lnb', 'wmsr_3_5_15_lnb']
+sc_sample_set = ['sc_0_15_lnb03b','sc_1_15_lnb03','sc_2_15_lnb03','sc_3_15_lnb03','sc_4_15_lnb03', 'sc_5_15_lnb03']
+wmsr_sample_set =['wmsr_5_0_15_lnb03','wmsr_5_1_15_lnb03','wmsr_5_2_15_lnb03','wmsr_5_3_15_lnb03','wmsr_5_4_15_lnb03','wmsr_5_5_15_lnb03']
 blockchain_num_consensus = [0]
 num_robots = 15
 
@@ -89,7 +90,7 @@ def extract_consensus_sample_set(this_exps):
                             ground_truth = np.array([float(lastRow.split(' [')[1].split(', ')[0]), float(lastRow.split(' [')[1].split(', ')[1][:-1])])
                             consensus_list = extract_all_consensus(lastRow.split(' [')[2])
                             this_consensus = np.array([float(consensus_list[this_num][0]), float(consensus_list[this_num][1])])
-                            this_data.append((np.linalg.norm(this_consensus-ground_truth)*(0.44/0.21)))
+                            this_data.append((np.linalg.norm(this_consensus-ground_truth)))
 
 
                 if len(this_data)>0:
@@ -103,31 +104,35 @@ def extract_consensus_sample_set(this_exps):
 #fig = plt.figure(figsize=(10, 7))
 
 # Creating axes instance
-#fig1, ax1 = plt.subplots()
+fig1, ax1 = plt.subplots()
 all_samples = [lca_sample_set, wmsr_sample_set, sc_sample_set]
+
+all_samples_test=[]
+for this_list in all_samples:
+    all_samples_test+=this_list
+exp_data_ens = extract_consensus_sample_set(all_samples_test)
 # Creating plot
-#bp = ax1.boxplot(exp_data_ens)
+bp = ax1.boxplot(exp_data_ens)
 
-exp_data_ens = extract_consensus_sample_set(['sc_0_15_lnb03'])
-
-
-for this_sample_list in all_samples:
-    exp_data_ens = extract_consensus_sample_set(this_sample_list)
-    plot_with_confidence(exp_data_ens, lambda x:x)
-    #legend('lca', 'lca')
-for this_sample_list in all_samples:
-    exp_data_ens = extract_consensus_sample_set(this_sample_list)
-    fill_with_confidence(exp_data_ens, lambda x:x)
-legend(['LCA', 'W-MSR excluding 3 outliers', 'Our method'])
-xlabel('Number of malicious agent')
-ylabel('Euclidean distance from consensus to ground truth')
+# exp_data_ens = extract_consensus_sample_set(['sc_0_15_lnb03'])
+#
+#
+# for this_sample_list in all_samples:
+#     exp_data_ens = extract_consensus_sample_set(this_sample_list)
+#     plot_with_confidence(exp_data_ens, lambda x:x)
+#     #legend('lca', 'lca')
+# for this_sample_list in all_samples:
+#     exp_data_ens = extract_consensus_sample_set(this_sample_list)
+#     fill_with_confidence(exp_data_ens, lambda x:x)
+# legend(['LCA', 'W-MSR excluding 3 outliers', 'Our method'])
+# xlabel('Number of malicious agent')
+# ylabel('Euclidean distance from consensus to ground truth')
 #blockchain_num_consensus = [4]
 #exp_data_ens = extract_consensus_sample_set(sc_sample_set)
 #plot_with_confidence(exp_data_ens, lambda x:x)
 # show plot
-show()
-#plt.show()
-
+#show()
+plt.show()
 
 
 

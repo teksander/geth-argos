@@ -56,81 +56,58 @@ run() {
 	done
 }
 
-export USEWMSR=3 #wmsr excluding 3 pts
+export USEWMSR=5
 export NUM1A=15
 export NUM2=0
-config "REPS" 10
-run "SingleSourceSupp/wmsr_3_0_15_lnb"
+config "REPS" 15
+run "SingleSourceSupp/wmsr_5_0_15_lnb03"
 
-
-
-export USEWMSR=3 #wmsr excluding 3 pts
 export NUM1A=14
 export NUM2=1
-config "REPS" 10
-run "SingleSourceSupp/wmsr_3_1_15_lnb"
+run "SingleSourceSupp/wmsr_5_1_15_lnb03"
 
-export USEWMSR=3 #wmsr excluding 3 pts
 export NUM1A=13
 export NUM2=2
-config "REPS" 10
-run "SingleSourceSupp/wmsr_3_2_15_lnb"
+run "SingleSourceSupp/wmsr_5_2_15_lnb03"
 
-export USEWMSR=3 #wmsr excluding 3 pts
 export NUM1A=12
 export NUM2=3
-config "REPS" 10
-run "SingleSourceSupp/wmsr_3_3_15_lnb"
+run "SingleSourceSupp/wmsr_5_3_15_lnb03"
 
-export USEWMSR=3 #wmsr excluding 3 pt#s
 export NUM1A=11
 export NUM2=4
-config "REPS" 10
-run "SingleSourceSupp/wmsr_3_4_15_lnb"
+run "SingleSourceSupp/wmsr_5_4_15_lnb03"
 
-#export USEWMSR=3 #wmsr excluding 3 pts
-#export NUM1A=10
-#export NUM2=5
-#config "REPS" 15
-#run "SingleSourceSupp/wmsr_3_5_15_lnb"
-#
-#
-#export USEWMSR=0 #wmsr excluding 3 pts
-#export NUM1A=15
-#export NUM2=0
-#config "REPS" 15
-#run "SingleSourceSupp/lca_3_0_15_lnb"
+export NUM1A=10
+export NUM2=5
+run "SingleSourceSupp/wmsr_5_5_15_lnb03"
 
 
 export USEWMSR=0
+export NUM1A=15
+export NUM2=0
+run "SingleSourceSupp/lca_0_15_lnb03"
+
 export NUM1A=14
 export NUM2=1
-config "REPS" 10
-run "SingleSourceSupp/lca_3_1_15_lnb"
+run "SingleSourceSupp/lca_1_15_lnb03"
 
-export USEWMSR=0
 export NUM1A=13
 export NUM2=2
-config "REPS" 10
-run "SingleSourceSupp/lca_3_2_15_lnb"
+run "SingleSourceSupp/lca_2_15_lnb03"
 
-export USEWMSR=0
 export NUM1A=12
 export NUM2=3
-config "REPS" 10
-run "SingleSourceSupp/lca_3_3_15_lnb"
+run "SingleSourceSupp/lca_3_15_lnb03"
 
-export USEWMSR=0
+
 export NUM1A=11
 export NUM2=4
-config "REPS" 10
-run "SingleSourceSupp/lca_3_4_15_lnb"
-#
-#export USEWMSR=0
-#export NUM1A=10
-#export NUM2=5
-#config "REPS" 15
-#run "SingleSourceSupp/lca_3_5_15_lnb"
+run "SingleSourceSupp/lca_4_15_lnb03"
+
+export NUM1A=10
+export NUM2=5
+run "SingleSourceSupp/lca_5_15_lnb03"
 
 
 
