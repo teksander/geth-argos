@@ -231,6 +231,7 @@ def init():
     robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifiersExtract(robotID, 'IP')
     robot.variables.set_attribute("id", str(robotID))
+    robot.variables.set_attribute("circle_color", "gray50")
     robot.variables.set_attribute("scresources", "[]")
     robot.variables.set_attribute("foraging", "")
     robot.variables.set_attribute("dropResource", "")
@@ -499,8 +500,7 @@ def controlstep():
         if logs['fsm'].query():
             logs['fsm'].log([round(fsm.accumTime[state], 3) if state in fsm.accumTime else 0 for state in stateList ])
 
-        with open(lp['files']['position'], 'w+' if me.id == '1' else 'a') as f:
-            f.write('%s, %s \n' % (repr(gps.getPosition()), repr(odo.getPosition())))
+        robot.variables.set_attribute("odo_position",repr(odo.getPosition()))
 
         # Perform the blockchain peering step
         peering()

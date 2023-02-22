@@ -48,12 +48,11 @@ def draw_patches():
 		environment.qt_draw.circle([res.x, res.y, 0.0005],[], res.radius, 'gray90', True)
 
 def draw_resources_on_robots():
-	with open(lp['files']['robots'], 'r') as f:
-		for line in f:
-			robotID, x, y, quantity, quality = eval(line)
+	quantity = int(robot.variables.get_attribute("quantity"))
+	quality  = robot.variables.get_attribute("hasResource")
 
-			# Draw carried quantity
-			environment.qt_draw.cylinder([x, y, 0.08],[], rob_diam * (quantity/cp['max_Q']), res_height, quality)
+	# Draw carried quantity
+	environment.qt_draw.cylinder([0, 0, 0.08],[], rob_diam * (quantity/cp['max_Q']), res_height, quality)
 
 # /* ARGoS Functions */
 #######################################################################
@@ -61,16 +60,13 @@ def draw_resources_on_robots():
 def init():
 	pass
 
-def DrawInWorld():
+def draw_in_world():
 
 	# Draw the Market
 	draw_market()
 
 	# Draw resource patches
 	draw_patches()
-
-	# Draw resources carried by robots
-	draw_resources_on_robots()
 	
 	# Draw rays
 	if lp['generic']['show_rays']:
@@ -81,18 +77,17 @@ def DrawInWorld():
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
 	
+def draw_in_robot():
+
+	# Draw circle for visibility
+	circle_color = robot.variables.get_attribute("circle_color")
+	environment.qt_draw.circle([0,0,0.01], [], 0.05, circle_color, True)
+
+	# Draw resources carried by robots
+	draw_resources_on_robots()
+
 def destroy():
 	print('Closing the QT window')
-
-
-
-
-
-
-
-
-
-
 
 
 	# # Draw the odometry position error

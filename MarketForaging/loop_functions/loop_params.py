@@ -94,6 +94,4 @@ params['economy']['efficiency_step'] = 0  # amps/second increase per robot ID
 # Initialize the files which store QT_draw information 
 params['files'] = dict()
 params['files']['patches'] = 'loop_functions/patches.txt'
-params['files']['robots']  = 'loop_functions/robots.txt'
 params['files']['position']  = 'loop_functions/position.txt'
-params['files']['rays']    = 'loop_functions/rays.txt'

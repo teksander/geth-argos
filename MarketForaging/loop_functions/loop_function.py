@@ -310,25 +310,6 @@ def post_step():
         for res in allresources:
             f.write(res._json+'\n')
 
-    # Record the carried resources to be drawn to a file
-    with open(lp['files']['robots'], 'w', buffering=1) as f:
-        for robot in allrobots:
-            if robot.variables.get_attribute("hasResource"):
-                robotID = str(int(robot.variables.get_id()[2:])+1)
-                x = str(robot.position.get_position()[0])
-                y = str(robot.position.get_position()[1])
-                # f.write(robotID + ', ' + x + ', ' + y + ', ' +  + '\n')
-                f.write('%s, %s, %s, %s, %s \n' % (robotID, x, y, robot.variables.get_attribute("quantity"), repr(robot.variables.get_attribute("hasResource"))))
-
-    # Record the rays to be drawn for each robot
-    for robot in allrobots:
-        robot.variables.set_attribute("newResource", "")
-        p = 'a'
-        if robot.variables.get_attribute("id") == "1":
-            p = 'w+'
-        with open(lp['files']['rays'], p, buffering=1) as f:
-            f.write(robot.variables.get_attribute("rays"))
-
     # Logging of simulation simulation (RAM, CPU, TPS)   
     if clocks['simlog'].query():
         RAM = getRAMPercent()
