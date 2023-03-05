@@ -68,15 +68,6 @@ def draw_in_world():
 	# Draw resource patches
 	draw_patches()
 	
-	# Draw rays
-	if lp['generic']['show_rays']:
-		with open(lp['files']['rays'], 'r') as f:
-			for line in f:
-				robotID, pos, vec_target, vec_avoid, vec_desired = eval(line)
-				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_target[0], pos[1] + vec_target[1] , 0.01], 'red', 0.15)
-				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
-				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
-	
 def draw_in_robot():
 
 	# Draw circle for visibility
@@ -90,6 +81,8 @@ def destroy():
 	print('Closing the QT window')
 
 
+
+
 	# # Draw the odometry position error
 	# if lp['generic']['show_pos']:
 	# 	with open(lp['files']['position'], 'r') as f:
@@ -98,7 +91,14 @@ def destroy():
 	# 			gps_pos, odo_pos = list(gps_pos)+[0.01], list(odo_pos)+[0.01]
 	# 			environment.qt_draw.ray(gps_pos, odo_pos, 'red', 0.15)
 
-
+	# # Draw rays
+	# if lp['generic']['show_rays']:
+	# 	with open(lp['files']['rays'], 'r') as f:
+	# 		for line in f:
+	# 			robotID, pos, vec_target, vec_avoid, vec_desired = eval(line)
+	# 			environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_target[0], pos[1] + vec_target[1] , 0.01], 'red', 0.15)
+	# 			environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
+	# 			environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
 	# # Draw patches which are on SC
 	# for i in range(1,lp['generic']['num_robots']+1):
 	# 	with open(lp['environ']['DOCKERFOLDER']+'/geth/logs/%s/scresources.txt' % i, 'r') as f:	

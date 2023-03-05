@@ -1,5 +1,9 @@
 #!/bin/bash  
-# Short script to extract and store log files
+# Short script to extract log files from 
+# DOCKERFOLDER/geth/logs and EXPERIMENTFOLDER/logs to
+# EXPERIMENTFOLDER/results/data/experiment_name/config_name/rep
+
+# Arguments: (string) experiment_name/config_name
 
 source experimentconfig.sh
 
@@ -15,7 +19,33 @@ last_rep=$(ls $DATAFOLDER -v | tail -1 | sed 's/^0*//')
 new_rep=$(printf "%03d\n" $(($last_rep+1)))
 
 # Collect experiment configuration into /logs/
-python3 collect-config.py
+python3 << END
+import sys, os
+
+sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+             os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+             os.environ['EXPERIMENTFOLDER']]
+
+import loop_params as lp
+import control_params as cp
+
+# Collect the loop parameters
+dict_list = [(param, value) for param, value in lp.params.items() if isinstance(value, dict)]
+
+# Collect the control parameters
+dict_list.extend([('control', cp.params)])
+
+# Collect the experiment configuration
+f = open('experimentconfig.sh', 'r')
+experimentconfig = f.read()
+experimentparams = {param:value for param,value in os.environ.items() if param in experimentconfig}
+dict_list.extend([('experiment',experimentparams)])
+
+savefile = open(os.environ['EXPERIMENTFOLDER'] + '/logs/config.py', 'w+')
+for name, param_dict in dict_list:
+  savefile.write('%s = %s \n' % (name, repr(param_dict)))
+END
+
 cp experimentconfig.sh $LOGSFOLDER
 cp $EXPERIMENTFOLDER/loop_functions/loop_params.py $LOGSFOLDER
 cp $EXPERIMENTFOLDER/controllers/control_params.py $LOGSFOLDER
