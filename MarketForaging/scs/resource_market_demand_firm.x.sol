@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 contract MarketForaging {
 
-  uint constant quota         = QUOTA;
-  uint constant fuel_cost     = FUELCOST;
-  uint constant maxw          = MAXWORKERS;
-  uint constant lim_assign    = LIMITASSIGN;
-  uint constant demandA    = DEMAND_A;
-  uint constant demandB    = DEMAND_B;
+  uint constant quota         = ${QUOTA};
+  uint constant fuel_cost     = ${FUELCOST};
+  uint constant maxw          = ${MAXWORKERS};
+  uint constant lim_assign    = ${LIMITASSIGN};
+  uint constant demandA       = ${DEMAND_A};
+  uint constant demandB       = ${DEMAND_B};
 
   function Token_key() public pure returns (string[2] memory){
     return ["robots", "supply"];

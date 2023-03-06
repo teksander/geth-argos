@@ -6,8 +6,8 @@ contract MarketForaging {
   uint constant fuel_cost     = 100;
   uint constant maxw          = 1;
   uint constant lim_assign    = 0;
-  uint constant demandA    = 0;
-  uint constant demandB    = 1000;
+  uint constant demandA       = 0;
+  uint constant demandB       = 1000;
 
   function Token_key() public pure returns (string[2] memory){
     return ["robots", "supply"];

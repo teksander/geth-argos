@@ -15,7 +15,10 @@ echo "MAINFOLDER IS $MAINFOLDER"
 echo "+-----------------------------------------------------------+"
 echo "Updating the ARGoS XML file"
 
-# sed -e "s|NUMROBOTS|\${NUMROBOTS}|g"\
+envsubst < $ARGOSTEMPLATE > $ARGOSFILE
+
+# # Keeping this for now: use this sed to replace an old version argos file to a new one.
+# sed -i -e "s|NUMROBOTS|\${NUMROBOTS}|g"\
 #     -e "s|WHEELNOISE|\${WHEELNOISE}|g"\
 #     -e "s|CON1|\${CON1}|g"\
 #     -e "s|CON2|\${CON2}|g"\
@@ -29,29 +32,7 @@ echo "Updating the ARGoS XML file"
 #     -e "s|FLOORFILE|\${FLOORFILE}|g"\
 #     -e "s|ARGOSFOLDER|\${ARGOSFOLDER}|g"\
 #     -e "s|ARENADIM|\${ARENADIM}|g"\
-#   $ARGOSTEMPLATE > "$ARGOSTEMPLATE.new"
-
-
-# This loop was generated using chatGPT with the prompt:
-# "bash replace the occurrences of environment variables in a file by their value"
-# really impressive
-
-echo "" > $ARGOSFILE
-while read -r line; do
-  while [[ $line =~ (\$\{[A-Za-z_]+[A-Za-z0-9_]*\}) ]]; do
-
-    # Extract the variable name from the match
-    param="${BASH_REMATCH[1]#*\{}"
-    param="${param%%\}*}"
-    echo $param
-    
-    # Replace the variable name with its value in the line
-    line="${line/${BASH_REMATCH[1]}/${!param}}"
-  done
-  
-  echo "$line" >> "$ARGOSFILE"
-done < "$ARGOSTEMPLATE"
-
+#   $ARGOSTEMPLATE 
 
 for opt in "$@"
 do
