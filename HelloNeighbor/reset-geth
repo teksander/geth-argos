@@ -5,8 +5,7 @@ source experimentconfig.sh
 echo "+-----------------------------------------------------------+"
 echo "Updating the Smart Contract"
 
-# sed -e "s|replace|$with|g"\
-#   $SCTEMPLATE > $SCFILE
+envsubst < $SCTEMPLATE > $SCFILE
 
 echo "+-----------------------------------------------------------+"
 echo "Sending python scripts"
@@ -45,7 +44,7 @@ echo "+-----------------------------------------------------------+"
 echo "Restarting the docker containers"
 
 echo "Shuting down docker process..."
-bash ${DOCKERFOLDER}/local/stop-network ${CONTAINERBASE} ${SWARMNAME}
+bash ${DOCKERFOLDER}/local/stop-network
 
 echo "Starting new docker process..."
 bash ${DOCKERFOLDER}/local/start-network $NUMROBOTS

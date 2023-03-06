@@ -71,7 +71,7 @@ $ pip3 install rpyc psutil
 
 Step 5: Configuration and Run
 
-Edit ```experimentconfig.sh``` and ```blockchainconfig``` files to match your paths\
+Edit ```experimentconfig.sh``` and ```blockchainconfig.sh``` files to match your paths\
 Then run an experiment (Tip: Start with HelloNeighbor. FloorEstimation is not implemented currently))
 
 ```

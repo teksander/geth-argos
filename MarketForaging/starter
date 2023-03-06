@@ -1,11 +1,14 @@
 #!/bin/bash
-# Start an experiment
+# Starts an experiment
+#
 # Options:
 # --reset    or -r  : will reset everything blockchain related
 # --start    or -s  : will start the experiment
 # --startz   or -sz : will start with no visualization
 # --logs     or -l  : will display monitor.log for all robots
 # --python   or -p  : will display python console for all robots
+# Example: 
+# . starter -r -s -l -p
 
 source experimentconfig.sh
 
@@ -16,23 +19,6 @@ echo "+-----------------------------------------------------------+"
 echo "Updating the ARGoS XML file"
 
 envsubst < $ARGOSTEMPLATE > $ARGOSFILE
-
-# # Keeping this for now: use this sed to replace an old version argos file to a new one.
-# sed -i -e "s|NUMROBOTS|\${NUMROBOTS}|g"\
-#     -e "s|WHEELNOISE|\${WHEELNOISE}|g"\
-#     -e "s|CON1|\${CON1}|g"\
-#     -e "s|CON2|\${CON2}|g"\
-#     -e "s|NUM1|\${NUM1}|g"\
-#     -e "s|NUM2|\${NUM2}|g"\
-#     -e "s|STARTDIM|\${STARTDIM}|g"\
-#     -e "s|TPS|\${TPS}|g"\
-#     -e "s|RABRANGE|\${RABRANGE}|g"\
-#     -e "s|NUMBYZANTINE|\${NUMBYZANTINE}|g"\
-#     -e "s|EXPERIMENTFOLDER|\${EXPERIMENTFOLDER}|g"\
-#     -e "s|FLOORFILE|\${FLOORFILE}|g"\
-#     -e "s|ARGOSFOLDER|\${ARGOSFOLDER}|g"\
-#     -e "s|ARENADIM|\${ARENADIM}|g"\
-#   $ARGOSTEMPLATE 
 
 for opt in "$@"
 do
@@ -45,7 +31,7 @@ fi
 done
 
 echo "+-----------------------------------------------------------+"
-echo "Waiting web3 to respond..."
+echo "Waiting for web3 to respond..."
 
 ready=0
 while [[ $ready != $NUMROBOTS ]]; do
@@ -56,32 +42,28 @@ done
 echo "+-----------------------------------------------------------+"
 echo "Cleaning logs folder..."
 
-# Keep files 0-$NUMROBOTS in order to prevent having to reopen logs
 eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
 
+echo "+-----------------------------------------------------------+"
+echo "Starting Experiment"
 
-for opt in "$@"
-do
-if [[ $opt == "--start" || $opt == "-s" ]]; then
-    echo "+-----------------------------------------------------------+"
-    echo "Starting Experiment-GUI"
-
-    argos3 -c $ARGOSFILE
-fi
-
-if [[ $opt == "--start-novis" || $opt == "-sz" ]]; then
-    echo "+-----------------------------------------------------------+"
-    echo "Starting Experiment"
-
-    argos3 -z -c $ARGOSFILE
-fi
-
+for opt in "$@"; do
 if [[ $opt == "--logs" || $opt == "-l" ]]; then
     ./tmux-all -l monitor.log
 fi
 
 if [[ $opt == "--python" || $opt == "-p" ]]; then
     ./tmux-all -s python
+fi
+done
+
+for opt in "$@"; do
+if [[ $opt == "--start" || $opt == "-s" ]]; then
+    argos3 -c $ARGOSFILE
+fi
+
+if [[ $opt == "--start-novis" || $opt == "-sz" ]]; then
+    argos3 -z -c $ARGOSFILE
 fi
 done
 
