@@ -37,7 +37,7 @@ for ID in "${TARGETS[@]}"; do
 done
 }
 
-if [[ "$SCRIPT" = "addPeers" ]]; then 
+if [[ "$SCRIPT" = "add-all-peers" ]]; then 
 
     echo "Executing custom script: addPeers"
 

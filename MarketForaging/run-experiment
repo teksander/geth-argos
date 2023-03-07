@@ -1,21 +1,28 @@
 #!/bin/bash
 # Iterate over experimental settings and start experiments
 source experimentconfig.sh
+
 DATAFOLDER="$EXPERIMENTFOLDER/results/data"
 
 ##################################################################################
+### Set a value for any parameter in experimentconfig.sh
+### USAGE:   config "parameter" value
 ### EXAMPLE: config "NUMROBOTS" 10 
 config() {
 	sed -i "s/^export ${1}=.*/export ${1}=${2}/" experimentconfig.sh
 }
 
 ##################################################################################
+### Set a value for any parameter in the loop_params.py dictionaries
+### USAGE:   loopconfig "dictionary" "parameter" value
 ### EXAMPLE: loopconfig "patches" "radius" 0.05 
 loopconfig() {
 	sed -i "/\['${1}'\]\['${2}'\]/ s/=.*/= ${3}/" loop_functions/loop_params.py
 }
 
 ##################################################################################
+### Copy a configuration from a previously run experiment in the results folder.
+### USAGE:   copy "experimentName/configName"
 ### EXAMPLE: copy "test116_patchy/20_blockchain1"
 copy() {
 	# Collect the config from results
@@ -25,6 +32,8 @@ copy() {
 }
 
 ##################################################################################
+### Copy a configuration from a previously run experiment in a remote server.
+### USAGE:   import "experimentName/configName"
 ### EXAMPLE: import "test116_patchy/20_blockchain1"
 import() {
 	# Collect the config from results
@@ -39,6 +48,8 @@ import() {
 }
 
 ##################################################################################
+### Run an experiment for the number of repetitions given in experimentconfig.sh
+### USAGE:   run "experimentName/configName"
 ### EXAMPLE: run "test116_patchy/20_blockchain1"
 run() {
 
@@ -76,7 +87,7 @@ config "LIMITASSIGN" 50
 config "NOTES" "\"Testing maxload 12 and resource params; limassign vs no limassign; regen 5 vs regen 10\""
 
 wait
-run    "${EXP}/${CFG}" $1
+run    "${EXP}/${CFG}"
 
 
 CFG=linear_20_limassign_0_regen_10
@@ -84,7 +95,7 @@ config "LIMITASSIGN" 0
 config "NOTES" "\"Testing maxload 12 and new resource regen/forage; limassign 50 vs limassign 0; regen 5 vs regen 10\""
 
 wait
-run    "${EXP}/${CFG}" $1
+run    "${EXP}/${CFG}"
 
 
 
