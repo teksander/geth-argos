@@ -8,6 +8,7 @@
 # -t list of robot IDs to bash (string, e.g. "1 2 3 4")
 # -s script to be executed     (string, bash, geth, python. Default: bash)
 
+source experimentconfig.sh
 
 NUM_ROB=$(docker ps | grep ${CONTAINERBASE}. | wc -l) 
 TARGETS=($(seq 1 $NUM_ROB))
@@ -32,7 +33,7 @@ done
 bash_ALL(){
 for ID in "${TARGETS[@]}"; do
     CT=$(docker ps -q -f name="${CONTAINERBASE}.${ID}\.")
-    echo "----------------------- Robot $ID -----------------------"
+    echo "-------------- Robot $ID @ $CT  --------------"
     docker exec -it $CT ${1}
 done
 }
@@ -47,6 +48,9 @@ if [[ "$SCRIPT" = "addPeers" ]]; then
         ./geth-all "admin.addPeer(\"$enode\")"
     done
     rm temp.txt
+
+elif [[ "$SCRIPT" = "" ]]; then 
+    echo "Please give script as option [-s]"
 
 else  
     echo "Executing script: $SCRIPT"

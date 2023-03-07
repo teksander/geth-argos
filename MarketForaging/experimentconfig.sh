@@ -5,6 +5,7 @@ export DOCKERFOLDER="$MAINFOLDER/argos-blockchain-sm"
 export ARGOSFOLDER="$MAINFOLDER/argos-python"
 export EXPERIMENTFOLDER="$MAINFOLDER/MarketForaging"
 export BLOCKCHAINPATH="$HOMEFOLDER/eth_data_para/data"
+[[ ":$PATH:" != *":$MAINFOLDER/scripts:"* ]] && export PATH=$PATH:$MAINFOLDER/scripts
 
 # [FILES]
 export ARGOSNAME="market-foraging"
