@@ -18,6 +18,7 @@ sed -e "s|DIMS|$DIMS|g"\
     -e "s|MINREP|$MINREP|g"\
     -e "s|RADIUS|$RADIUS|g"\
     -e "s|MINBALANCE|$MINBALANCE|g"\
+    -e "s|MAXUNVCLUSTER|$MAXUNVCLUSTER|g"\
   $SCTEMPLATE > $SCFILE
 
 <<<<<<< HEAD

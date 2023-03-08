@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="634024c7-80af-4f87-8b06-c52c8b3b855c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FraudForaging/results/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/results/notebook.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/argos-python" beforeDir="false" afterPath="$PROJECT_DIR$/argos-python" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/argos-python/py_actusensor_wrapper_epuck.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/argos-python/py_actusensor_wrapper_epuck.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/argos-python/py_actusensor_wrapper_epuck.h" beforeDir="false" afterPath="$PROJECT_DIR$/argos-python/py_actusensor_wrapper_epuck.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/argos-python/py_qtuser_function.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/argos-python/py_qtuser_function.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/argos-python/py_wrapper.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/argos-python/py_wrapper.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/argos-python/py_wrapper.h" beforeDir="false" afterPath="$PROJECT_DIR$/argos-python/py_wrapper.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging/reset-geth" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging/reset-geth" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging3D/experimentconfig.sh" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging3D/experimentconfig.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging3D/experiments/market-foraging.argos" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging3D/experiments/market-foraging.argos" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging3D/reset-geth" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging3D/reset-geth" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging3D/run-experiment" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging3D/run-experiment" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging3D/scs/kmeans_estimation_3D.sol" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging3D/scs/kmeans_estimation_3D.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FraudForaging3D/scs/kmeans_estimation_3D.x.sol" beforeDir="false" afterPath="$PROJECT_DIR$/FraudForaging3D/scs/kmeans_estimation_3D.x.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,7 +27,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/argos-python" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$USER_HOME$/.local/lib/python3.8/site-packages/rpyc/core/stream.py" root0="SKIP_INSPECTION" />
@@ -45,16 +48,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/hzhao/gnn_fdd_project/fraud_detetction_GNN&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/home/ubuntu/blockchain_robots_b/geth-argos",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/FraudForaging/experiments_log" />
@@ -168,6 +176,7 @@
       <workItem from="1658250137375" duration="3509000" />
       <workItem from="1659386025673" duration="599000" />
       <workItem from="1659662950217" duration="46000" />
+      <workItem from="1678280612229" duration="5736000" />
     </task>
     <servers />
   </component>

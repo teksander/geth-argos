@@ -6,6 +6,9 @@ if [ $USER == "eksander" ]; then
 
 elif [ $USER == "hzhao" ]; then
 	export MAINFOLDER="$HOME/blockchain-robots/geth-argos"
+
+elif [ $USER == "ubuntu" ]; then
+	export MAINFOLDER="$HOME/blockchain_robots_b/geth-argos"
 fi
 
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain-sm"
@@ -64,7 +67,9 @@ export MAXLIFE=5
 export MINREP=15
 export RADIUS=10000 # 0.1
 export DECIMAL_FACTOR=100000 # 1e5
-export MINBALANCE=28000000000000000000
+export MAXUNVCLUSTER=3
+# shellcheck disable=SC2155
+export MINBALANCE=$(echo "200000000000000000000/$MAXUNVCLUSTER" | bc)
 #export MINBALANCE=0
 
 # [OTHER]
