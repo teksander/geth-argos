@@ -10,8 +10,8 @@ export BLOCKCHAINPATH="$HOMEFOLDER/eth_data_para/data"
 # [FILES]
 export ARGOSNAME="market-foraging"
 export GENESISNAME="genesis_poa"
-export CONTRACTNAME="MarketForaging"
-export SCNAME="resource_market_demand_firm"
+export CONTRACTNAME="FederatedLearning"
+export SCNAME="FederatedLearning"
 
 export GENESISFILE="${DOCKERFOLDER}/geth/files/$GENESISNAME.json"
 export CONTRACTADDRESS="${EXPERIMENTFOLDER}/scs/contractAddress.txt"
@@ -65,7 +65,7 @@ export WINSIZE=5
 export SEED=1500
 export TIMELIMIT=100
 export SLEEPTIME=5
-export REPS=4
+export REPS=10
 export NOTES=""
 
 

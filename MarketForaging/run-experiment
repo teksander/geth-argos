@@ -78,24 +78,26 @@ run() {
 }
 
 
+# DEFINE EXPERIMENT
+EXP=210
+config "REPS" 10
 
-EXP=208
-config "REPS" 3
-
-CFG=linear_20_limassign_50_regen_10
-config "LIMITASSIGN" 50
+# DEFINE CONFIGURATION 1
+CFG=linear_20
+config "LIMITASSIGN" 20
 config "NOTES" "\"Testing maxload 12 and resource params; limassign vs no limassign; regen 5 vs regen 10\""
 
 wait
 run    "${EXP}/${CFG}"
 
 
-CFG=linear_20_limassign_0_regen_10
-config "LIMITASSIGN" 0
-config "NOTES" "\"Testing maxload 12 and new resource regen/forage; limassign 50 vs limassign 0; regen 5 vs regen 10\""
+# DEFINE CONFIGURATION 1
+# CFG=linear_20_limassign_0_regen_10
+# config "LIMITASSIGN" 0
+# config "NOTES" "\"Testing maxload 12 and new resource regen/forage; limassign 50 vs limassign 0; regen 5 vs regen 10\""
 
-wait
-run    "${EXP}/${CFG}"
+# wait
+# run    "${EXP}/${CFG}"
 
 
 
