@@ -34,7 +34,7 @@ def init():
 
 		stone_list.append((x, y))
 
-def DrawInWorld():
+def draw_in_world():
 
 	# Draw home
 	rh = params['home']['radius']
@@ -55,6 +55,9 @@ def DrawInWorld():
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_target[0], pos[1] + vec_target[1] , 0.01], 'red', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_avoid[0], pos[1] + vec_avoid[1] , 0.01], 'blue', 0.15)
 				environment.qt_draw.ray([pos[0], pos[1] , 0.01],[pos[0] + vec_desired[0], pos[1] + vec_desired[1] , 0.01], 'green', 0.15)
+
+def draw_in_robot():
+	pass
 
 def destroy():
 	print('Closing the QT window')

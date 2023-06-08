@@ -248,7 +248,7 @@ class Transaction(object):
 ####################################################################################################################################################################################
 def init():
     global clocks, submodules, counters, logs, me, rw, nav, odo, rb, w3, fsm, rs, erb, tcp, rgb
-    robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
+    robotID = str(int(robot.variables.get_id()[2:])+1)
     robotIP = identifersExtract(robotID, 'IP')
     
     robot.variables.set_attribute("newResource", "")
@@ -362,55 +362,31 @@ def controlstep():
 
     else:
 
-        ##########################
-        #### SUB-MODULE STEPS ####
-        ##########################
-
-        for module in [erb, rs, odo]:
-            module.step()
-
-        ##########################
-        #### LOG-MODULE STEPS ####
-        ##########################
-
-        if logs['resources'].queryTimer():
-            logs['resources'].log([len(rb)])
-
-        if logs['odometry'].queryTimer():
-            logs['odometry'].log([odo.getNew()])
-
-        ###########################
-        #### MAIN-MODULE STEPS ####
-        ###########################
-        gethPeers_count = 0
-        if clocks['buffer'].query(): 
-
-            peer_IPs = dict()
-            peers = erb.getNew()
-            for peer in peers:
-                peer_IPs[peer] = identifersExtract(peer, 'IP_DOCKER')
-
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((me.ip, 9898))
-                s.sendall(str(peer_IPs).encode())
-                data = s.recv(1024)
-                gethPeers_count = int(data)
-
-             # Turn on LEDs according to geth Peers
-            if gethPeers_count == 0: 
-                rgb.setLED(rgb.all, 3* ['black'])
-            elif gethPeers_count == 1:
-                rgb.setLED(rgb.all, ['red', 'black', 'black'])
-            elif gethPeers_count == 2:
-                rgb.setLED(rgb.all, ['red', 'black', 'red'])
-            elif gethPeers_count > 2:
-                rgb.setLED(rgb.all, 3*['red'])
-
-        ##############################
-        #### STATE-MACHINE STEPS ####
-        ##############################
-
         # Routines to be used in state machine steps:
+        def peering():
+            global geth_peer_count
+            geth_peer_count = 0
+            if clocks['peering'].query(): 
+
+                peer_IPs = dict()
+                for peer in erb.peers:
+                    peer_IPs[peer.id] = identifiersExtract(peer.id, 'IP_DOCKER')
+
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((me.ip, 9898))
+                    s.sendall(str(peer_IPs).encode())
+                    data = s.recv(1024)
+                    geth_peer_count = int(data)
+
+                 # Turn on LEDs according to geth Peers
+                if geth_peer_count == 0: 
+                    rgb.setLED(rgb.all, 3* ['black'])
+                elif geth_peer_count == 1:
+                    rgb.setLED(rgb.all, ['red', 'black', 'black'])
+                elif geth_peer_count == 2:
+                    rgb.setLED(rgb.all, ['red', 'black', 'red'])
+                elif geth_peer_count > 2:
+                    rgb.setLED(rgb.all, 3*['red'])
 
         def homing(to_drop = False):
             # Navigate to the market
@@ -442,6 +418,30 @@ def controlstep():
                 if resource:
                     rb.addResource(resource)
                     return resource
+
+        ##############################
+        #### STATE-MACHINE STEPS #####
+        ##############################
+
+        #########################################################################################################
+        #### State::EVERY
+        #########################################################################################################
+        
+        # Perform submodules step
+        for module in [erb, rs, odo]:
+            module.step()
+
+        # Perform file logging step
+        if logs['resources'].queryTimer():
+            logs['resources'].log([len(rb)])
+
+        if logs['odometry'].queryTimer():
+            logs['odometry'].log([odo.getNew()])
+
+
+        # Perform the blockchain peering step
+        peering()
+
 
         #########################################################################################################
         #### Idle.IDLE
