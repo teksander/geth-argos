@@ -15,7 +15,7 @@ echo "+-----------------------------------------------------------+"
 echo "Compiling the Smart Contract"
 
 # Compile smart contract
-solc --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCFILE
+solc --evm-version berlin --overwrite --abi --bin-runtime -o  "${EXPERIMENTFOLDER}/scs/build/" $SCFILE
 cp -r "${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.bin-runtime" "${DOCKERFOLDER}/geth/contracts/deploy.bin-runtime"
 cp -r "${EXPERIMENTFOLDER}/scs/build/$CONTRACTNAME.abi" "${DOCKERFOLDER}/geth/contracts/deploy.abi"
 
