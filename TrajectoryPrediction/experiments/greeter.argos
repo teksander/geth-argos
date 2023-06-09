@@ -1,0 +1,169 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <experiment threads="1" length="0" ticks_per_second="10" real_time="true" />
+  </framework>
+
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+
+   
+    <python_controller id="con1" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
+      <!-- Normal actuator/sensor configuration follows -->
+      <actuators>
+        <epuck_rgb_leds implementation="default" medium="leds" />
+        <epuck_wheels implementation="default" noise_std_dev="0"/>
+        <epuck_range_and_bearing implementation="medium" range="2" />
+      </actuators>
+      <sensors>
+        <positioning implementation="default" />
+        <epuck_proximity implementation="default" show_rays="true" />
+        <epuck_ground implementation="rot_z_only" />
+        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true" rab_range="2" noise_std_dev="0.01"/>
+        <differential_steering implementation="default"/>
+      </sensors>
+      <!-- No required configuration -->
+      
+      <!-- Optionally, you can pass a script as a controller parameter: -->
+      <params script="/home/eksander/geth-argos/TrajectoryPrediction/controllers/main.py" timeRate="1" velocity="5"/>
+    </python_controller>
+
+    <python_controller id="con2" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
+      <!-- Normal actuator/sensor configuration follows -->
+      <actuators>
+        <epuck_rgb_leds implementation="default" medium="leds" />
+        <epuck_wheels implementation="default" noise_std_dev="0"/>
+        <epuck_range_and_bearing implementation="medium" range="2" />
+      </actuators>
+      <sensors>
+        <positioning implementation="default" />
+        <epuck_proximity implementation="default" show_rays="true" />
+        <epuck_ground implementation="rot_z_only" />
+        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true" rab_range="2" noise_std_dev="0.01"/>
+        <differential_steering implementation="default"/>
+      </sensors>
+      <!-- No required configuration -->
+      
+      <!-- Optionally, you can pass a script as a controller parameter: -->
+      <params script="/home/eksander/geth-argos/TrajectoryPrediction/controllers/main_byzantine.py" timeRate="1" velocity="5"/>
+    </python_controller>
+
+  </controllers>
+  <loop_functions library="/home/eksander/geth-argos/argos-python/build/libpy_loop_function_interface.so"
+                  label="py_loop_function">
+    <params script="/home/eksander/geth-argos/TrajectoryPrediction/loop_functions/loop_function.py"/>
+  </loop_functions>
+  
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="5, 5, 1" center="0,0,0.5">
+
+ <floor id="f" source="image" path="/home/eksander/geth-argos/TrajectoryPrediction/experiments/floors/market.png" />
+
+    <box id="wall_north" size="5,0.06,0.1" movable="false">
+      <body position="0,2,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_south" size="5,0.06,0.1" movable="false">
+      <body position="0,-2,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_east" size="0.06,5,0.1" movable="false">
+      <body position="2,0,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_west" size="0.06,5,0.1" movable="false">
+      <body position="-2,0,0" orientation="0,0,0" />
+    </box>
+
+     <distribute>
+      <position method="uniform" min="-2.000,-2.000,0" max="2.000,2.000,0" /> 
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
+      <entity quantity="15" max_trials="15"> 
+        <e-puck id="bc" >
+          <controller config="con1" />
+        </e-puck>
+      </entity> 
+    </distribute>
+
+    <distribute>
+      <position method="uniform" min="-2.000,-2.000,0" max="2.000,2.000,0" /> 
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
+      <entity quantity="0" max_trials="15" base_num="15"> 
+        <e-puck id="bc" >
+          <controller config="con2"/>
+        </e-puck>
+      </entity> 
+    </distribute>
+
+    <!--
+        We distribute 5 boxes uniformly in position and rotation around Z.
+    -->
+    <distribute>
+      <position method="uniform" min="-1.5,-1.5,0"  max="1.5,1.5,0" />
+      <orientation method="uniform" min="0,0,0" max="360,0,0" />
+      <entity quantity="5" max_trials="100">
+        <box id="b" size="0.3,0.3,0.5" movable="false" />
+      </entity>
+    </distribute>
+
+    <!--
+        We distribute cylinders uniformly in position and with
+        constant rotation (rotating a cylinder around Z does not
+        matter)
+    -->
+    <distribute>
+      <position method="uniform" min="-1.5,-1.5,0" max="1.5,1.5,0" />
+      <orientation method="constant" values="0,0,0" />
+      <entity quantity="5" max_trials="100">
+        <cylinder id="c" height="0.5" radius="0.15" movable="false" />
+      </entity>
+    </distribute>
+
+
+
+  </arena>
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <range_and_bearing id="rab" index="grid" grid_size="1,1,1" />
+    <led id="leds" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+
+    <!-- ************************************************************************ -->
+    <!-- * To activate the Lua editor, just use the 'lua_editor' flag attribute * -->
+    <!-- ************************************************************************ -->
+    <qt-opengl autoplay="true">
+      <!--<user_functions library="/home/eksander/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
+                      label="py_qtuser_function" >
+      <params script="/home/eksander/geth-argos/TrajectoryPrediction/loop_functions/qtuser_function.py"/>
+      </user_functions> -->
+      <camera>
+        <placements>
+        <placement index="0" position="0,0,8" up="1,0,0" look_at="0,0,0" lens_focal_length="50" />
+        <placement index="1" position="0,0,1.5" up="1,0,0" look_at="0,0,0" lens_focal_length="20" />
+      </placements>
+      </camera>
+    </qt-opengl>
+
+  </visualization>
+
+</argos-configuration>

@@ -1,0 +1,89 @@
+#!/bin/bash
+# Start an experiment
+# Options:
+# --reset    or -r  : will reset everything blockchain related
+# --start    or -s  : will start the experiment
+# --startz   or -sz : will start the experiment with no gui
+# --logs     or -l  : will display monitor.log for all robots
+# --python   or -p  : will display python console for all robots
+
+source experimentconfig.sh
+
+echo "+-----------------------------------------------------------+"
+echo "MAINFOLDER IS $MAINFOLDER"
+
+echo "+-----------------------------------------------------------+"
+echo "Updating the ARGoS XML file"
+
+envsubst < $ARGOSTEMPLATE > $ARGOSFILE
+
+echo "+-----------------------------------------------------------+"
+echo "Resetting Geth..."
+
+for opt in "$@"; do
+echo $opt
+done
+
+for opt in "$@"; do
+if [[ $opt == "--reset" || $opt == "-r" ]]; then
+    ./reset-geth
+fi
+done
+
+echo "+-----------------------------------------------------------+"
+echo "Waiting for web3 to respond..."
+
+ready=0
+while [[ $ready != $NUMROBOTS ]]; do
+    . test-tcp 4000 9898 9899
+    sleep 0.5
+done
+
+echo "+-----------------------------------------------------------+"
+echo "Cleaning logs folder..."
+
+eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
+
+echo "+-----------------------------------------------------------+"
+echo "Deleting all previous logs sebway"
+
+rm -r logs/*
+
+
+echo "+-----------------------------------------------------------+"
+echo "Launching server"
+
+for opt in "$@"; do
+if [[ $opt == "--server" || $opt == "-sv" ]]; then
+    gnome-terminal -- python3 $SERVERFILE
+fi
+done
+
+echo "+-----------------------------------------------------------+"
+echo "Starting Experiment"
+
+for opt in "$@"; do
+if [[ $opt == "--logs" || $opt == "-l" ]]; then
+    ./tmux-all -l monitor.log
+fi
+
+if [[ $opt == "--python" || $opt == "-p" ]]; then
+    ./tmux-all -s python
+fi
+done
+
+
+
+for opt in "$@"; do
+if [[ $opt == "--start" || $opt == "-s" ]]; then
+    argos3 -c $ARGOSFILE
+fi
+
+
+if [[ $opt == "--start-novis" || $opt == "-sz" ]]; then
+    argos3 -z -c $ARGOSFILE
+fi
+done
+
+
+
