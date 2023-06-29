@@ -1,0 +1,125 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="1" method="balance_quantity" />
+    <experiment length="0"
+                ticks_per_second="${TPS}"
+                real_time="true"/>
+  </framework>
+
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <python_controller id="blockchain" library="${ARGOSFOLDER}/build/libpy_controller_interface.so">
+      <actuators>
+        <epuck_rgb_leds implementation="default" medium="leds" />
+        <epuck_wheels implementation="default" />
+        <epuck_range_and_bearing implementation="medium" range="${RABRANGE}"/>
+      </actuators>
+      <sensors>
+        <positioning implementation="default" />
+        <epuck_proximity implementation="default" show_rays="false" />
+        <epuck_ground implementation="rot_z_only" />
+        <differential_steering implementation="default" bias_stddev="2" />
+        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="false"/>
+        <colored_blob_omnidirectional_camera implementation="rot_z_only" medium="resources" show_rays="false"/>
+      </sensors>
+      <params script="${CONTROLLER}"
+              timeRate="1" />
+    </python_controller>
+  </controllers>
+
+  <loop_functions library="${ARGOSFOLDER}/build/libpy_loop_function_interface.so"
+                  label="py_loop_function">
+    <params script="${EXPERIMENTFOLDER}/loop_functions/loop_function.py"/>
+  </loop_functions>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="${ARENASIZE}, ${ARENASIZE}, 1" center="0,0,0.5">
+    <floor id="f" source="image" path="${EXPERIMENTFOLDER}/experiments/floors/white.png" />
+
+<box id="AB" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
+  <body position="${xAB},${yAB},0" orientation="0,0,0" />
+</box>
+<box id="AC" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
+  <body position="${xAC},${yAC},0" orientation="60,0,0" />
+</box>
+<box id="BC" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
+  <body position="${xBC},${yBC},0" orientation="120,0,0" />
+</box>
+
+    <distribute>
+      <position method="uniform" min="-${SPAWNSIZE},-${SPAWNSIZE},0" max="${SPAWNSIZE},${SPAWNSIZE},0" /> 
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
+      <entity quantity="${NUMROBOTS}" max_trials="15" base_num="1">
+        <e-puck id="bc">
+          <controller config="blockchain" />
+        </e-puck>
+      </entity> 
+    </distribute>
+
+    <light id="light_A"
+           position="${xA},${yA},0.05"
+           orientation="0,0,0"
+           color="red"
+           intensity="1"
+           medium="resources" />
+
+    <light id="light_B"
+           position="${xB},${yB},0.05"
+           orientation="0,0,0"
+           color="green"
+           intensity="1"
+           medium="resources" />
+
+    <light id="light_C"
+           position="${xC},${yC},0.05"
+           orientation="0,0,0"
+           color="blue"
+           intensity="1"
+           medium="resources" />
+
+  </arena>
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <range_and_bearing id="rab" index="grid" grid_size="1,1,1" />
+    <led id="leds" />
+    <led id="resources"/>
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+    <qt-opengl autoplay="true">
+      <user_functions library="${ARGOSFOLDER}/build/libpy_qtuser_function_interface.so"
+                      label="py_qtuser_function" >
+      <params script="${EXPERIMENTFOLDER}/loop_functions/qtuser_function.py"/>
+      </user_functions>
+    <camera>
+      <placements>
+        <placement index="0" position="0,-3,3" up="0,1,0" look_at="0,0,0" lens_focal_length="30" />
+        <placement index="1" position="0,0,1.5" up="1,0,0" look_at="0,0,0" lens_focal_length="20" />
+      </placements>
+    </camera>
+    </qt-opengl>
+  </visualization>
+
+</argos-configuration>
