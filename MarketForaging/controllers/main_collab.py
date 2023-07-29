@@ -50,6 +50,8 @@ cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['c
 global geth_peer_count
 previous_epoch_num = -1
 
+global robot
+
 class ResourceBuffer(object):
     """ Establish the resource buffer class 
     """
@@ -387,29 +389,22 @@ def controlstep():
         ###########################
 
         def peering():
-            global geth_peer_count
-            geth_peer_count = 0
-            if clocks['peering'].query(): 
+            global peer_count        
+            peer_count = 0
 
-                peer_IPs = dict()
-                for peer in erb.peers:
-                    peer_IPs[peer.id] = identifiersExtract(peer.id, 'IP_DOCKER')
+            # Get the current peer from erb
+            peer_IPs = dict()
+            for peer in erb.peers:
+                peer_IPs[peer.id] = identifiersExtract(peer.id, 'IP_DOCKER')
 
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.connect((me.ip, 9898))
-                    s.sendall(str(peer_IPs).encode())
-                    data = s.recv(1024)
-                    geth_peer_count = int(data)
+            # Send peers to docker and receive geth peer count
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((me.ip, 9898))
+                s.sendall(str(peer_IPs).encode())
+                peer_count = int(s.recv(1024))
 
-                 # Turn on LEDs according to geth Peers
-                if geth_peer_count == 0: 
-                    rgb.setLED(rgb.all, 3* ['black'])
-                elif geth_peer_count == 1:
-                    rgb.setLED(rgb.all, ['red', 'black', 'black'])
-                elif geth_peer_count == 2:
-                    rgb.setLED(rgb.all, ['red', 'black', 'red'])
-                elif geth_peer_count > 2:
-                    rgb.setLED(rgb.all, 3*['red'])
+            # Turn on LEDs according to geth peer count
+            rgb.setLED(rgb.all, rgb.presets.get(peer_count, 3 * ['red']))
 
         def homing():
 
@@ -419,7 +414,7 @@ def controlstep():
             if nav.get_distance_to(market._pr) < 0.9*market.radius:           
                 nav.avoid(move = True)
                 
-            elif nav.get_distance_to(market._pr) < market.radius and geth_peer_count > 1:
+            elif nav.get_distance_to(market._pr) < market.radius and peer_count > 1:
                 nav.avoid(move = True)
 
             else:
@@ -502,8 +497,9 @@ def controlstep():
 
         robot.variables.set_attribute("odo_position",repr(odo.getPosition()))
 
-        # Perform the blockchain peering step
-        peering()
+        if clocks['peering'].query():
+            peering()
+
 
         # Get perfect position if at nest
         if robot.variables.get_attribute("at") == "cache":

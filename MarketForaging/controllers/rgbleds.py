@@ -21,6 +21,12 @@ class RGBLEDs(object):
         self.off = 'black'
         self.white = 'white'
 
+        self.presets = {
+                        0: ['black', 'black', 'black'],
+                        1: ['red', 'black', 'black'],
+                        2: ['red', 'black', 'red']
+                        }
+        
         self.frozen = False
 
     def setLED(self, LED, RGB):

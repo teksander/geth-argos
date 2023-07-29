@@ -20,6 +20,16 @@ echo "Updating the ARGoS XML file"
 
 envsubst < $ARGOSTEMPLATE > $ARGOSFILE
 
+echo "+-----------------------------------------------------------+"
+echo "Sending python scripts"
+cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
+
+echo "+-----------------------------------------------------------+"
+echo "Cleaning logs folder..."
+
+eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
+
+
 for opt in "$@"
 do
 if [[ $opt == "--reset" || $opt == "-r" ]]; then
@@ -38,11 +48,6 @@ while [[ $ready != $NUMROBOTS ]]; do
     . test-tcp 4000
     sleep 0.5
 done
-
-echo "+-----------------------------------------------------------+"
-echo "Cleaning logs folder..."
-
-eval $(echo "rm -rf logs/{$(($NUMROBOTS+1))..100}")
 
 echo "+-----------------------------------------------------------+"
 echo "Starting Experiment"

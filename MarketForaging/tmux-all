@@ -23,7 +23,7 @@ tmux_ALL() {
 	done
 
 	# Open the terminal and configure it to execute docker bash
-	gnome-terminal --tab --title="$1" -- tmux new -s $1 docker exec -it "${ALL_CTS[0]}" /bin/bash ';' \
+	gnome-terminal --geometry="$geom" --tab --title="$1" -- tmux new -s $1 docker exec -it "${ALL_CTS[0]}" /bin/bash ';' \
 	    "${split_list[@]}" \
 	    set-option -w synchronize-panes ';' \
 		select-layout tiled ';' 
@@ -38,7 +38,7 @@ tmux_ALL_logs() {
 	done
 
 	# Open the terminal and configure it to tail log files
-	gnome-terminal --tab --title="$1" -- tmux new -s $1 tail -f "${EXPERIMENTFOLDER}"/logs/"1"/"$2"  ';' \
+	gnome-terminal --geometry="$geom" --tab --title="$1" -- tmux new -s $1 tail -f "${EXPERIMENTFOLDER}"/logs/"1"/"$2"  ';' \
 	    "${split_list[@]}" \
 	    set-option -w synchronize-panes ';' \
 		select-layout tiled ';' 
@@ -53,7 +53,7 @@ tmux_ALL_geth_logs() {
 	done
 
 	# Open the terminal and configure it to tail the docker logs
-	gnome-terminal  --tab --title="$1" -- tmux new -s $1 docker logs --tail 2000 --follow "${ALL_CTS[0]}"  ';' \
+	gnome-terminal --geometry="$geom" --tab --title="$1" -- tmux new -s $1 docker logs --tail 2000 --follow "${ALL_CTS[0]}"  ';' \
 	    "${split_list[@]}" \
 	    set-option -w synchronize-panes ';' \
 		select-layout tiled ';' 
@@ -62,8 +62,8 @@ tmux_ALL_geth_logs() {
 # Define the terminal geometry (larger if there are many robots)
 geom="default"
 if [ $NUMROBOTS -gt 8 ]; then
-	geomX=$(( $NUMROBOTS*8 ))
-	geomY=$(( $NUMROBOTS*5 ))
+	geomX=$(( $NUMROBOTS*15 ))
+	geomY=$(( $NUMROBOTS*3 ))
 	geom="${geomX}x${geomY}"
 fi
 
