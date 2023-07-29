@@ -35,7 +35,7 @@ echo "Waiting web3 to respond..."
 
 ready=0
 while [[ $ready != $NUMROBOTS ]]; do
-    . test-tcp 4000
+    . test-tcp 4000 9899
     sleep 0.5
 done
 

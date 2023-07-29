@@ -14,9 +14,9 @@ sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
 
 from loop_function_params import params as lp
 from helpers import *
-from aux import Vector2D, Logger, getRAMPercent, getCPUPercent, mydict, Timer, Accumulator
-from groundsensor import Resource
-from controller_params import *
+from controllers.aux import Vector2D, Logger, getRAMPercent, getCPUPercent, mydict, Timer, Accumulator
+from controllers.groundsensor import Resource
+from controllers.controller_params import params as cp
 
 random.seed(lp['generic']['seed'])
 
@@ -29,6 +29,7 @@ open(rays_file, 'w+').close()
 
 # /* Global Variables */
 #######################################################################
+global allrobots
 
 # Other inits
 global startFlag, startTime

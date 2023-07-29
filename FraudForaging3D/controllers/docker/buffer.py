@@ -124,11 +124,13 @@ if __name__ == '__main__':
 
     tcp_calls = TCP_mp(data, host, port)
     tcp_calls.start()
+
+    point_keys = sc.functions.getPointKeys().call()
+    cluster_keys = sc.functions.getClusterKeys().call()
     scHandle()
 
 ################################################################################################################
-    point_keys = sc.functions.getPointKeys().call()
-    cluster_keys = sc.functions.getClusterKeys().call()
+
 
     while True:
 

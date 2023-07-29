@@ -11,12 +11,13 @@ sys.path.insert(1, experimentFolder+'/controllers')
 sys.path.insert(1, experimentFolder+'/loop_functions')
 sys.path.insert(1, experimentFolder)
 
-from loop_function_params import params as lp
-from controller_params import *
+from loop_functions.loop_function_params import params as lp
+from controllers.controller_params import params as cp
 
 # /* Global Variables */
 #######################################################################
-    
+global robot, environment
+
 def init():
 	pass
 

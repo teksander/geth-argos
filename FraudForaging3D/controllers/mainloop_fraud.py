@@ -14,6 +14,7 @@ from controllers.console import init_web3
 from controllers.aux import Peer, Logger, Transaction, Timer, TCP_mp, identifiersExtract, print_color, update_formater
 from controllers.statemachine import *
 from controllers.controller_params import *
+from controllers.controller_params import params as cp
 
 from loop_functions.loop_function_params import params, generic_params
 
@@ -30,8 +31,8 @@ logfolder = os.environ["EXPERIMENTFOLDER"] + '/logs/'
 erbDist = 60
 erbtFreq = 10
 gsFreq = 20
-rwSpeed = controller_params['scout_speed']
-navSpeed = controller_params['recruit_speed']
+rwSpeed = cp['scout_speed']
+navSpeed = cp['recruit_speed']
 
 num_honest = int(os.environ["NUM1A"])
 num_faulty = int(os.environ["NUM1B"])
@@ -113,12 +114,26 @@ def init():
 
     # Set the level and add the file handler to the 'main' logger    
     # robot.log.addHandler(file_handler)
-    
-    
+    # import logging.handlers
+    # f = logging.Formatter(fmt=f'[{robotID} %(levelname)s %(name)s] %(message)s')
+    # handlers = [
+    #     logging.handlers.RotatingFileHandler('rotated.log', encoding='utf8',
+    #         maxBytes=100000, backupCount=1),
+    #     logging.StreamHandler()
+    # ]
+    # root_logger = logging.getLogger()
+    # root_logger.setLevel(logging.DEBUG)
+    # for h in handlers:
+    #     h.setFormatter(f)
+    #     h.setLevel(logging.DEBUG)
+    #     root_logger.addHandler(h)
+    #     logging.getLogger().handlers = []
+    # robot.log = root_logger
+
     robot.log = logging.getLogger('main')
-    update_formater(robotID, robot.log)
+    # # update_formater(robotID, robot.log)
     robot.log.setLevel(logging.DEBUG)
-    logging.getLogger().handlers.clear()
+ 
 
     # Experiment data logs (recorded to file)
     header = ['B','G','R', 'NAME', 'IDX', 'FOOD', 'SUPPORT','STATE']
@@ -232,7 +247,7 @@ def controlstep():
                 int(value),
                 color_idx,  
                 int(cluster_idx)
-                ).transact({'from': me.key, 'value':value, 'gas': gasLimit, 'gasPrice': gasprice})
+                ).transact({'from': me.key, 'value':value})
             
             txs['vote'] = Transaction(w3, voteHash)
             txList.append(voteHash)
@@ -268,7 +283,7 @@ def controlstep():
             fsm.setState(Scout.Query, message="Start exploration")
 
         #########################################################################################################
-        #### Scout.QUERY
+        #### Scout.Query
         #########################################################################################################
 
         elif fsm.query(Scout.Query):
@@ -282,9 +297,12 @@ def controlstep():
             all_clusters = tcp_sc.request('clusters')
             all_points   = tcp_sc.request('points')
             vote_support, current_balance = tcp_sc.request('spendable_balance'), tcp_sc.request('balance')
+            vote_support /= DEPOSITFACTOR
 
-            # # this is for a test: idle and wait if no assets
-            # vote_support /= DEPOSITFACTOR
+            # w3.sc.functions.test(5).transact({'from': me.key})
+            # 
+            # this is for a test: idle and wait if no assets
+            # print(all_clusters, all_points, vote_support)
             # if vote_support >= current_balance and current_balance!=0:
             # 	rgb.setAll('white')
             # 	verify  = False
@@ -292,46 +310,47 @@ def controlstep():
             # 	time.sleep(1)
 
             # check if any cluster avaiting verification on chain
-            if verify and len(all_clusters) > 0:
-                candidate_cluster  = []
-                unverified_clusters = 0
-                for idx, cluster in enumerate(all_clusters):
-                    
-                    verified_by_me = False
-                    for point_rec in all_points:
-                        if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
-                            verified_by_me = True
+            if verify:
+                if len(all_clusters) > 0:
+                    candidate_cluster  = []
+                    unverified_clusters = 0
+                    for idx, cluster in enumerate(all_clusters):
+                        
+                        verified_by_me = False
+                        for point_rec in all_points:
+                            if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
+                                verified_by_me = True
 
-                    if cluster['verified'] == 0:
-                        unverified_clusters += 1
+                        if cluster['verified'] == 0:
+                            unverified_clusters += 1
 
-                        if not verified_by_me and any([int(a) for a in cluster['position']]):
-                            candidate_cluster.append((cluster, idx))
+                            if not verified_by_me and any([int(a) for a in cluster['position']]):
+                                candidate_cluster.append((cluster, idx))
 
-                # this is for a test: idle and wait if no clusters to verify
-                if unverified_clusters == DEPOSITFACTOR and len(candidate_cluster) == 0:
-                    print("no candidates to verify and max cluster count reached")
-                    rgb.setAll('white')
-                    verify  = False
-                    explore = False
-                    clocks['sleep'].set(1)
-                    
-                # randomly select a cluster to verify
-                if verify and len(candidate_cluster) > 0:
-                    print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
-                    select_idx = random.randrange(len(candidate_cluster))
-                    cluster = candidate_cluster[select_idx][0]
-                    cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
-                    color_to_verify = [float(a)/DECIMAL_FACTOR for a in cluster['position']]
-            
-                    fsm.setState(Verify.DriveTo, message=f"Verify cluster idx {cluster_idx_to_verify}")
-                    explore = False
+                    # this is for a test: idle and wait if no clusters to verify
+                    if unverified_clusters == DEPOSITFACTOR and len(candidate_cluster) == 0:
+                        print("no candidates to verify and max cluster count reached")
+                        rgb.setAll('white')
+                        verify  = False
+                        explore = False
+                        clocks['sleep'].set(1)
+                        
+                    # randomly select a cluster to verify
+                    if verify and len(candidate_cluster) > 0:
+                        print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
+                        select_idx = random.randrange(len(candidate_cluster))
+                        cluster = candidate_cluster[select_idx][0]
+                        cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
+                        color_to_verify = [float(a)/DECIMAL_FACTOR for a in cluster['position']]
+                
+                        fsm.setState(Verify.DriveTo, message=f"Verify cluster idx {cluster_idx_to_verify}")
+                        explore = False
 
             if explore:
                 fsm.setState(Scout.Discover, message=f"Try to discover color")
 
         #########################################################################################################
-        #### Scout.DISCOVER
+        #### Scout.Discover
         #########################################################################################################
 
         elif fsm.query(Scout.Discover):
@@ -360,7 +379,7 @@ def controlstep():
                     fsm.setState(Scout.Query, message="No color found while exploring for 10s")
 
         #########################################################################################################
-        #### Scout.DISCOVER
+        #### Scout.PrepReport
         #########################################################################################################
 
         elif fsm.query(Scout.PrepReport):

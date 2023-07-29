@@ -2,9 +2,9 @@
 import random, math
 import os
 
-controller_params = dict()
-controller_params['scout_speed']    = 7
-controller_params['recruit_speed']  = 7
-controller_params['buy_duration']   = 30
-controller_params['explore_mu']     = float(os.environ["ARENASIZE"])/controller_params['scout_speed']*100
-controller_params['explore_sg']     = 2
+params = dict()
+params['scout_speed']    = 7
+params['recruit_speed']  = 7
+params['buy_duration']   = 30
+params['explore_mu']     = float(os.environ["ARENASIZE"])/params['scout_speed']*100
+params['explore_sg']     = 2
