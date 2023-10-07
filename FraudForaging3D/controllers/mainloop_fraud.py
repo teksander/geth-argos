@@ -3,7 +3,7 @@
 
 # /* Import Packages */
 #######################################################################
-import sys, os, copy
+import sys, os
 import socket
 sys.path.insert(1, os.environ["EXPERIMENTFOLDER"])
 
@@ -133,7 +133,7 @@ def init():
     robot.log = logging.getLogger('main')
     # # update_formater(robotID, robot.log)
     robot.log.setLevel(logging.DEBUG)
- 
+    logging.getLogger('cwe').setLevel(logging.INFO)
 
     # Experiment data logs (recorded to file)
     header = ['B','G','R', 'NAME', 'IDX', 'FOOD', 'SUPPORT','STATE']
@@ -240,7 +240,7 @@ def controlstep():
         def sendVote(color_to_report, is_useful, support, color_idx, cluster_idx):
             global txList
             value = w3.toWei(support, 'ether')
-
+            
             voteHash = w3.sc.functions.reportNewPt(
                 [int(a*DECIMAL_FACTOR) for a in color_to_report],
                 int(is_useful),
@@ -248,7 +248,7 @@ def controlstep():
                 color_idx,  
                 int(cluster_idx)
                 ).transact({'from': me.key, 'value':value})
-            
+            # voteHash = w3.sc.functions.test([int(a*DECIMAL_FACTOR) for a in color_to_report], int(is_useful), int(value)).transact({'from': me.key, 'value': value})
             txs['vote'] = Transaction(w3, voteHash)
             txList.append(voteHash)
 
@@ -299,7 +299,7 @@ def controlstep():
             vote_support, current_balance = tcp_sc.request('spendable_balance'), tcp_sc.request('balance')
             vote_support /= DEPOSITFACTOR
 
-            # w3.sc.functions.test(5).transact({'from': me.key})
+            # w3.sc.functions.test(1).transact({'from': me.key, 'value':vote_support})
             # 
             # this is for a test: idle and wait if no assets
             # print(all_clusters, all_points, vote_support)
@@ -359,18 +359,17 @@ def controlstep():
                 rgb.setAll(rgb.off)
 
                 if found_color_bgr != -1:
-                
-                    robot.log.info(f"Found color: {found_color_name} {[int(a) for a in found_color_bgr]}")
                     
-                    for idx in range(3):
-                        color_to_report[idx] = found_color_bgr[idx]
+                    robot.log.info(f"Found color: {found_color_name} {[int(a) for a in found_color_bgr]}")
+
+                    color_to_report[:3]  = found_color_bgr[:3]
                     color_name_to_report = found_color_name
-                    color_idx_to_report = found_color_idx
+                    color_idx_to_report  = found_color_idx
 
                     if found_color_idx > -1 and color_name_to_report not in recent_colors:
                         fsm.setState(Scout.PrepReport, message="Found color by exploring")
                         rgb.setAll(color_name_to_report)
-                        robot.log.info(f"Drive to report: {color_name_to_report}, {[int(a) for a in color_to_report]}")       
+                        robot.log.info(f"Drive to report: {color_idx_to_report}, {color_name_to_report}, {[int(a) for a in color_to_report]}")       
 
                     elif color_name_to_report in recent_colors:
                         cwe.random_walk_engine(10, 10)
@@ -399,7 +398,7 @@ def controlstep():
                     recent_colors = recent_colors[-2:]
 
                     # repeat sampling of the color to report
-                    robot.log.info("found color, start repeat sampling...")
+                    print("found color, start repeat sampling...")
                     repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=3)
                     if repeat_sampled_color[0] !=-1:
                         color_to_report = repeat_sampled_color

@@ -58,7 +58,7 @@
     <distribute>
       <position method="uniform" min="-.60,-.60,0" max=".60,.60,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="15" max_trials="15" base_num="1">
+      <entity quantity="10" max_trials="15" base_num="1">
         <e-puck id="bc">
           <controller config="blockchain" />
         </e-puck>
@@ -108,7 +108,7 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl autoplay="true">
+    <qt-opengl >   <!-- autoplay="true" -->
       <user_functions library="/home/eksander/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
                       label="py_qtuser_function" >
       <params script="/home/eksander/geth-argos/FraudForaging3D/loop_functions/qtuser_function.py"/>

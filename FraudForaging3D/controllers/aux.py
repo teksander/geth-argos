@@ -811,7 +811,8 @@ class Vector3D:
 
     def __str__(self):
         """Human-readable string representation of the vector."""
-        return '{:g}i + {:g}j + {:g}k'.format(self.x, self.y, self.z)
+        # return '{:g}i + {:g}j + {:g}k'.format(self.x, self.y, self.z)
+        return f"[{self.x},{self.y},{self.z}]"
 
     def __repr__(self):
         """Unambiguous string representation of the vector."""

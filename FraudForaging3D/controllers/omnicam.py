@@ -5,7 +5,7 @@ import colorsys
 
 def bgr_to_hsv(bgr):
     h,s,v = colorsys.rgb_to_hsv(*bgr[::-1])
-    return (h*180, s*255, v)
+    return (int(h * 180), int(s * 255), int(v))
 
 class omnicam_reading(object):
     def __init__(self, color, angle, distance):
@@ -31,10 +31,14 @@ class OmniCam(object):
         """
         self.robot = robot
         self.readings  = []
-        
 
         self.robot.colored_blob_omnidirectional_camera.enable()
         self.robot.colored_blob_omnidirectional_camera.set_fov(math.radians(fov))
+
+        # Hard coded colors
+        self.colors = ['red', 'blue', 'green']
+        self.init_simulated_readings()
+
 
         logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
         logger = logging.getLogger(__name__)
@@ -43,24 +47,43 @@ class OmniCam(object):
         """ Execute at every timestep
         """  
         # Read data from the colored_blob_omnidirectional_camera
-        self.readSensor()
+        self.read_simulated_sensor()
 
-        # Add noise model
-        self.addNoise()
 
-    def readSensor(self):
+    def init_simulated_readings(self):
+        self.rgb_samples = dict()
+        for color in self.colors:
+            file = open(f"controllers/color_data/{color}.csv")
+            self.rgb_samples[color] = []
+            for line in file:
+                self.rgb_samples[color].append([float(a) for a in line.split(",")])
+            file.close()
+    
+    def read_simulated_sensor(self):
+        readings = self.robot.colored_blob_omnidirectional_camera.get_readings()
+        for i, _ in enumerate(readings):
+            if readings[i][0] == [255, 0, 0]:
+                readings[i][0] = random.sample(self.rgb_samples['red'], k = 1)[0]
+            if readings[i][0] == [0, 255, 0]:
+                readings[i][0] = random.sample(self.rgb_samples['green'], k = 1)[0]
+            if readings[i][0] == [0, 0, 255]:
+                readings[i][0] = random.sample(self.rgb_samples['blue'], k = 1)[0]
+            readings[i][0] = [round(a) for a in readings[i][0]]
+
+        self.readings = [omnicam_reading(*r) for r in readings]
+        # if self.readings:
+        #     print(self.readings[0])
+
+    def read_argos_sensor(self):
         readings = self.robot.colored_blob_omnidirectional_camera.get_readings()
         self.readings = [omnicam_reading(*r) for r in readings]
-
-    def addNoise(self):
-        pass
 
     def getNew(self):
         """ This method returns the current readings """
         return self.readings
     
     def get_reading(self):
-        """ This method returns the current readings """
+        """ This method returns the current reading (just one) """
         if self.readings:
             return self.readings[0]
         else:

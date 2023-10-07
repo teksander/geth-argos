@@ -11,35 +11,30 @@ import logging
 
 logger = logging.getLogger('cwe')
 
-cam_int_reg_h = 200
-cam_int_reg_offest = 50
-cam_rot = True
-hsv_threshold = [12, 70, 100]
+# cam_int_reg_h = 200
+# cam_int_reg_offest = 50
+# cam_rot = True
+hsv_threshold = [25, 300, 300]
 
-def get_contours(cam_reading, ground_truth_hsv, hsv_threshold):
+def get_contours(cam_reading, ground_truth_hsv, hsv_threshold, name=None):
 
     if cam_reading:
-        feature_hsv  = v3d(cam_reading.color_hsv)
         feature_dist = cam_reading.distance
         feature_cen  = cam_reading.angle_d
-    else:
-        return 0, -1
-    
-    ground_truth_hsv = v3d(ground_truth_hsv)
-    hsv_threshold    = v3d(hsv_threshold)
+        feature_hsv  = v3d(cam_reading.color_hsv)
 
-    lb = ground_truth_hsv-hsv_threshold
-    hb = ground_truth_hsv+hsv_threshold
-    a     = v3d(0, 0, 0)
-    b     = v3d(180, 255, 255)
+        # Obtain the low bound and high bound in h, s and v
+        lb = v3d(ground_truth_hsv) - v3d(hsv_threshold)
+        hb = v3d(ground_truth_hsv) + v3d(hsv_threshold)
 
-    low_bound  = lb.maximums(a).minimums(b)
-    high_bound = hb.maximums(a).minimums(b)
-    
-    if low_bound <= feature_hsv <= high_bound:
-        return feature_dist, feature_cen
-    else:
-        return 0, -1
+        # Saturate h, s and v to their respective ranges
+        lb  = lb.maximums(v3d(0, 0, 0)).minimums(v3d(180, 255, 255))
+        hb = hb.maximums(v3d(0, 0, 0)).minimums(v3d(180, 255, 255))
+
+        if lb <= feature_hsv <= hb:
+            return feature_dist, feature_cen
+
+    return 0, -1
 
 class ColorWalkEngine(object):
 
@@ -49,7 +44,7 @@ class ColorWalkEngine(object):
         update_formater(robot.variables.get_attribute("id"), logger)
         
         # Color inits
-        self.colors = []
+        self.colors = ["red", "blue", "green"]
         self.ground_truth_bgr = []  # bgr
         self.ground_truth_hsv = []  # bgr
 
@@ -59,6 +54,7 @@ class ColorWalkEngine(object):
 
         # Submodules
         self.robot = robot
+        self.id  = int(robot.variables.get_attribute("id"))
         self.cam = OmniCam(robot, 45)
         self.rot = Rotation(robot, MAX_SPEED)
         self.cam.start()
@@ -70,34 +66,49 @@ class ColorWalkEngine(object):
         self.drive = None
 
         # Calibration
-        calibFile = f'../calibration/cam/tungsten/{self.robot.variables.get_attribute("id")}_bgr.csv'
-        # calibFileTemp = f'../calibration/cam/tungsten/{self.robot.id}_rgb.csv'
+        for idx, name in enumerate(self.colors):
+            calibFile = f'controllers/color_data/{name}_calibration.csv'
 
-        if exists(calibFile):
-            with open(calibFile) as file:
-                for line in file:
-                    elements = line.strip().split(' ')
-                    color_name = elements[0]
-                    color_bgr  = [int(bias_bgr[0]*int(elements[1])), 
-                                  int(bias_bgr[1]*int(elements[2])), 
-                                  int(bias_bgr[2]*int(elements[3]))]
+            if exists(calibFile):
+                with open(calibFile) as file:
+                    line = file.readlines()[self.id]
+                    elements = line.strip().split(',')
+                    color_bgr  = [  int(bias_bgr[0]*float(elements[2])), 
+                                    int(bias_bgr[1]*float(elements[1])), 
+                                    int(bias_bgr[2]*float(elements[0]))]
                     color_hsv  = bgr_to_hsv(color_bgr)
-                    
-                    self.colors.append(color_name)
                     self.ground_truth_bgr.append(color_bgr)
                     self.ground_truth_hsv.append(color_hsv)
+            else:
+                print(f"color calibration file not found, use hard coded colors")
+                self.colors = ["red", "blue", "green"]
+                self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [0, 255, 0]] 
+                self.ground_truth_hsv = [[0, 255, 255], [120, 255, 255], [60, 255, 255]]
+                break
+            
+        print(f"{self.id} calibrated colors:")
+        print(self.colors)
+        print(self.ground_truth_bgr)
+        print(self.ground_truth_hsv)
 
-        # elif exists(calibFileTemp):
-        #     with open(calibFileTemp) as file:
+        #     with open(calibFile) as file:
         #         for line in file:
         #             elements = line.strip().split(' ')
-        #             self.colors.append(elements[0])
-        #             self.ground_truth_bgr.append([int(x) for x in elements[1:]])
-        else:
-            print("color calibration file not found, use hard coded colors")
-            self.colors = ["red", "blue", "green"]
-            self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [0, 255, 0]] 
-            self.ground_truth_hsv = [[0, 255, 255], [120, 255, 255], [60, 255, 255]]
+        #             color_name = elements[0]
+        #             color_bgr  = [int(bias_bgr[0]*int(elements[1])), 
+        #                           int(bias_bgr[1]*int(elements[2])), 
+        #                           int(bias_bgr[2]*int(elements[3]))]
+        #             color_hsv  = bgr_to_hsv(color_bgr)
+                    
+        #             self.colors.append(color_name)
+        #             self.ground_truth_bgr.append(color_bgr)
+        #             self.ground_truth_hsv.append(color_hsv)
+
+        # else:
+        #     print("color calibration file not found, use hard coded colors")
+        #     self.colors = ["red", "blue", "green"]
+        #     self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [0, 255, 0]] 
+        #     self.ground_truth_hsv = [[0, 255, 255], [120, 255, 255], [60, 255, 255]]
 
         logger.info('Color walk OK')
     
@@ -134,7 +145,7 @@ class ColorWalkEngine(object):
 
             color_hsv   = self.ground_truth_hsv[color_idx]
             reading     = self.cam.get_reading()
-            dist, angle = get_contours(reading, color_hsv, hsv_threshold)
+            dist, angle = get_contours(reading, color_hsv, hsv_threshold, name = color_name)
 
             if angle != -1:
                 logger.debug(f"found {color_idx} {color_name} {dist}")
@@ -271,7 +282,7 @@ class ColorWalkEngine(object):
 
             cam_reading = self.cam.get_reading()
             tracking_color_threshold = hsv_threshold.copy()
-            tracking_color_threshold[0]=15
+            # tracking_color_threshold[0]=20
             dist, cen = get_contours(cam_reading, target_hsv, tracking_color_threshold)
 
             if cen != -1:

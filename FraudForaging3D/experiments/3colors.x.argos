@@ -108,7 +108,7 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl autoplay="true">
+    <qt-opengl >   <!-- autoplay="true" -->
       <user_functions library="${ARGOSFOLDER}/build/libpy_qtuser_function_interface.so"
                       label="py_qtuser_function" >
       <params script="${EXPERIMENTFOLDER}/loop_functions/qtuser_function.py"/>

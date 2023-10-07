@@ -8,7 +8,7 @@ contract ForagingPtManagement{
     uint constant max_life    = 3;
     uint constant min_rep     = 0;     //Minimum number of reported points that make contract verified
     int256 constant radius    = 3000000;
-    uint constant min_balance = 66666666666666666666; //Minimum number of balance to confirm a cluster
+    uint constant min_balance = 44444444444444444444; //Minimum number of balance to confirm a cluster
     int256 constant max_unverified_cluster =  3;
 
     address public minter;
@@ -51,7 +51,11 @@ contract ForagingPtManagement{
         uint minClusterStatus;
     }
 
-    int[4] report_statistics; //0:number of recorded reports, 1: number of reports rejected due to duplicated verification, 2: reports rejected due to maximum number of clusters reached, 3:verification outlier count
+    int[4] report_statistics; 
+    // 0:number of recorded reports, 
+    // 1: number of reports rejected due to duplicated verification, 
+    // 2: reports rejected due to maximum number of clusters reached, 
+    // 3:verification outlier count
     constructor() {
         report_statistics[0] = 0;
         report_statistics[1] = 0;
@@ -375,7 +379,7 @@ contract ForagingPtManagement{
                     }
                 }
             }
-            else if (clusterList[i].verified==0 && clusterList[i].total_credit_outlier>(1-min_balance)){
+            else if (clusterList[i].verified==0 && clusterList[i].total_credit_outlier>(min_balance/2)){ //min_balance/2 = 1/3 of total assets, as min_nalance = 2/3 total assets
                 for (uint j=0; j<clusterList[i].outlier_senders.length; j++){
                     bonus_credit = clusterList[i].total_credit/clusterList[i].outlier_senders.length;
                     payable(clusterList[i].outlier_senders[j]).transfer(bonus_credit);
