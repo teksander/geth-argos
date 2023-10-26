@@ -8,7 +8,7 @@ def bgr_to_hsv(bgr):
     return (int(h * 180), int(s * 255), int(v))
 
 class omnicam_reading(object):
-    def __init__(self, color, angle, distance):
+    def __init__(self, color, angle, distance, util):
         self.color     = color
         self.color_rgb = color
         self.color_bgr = color[::-1]
@@ -16,6 +16,7 @@ class omnicam_reading(object):
         self.distance  = distance
         self.angle     = angle
         self.angle_d   = math.degrees(angle)
+        self.util = util
 
     def __repr__(self):
         return repr(self.__dict__)
@@ -61,15 +62,19 @@ class OmniCam(object):
     
     def read_simulated_sensor(self):
         readings = self.robot.colored_blob_omnidirectional_camera.get_readings()
+        this_util = 0
         for i, _ in enumerate(readings):
             if readings[i][0] == [255, 0, 0]:
                 readings[i][0] = random.sample(self.rgb_samples['red'], k = 1)[0]
+                this_util = 2
             if readings[i][0] == [0, 255, 0]:
                 readings[i][0] = random.sample(self.rgb_samples['green'], k = 1)[0]
+                this_util = 1
             if readings[i][0] == [0, 0, 255]:
                 readings[i][0] = random.sample(self.rgb_samples['blue'], k = 1)[0]
+                this_util = 1
             readings[i][0] = [round(a) for a in readings[i][0]]
-
+            readings[i] += [this_util]
         self.readings = [omnicam_reading(*r) for r in readings]
         # if self.readings:
         #     print(self.readings[0])

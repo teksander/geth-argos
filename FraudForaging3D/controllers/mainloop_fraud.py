@@ -390,7 +390,7 @@ def controlstep():
                 vote_support, address_balance = tcp_sc.request('spendable_balance'), tcp_sc.request('balance')
                 vote_support /= DEPOSITFACTOR
                 tag_id, _ = cwe.check_apriltag()
- 
+                print(arrived, tag_id, vote_support)
                 if tag_id != 0 and vote_support < address_balance:
 
                     # two recently discovered colord are recorded in recent_colors

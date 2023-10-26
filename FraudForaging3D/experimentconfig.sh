@@ -4,8 +4,8 @@
 if [ $USER == "eksander" ]; then
 	export MAINFOLDER="$HOME/geth-argos"
 
-elif [ $USER == "hzhao" ]; then
-	export MAINFOLDER="$HOME/blockchain-robots/geth-argos"
+elif [ $USER == "ubuntu" ]; then
+	export MAINFOLDER="$HOME/blockchain_robots_temp_debug/geth-argos"
 fi
 
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain-sm"

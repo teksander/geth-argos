@@ -14,7 +14,7 @@ logger = logging.getLogger('cwe')
 # cam_int_reg_h = 200
 # cam_int_reg_offest = 50
 # cam_rot = True
-hsv_threshold = [25, 300, 300]
+hsv_threshold = [300, 300, 300]
 
 def get_contours(cam_reading, ground_truth_hsv, hsv_threshold, name=None):
 
@@ -188,10 +188,7 @@ class ColorWalkEngine(object):
         tag_id = 0
         if reading:
             tag_dt = reading.distance
-            if reading.color_bgr == [0,0,255]:
-                tag_id = 2 
-            elif reading.color_bgr == [0,255,0] or reading.color_bgr == [255,0,0]:
-                tag_id = 1
+            tag_id = reading.util
         return tag_id, tag_dt
         
     def get_closest_color(self, bgr_feature):
@@ -230,7 +227,8 @@ class ColorWalkEngine(object):
             # logger.debug(f"Driving to BGR: {self.ground_truth_bgr[self.colors.index(color_name)]}")
             # logger.debug(f"Driving to HSV: {self.ground_truth_hsv[self.colors.index(color_name)]}")
             hsv_feature = self.ground_truth_hsv[self.colors.index(color_name)]
-            return self.drive_to_hsv(hsv_feature, duration)
+            is_arrived = self.drive_to_hsv(hsv_feature, duration)
+            return is_arrived
 
     class Drive():
         pid_controller = PID(0.1, 0, 0)
