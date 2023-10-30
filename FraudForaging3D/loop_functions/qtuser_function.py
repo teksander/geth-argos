@@ -31,8 +31,15 @@ def draw_in_robot():
 
 	# Draw the rays seen by robots
 	readings = robot.colored_blob_omnidirectional_camera.get_readings()
-	for reading in readings:
-		color, angle, dist = reading
+
+	closest_dist = float('inf')
+	closest_index = None
+	for i, (color, angle, dist) in enumerate(readings):
+		if dist < closest_dist:
+			closest_dist = dist
+			closest_index = i
+	if closest_index != None:
+		color, angle, dist = readings[closest_index]
 		x, y = dist*math.cos(angle)/100,  dist*math.sin(angle)/100
 		environment.qt_draw.ray([0,0,0.01], [x, y, 0.01], color, 0.15)
 

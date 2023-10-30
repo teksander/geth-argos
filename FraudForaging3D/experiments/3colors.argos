@@ -15,7 +15,7 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <python_controller id="blockchain" library="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/argos-python/build/libpy_controller_interface.so">
+    <python_controller id="blockchain" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
@@ -26,37 +26,90 @@
         <epuck_proximity implementation="default" show_rays="false" />
         <epuck_ground implementation="rot_z_only" />
         <differential_steering implementation="default" bias_stddev="2" />
-        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="false"/>
+        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
         <colored_blob_omnidirectional_camera implementation="rot_z_only" medium="resources" show_rays="false"/>
       </sensors>
-      <params script="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/controllers/mainloop_fraud.py"
+      <params script="/home/eksander/geth-argos/FraudForaging3D/controllers/mainloop_fraud.py"
               timeRate="1" />
     </python_controller>
   </controllers>
 
-  <loop_functions library="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/argos-python/build/libpy_loop_function_interface.so"
+  <loop_functions library="/home/eksander/geth-argos/argos-python/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
-    <params script="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/loop_functions/loop_function.py"/>
+    <params script="/home/eksander/geth-argos/FraudForaging3D/loop_functions/loop_function.py"/>
   </loop_functions>
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="6, 6, 1" center="0,0,0.5">
-    <floor id="f" source="image" path="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/experiments/floors/white.png" />
+  <arena size="2.50, 2.50, 1" center="0,0,0.5">
+    <floor id="f" source="image" path="/home/eksander/geth-argos/FraudForaging3D/experiments/floors/white.png" />
 
-<box id="AB" size="3,0.01,0.1" movable="false">
-  <body position="0,-.86,0" orientation="0,0,0" />
-</box>
-<box id="AC" size="3,0.01,0.1" movable="false">
-  <body position="-.75,.43,0" orientation="60,0,0" />
-</box>
-<box id="BC" size="3,0.01,0.1" movable="false">
-  <body position=".75,.43,0" orientation="120,0,0" />
-</box>
+  <box id="L1" size="1.25,0.01,0.1" movable="false">
+    <body position="0.5625,0.3247,0" orientation="-60,0,0" />
+  </box>
+  <box id="L2" size="1.25,0.01,0.1" movable="false">
+    <body position="-0.5625,0.3247,0" orientation="60,0,0" />
+  </box>
+  <box id="L3" size="1.25,0.01,0.1" movable="false">
+    <body position="0,-0.649519,0" orientation="0,0,0" />
+  </box>
+
+
+
+  <box id="S1" size="0.50,0.01,0.1" movable="false">
+    <body position="0,0.866025,0" orientation="0,0,0" />
+    <leds medium="resources">
+    <led offset=" 0.04, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.08, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.12, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.16, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.20, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.00, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.04, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.08, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.12, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.16, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.20, -0.025,0.1" anchor="origin" color="red" />
+    </leds>
+  </box>
+
+  <box id="S2" size="0.50,0.01,0.1" movable="false">
+    <body position="-0.75,-0.433013,0" orientation="-60,0,0" />
+    <leds medium="resources">
+    <led offset=" 0.04, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.08, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.12, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.16, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.20, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.00, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.04, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.08, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.12, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.16, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.20, 0.025,0.1" anchor="origin" color="blue" />
+    </leds>
+  </box>
+
+  <box id="S3" size="0.50,0.01,0.1" movable="false">
+    <body id="light_t" position="0.75,-0.433013,0" orientation="60,0,0" />
+    <leds medium="resources">
+    <led offset=" 0.04, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.08, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.12, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.16, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.20, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.00, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.04, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.08, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.12, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.16, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.20, 0.025,0.1" anchor="origin" color="green" />
+    </leds>
+  </box>
 
     <distribute>
-      <position method="uniform" min="-.60,-.60,0" max=".60,.60,0" /> 
+      <position method="uniform" min="-.25,-.25,0" max=".25,.25,0" /> 
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
       <entity quantity="12" max_trials="15" base_num="1">
         <e-puck id="bc">
@@ -65,26 +118,26 @@
       </entity> 
     </distribute>
 
-    <light id="light_A"
-           position="-1.35,-.77,0.05"
+    <!-- <light id="light_1"
+           position="0,.822723,0.1"
            orientation="0,0,0"
            color="red"
            intensity="1"
-           medium="resources" />
-
-    <light id="light_B"
-           position="1.35,-.77,0.05"
+           medium="resources" /> -->
+<!-- 
+    <light id="light_2"
+           position="-.71,-.411362,0.1"
            orientation="0,0,0"
            color="green"
            intensity="1"
            medium="resources" />
 
-    <light id="light_C"
-           position="0,1.55,0.05"
+    <light id="light_3"
+           position=".71,-.411362,0.1"
            orientation="0,0,0"
            color="blue"
            intensity="1"
-           medium="resources" />
+           medium="resources" /> -->
 
   </arena>
 
@@ -108,10 +161,10 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl >   <!-- autoplay="true" -->
-      <user_functions library="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
+    <qt-opengl autoplay="true" >   
+      <user_functions library="/home/eksander/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
                       label="py_qtuser_function" >
-      <params script="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/loop_functions/qtuser_function.py"/>
+      <params script="/home/eksander/geth-argos/FraudForaging3D/loop_functions/qtuser_function.py"/>
       </user_functions>
     <camera>
       <placements>

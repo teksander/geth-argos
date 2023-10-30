@@ -26,8 +26,8 @@ sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
              os.environ['EXPERIMENTFOLDER']]
 
-import loop_params as lp
-import control_params as cp
+import loop_function_params as lp
+import controller_params as cp
 
 # Collect the loop parameters
 dict_list = [(param, value) for param, value in lp.params.items() if isinstance(value, dict)]
@@ -47,8 +47,8 @@ for name, param_dict in dict_list:
 END
 
 cp experimentconfig.sh $LOGSFOLDER
-cp $EXPERIMENTFOLDER/loop_functions/loop_params.py $LOGSFOLDER
-cp $EXPERIMENTFOLDER/controllers/control_params.py $LOGSFOLDER
+cp $EXPERIMENTFOLDER/loop_functions/loop_function_params.py $LOGSFOLDER
+cp $EXPERIMENTFOLDER/controllers/controller_params.py $LOGSFOLDER
 
 # Collect geth related logs from docker folder into /logs/
 for ID in $(seq 1 $NUMROBOTS); do

@@ -14,7 +14,7 @@ logger = logging.getLogger('cwe')
 # cam_int_reg_h = 200
 # cam_int_reg_offest = 50
 # cam_rot = True
-hsv_threshold = [300, 300, 300]
+hsv_threshold = [15, 90, 120]
 
 def get_contours(cam_reading, ground_truth_hsv, hsv_threshold, name=None):
 
@@ -59,7 +59,8 @@ class ColorWalkEngine(object):
         self.rot = Rotation(robot, MAX_SPEED)
         self.cam.start()
         self.rot.start()
-        
+        # self.rgb = RGBLEDs(robot)
+
         # Timers
         self.timers = dict()
         self.timers['discover'] = Timer()
@@ -271,7 +272,7 @@ class ColorWalkEngine(object):
 
             _, tag_dist = self.check_apriltag()
             if tag_dist>0:
-                if tag_dist < 50 and self.drive.detect_color:  # see color and white board at once
+                if tag_dist < 10 and self.drive.detect_color:  # see color and white board at once
                     self.rot.setDrivingMode("pattern")
                     self.rot.setWalk(False)
                     self.drive.arrived_count += 1

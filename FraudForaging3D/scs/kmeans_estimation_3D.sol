@@ -7,7 +7,7 @@ contract ForagingPtManagement{
     uint constant num_pt      = 100;
     uint constant max_life    = 3;
     uint constant min_rep     = 0;     //Minimum number of reported points that make contract verified
-    int256 constant radius    = 3000000;
+    int256 constant radius    = 5000000;
     uint constant min_balance = 53333333333333333333; //Minimum number of balance to confirm a cluster
     int256 constant max_unverified_cluster =  3;
 
@@ -36,6 +36,7 @@ contract ForagingPtManagement{
         int[space_size] sup_position;
         uint256 total_credit_outlier;
         address[] outlier_senders;
+        uint block_verified;
     }
 
     struct clusterInfo{
@@ -52,10 +53,10 @@ contract ForagingPtManagement{
     }
 
     int[4] report_statistics; 
-    // 0:number of recorded reports, 
+    // 0: number of recorded reports, 
     // 1: number of reports rejected due to duplicated verification, 
-    // 2: reports rejected due to maximum number of clusters reached, 
-    // 3:verification outlier count
+    // 2: number of reports rejected due to maximum number of clusters reached, 
+    // 3: verification outlier count
     constructor() {
         report_statistics[0] = 0;
         report_statistics[1] = 0;
@@ -169,7 +170,7 @@ contract ForagingPtManagement{
         // int256 this_distance = 0;
 
         if (category==1 && clusterList.length == 0){
-            clusterList.push(Cluster(position, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention, position, 0, new address[](0)));
+            clusterList.push(Cluster(position, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention, position, 0, new address[](0), 0));
             pointList.push(Point(position, amount, category, 0, msg.sender, realType));
             balances[msg.sender] += amount;
             report_statistics[0] += 1;
@@ -278,7 +279,7 @@ contract ForagingPtManagement{
             }
             else if (category==1 && info.foundCluster==0 && unverfied_clusters<max_unverified_cluster){
                 //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster
-                clusterList.push(Cluster(position,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,position, 0, new address[](0)));
+                clusterList.push(Cluster(position,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,position, 0, new address[](0), 0));
                 pointList.push(Point(position,amount, category, int256(clusterList.length-1), msg.sender, realType));
                 balances[msg.sender] += amount;
                 report_statistics[0] += 1;
@@ -310,6 +311,7 @@ contract ForagingPtManagement{
         for(uint i=0; i<clusterList.length; i++){
             if (clusterList[i].verified==0 && clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=min_balance && clusterList[i].total_credit_food>(clusterList[i].total_credit-clusterList[i].total_credit_food)){
                 clusterList[i].verified=1; //cluster verified
+                clusterList[i].block_verified = block.number;
                 clusterList[i].life = curtime+max_life;
                 total_non_food_credit = clusterList[i].total_credit-clusterList[i].total_credit_food;
                 //Redistribute money
@@ -350,6 +352,7 @@ contract ForagingPtManagement{
             }
             else if (clusterList[i].verified==0 && clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=min_balance && clusterList[i].total_credit_food<(clusterList[i].total_credit-clusterList[i].total_credit_food)){
                 clusterList[i].verified=2; //cluster abandon
+                clusterList[i].block_verified = block.number;
                 total_non_food_credit = clusterList[i].total_credit-clusterList[i].total_credit_food;
                 //Redistribute money
                 //WVG wining side
@@ -452,7 +455,7 @@ contract ForagingPtManagement{
     //----- setters and getters ------
 
     function getClusters() public view returns(Cluster[] memory) { return clusterList; }
-    function getClusterKeys() public pure returns (string[12] memory){
+    function getClusterKeys() public pure returns (string[13] memory){
         return ["position",
             "life",
             "verified",
@@ -464,7 +467,8 @@ contract ForagingPtManagement{
             "intention",
             "sup_position",
             "total_credit_outlier",
-            "outlier_senders"];
+            "outlier_senders",
+            "block_verified"];
         }
 
     function getPoints() public view returns(Point[] memory) { return pointList; }

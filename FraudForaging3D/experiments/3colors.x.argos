@@ -26,7 +26,7 @@
         <epuck_proximity implementation="default" show_rays="false" />
         <epuck_ground implementation="rot_z_only" />
         <differential_steering implementation="default" bias_stddev="2" />
-        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="false"/>
+        <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
         <colored_blob_omnidirectional_camera implementation="rot_z_only" medium="resources" show_rays="false"/>
       </sensors>
       <params script="${CONTROLLER}"
@@ -45,15 +45,68 @@
   <arena size="${ARENASIZE}, ${ARENASIZE}, 1" center="0,0,0.5">
     <floor id="f" source="image" path="${EXPERIMENTFOLDER}/experiments/floors/white.png" />
 
-<box id="AB" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
-  <body position="${xAB},${yAB},0" orientation="0,0,0" />
-</box>
-<box id="AC" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
-  <body position="${xAC},${yAC},0" orientation="60,0,0" />
-</box>
-<box id="BC" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
-  <body position="${xBC},${yBC},0" orientation="120,0,0" />
-</box>
+  <box id="L1" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
+    <body position="${xL1},${yL1},0" orientation="-60,0,0" />
+  </box>
+  <box id="L2" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
+    <body position="${xL2},${yL2},0" orientation="60,0,0" />
+  </box>
+  <box id="L3" size="${SIDE_L},${SIDE_W},${SIDE_H}" movable="false">
+    <body position="${xL3},${yL3},0" orientation="0,0,0" />
+  </box>
+
+
+
+  <box id="S1" size="${SIDE_S},${SIDE_W},${SIDE_H}" movable="false">
+    <body position="${xS1},${yS1},0" orientation="0,0,0" />
+    <leds medium="resources">
+    <led offset=" 0.04, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.08, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.12, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.16, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.20, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" 0.00, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.04, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.08, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.12, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.16, -0.025,0.1" anchor="origin" color="red" />
+    <led offset=" -0.20, -0.025,0.1" anchor="origin" color="red" />
+    </leds>
+  </box>
+
+  <box id="S2" size="${SIDE_S},${SIDE_W},${SIDE_H}" movable="false">
+    <body position="${xS2},${yS2},0" orientation="-60,0,0" />
+    <leds medium="resources">
+    <led offset=" 0.04, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.08, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.12, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.16, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.20, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" 0.00, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.04, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.08, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.12, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.16, 0.025,0.1" anchor="origin" color="blue" />
+    <led offset=" -0.20, 0.025,0.1" anchor="origin" color="blue" />
+    </leds>
+  </box>
+
+  <box id="S3" size="${SIDE_S},${SIDE_W},${SIDE_H}" movable="false">
+    <body id="light_t" position="${xS3},${yS3},0" orientation="60,0,0" />
+    <leds medium="resources">
+    <led offset=" 0.04, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.08, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.12, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.16, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.20, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" 0.00, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.04, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.08, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.12, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.16, 0.025,0.1" anchor="origin" color="green" />
+    <led offset=" -0.20, 0.025,0.1" anchor="origin" color="green" />
+    </leds>
+  </box>
 
     <distribute>
       <position method="uniform" min="-${SPAWNSIZE},-${SPAWNSIZE},0" max="${SPAWNSIZE},${SPAWNSIZE},0" /> 
@@ -65,26 +118,26 @@
       </entity> 
     </distribute>
 
-    <light id="light_A"
-           position="${xA},${yA},0.05"
+    <!-- <light id="light_1"
+           position="${xV1},${yV1},0.1"
            orientation="0,0,0"
            color="red"
            intensity="1"
-           medium="resources" />
-
-    <light id="light_B"
-           position="${xB},${yB},0.05"
+           medium="resources" /> -->
+<!-- 
+    <light id="light_2"
+           position="${xV2},${yV2},0.1"
            orientation="0,0,0"
            color="green"
            intensity="1"
            medium="resources" />
 
-    <light id="light_C"
-           position="${xC},${yC},0.05"
+    <light id="light_3"
+           position="${xV3},${yV3},0.1"
            orientation="0,0,0"
            color="blue"
            intensity="1"
-           medium="resources" />
+           medium="resources" /> -->
 
   </arena>
 
@@ -108,7 +161,7 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl >   <!-- autoplay="true" -->
+    <qt-opengl autoplay="true" >   
       <user_functions library="${ARGOSFOLDER}/build/libpy_qtuser_function_interface.so"
                       label="py_qtuser_function" >
       <params script="${EXPERIMENTFOLDER}/loop_functions/qtuser_function.py"/>

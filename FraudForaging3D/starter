@@ -25,6 +25,11 @@ do
 if [[ $opt == "--reset" || $opt == "-r" ]]; then
 
     echo "+-----------------------------------------------------------+"
+    echo "Sending python scripts"
+    cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
+
+
+    echo "+-----------------------------------------------------------+"
     echo "Resetting Geth..."
     ./reset-geth
 fi
@@ -40,10 +45,6 @@ while [[ $ready != $NUMROBOTS ]]; do
 done
 
 echo "+-----------------------------------------------------------+"
-echo "Sending python scripts"
-cp -r $EXPERIMENTFOLDER/controllers/docker/* $DOCKERFOLDER/geth/python_scripts/
-
-echo "+-----------------------------------------------------------+"
 echo "Cleaning logs folder..."
 
 eval $(echo "rm -rf logs/{0..250}")
@@ -56,11 +57,11 @@ echo "Starting Experiment"
 
 for opt in "$@"; do
 if [[ $opt == "--start" || $opt == "-s" ]]; then
-    gnome-terminal --title="Simulation" -- argos3 -c $ARGOSFILE
+    argos3 -c $ARGOSFILE
 fi
 
 if [[ $opt == "--start-novis" || $opt == "-sz" ]]; then
-    gnome-terminal --title="Simulation" -- argos3 -z -c $ARGOSFILE
+    argos3 -z -c $ARGOSFILE
 fi
 done
 wait

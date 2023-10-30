@@ -34,11 +34,11 @@ gsFreq = 20
 rwSpeed = cp['scout_speed']
 navSpeed = cp['recruit_speed']
 
-num_honest = int(os.environ["NUM1A"])
-num_faulty = int(os.environ["NUM1B"])
-num_malicious = int(os.environ["NUM2"])
+num_rob = int(os.environ["NUMROBOTS"])
+num_byz = int(os.environ["NUM_BYZ"])
+num_fau = int(os.environ["NUM_FAU"])
+num_col = int(os.environ["NUM_COL"])
 
-typeflag = "honest"  # type of current robot
 DECIMAL_FACTOR = generic_params['decimal_factor']
 DECIMAL_FACTOR =  1e5
 DEPOSITFACTOR = 3
@@ -78,68 +78,53 @@ recent_colors=[]
 global voteHash
 voteHash = None
 
-global isByz 
-isByz = False
+global isByz, isFau, isCol, behaviour
+isByz=isFau=isCol=False
+behaviour="honest"
 
 def init():
-    global friction, my_speed, previous_pos, pos_to_verify, fault_behaviour, residual_list, source_pos_list, idx_to_verity, verified_idx, myBalance
+    global friction, my_speed, previous_pos, pos_to_verify, residual_list, source_pos_list, idx_to_verity, verified_idx, myBalance
+    global isByz, isFau, isCol, behaviour
+    global logfolder
 
     robotID = ''.join(c for c in robot.variables.get_id() if c.isdigit())
     robotIP = identifiersExtract(robotID, 'IP')
 
-    # print(num_normal + num_faulty)
-    # if int(robotID) > num_normal + num_faulty:
-    #     typeflag = "malicious"  # malicious robot
-    # elif int(robotID) > num_normal:
-    #     typeflag = "faulty"
-    # else:
-    #     typeflag = "normal"
+    # isByz = True if len(sys.argv)>1 and sys.argv[1] == '--byz' else False
+    # isFau = True if len(sys.argv)>1 and sys.argv[1] == '--fau' else False
+    # isCol = True if len(sys.argv)>1 and sys.argv[1] == '--col' else False
+    # behaviour = 'malicious' if isByz else 'faulty' if isFau else 'colluding' if isCol else 'honest'
 
-    robot.variables.set_attribute("id", str(robotID))
-    # robot.variables.set_attribute("type", typeflag)
-    # print("Robot: ", robotID, "state set to: ", typeflag)
+    if int(robotID) > num_rob-num_byz:
+        isByz=True
+        behaviour = "malicious"
+    elif int(robotID) > num_rob-num_byz-num_col:
+        isCol=True
+        behaviour = "colluding"
+    elif int(robotID) > num_rob-num_byz-num_col-num_fau:
+        isFau=True
+        behaviour = "faulty"
+    else:
+        behaviour = "honest"
+    print(f"ID:{robotID} is {behaviour}")
+    robot.variables.set_attribute("id", robotID)
     robot.variables.set_attribute("state", "")
+    robot.variables.set_attribute("stop", "0")
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
+    logfolder = logfolder + robotID + '/'
 
     # Monitor logs (recorded to file)
-    monitor_file = logfolder + robotID + '/'+ 'monitor.log'
-    # file_handler = logging.FileHandler(monitor_file, mode='a')
-    # file_handler.setFormatter(logging.Formatter(f'[{robotID} %(levelname)s %(name)s] %(message)s'))
-    
-    # cwe_logger = logging.getLogger('cwe')
-    # cwe_logger.setLevel(logging.DEBUG)
-    # cwe_logger.addHandler(file_handler)
-
-    # Set the level and add the file handler to the 'main' logger    
-    # robot.log.addHandler(file_handler)
-    # import logging.handlers
-    # f = logging.Formatter(fmt=f'[{robotID} %(levelname)s %(name)s] %(message)s')
-    # handlers = [
-    #     logging.handlers.RotatingFileHandler('rotated.log', encoding='utf8',
-    #         maxBytes=100000, backupCount=1),
-    #     logging.StreamHandler()
-    # ]
-    # root_logger = logging.getLogger()
-    # root_logger.setLevel(logging.DEBUG)
-    # for h in handlers:
-    #     h.setFormatter(f)
-    #     h.setLevel(logging.DEBUG)
-    #     root_logger.addHandler(h)
-    #     logging.getLogger().handlers = []
-    # robot.log = root_logger
-
+    os.makedirs(os.path.dirname(logfolder + 'monitor.log'), exist_ok=True) 
+    logging.basicConfig(filename=logfolder + 'monitor.log', filemode='w+', format='[{} %(levelname)s %(name)s %(relativeCreated)d] %(message)s'.format(robotID))
     robot.log = logging.getLogger('main')
-    # # update_formater(robotID, robot.log)
-    robot.log.setLevel(logging.DEBUG)
-    logging.getLogger('cwe').setLevel(logging.INFO)
+    robot.log.setLevel(loglevel)
 
     # Experiment data logs (recorded to file)
     header = ['B','G','R', 'NAME', 'IDX', 'FOOD', 'SUPPORT','STATE']
-    logs['color'] = Logger(logfolder + robotID + '/'+ 'color.csv', header, ID=robotID)
-    # extrafields={'isbyz':isByz, 'isfaulty':isFaulty, 'type':'malicious' if isByz else 'faulty' if isFaulty else 'honest'}
-
+    logs['color'] = Logger(logfolder+'color.csv', header, ID=robotID, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
+ 
     # /* Initialize Sub-modules */
     #######################################################################
     global  w3, me, erb, cwe, gs, rgb, fsm, tcp_sc
@@ -155,7 +140,7 @@ def init():
     erb = ERANDB(robot, erbDist, erbtFreq)
 
     # /* Init Navigation */
-    cwe = ColorWalkEngine(robot, rwSpeed)
+    cwe = ColorWalkEngine(robot, rwSpeed, [1,1,0.75] if isFau else [1,1,1])
 
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
@@ -296,8 +281,13 @@ def controlstep():
             # query the Smart Contract 
             all_clusters = tcp_sc.request('clusters')
             all_points   = tcp_sc.request('points')
-            vote_support, current_balance = tcp_sc.request('spendable_balance'), tcp_sc.request('balance')
+            vote_support, current_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
+            vote_support -= 1
             vote_support /= DEPOSITFACTOR
+
+            n_accepted = len([c for c in all_clusters if c['verified']==1])
+            if n_accepted >= 1:
+                robot.variables.set_attribute("stop", "1")
 
             # w3.sc.functions.test(1).transact({'from': me.key, 'value':vote_support})
             # 
@@ -327,13 +317,13 @@ def controlstep():
                             if not verified_by_me and any([int(a) for a in cluster['position']]):
                                 candidate_cluster.append((cluster, idx))
 
-                    # this is for a test: idle and wait if no clusters to verify
-                    if unverified_clusters == DEPOSITFACTOR and len(candidate_cluster) == 0:
-                        print("no candidates to verify and max cluster count reached")
-                        rgb.setAll('white')
-                        verify  = False
-                        explore = False
-                        clocks['sleep'].set(1)
+                    # # this is for a test: idle and wait if no clusters to verify
+                    # if unverified_clusters == DEPOSITFACTOR and len(candidate_cluster) == 0:
+                    #     print("no candidates to verify and max cluster count reached")
+                    #     rgb.setAll('white')
+                    #     verify  = False
+                    #     explore = False
+                    #     clocks['sleep'].set(1)
                         
                     # randomly select a cluster to verify
                     if verify and len(candidate_cluster) > 0:
@@ -387,7 +377,8 @@ def controlstep():
 
             if arrived:
 
-                vote_support, address_balance = tcp_sc.request('spendable_balance'), tcp_sc.request('balance')
+                vote_support, address_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
+                vote_support -= 1
                 vote_support /= DEPOSITFACTOR
                 tag_id, _ = cwe.check_apriltag()
                 print(arrived, tag_id, vote_support)
@@ -405,11 +396,11 @@ def controlstep():
                     else:
                         print("color repeat sampling failed, report one time measure")
 
-                    is_useful=False
-                    if int(tag_id)==2: # red color apriltag = 2
-                        is_useful = True
+                    is_useful = int(tag_id) == 2
                     if isByz:
-                        is_useful = not is_useful 
+                        is_useful = not is_useful
+                    if isCol:
+                        is_useful = color_name_to_report == 'blue' 
 
                     logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
@@ -446,11 +437,13 @@ def controlstep():
             rgb.setAll(color_name_to_verify)
 
             fsm.initVar('attempts', 0)
+            ok_to_vote = False
             if arrived:
 
                 tag_id,_ = cwe.check_apriltag()
                 found_color_idx, found_color_name, found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
-                vote_support, address_balance  = tcp_sc.request('spendable_balance'), tcp_sc.request('balance')
+                vote_support, address_balance  = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
+                vote_support -= 1
                 vote_support /= DEPOSITFACTOR
                 if vote_support >= address_balance:
                     fsm.vars.attempts += 10
@@ -475,15 +468,11 @@ def controlstep():
 
                 if ok_to_vote:
                     
-                    if tag_id==2: 
-                        is_useful = True
-                    elif tag_id==1:
-                        is_useful=False
-                    else:
-                        print('Unrecognized tag ID!')
-
+                    is_useful = int(tag_id) == 2
                     if isByz:
-                        is_useful = not is_useful 
+                        is_useful = not is_useful
+                    if isCol:
+                        is_useful = color_name_to_report == 'blue' 
 
                     print(f"found color {found_color_name}, start repeat sampling...")
                     repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
@@ -500,8 +489,8 @@ def controlstep():
 
                     # logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
                     voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
-                    robot.log.info("Verify vote: ", voteHash[0:8], 
-                                 "color: ", [int(a) for a in color_to_report], found_color_name, 
+                    print_color("Verify vote: ", voteHash[0:8], 
+                                "color: ", [int(a) for a in color_to_report], found_color_name, 
                                 "support: ", vote_support, 
                                 "tagid: ", tag_id, 
                                 "vote: ", is_useful, 
@@ -516,7 +505,7 @@ def controlstep():
         elif fsm.query(Idle.RandomWalk):
             cwe.random_walk_engine(10, 10)
                  
-            if txs['vote'].hash == None or fsm.getCurrentTimer()>20:
+            if txs['vote'].hash == None or fsm.getCurrentTimer()>40:
 
                 txs['vote'] = Transaction(w3, None)
                 voteHash = None
@@ -529,6 +518,32 @@ def destroy():
     if startFlag:
         w3.geth.miner.stop()
 
-    print('Killed robot ' + me.id)
+        header = w3.sc.functions.getClusterKeys().call()
+        clusterlog= Logger(logfolder+'cluster.csv', header, ID=me.id)
 
+        clusterlog.start()
+        for cluster in w3.sc.functions.getClusters().call():
+            cluster = [str(i).replace(', ', ',') for i in cluster]
+            clusterlog.log(cluster)
+        clusterlog.close()
+
+        header = ['HASH','MINED?', 'STATUS', 'BLOCK', 'NONCE', 'VALUE', ]
+        txlog = Logger(logfolder+'tx.csv', header, ID=me.id, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
+
+        txlog.start()
+        for txHash in txList:
+            try:
+                tx = w3.eth.getTransaction(txHash)
+            except:
+                txlog.log(['Lost'])
+            else:
+                try:
+                    txRecpt = w3.eth.getTransactionReceipt(txHash)
+                    txlog.log([txHash, 'Yes', txRecpt['status'], txRecpt['blockNumber'], tx['nonce'], tx['value']])
+                except:
+                    txlog.log([txHash, 'No', 'No', 'No', tx['nonce'], tx['value']])
+        txlog.close()
+
+
+    print('Killed robot ' + me.id)
 

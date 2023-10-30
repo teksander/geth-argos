@@ -37,36 +37,50 @@ export CONTAINERBASE=${SWARMNAME}_eth
 export TPS=10
 export RABRANGE="0.3"
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"
-export NUM1A=12
-export NUM1B=0
-export NUM2=0
-export NUMROBOTS=$(echo $NUM1A+$NUM1B+$NUM2 | bc)
+export NUMROBOTS=12
 
 export SIDE_W=0.01
 export SIDE_H=0.1
-export SIDE_L=3
 export COLOR_L=0.1
+
+export SIDE_L=1.25
 export ARENASIZE=$(echo "scale=2 ; $SIDE_L*2" | bc)
 export SPAWNSIZE=$(echo "scale=2 ; $ARENASIZE/10" | bc)
 
+
+export xL1=0.5625
+export yL1=0.3247
+export xL2=-0.5625
+export yL2=0.3247
+export xL3=0
+export yL3=-0.649519
+
+export SIDE_S=0.50
+export xS1=0
+export yS1=0.866025
+export xS2=-0.75
+export yS2=-0.433013
+export xS3=0.75
+export yS3=-0.433013
+
 # Calculate the coordinates of the vertices for the lights
-export SIDE_LL=$(echo "scale=2; $SIDE_L*0.9" | bc)
-export xA=$(echo "scale=2; -$SIDE_LL/2" | bc)
-export yA=$(echo "scale=2; -sqrt(3)*$SIDE_LL/6" | bc)
-export xB=$(echo "scale=2; $SIDE_LL/2" | bc)
-export yB=$(echo "scale=2; -sqrt(3)*$SIDE_LL/6" | bc)
-export xC=0
-export yC=$(echo "scale=2; sqrt(3)*$SIDE_LL/3" | bc)
+export F=0.95
+export xV1=$(echo "scale=2; $xS1*$F" | bc)
+export yV1=$(echo "scale=2; $yS1*$F" | bc)
+export xV2=$(echo "scale=2; $xS2*$F" | bc)
+export yV2=$(echo "scale=2; $yS2*$F" | bc)
+export xV3=$(echo "scale=2; $xS3*$F" | bc)
+export yV3=$(echo "scale=2; $yS3*$F" | bc)
 
-# Calculate the coordinates of the midpoints for the walls
-export xAB=$(echo "scale=2; 0" | bc)
-export yAB=$(echo "scale=2; -sqrt(3)*$SIDE_L/6" | bc)
-export xBC=$(echo "scale=2; $SIDE_L/4" | bc)
-export yBC=$(echo "scale=2; sqrt(3)*$SIDE_L/12" | bc)
-export xAC=$(echo "scale=2; -$SIDE_L/4" | bc)
-export yAC=$(echo "scale=2; sqrt(3)*$SIDE_L/12" | bc)
+# # Calculate the coordinates of the midpoints for the walls
+# export xAB=$(echo "scale=2; 0" | bc)
+# export yAB=$(echo "scale=2; -sqrt(3)*$SIDE_L/6" | bc)
+# export xBC=$(echo "scale=2; $SIDE_L/4" | bc)
+# export yBC=$(echo "scale=2; sqrt(3)*$SIDE_L/12" | bc)
+# export xAC=$(echo "scale=2; -$SIDE_L/4" | bc)
+# export yAC=$(echo "scale=2; sqrt(3)*$SIDE_L/12" | bc)
 
-# # Calculate the height of the triangle
+# # Calculate the height of the triangles
 # height=$(echo "scale=2; sqrt(3)/2 * $SIDE_L" | bc)
 
 # # Calculate the coordinates for line 1
@@ -81,8 +95,13 @@ export yAC=$(echo "scale=2; sqrt(3)*$SIDE_L/12" | bc)
 # export xC=$(echo "scale=2; -$COLOR_L/2" | bc)
 # export yC=$(echo "scale=2; $height - $COLOR_L/2" | bc)
 
+# [EXPERIMENT]
+export NUM_BYZ=0
+export NUM_FAU=0
+export NUM_COL=0
+
 # [GETH]
-export BLOCKPERIOD=2
+export BLOCKPERIOD=10
 export STARTTOKENS="0x1236efcbcbb340000"
 
 # [SC]
@@ -93,16 +112,16 @@ export DIMS=3
 export NUMPT=100
 export MAXLIFE=3
 export MINREP=0
-export RADIUS=$(echo 30*$DECIMAL_FACTOR | bc)
+export RADIUS=$(echo 50*$DECIMAL_FACTOR | bc)
 
 export TOTALASSETS=$(echo $NUMROBOTS*20000000000000000000 | bc)
 export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER*2/3 | bc)
 
 # [OTHER]
 export SEED=350
-export TIMELIMIT=90
-export REPS=20
-
+export TIMELIMIT=20
+export REPS=1
+export NOTES="Variation of number of malicious robots; short runs; first test"
 
 
 

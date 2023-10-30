@@ -19,19 +19,23 @@ def getPoints():
 
 
 def getBalance(allpoints, allclusters):
-    # check all my balance, including those frozen in unverified clusters.
-    myUsableBalance = float(w3.fromWei(
-        w3.eth.getBalance(w3.eth.coinbase), "ether")) - 1
-    myBalance = myUsableBalance
-    # _, allpoints = getPoints()
-    # _, allclusters = getClusters()
-    for idx, cluster in enumerate(allclusters):
-        if cluster['verified'] == 0:
-            for point in allpoints:
-                if point['sender'] == w3.key and int(point['cluster']) == idx:
-                    myBalance += float(point['credit']) / 1e18
-    return round(myBalance, 2), myUsableBalance
+    chain_balance  = float(w3.fromWei(w3.eth.getBalance(w3.eth.coinbase), "ether"))
+    full_balance   = chain_balance
 
+    cluster_buffer = [0] * len(allclusters)
+    for point in allpoints:
+        i = int(point['cluster'])
+
+        try:
+            allclusters[i]['verified'] == 0
+        except:
+            print(f'index error {i}')
+
+        if point['sender'] == w3.eth.coinbase and allclusters[i]['verified'] == 0:
+            if cluster_buffer[i] == 0:
+                full_balance += float(point['credit']) / 1e18
+                cluster_buffer[i] = 1
+    return round(full_balance, 2), chain_balance
 
 def blockHandle():
     """ Execute for each block when new blocks are synchronized """
@@ -70,16 +74,25 @@ def scHandle():
     # 	balance_pending += tx['value']
 
     # Log relevant smart contract details
+    blockNumb = lastBlock['number']
+    blockHash = lastBlock['hash'].hex()
+    rep_stats  = sc.functions.getReportStatistics().call()
+    n_clusters = len(allclusters)
+    n_accepted = len([c for c in allclusters if c['verified']==1])
+    n_rejected = len([c for c in allclusters if c['verified']==2])
+    n_pending  = len([c for c in allclusters if c['verified']==0])
 
-    logs['sc'].log([
-        lastBlock['number'],
-        lastBlock['hash'].hex(),
-        balance,
-        spendable_balance,
-        balance_pending,
-        len(allclusters)
-    ])
-
+    logs['sc'].log([blockNumb, 
+                    blockHash, 
+                    balance, 
+                    spendable_balance, 
+                    balance_pending, 
+                    n_clusters, 
+                    n_accepted, 
+                    n_rejected, 
+                    n_pending, 
+                    *rep_stats])
+                    
     tcp_calls.setData({
         'balance': balance,
         'spendable_balance': spendable_balance,
@@ -103,10 +116,10 @@ if __name__ == '__main__':
               'DIFF', 'TDIFF', 'SIZE', 'TXS', 'UNC', 'PENDING', 'QUEUED']
     logs['block'] = Logger(f'{logfolder}/block.csv', header, ID=robotID)
 
-    header = ['BLOCK', 'HASH', 'BALANCE', 'SPENDABLE', 'PENDING', '#CLUSTERS']
+    header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'PENDING', '#CLUSTERS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
     logs['sc'] = Logger(f'{logfolder}/sc.csv', header, ID=robotID)
-    # extrafields={'isbyz':isByz, 'isfaulty':isFaulty, 'type':'malicious' if isByz else 'faulty' if isFaulty else 'honest'}
-
+    # extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
+    
     header = ['MEM', '%CPU', '%RAM']
     logs['extra'] = Logger(f'{logfolder}/extra.csv', header, 10, ID=robotID)
 

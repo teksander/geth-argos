@@ -135,15 +135,22 @@ def post_step():
 
     # Logging of loop function variables
     logs['loop'].log('')
-
+    
 
 def is_experiment_finished():
-  
-    finished = time.time() - startTime > lp['generic']['time_limit']
-    if finished:
-        print("Experiment has finished")
+    
+    finish_flags = 0
+    for robot in allrobots:
+        finish_flags += int(robot.variables.get_attribute("stop"))
+    
+    if finish_flags >= 0.66*len(allrobots):
+        return True
 
-    return finished
+    # finished = time.time() - startTime > lp['generic']['time_limit']
+    # if finished:
+    #     print("Experiment has finished")
+
+    # return finished
 
 def reset():
     pass

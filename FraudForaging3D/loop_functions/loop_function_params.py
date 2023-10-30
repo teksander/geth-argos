@@ -37,7 +37,7 @@ generic_params['decimal_factor'] = float(os.environ["DECIMAL_FACTOR"])
 generic_params['num_food_source'] = 3
 generic_params['unitPositionUncertainty'] = 0.03
 generic_params['frictionUncertainty'] = 0.01
-num_malicious = int(os.environ["NUM2"])
+num_malicious = 0
 
 generic_params['tps'] = eval(os.environ["TPS"])
 generic_params['rab_range'] = eval(os.environ["RABRANGE"])

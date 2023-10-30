@@ -4,9 +4,23 @@ source experimentconfig.sh
 DATAFOLDER="$EXPERIMENTFOLDER/results/data"
 
 ##################################################################################
+### Set a value for any parameter in experimentconfig.sh
+### USAGE:   config "parameter" value
 ### EXAMPLE: config "NUMROBOTS" 10 
 config() {
 	sed -i "s/^export ${1}=.*/export ${1}=${2}/" experimentconfig.sh
+}
+
+##################################################################################
+### Set a value for any parameter in the loop_params.py dictionaries
+### USAGE:   loopconfig "dictionary" "parameter" value
+### EXAMPLE: loopconfig "patches" "radius" 0.05 
+loopconfig() {
+	sed -i "/\['${1}'\]\['${2}'\]/ s/=.*/= ${3}/" loop_functions/loop_function_params.py
+}
+
+controlconfig() {
+	sed -i "/\['${1}'\]\['${2}'\]/ s/=.*/= ${3}/" controllers/controller_params.py
 }
 
 ##################################################################################
@@ -42,8 +56,7 @@ run() {
 	for REP in $(seq 1 ${REPS}); do
 
 		# Perform experiment
-		#. starter --reset-geth --start-novis
-		. starter --reset-geth --start
+		. starter -r -sz
 
 		# Collect data
 		if [ $# -eq 1 ]; then
@@ -54,7 +67,16 @@ run() {
 }
 
 
+# DEFINE AND RUN EXPERIMENT
+EXP=short
+config "REPS" 1
+config "NOTES" "\"Variation of number of malicious robots; short runs; first test\""
 
-config "REPS" 20
-run "FraudForaging/161501_paper_config_60min_add_20agents_all_normal_no_min_balance_friction_addb"
+for K in $(seq 3 1 5); do 
+	CFG="${K}byz-0fau"
+	config "NUM_BYZ" ${K}
+	wait
+	run    "${EXP}/${CFG}" ${1}
+	wait
+done
 

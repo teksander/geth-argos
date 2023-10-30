@@ -602,14 +602,15 @@ class PeerBuffer(object):
 class Logger(object):
     """ Logging Class to Record Data to a File
     """
-    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None):
+    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None, extrafields = {}):
 
         self.file = open(logfile, 'w+', buffering = buffering)
         self.rate = rate
         self.tStamp = 0
         self.tStart = 0
         self.latest = time.time()
-        pHeader = ' '.join([str(x) for x in header])
+        self.extra  = extrafields.values()
+        pHeader = ' '.join([str(x) for x in header]+[str(x) for x in extrafields])
         self.file.write('{} {} {}\n'.format('ID', 'TIME', pHeader))
         
         if ID:
@@ -627,7 +628,7 @@ class Logger(object):
             self.tStamp = time.time()
             try:
                 tString = str(round(self.tStamp-self.tStart, 3))
-                pData = ' '.join([str(x) for x in data])
+                pData = ' '.join([str(x) for x in data]+[str(x) for x in self.extra])
                 self.file.write('{} {} {}\n'.format(self.id, tString, pData))
                 self.latest = self.tStamp
             except:

@@ -90,7 +90,7 @@ class OmniCam(object):
     def get_reading(self):
         """ This method returns the current reading (just one) """
         if self.readings:
-            return self.readings[0]
+            return min(self.readings, key=lambda reading: reading.distance)
         else:
             return None
     

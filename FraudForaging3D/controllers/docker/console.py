@@ -48,8 +48,8 @@ def registerSC(w3):
 
 def call(show_points=True, raw=False):
     block = w3.eth.getBlock('latest')
-    points = getPoints()
-    clusters = getClusters()
+    _, points = getPoints()
+    _, clusters = getClusters()
     balance, usable = getBalance(points, clusters)
     unclustered_points = []
 
@@ -63,8 +63,8 @@ def call(show_points=True, raw=False):
             # point['CHS'] = round(chebyshev_distance(p1,p2)/1e5, 2)
             point['position'] = [round(i/1e5) for i in point['position']]
             point['credit'] //= 1e16
-            # point['sender'] = point['sender'][0:5]
-            point['sender'] = key_to_id[point['sender'].lower()]
+            point['sender'] = point['sender'][0:5]
+            # point['sender'] = key_to_id[point['sender'].lower()]
 
         for idx, cluster in enumerate(clusters):
             del cluster['life']
@@ -75,8 +75,8 @@ def call(show_points=True, raw=False):
             cluster['total_credit'] //= 1e16
             cluster['total_credit_food'] //= 1e16
             cluster['total_credit_outlier'] //= 1e16
-            # cluster['init_reporter'] = cluster['init_reporter'][0:5]
-            cluster['init_reporter'] = key_to_id[cluster['init_reporter'].lower()]
+            cluster['init_reporter'] = cluster['init_reporter'][0:5]
+            # cluster['init_reporter'] = key_to_id[cluster['init_reporter'].lower()]
 
             if show_points:
                 cluster['points'] = [
