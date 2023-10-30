@@ -69,10 +69,10 @@ run() {
 
 # DEFINE AND RUN EXPERIMENT
 EXP=short
-config "REPS" 1
+config "REPS" 2
 config "NOTES" "\"Variation of number of malicious robots; short runs; first test\""
 
-for K in $(seq 3 1 5); do 
+for K in $(seq 0 1 5); do 
 	CFG="${K}byz-0fau"
 	config "NUM_BYZ" ${K}
 	wait

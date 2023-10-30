@@ -234,9 +234,9 @@ def controlstep():
                 int(cluster_idx)
                 ).transact({'from': me.key, 'value':value})
             # voteHash = w3.sc.functions.test([int(a*DECIMAL_FACTOR) for a in color_to_report], int(is_useful), int(value)).transact({'from': me.key, 'value': value})
+            
             txs['vote'] = Transaction(w3, voteHash)
             txList.append(voteHash)
-
             return voteHash
 
         ##############################
@@ -281,18 +281,15 @@ def controlstep():
             # query the Smart Contract 
             all_clusters = tcp_sc.request('clusters')
             all_points   = tcp_sc.request('points')
-            vote_support, current_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
-            vote_support -= 1
-            vote_support /= DEPOSITFACTOR
 
             n_accepted = len([c for c in all_clusters if c['verified']==1])
             if n_accepted >= 1:
                 robot.variables.set_attribute("stop", "1")
 
-            # w3.sc.functions.test(1).transact({'from': me.key, 'value':vote_support})
-            # 
-            # this is for a test: idle and wait if no assets
-            # print(all_clusters, all_points, vote_support)
+            # vote_support, current_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
+            # vote_support -= 1
+            # vote_support /= DEPOSITFACTOR
+
             # if vote_support >= current_balance and current_balance!=0:
             # 	rgb.setAll('white')
             # 	verify  = False
@@ -381,7 +378,8 @@ def controlstep():
                 vote_support -= 1
                 vote_support /= DEPOSITFACTOR
                 tag_id, _ = cwe.check_apriltag()
-                print(arrived, tag_id, vote_support)
+                
+
                 if tag_id != 0 and vote_support < address_balance:
 
                     # two recently discovered colord are recorded in recent_colors
@@ -445,9 +443,10 @@ def controlstep():
                 vote_support, address_balance  = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
                 vote_support -= 1
                 vote_support /= DEPOSITFACTOR
+
                 if vote_support >= address_balance:
                     fsm.vars.attempts += 10
-                    print(f"Verify fail {fsm.vars.attempts}/10: poor {address_balance}<{vote_support}")
+                    print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}>{address_balance}")
 
                 elif found_color_idx != color_idx_to_verify:
                     fsm.vars.attempts += 1
@@ -463,8 +462,8 @@ def controlstep():
                 if fsm.vars.attempts >= 10:
                     fsm.setState(Scout.Query, message="Verification failed")
                     ok_to_vote = False
-                
-                cwe.rot.setPattern_duration(["ccw", "cw"][fsm.vars.attempts % 2], fsm.vars.attempts//2)
+                else:
+                    cwe.rot.setPattern_duration(["ccw", "cw"][fsm.vars.attempts % 2], fsm.vars.attempts//2)
 
                 if ok_to_vote:
                     
