@@ -54,8 +54,10 @@ cp $EXPERIMENTFOLDER/controllers/controller_params.py $LOGSFOLDER
 for ID in $(seq 1 $NUMROBOTS); do
   cp -rp $DOCKERFOLDER/geth/logs/$ID/ $LOGSFOLDER
 done
+wait 
 
 # Collect data from /logs/ into /results/data
+rm ${LOGSFOLDER}.gitignore
 cp -rp $LOGSFOLDER $DATAFOLDER$new_rep
 
 echo "Storing data to: /results/data/experiment_$1/$new_rep"

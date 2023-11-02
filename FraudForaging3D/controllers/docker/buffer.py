@@ -28,13 +28,15 @@ def getBalance(allpoints, allclusters):
 
         try:
             allclusters[i]['verified'] == 0
+
+
+            if point['sender'] == w3.eth.coinbase and allclusters[i]['verified'] == 0:
+                if cluster_buffer[i] == 0:
+                    full_balance += float(point['credit']) / 1e18
+                    cluster_buffer[i] = 1
         except:
             print(f'index error {i}')
-
-        if point['sender'] == w3.eth.coinbase and allclusters[i]['verified'] == 0:
-            if cluster_buffer[i] == 0:
-                full_balance += float(point['credit']) / 1e18
-                cluster_buffer[i] = 1
+            
     return round(full_balance, 2), chain_balance
 
 def blockHandle():
