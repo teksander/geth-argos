@@ -64,53 +64,33 @@ class ColorWalkEngine(object):
         # Timers
         self.timers = dict()
         self.timers['discover'] = Timer()
-        self.drive = None
+        self.drive = None          
 
-        # Calibration
-        for idx, name in enumerate(self.colors):
-            calibFile = f'controllers/color_data/{name}_calibration.csv'
+        calibFile = f'controllers/color_data/calibration/{self.id}_bgr.csv'
 
-            if exists(calibFile):
-                with open(calibFile) as file:
-                    line = file.readlines()[self.id]
-                    elements = line.strip().split(',')
-                    color_bgr  = [  int(bias_bgr[0]*float(elements[2])), 
-                                    int(bias_bgr[1]*float(elements[1])), 
-                                    int(bias_bgr[2]*float(elements[0]))]
-                    color_hsv  = bgr_to_hsv(color_bgr)
-                    self.ground_truth_bgr.append(color_bgr)
-                    self.ground_truth_hsv.append(color_hsv)
-            else:
-                print(f"color calibration file not found, use hard coded colors")
-                self.colors = ["red", "blue", "green"]
-                self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [0, 255, 0]] 
-                self.ground_truth_hsv = [[0, 255, 255], [120, 255, 255], [60, 255, 255]]
-                break
-            
-        print(f"{self.id} calibrated colors:")
-        print(self.colors)
-        print(self.ground_truth_bgr)
-        print(self.ground_truth_hsv)
+        if exists(calibFile):
+            openFile = list(open(calibFile))
+            for color in self.colors:
+                for line in reversed(openFile):
+                    _, awb_mode, color_name, b, g, r  = line.strip().split(' ')
+                    if awb_mode == 'tungsten' and color_name == color:
+                        color_bgr = [bias_bgr[0]*int(b), bias_bgr[0]*int(g), bias_bgr[0]*int(r)]
+                        color_hsv = bgr_to_hsv(color_bgr)
 
-        #     with open(calibFile) as file:
-        #         for line in file:
-        #             elements = line.strip().split(' ')
-        #             color_name = elements[0]
-        #             color_bgr  = [int(bias_bgr[0]*int(elements[1])), 
-        #                           int(bias_bgr[1]*int(elements[2])), 
-        #                           int(bias_bgr[2]*int(elements[3]))]
-        #             color_hsv  = bgr_to_hsv(color_bgr)
-                    
-        #             self.colors.append(color_name)
-        #             self.ground_truth_bgr.append(color_bgr)
-        #             self.ground_truth_hsv.append(color_hsv)
+                        # self.calibrated_bgr[color_name] = color_bgr
+                        # self.calibrated_hsv[color_name] = color_hsv
+                        self.ground_truth_bgr.append(color_bgr)
+                        self.ground_truth_hsv.append(color_hsv)
+                        break
 
-        # else:
-        #     print("color calibration file not found, use hard coded colors")
-        #     self.colors = ["red", "blue", "green"]
-        #     self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [0, 255, 0]] 
-        #     self.ground_truth_hsv = [[0, 255, 255], [120, 255, 255], [60, 255, 255]]
+        else:
+            print("color calibration file not found, use hard coded colors")
+            self.colors = ["red", "blue", "green"]
+            self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 0]] 
+            self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [80, 157, 157]]
 
+        print(f"My bias: {bias_bgr} // ")
+        print(f"My colors: {self.ground_truth_bgr}")
         logger.info('Color walk OK')
     
     def random_walk_engine(self, mylambda= 15, turn = 7):
