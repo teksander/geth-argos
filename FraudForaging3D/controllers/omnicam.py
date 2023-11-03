@@ -25,7 +25,7 @@ class OmniCam(object):
     """ Set up ARGoS3 colored_blob_omnidirectional_camera
 
     """
-    def __init__(self, robot, fov = 360):
+    def __init__(self, robot, fov = 360, bias_bgr = [1,1,1]):
         """ Constructor
         :type fov: str
         :param fov: field of view in degrees (tip: 45)
@@ -77,7 +77,7 @@ class OmniCam(object):
                 readings[i][0] = random.choice(self.rgb_samples['blue'])
                 this_util = 1
 
-            readings[i][0] = [round(a) for a in readings[i][0]]
+            readings[i][0] = [round(a*bias_bgr[i]) for i, a in enumerate(readings[i][0])]
             readings[i] += [this_util]
 
         self.readings = [omnicam_reading(*r) for r in readings]

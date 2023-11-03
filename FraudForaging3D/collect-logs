@@ -57,8 +57,8 @@ done
 wait 
 
 # Collect data from /logs/ into /results/data
-rm ${LOGSFOLDER}.gitignore
 cp -rp $LOGSFOLDER $DATAFOLDER$new_rep
+rm $DATAFOLDER$new_rep/.gitignore
 
 echo "Storing data to: /results/data/experiment_$1/$new_rep"
 

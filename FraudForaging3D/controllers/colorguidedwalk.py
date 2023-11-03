@@ -55,7 +55,7 @@ class ColorWalkEngine(object):
         # Submodules
         self.robot = robot
         self.id  = int(robot.variables.get_attribute("id"))
-        self.cam = OmniCam(robot, 45)
+        self.cam = OmniCam(robot, 45, bias_bgr = bias_bgr)
         self.rot = Rotation(robot, MAX_SPEED)
         self.cam.start()
         self.rot.start()
@@ -74,7 +74,7 @@ class ColorWalkEngine(object):
                 for line in reversed(openFile):
                     _, awb_mode, color_name, b, g, r  = line.strip().split(' ')
                     if awb_mode == 'tungsten' and color_name == color:
-                        color_bgr = [bias_bgr[0]*int(b), bias_bgr[0]*int(g), bias_bgr[0]*int(r)]
+                        color_bgr = [bias_bgr[0]*int(b), bias_bgr[1]*int(g), bias_bgr[2]*int(r)]
                         color_hsv = bgr_to_hsv(color_bgr)
 
                         # self.calibrated_bgr[color_name] = color_bgr

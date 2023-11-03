@@ -71,8 +71,22 @@ def create_df(experiments, logfile, exclude_patterns = []):
         return None
 
 def get_param_df(df, param_dict, param, alias = None):
-    df = df.groupby(['EXP','CFG','REP']).apply(lambda x: get_param(x, x.name , param_dict, param, alias))
-    return df
+    
+    # Group the DataFrame by ['EXP', 'CFG', 'REP']
+    groups = df.groupby(['EXP', 'CFG', 'REP'], as_index=False)
+    
+    # Initialize an empty list to store modified DataFrame chunks
+    result = []
+
+    # Iterate over each group and apply the get_param function
+    for name, group in groups:
+        modified_group = get_param(group, name, param_dict, param, alias)
+        result.append(modified_group)
+
+    # Concatenate the modified chunks into a new DataFrame
+    df_result = pd.concat(result, ignore_index=True)
+
+    return df_result
 
 def get_param(group, name, param_dict, param, alias):
     exp = name[0]
