@@ -96,8 +96,8 @@ export yV3=$(echo "scale=2; $yS3*$F" | bc)
 # export yC=$(echo "scale=2; $height - $COLOR_L/2" | bc)
 
 # [EXPERIMENT]
-export NUM_BYZ=5
-export NUM_FAU=0
+export NUM_BYZ=0
+export NUM_FAU=1
 export NUM_COL=0
 
 # [GETH]
@@ -120,8 +120,8 @@ export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER*2/3 | bc)
 # [OTHER]
 export SEED=350
 export TIMELIMIT=20
-export REPS=2
-export NOTES="Variation of number of malicious robots; short runs; first test"
+export REPS=1
+export NOTES="Variation of number of faulty robots; short runs; first test"
 
 
 

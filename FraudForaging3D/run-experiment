@@ -56,7 +56,7 @@ run() {
 	for REP in $(seq 1 ${REPS}); do
 
 		# Perform experiment
-		. starter -r -s
+		. starter -r -sz
 
 		# Collect data
 		if [ $# -eq 1 ]; then
@@ -68,13 +68,13 @@ run() {
 
 
 # DEFINE AND RUN EXPERIMENT
-EXP=short
+EXP=short_faulty2
 config "REPS" 1
-config "NOTES" "\"Variation of number of malicious robots; short runs; first test\""
+config "NOTES" "\"Variation of number of faulty robots; short runs; first test\""
 
-for K in $(seq 2 1 2); do 
-	CFG="${K}byz-0fau"
-	config "NUM_BYZ" ${K}
+for K in $(seq 1 1 8); do 
+	CFG="${K}fau"
+	config "NUM_FAU" ${K}
 	wait
 	run    "${EXP}/${CFG}" ${1}
 	wait

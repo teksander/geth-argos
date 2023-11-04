@@ -39,6 +39,7 @@ class OmniCam(object):
         # Hard coded colors
         self.colors = ['red', 'blue', 'green']
         self.rgb_samples = {color: [] for color in self.colors}
+        self.bias_rgb = bias_bgr[::-1]
 
         # Read the sample data from real experiments
         for color in self.colors:
@@ -77,7 +78,7 @@ class OmniCam(object):
                 readings[i][0] = random.choice(self.rgb_samples['blue'])
                 this_util = 1
 
-            readings[i][0] = [round(a*bias_bgr[i]) for i, a in enumerate(readings[i][0])]
+            readings[i][0] = [round(a*self.bias_rgb[i]) for i, a in enumerate(readings[i][0])]
             readings[i] += [this_util]
 
         self.readings = [omnicam_reading(*r) for r in readings]
