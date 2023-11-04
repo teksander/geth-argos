@@ -140,7 +140,7 @@ def init():
     erb = ERANDB(robot, erbDist, erbtFreq)
 
     # /* Init Navigation */
-    cwe = ColorWalkEngine(robot, rwSpeed, [1,1,0.66] if isFau else [1,1,1])
+    cwe = ColorWalkEngine(robot, rwSpeed, [1, 1, 1-int(me.id)*(0.35)/8] if isFau else [1,1,1])
 
     # /* Init LEDs */
     rgb = RGBLEDs(robot)

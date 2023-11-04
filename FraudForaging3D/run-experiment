@@ -68,15 +68,10 @@ run() {
 
 
 # DEFINE AND RUN EXPERIMENT
-EXP=short_faulty2
-config "REPS" 1
-config "NOTES" "\"Variation of number of faulty robots; short runs; first test\""
+EXP=long_faulty
+config "REPS" 15
+config "NOTES" "\"Longrun to see faulty robots losing funds according to ID. 4 perfect robots and 8 faulty\""
 
-for K in $(seq 1 1 8); do 
-	CFG="${K}fau"
-	config "NUM_FAU" ${K}
-	wait
-	run    "${EXP}/${CFG}" ${1}
-	wait
-done
-
+CFG="8fau"
+run    "${EXP}/${CFG}" ${1}
+wait
