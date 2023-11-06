@@ -5,6 +5,7 @@
 #######################################################################
 import sys, os
 import socket
+from random import random
 sys.path.insert(1, os.environ["EXPERIMENTFOLDER"])
 
 from controllers.colorguidedwalk import ColorWalkEngine
@@ -140,7 +141,7 @@ def init():
     erb = ERANDB(robot, erbDist, erbtFreq)
 
     # /* Init Navigation */
-    cwe = ColorWalkEngine(robot, rwSpeed, [1, 1, 1-int(me.id)*(0.35)/8] if isFau else [1,1,1])
+    cwe = ColorWalkEngine(robot, rwSpeed, [1, 1, 1-int(me.id)**2.4*0.001] if isFau else [1,1,1])
 
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
@@ -227,7 +228,7 @@ def controlstep():
             value = w3.toWei(support, 'ether')
             
             voteHash = w3.sc.functions.reportNewPt(
-                [int(a*DECIMAL_FACTOR) for a in color_to_report],
+                [int(DECIMAL_FACTOR * (a+random())) for a in color_to_report],
                 int(is_useful),
                 int(value),
                 color_idx,  
