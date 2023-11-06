@@ -128,17 +128,22 @@ contract ForagingPtManagement{
             }
             // Update the membership to the nearest cluster of point[k]
             if (info.foundCluster ==1 && info.minClusterIdx != uint(pointList[k].cluster)){
-                for (uint j=0; j<space_size; j++){
-                    clusterList[uint(pointList[k].cluster)].position[j] = ((int256(clusterList[uint(pointList[k].cluster)].position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit)
-                                     - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit-pointList[k].credit);
+                if (clusterList[uint(pointList[k].cluster)].total_credit_food>pointList[k].credit){ //At least another supportive vote in this cluster, other than the one of pointList[k]
+                    for (uint j=0; j<space_size; j++){
+                        clusterList[uint(pointList[k].cluster)].position[j] = ((int256(clusterList[uint(pointList[k].cluster)].position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit)
+                                         - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit-pointList[k].credit);
+                    }
                 }
                 clusterList[uint(pointList[k].cluster)].num_rep-=1;
                 clusterList[uint(pointList[k].cluster)].total_credit-=pointList[k].credit;
 
+
                 if (pointList[k].category==1){
-                    for (uint j=0; j<space_size; j++){
+                    if (clusterList[uint(pointList[k].cluster)].total_credit_food>pointList[k].credit){
+                        for (uint j=0; j<space_size; j++){
                         clusterList[uint(pointList[k].cluster)].sup_position[j] = ((int256(clusterList[uint(pointList[k].cluster)].sup_position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit_food)
                                          - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit_food-pointList[k].credit);
+                        }
                     }
                     clusterList[uint(pointList[k].cluster)].total_credit_food-=pointList[k].credit;
 
