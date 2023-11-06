@@ -80,6 +80,7 @@ def scHandle():
     blockHash = lastBlock['hash'].hex()
     rep_stats  = sc.functions.getReportStatistics().call()
     n_clusters = len(allclusters)
+    n_points   = len(allpoints)
     n_accepted = len([c for c in allclusters if c['verified']==1])
     n_rejected = len([c for c in allclusters if c['verified']==2])
     n_pending  = len([c for c in allclusters if c['verified']==0])
@@ -89,7 +90,8 @@ def scHandle():
                     balance, 
                     spendable_balance, 
                     balance_pending, 
-                    n_clusters, 
+                    n_clusters,
+                    n_points, 
                     n_accepted, 
                     n_rejected, 
                     n_pending, 
@@ -118,7 +120,7 @@ if __name__ == '__main__':
               'DIFF', 'TDIFF', 'SIZE', 'TXS', 'UNC', 'PENDING', 'QUEUED']
     logs['block'] = Logger(f'{logfolder}/block.csv', header, ID=robotID)
 
-    header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'PENDING', '#CLUSTERS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
+    header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'PENDING', '#CLUSTERS', '#POINTS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
     logs['sc'] = Logger(f'{logfolder}/sc.csv', header, ID=robotID)
     # extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
     

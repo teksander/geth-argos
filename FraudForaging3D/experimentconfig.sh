@@ -96,8 +96,8 @@ export yV3=$(echo "scale=2; $yS3*$F" | bc)
 # export yC=$(echo "scale=2; $height - $COLOR_L/2" | bc)
 
 # [EXPERIMENT]
-export NUM_BYZ=0
-export NUM_FAU=1
+export NUM_BYZ=2
+export NUM_FAU=4
 export NUM_COL=0
 
 # [GETH]
@@ -119,9 +119,9 @@ export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER*2/3 | bc)
 
 # [OTHER]
 export SEED=350
-export TIMELIMIT=20
-export REPS=1
-export NOTES="Variation of number of faulty robots; short runs; first test"
+export TIMELIMIT=75
+export REPS=15
+export NOTES="Longrun to see faulty robots losing funds according to ID. 4 perfect robots and 8 faulty"
 
 
 
