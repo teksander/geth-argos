@@ -140,7 +140,6 @@ contract ForagingPtManagement{
 
                 if (pointList[k].category==1){
                     if (clusterList[uint(pointList[k].cluster)].total_credit_food>pointList[k].credit){
-
                         for (uint j=0; j<space_size; j++){
                         clusterList[uint(pointList[k].cluster)].sup_position[j] = ((int256(clusterList[uint(pointList[k].cluster)].sup_position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit_food)
                                          - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit_food-pointList[k].credit);
@@ -157,8 +156,8 @@ contract ForagingPtManagement{
                     clusterList[info.minClusterIdx].sup_position = info.positiono;
                 }
                 pointList[k].cluster = int256(info.minClusterIdx);
-                if (clusterList[uint(pointList[k].cluster)].num_rep == 0){
-                        clusterList[uint(pointList[k].cluster)].verified=5; //cluster abandon due to all points have been reassigned to other clusters
+                if (clusterList[uint(pointList[k].cluster)].total_credit_food == 0){ //when there is no more supportive votes in the cluster, due to kmeans reclustering
+                        clusterList[uint(pointList[k].cluster)].verified=5; //cluster abandon due to supportive votes have been reassigned to other clusters
                     }
                 }
             }
@@ -407,7 +406,7 @@ contract ForagingPtManagement{
                 clusterList[i].verified=4; //cluster rejected due to most of reports that intended to verify it have been classified as outliers
             }
             //remove points that correspond to redundant or rejected clusters
-            if (clusterList[i].verified==3 || clusterList[i].verified==4){
+            if (clusterList[i].verified==3 || clusterList[i].verified==4 || clusterList[i].verified==5){
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && clusterList[i].verified==3){ //only return deposits for clusters that have been rejected due to maximum number of cluster reached and condition here
                         payable(pointList[j].sender).transfer(pointList[j].credit);
