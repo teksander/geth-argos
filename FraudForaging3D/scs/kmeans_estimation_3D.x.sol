@@ -140,6 +140,7 @@ contract ForagingPtManagement{
 
                 if (pointList[k].category==1){
                     if (clusterList[uint(pointList[k].cluster)].total_credit_food>pointList[k].credit){
+
                         for (uint j=0; j<space_size; j++){
                         clusterList[uint(pointList[k].cluster)].sup_position[j] = ((int256(clusterList[uint(pointList[k].cluster)].sup_position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit_food)
                                          - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit_food-pointList[k].credit);
