@@ -5,7 +5,7 @@
 #######################################################################
 import sys, os
 import socket
-from random import random
+import random
 sys.path.insert(1, os.environ["EXPERIMENTFOLDER"])
 
 from controllers.colorguidedwalk import ColorWalkEngine
@@ -228,7 +228,7 @@ def controlstep():
             value = w3.toWei(support, 'ether')
             
             voteHash = w3.sc.functions.reportNewPt(
-                [int(DECIMAL_FACTOR * (a+random())) for a in color_to_report],
+                [int(DECIMAL_FACTOR * a) for a in color_to_report],
                 int(is_useful),
                 int(value),
                 color_idx,  
@@ -381,7 +381,7 @@ def controlstep():
                 tag_id, _ = cwe.check_apriltag()
                 
 
-                if tag_id != 0 and vote_support < address_balance:
+                if tag_id != 0 and vote_support < address_balance and vote_support:
 
                     # two recently discovered colord are recorded in recent_colors
                     recent_colors.append(color_name_to_report)
@@ -456,7 +456,10 @@ def controlstep():
                 elif tag_id == 0:
                     fsm.vars.attempts += 1
                     print(f"Verify fail {fsm.vars.attempts}/10: no tag found")
-            
+                elif vote_support <= 0:
+                    fsm.vars.attempts += 1
+                    print(f"Verify fail {fsm.vars.attempts}/10: negative vote support")
+
                 else:
                     ok_to_vote = True
 
