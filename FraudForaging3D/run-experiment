@@ -68,10 +68,10 @@ run() {
 
 
 # DEFINE AND RUN EXPERIMENT
-EXP=long_faulty
+EXP=long_faulty_7
 config "REPS" 15
-config "NOTES" "\"Longrun to see faulty robots losing funds according to ID. 4 perfect robots and 8 faulty\""
+config "NOTES" "\"Longrun to see faulty robots losing funds according to ID. each fau is blind in different color\""
 
-CFG="8fau"
+CFG="2byz-3fau"
 run    "${EXP}/${CFG}" ${1}
 wait

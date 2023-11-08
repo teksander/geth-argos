@@ -5,7 +5,7 @@
 #######################################################################
 import sys, os
 import socket
-from random import random
+import random
 sys.path.insert(1, os.environ["EXPERIMENTFOLDER"])
 
 from controllers.colorguidedwalk import ColorWalkEngine
@@ -141,7 +141,8 @@ def init():
     erb = ERANDB(robot, erbDist, erbtFreq)
 
     # /* Init Navigation */
-    cwe = ColorWalkEngine(robot, rwSpeed, [1, 1, 1-int(me.id)**2.4*0.001] if isFau else [1,1,1])
+    # cwe = ColorWalkEngine(robot, rwSpeed, [1, 1, 1-int(me.id)**3.1*0.0005] if isFau else [1,1,1])
+    cwe = ColorWalkEngine(robot, rwSpeed, [0.4 if i==me.ii % 3 else 1 for i in range(3)] if isFau else [1,1,1])
 
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
@@ -227,15 +228,23 @@ def controlstep():
             global txList
             value = w3.toWei(support, 'ether')
             
-            voteHash = w3.sc.functions.reportNewPt(
-                [int(DECIMAL_FACTOR * (a+random())) for a in color_to_report],
-                int(is_useful),
-                int(value),
-                color_idx,  
-                int(cluster_idx)
-                ).transact({'from': me.key, 'value':value})
-            # voteHash = w3.sc.functions.test([int(a*DECIMAL_FACTOR) for a in color_to_report], int(is_useful), int(value)).transact({'from': me.key, 'value': value})
-            
+            try:
+                voteHash = w3.sc.functions.reportNewPt(
+                    [int(DECIMAL_FACTOR * (a+random.random())) for a in color_to_report],
+                    int(is_useful),
+                    int(value),
+                    color_idx,  
+                    int(cluster_idx)
+                    ).transact({'from': me.key, 'value':value})
+                
+            except Exception as e:
+                print(e)
+                print([int(DECIMAL_FACTOR * (a+random.random())) for a in color_to_report],
+                    int(is_useful),
+                    int(value),
+                    color_idx,  
+                    int(cluster_idx))
+
             txs['vote'] = Transaction(w3, voteHash)
             txList.append(voteHash)
             return voteHash
@@ -381,7 +390,7 @@ def controlstep():
                 tag_id, _ = cwe.check_apriltag()
                 
 
-                if tag_id != 0 and vote_support < address_balance:
+                if tag_id != 0 and 0 < vote_support < address_balance:
 
                     # two recently discovered colord are recorded in recent_colors
                     recent_colors.append(color_name_to_report)
@@ -448,6 +457,10 @@ def controlstep():
                 if vote_support >= address_balance:
                     fsm.vars.attempts += 10
                     print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}>{address_balance}")
+
+                elif vote_support < 0:
+                    fsm.vars.attempts += 10
+                    print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}<0")
 
                 elif found_color_idx != color_idx_to_verify:
                     fsm.vars.attempts += 1
