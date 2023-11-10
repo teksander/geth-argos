@@ -31,6 +31,7 @@ class OmniCam(object):
         :param fov: field of view in degrees (tip: 45)
         """
         self.robot = robot
+        self.id    = int(robot.variables.get_attribute("id"))
         self.readings  = []
 
         self.robot.colored_blob_omnidirectional_camera.enable()
@@ -45,7 +46,11 @@ class OmniCam(object):
         for color in self.colors:
             with open(f"controllers/color_data/{color}.csv") as file:
                 for line in file:
-                    self.rgb_samples[color].append([float(a) for a in line.split(",")])
+                    b, g, r , robot_id = line.split(",")
+                    bgr = [b,g,r]
+                    
+                    if self.id == int(robot_id):
+                        self.rgb_samples[color].append([float(a) for a in bgr])
 
         logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
         logger = logging.getLogger(__name__)

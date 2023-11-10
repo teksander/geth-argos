@@ -5,7 +5,7 @@
 #######################################################################
 import sys, os
 import socket
-from random import random
+import random
 sys.path.insert(1, os.environ["EXPERIMENTFOLDER"])
 
 from controllers.colorguidedwalk import ColorWalkEngine
@@ -228,7 +228,7 @@ def controlstep():
             value = w3.toWei(support, 'ether')
             
             voteHash = w3.sc.functions.reportNewPt(
-                [int(DECIMAL_FACTOR * (a+random())) for a in color_to_report],
+                [int(DECIMAL_FACTOR * (a+random.random())) for a in color_to_report],
                 int(is_useful),
                 int(value),
                 color_idx,  
@@ -381,7 +381,7 @@ def controlstep():
                 tag_id, _ = cwe.check_apriltag()
                 
 
-                if tag_id != 0 and vote_support < address_balance:
+                if tag_id != 0 and 0 < vote_support < address_balance:
 
                     # two recently discovered colord are recorded in recent_colors
                     recent_colors.append(color_name_to_report)
@@ -403,13 +403,23 @@ def controlstep():
 
                     logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
-                    voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
-                    print_color("Report vote: ", voteHash[0:8], 
+                    try:
+                        voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
+                        print_color("Report vote: ", voteHash[0:8], 
                                    "color: ", [int(a) for a in color_to_report], color_name_to_report, 
                                    "support: ", vote_support, 
                                    "tagid: ", tag_id, 
                                    "vote: ", is_useful, 
                                    color_bgr=[int(a) for a in color_to_report])		
+
+                    except Exception as e:
+                        print(f"Error occurred: {e} // Roboot ID: me.id")
+                        print_color("FAILED VOTE: ", voteHash[0:8], 
+                                   "color: ", color_to_report, color_name_to_report, 
+                                   "support: ", vote_support, 
+                                   "tagid: ", tag_id, 
+                                   "vote: ", is_useful, 
+                                   color_bgr=[int(a) for a in color_to_report])	
 
                     fsm.setState(Idle.RandomWalk, message="Wait for vote")
             
@@ -448,6 +458,10 @@ def controlstep():
                 if vote_support >= address_balance:
                     fsm.vars.attempts += 10
                     print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}>{address_balance}")
+
+                elif vote_support < 0:
+                    fsm.vars.attempts += 10
+                    print(f"Verify fail {fsm.vars.attempts}/10: negative vote support")
 
                 elif found_color_idx != color_idx_to_verify:
                     fsm.vars.attempts += 1
