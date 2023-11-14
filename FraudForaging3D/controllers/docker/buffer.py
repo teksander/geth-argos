@@ -76,19 +76,21 @@ def scHandle():
     # 	balance_pending += tx['value']
 
     # Log relevant smart contract details
-    blockNumb = lastBlock['number']
-    blockHash = lastBlock['hash'].hex()
+    blockNumb  = lastBlock['number']
+    blockHash  = lastBlock['hash'].hex()
     rep_stats  = sc.functions.getReportStatistics().call()
     n_clusters = len(allclusters)
     n_points   = len(allpoints)
     n_accepted = len([c for c in allclusters if c['verified']==1])
     n_rejected = len([c for c in allclusters if c['verified']==2])
     n_pending  = len([c for c in allclusters if c['verified']==0])
+    scbalance  = sc.functions.balances(w3.eth.coinbase).call()
 
     logs['sc'].log([blockNumb, 
                     blockHash, 
                     balance, 
-                    spendable_balance, 
+                    spendable_balance,
+                    float(scbalance/1e18), 
                     balance_pending, 
                     n_clusters,
                     n_points, 
@@ -120,7 +122,7 @@ if __name__ == '__main__':
               'DIFF', 'TDIFF', 'SIZE', 'TXS', 'UNC', 'PENDING', 'QUEUED']
     logs['block'] = Logger(f'{logfolder}/block.csv', header, ID=robotID)
 
-    header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'PENDING', '#CLUSTERS', '#POINTS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
+    header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'SCBAL', 'PENDING', '#CLUSTERS', '#POINTS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
     logs['sc'] = Logger(f'{logfolder}/sc.csv', header, ID=robotID)
     # extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
     

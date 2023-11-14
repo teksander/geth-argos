@@ -7,7 +7,7 @@ contract ForagingPtManagement{
     uint constant num_pt      = 100;
     uint constant max_life    = 3;
     uint constant min_rep     = 0;     //Minimum number of reported points that make contract verified
-    int256 constant radius    = 5000000;
+    int256 constant radius    = 6000000;
     uint constant min_balance = 53333333333333333333; //Minimum number of balance to confirm a cluster
     int256 constant max_unverified_cluster =  3;
 
@@ -239,47 +239,33 @@ contract ForagingPtManagement{
             }
             //if exists non-verified cluster that the new point belongs
             if (info.foundCluster==1 && info.minClusterStatus == 0 && clusterList[info.minClusterIdx].init_reporter != msg.sender){
-                clusterList[info.minClusterIdx].num_rep+=1;
-                clusterList[info.minClusterIdx].total_credit+=amount;
-                //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
-                if (category==1){
-                    clusterList[info.minClusterIdx].total_credit_food+=amount;
-                    clusterList[info.minClusterIdx].sup_position = info.positiono;
-                }
-
-                // clusterList[info.minClusterIdx].x = info.x;
-                // clusterList[info.minClusterIdx].y = info.y;
-                clusterList[info.minClusterIdx].position = info.position;
-
-                //ADD CORRESPONDING POINT
-                pointList.push(Point(position, amount, category, int256(info.minClusterIdx), msg.sender, realType));
-                balances[msg.sender] += amount;
-                report_statistics[0] += 1;
-                //Remove redundant reporters from the pointList
+                uint repexist = 0; //check if report from the same agent already exist in this cluster
                 for (uint k=0; k<pointList.length-1; k++){
-                    for (uint l=k+1; l<pointList.length; l++){
-                        if (pointList[k].cluster == int256(info.minClusterIdx) && pointList[l].cluster == int256(info.minClusterIdx) && pointList[k].sender == pointList[l].sender){
-                            payable(pointList[l].sender).transfer(pointList[l].credit);
-                            //update cluster average
-                            for (uint j=0; j<space_size; j++){
-                                    clusterList[info.minClusterIdx].position[j] = ((int256(clusterList[info.minClusterIdx].position[j])*int256(clusterList[info.minClusterIdx].total_credit)
-                                    - int256(pointList[l].position[j])*int256(pointList[l].credit)))/int256(clusterList[info.minClusterIdx].total_credit-pointList[l].credit);
-                            }
-                            clusterList[info.minClusterIdx].num_rep-=1;
-                            clusterList[info.minClusterIdx].total_credit-=pointList[l].credit;
-                            if (pointList[l].category==1){
-                                for (uint j=0; j<space_size; j++){
-                                    clusterList[info.minClusterIdx].sup_position[j] = ((int256(clusterList[info.minClusterIdx].sup_position[j])*int256(clusterList[info.minClusterIdx].total_credit_food)
-                                    - int256(pointList[l].position[j])*int256(pointList[l].credit)))/int256(clusterList[info.minClusterIdx].total_credit_food-pointList[l].credit);
-                                }
-                                clusterList[info.minClusterIdx].total_credit_food-=pointList[l].credit;
-                            }
-                            pointList[l].cluster=-1;
-                            balances[pointList[l].sender] -= pointList[l].credit;
-                            report_statistics[1] += 1; // report removed due to redundant verification
-                            report_statistics[0] -= 1;
-                         }
+                    if(pointList[k].cluster == int256(info.minClusterIdx) && pointList[k].sender==msg.sender){
+                        repexist=1;
                     }
+                }
+                if(repexist==0){
+                    clusterList[info.minClusterIdx].num_rep+=1;
+                    clusterList[info.minClusterIdx].total_credit+=amount;
+                    //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
+                    if (category==1){
+                        clusterList[info.minClusterIdx].total_credit_food+=amount;
+                        clusterList[info.minClusterIdx].sup_position = info.positiono;
+                    }
+
+                    // clusterList[info.minClusterIdx].x = info.x;
+                    // clusterList[info.minClusterIdx].y = info.y;
+                    clusterList[info.minClusterIdx].position = info.position;
+
+                    //ADD CORRESPONDING POINT
+                    pointList.push(Point(position, amount, category, int256(info.minClusterIdx), msg.sender, realType));
+                    balances[msg.sender] += amount;
+                    report_statistics[0] += 1;
+                }
+                else{
+                    payable(msg.sender).transfer(amount);
+                    report_statistics[1] += 1; // report removed due to redundant verification
                 }
             }
             else if (category==1 && info.foundCluster==0 && unverfied_clusters<max_unverified_cluster){
@@ -436,7 +422,7 @@ contract ForagingPtManagement{
             if (clusterList[i].verified==0){
                 for (uint k=0; k<pointList.length-1; k++){
                     for (uint l=k+1; l<pointList.length; l++){
-                        if (pointList[k].cluster == int256(i) && pointList[l].cluster == int256(i) && pointList[k].sender == pointList[l].sender){
+                        if (pointList[k].cluster == int256(i) && pointList[l].cluster == int256(i) && pointList[k].sender == pointList[l].sender && pointList[k].category == pointList[l].category){
                             payable(pointList[l].sender).transfer(pointList[l].credit);
                             clusterList[i].num_rep-=1;
                             clusterList[i].total_credit-=pointList[l].credit;

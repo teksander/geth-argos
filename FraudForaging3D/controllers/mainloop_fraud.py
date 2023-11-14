@@ -41,8 +41,8 @@ num_fau = int(os.environ["NUM_FAU"])
 num_col = int(os.environ["NUM_COL"])
 
 DECIMAL_FACTOR = generic_params['decimal_factor']
-DECIMAL_FACTOR =  1e5
-DEPOSITFACTOR = 3
+DECIMAL_FACTOR = 1e5
+DEPOSIT_FACTOR = generic_params['deposit_factor']
 
 # /* Global Variables */
 #######################################################################
@@ -142,7 +142,8 @@ def init():
 
     # /* Init Navigation */
     # cwe = ColorWalkEngine(robot, rwSpeed, [1, 1, 1-int(me.id)**3.1*0.0005] if isFau else [1,1,1])
-    cwe = ColorWalkEngine(robot, rwSpeed, [0.4 if i==me.ii % 3 else 1 for i in range(3)] if isFau else [1,1,1])
+    # cwe = ColorWalkEngine(robot, rwSpeed, [0.4 if i==me.ii % 3 else 1 for i in range(3)] if isFau else [1,1,1])
+    cwe = ColorWalkEngine(robot, rwSpeed, [1,1,0.5] if isFau else [1,1,1])
 
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
@@ -298,7 +299,7 @@ def controlstep():
 
             # vote_support, current_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
             # vote_support -= 1
-            # vote_support /= DEPOSITFACTOR
+            # vote_support /= DEPOSIT_FACTOR
 
             # if vote_support >= current_balance and current_balance!=0:
             # 	rgb.setAll('white')
@@ -325,7 +326,7 @@ def controlstep():
                                 candidate_cluster.append((cluster, idx))
 
                     # # this is for a test: idle and wait if no clusters to verify
-                    # if unverified_clusters == DEPOSITFACTOR and len(candidate_cluster) == 0:
+                    # if unverified_clusters == DEPOSIT_FACTOR and len(candidate_cluster) == 0:
                     #     print("no candidates to verify and max cluster count reached")
                     #     rgb.setAll('white')
                     #     verify  = False
@@ -386,7 +387,7 @@ def controlstep():
 
                 vote_support, address_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
                 vote_support -= 1
-                vote_support /= DEPOSITFACTOR
+                vote_support /= DEPOSIT_FACTOR
                 tag_id, _ = cwe.check_apriltag()
                 
 
@@ -452,7 +453,7 @@ def controlstep():
                 found_color_idx, found_color_name, found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
                 vote_support, address_balance  = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
                 vote_support -= 1
-                vote_support /= DEPOSITFACTOR
+                vote_support /= DEPOSIT_FACTOR
 
                 if vote_support >= address_balance:
                     fsm.vars.attempts += 10

@@ -68,10 +68,24 @@ run() {
 
 
 # DEFINE AND RUN EXPERIMENT
-EXP=long_faulty_7
-config "REPS" 15
-config "NOTES" "\"Longrun to see faulty robots losing funds according to ID. each fau is blind in different color\""
+EXP=long
+config "REPS" 5
+config "NOTES" "\"Longrun with 2mal and 2 fau\""
 
-CFG="2byz-3fau"
+CFG="2byz-2fau"
 run    "${EXP}/${CFG}" ${1}
 wait
+
+# for R in $(seq 30 10 80); do 
+# 	CFG="2byz-R${R}"
+# 	config "R" $R
+# 	run    "${EXP}/${CFG}" ${1}
+# 	wait
+# done
+
+# for K in $(seq 1 1 6); do 
+# 	CFG="K=${K}"
+# 	config "MAXUNVCLUSTER" $K
+# 	run    "${EXP}/${CFG}" ${1}
+# 	wait
+# done
