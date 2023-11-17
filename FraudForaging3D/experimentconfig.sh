@@ -97,7 +97,7 @@ export yV3=$(echo "scale=2; $yS3*$F" | bc)
 
 # [EXPERIMENT]
 export NUM_BYZ=2
-export NUM_FAU=4
+export NUM_FAU=2
 export NUM_COL=0
 
 # [GETH]
@@ -112,7 +112,8 @@ export DIMS=3
 export NUMPT=100
 export MAXLIFE=3
 export MINREP=0
-export RADIUS=$(echo 50*$DECIMAL_FACTOR | bc)
+export R=60
+export RADIUS=$(echo $R*$DECIMAL_FACTOR | bc)
 
 export TOTALASSETS=$(echo $NUMROBOTS*20000000000000000000 | bc)
 export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER*2/3 | bc)
@@ -120,9 +121,9 @@ export INFLATIONR=$(echo $TOTALASSETS/$MAXUNVCLUSTER/10 | bc)
 
 # [OTHER]
 export SEED=350
-export TIMELIMIT=75
-export REPS=15
-export NOTES="Longrun to see faulty robots losing funds according to ID. 4 perfect robots and 8 faulty"
+export TIMELIMIT=60
+export REPS=5
+export NOTES="Longrun with 2mal and 2 fau"
 
 
 

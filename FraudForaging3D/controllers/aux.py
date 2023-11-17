@@ -482,6 +482,7 @@ class Peer(object):
         """
         # Add the known peer details
         self.id = _id
+        self.ii = int(_id)
         self.ip = _ip
         self.enode = enode
         self.key = key

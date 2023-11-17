@@ -41,8 +41,8 @@ num_fau = int(os.environ["NUM_FAU"])
 num_col = int(os.environ["NUM_COL"])
 
 DECIMAL_FACTOR = generic_params['decimal_factor']
-DECIMAL_FACTOR =  1e5
-DEPOSITFACTOR = 3
+DECIMAL_FACTOR = 1e5
+DEPOSIT_FACTOR = generic_params['deposit_factor']
 
 # /* Global Variables */
 #######################################################################
@@ -141,7 +141,9 @@ def init():
     erb = ERANDB(robot, erbDist, erbtFreq)
 
     # /* Init Navigation */
-    cwe = ColorWalkEngine(robot, rwSpeed, [1, 1, 1-int(me.id)**2.4*0.001] if isFau else [1,1,1])
+    # cwe = ColorWalkEngine(robot, rwSpeed, [1, 1, 1-int(me.id)**3.1*0.0005] if isFau else [1,1,1])
+    # cwe = ColorWalkEngine(robot, rwSpeed, [0.4 if i==me.ii % 3 else 1 for i in range(3)] if isFau else [1,1,1])
+    cwe = ColorWalkEngine(robot, rwSpeed, [1,1,0.5] if isFau else [1,1,1])
 
     # /* Init LEDs */
     rgb = RGBLEDs(robot)
@@ -227,15 +229,23 @@ def controlstep():
             global txList
             value = w3.toWei(support, 'ether')
             
-            voteHash = w3.sc.functions.reportNewPt(
-                [int(DECIMAL_FACTOR * a) for a in color_to_report],
-                int(is_useful),
-                int(value),
-                color_idx,  
-                int(cluster_idx)
-                ).transact({'from': me.key, 'value':value})
-            # voteHash = w3.sc.functions.test([int(a*DECIMAL_FACTOR) for a in color_to_report], int(is_useful), int(value)).transact({'from': me.key, 'value': value})
-            
+            try:
+                voteHash = w3.sc.functions.reportNewPt(
+                    [int(DECIMAL_FACTOR * (a+random.random())) for a in color_to_report],
+                    int(is_useful),
+                    int(value),
+                    color_idx,  
+                    int(cluster_idx)
+                    ).transact({'from': me.key, 'value':value})
+                
+            except Exception as e:
+                print(e)
+                print([int(DECIMAL_FACTOR * (a+random.random())) for a in color_to_report],
+                    int(is_useful),
+                    int(value),
+                    color_idx,  
+                    int(cluster_idx))
+
             txs['vote'] = Transaction(w3, voteHash)
             txList.append(voteHash)
             return voteHash
@@ -289,7 +299,7 @@ def controlstep():
 
             # vote_support, current_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
             # vote_support -= 1
-            # vote_support /= DEPOSITFACTOR
+            # vote_support /= DEPOSIT_FACTOR
 
             # if vote_support >= current_balance and current_balance!=0:
             # 	rgb.setAll('white')
@@ -316,7 +326,7 @@ def controlstep():
                                 candidate_cluster.append((cluster, idx))
 
                     # # this is for a test: idle and wait if no clusters to verify
-                    # if unverified_clusters == DEPOSITFACTOR and len(candidate_cluster) == 0:
+                    # if unverified_clusters == DEPOSIT_FACTOR and len(candidate_cluster) == 0:
                     #     print("no candidates to verify and max cluster count reached")
                     #     rgb.setAll('white')
                     #     verify  = False
@@ -377,11 +387,11 @@ def controlstep():
 
                 vote_support, address_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
                 vote_support -= 1
-                vote_support /= DEPOSITFACTOR
+                vote_support /= DEPOSIT_FACTOR
                 tag_id, _ = cwe.check_apriltag()
                 
 
-                if tag_id != 0 and vote_support < address_balance and vote_support:
+                if tag_id != 0 and 0 < vote_support < address_balance:
 
                     # two recently discovered colord are recorded in recent_colors
                     recent_colors.append(color_name_to_report)
@@ -443,11 +453,15 @@ def controlstep():
                 found_color_idx, found_color_name, found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
                 vote_support, address_balance  = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
                 vote_support -= 1
-                vote_support /= DEPOSITFACTOR
+                vote_support /= DEPOSIT_FACTOR
 
                 if vote_support >= address_balance:
                     fsm.vars.attempts += 10
                     print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}>{address_balance}")
+
+                elif vote_support < 0:
+                    fsm.vars.attempts += 10
+                    print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}<0")
 
                 elif found_color_idx != color_idx_to_verify:
                     fsm.vars.attempts += 1
@@ -456,10 +470,7 @@ def controlstep():
                 elif tag_id == 0:
                     fsm.vars.attempts += 1
                     print(f"Verify fail {fsm.vars.attempts}/10: no tag found")
-                elif vote_support <= 0:
-                    fsm.vars.attempts += 1
-                    print(f"Verify fail {fsm.vars.attempts}/10: negative vote support")
-
+            
                 else:
                     ok_to_vote = True
 

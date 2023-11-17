@@ -34,6 +34,7 @@ generic_params['num_robots'] = int(os.environ["NUMROBOTS"])
 generic_params['time_limit'] = float(os.environ["TIMELIMIT"]) * 60
 generic_params['seed']       = 350 
 generic_params['decimal_factor'] = float(os.environ["DECIMAL_FACTOR"])
+generic_params['deposit_factor'] = int(os.environ["MAXUNVCLUSTER"])
 generic_params['num_food_source'] = 3
 generic_params['unitPositionUncertainty'] = 0.03
 generic_params['frictionUncertainty'] = 0.01

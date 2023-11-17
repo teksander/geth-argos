@@ -7,7 +7,7 @@ contract ForagingPtManagement{
     uint constant num_pt      = 100;
     uint constant max_life    = 3;
     uint constant min_rep     = 0;     //Minimum number of reported points that make contract verified
-    int256 constant radius    = 5000000;
+    int256 constant radius    = 6000000;
     uint constant min_balance = 53333333333333333333; //Minimum number of balance to confirm a cluster
     uint constant inflation_reward = 8000000000000000000; //inflation reward R, R/#winner
     int256 constant max_unverified_cluster =  3;
