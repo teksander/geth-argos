@@ -9,6 +9,7 @@ contract ForagingPtManagement{
     uint constant min_rep     = 0;     //Minimum number of reported points that make contract verified
     int256 constant radius    = 5000000;
     uint constant min_balance = 53333333333333333333; //Minimum number of balance to confirm a cluster
+    uint constant inflation_reward = 8000000000000000000; //inflation reward R, R/#winner
     int256 constant max_unverified_cluster =  3;
 
     address public minter;
@@ -128,17 +129,22 @@ contract ForagingPtManagement{
             }
             // Update the membership to the nearest cluster of point[k]
             if (info.foundCluster ==1 && info.minClusterIdx != uint(pointList[k].cluster)){
-                for (uint j=0; j<space_size; j++){
-                    clusterList[uint(pointList[k].cluster)].position[j] = ((int256(clusterList[uint(pointList[k].cluster)].position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit)
-                                     - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit-pointList[k].credit);
+                if (clusterList[uint(pointList[k].cluster)].total_credit_food>pointList[k].credit){ //At least another supportive vote in this cluster, other than the one of pointList[k]
+                    for (uint j=0; j<space_size; j++){
+                        clusterList[uint(pointList[k].cluster)].position[j] = ((int256(clusterList[uint(pointList[k].cluster)].position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit)
+                                         - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit-pointList[k].credit);
+                    }
                 }
                 clusterList[uint(pointList[k].cluster)].num_rep-=1;
                 clusterList[uint(pointList[k].cluster)].total_credit-=pointList[k].credit;
 
+
                 if (pointList[k].category==1){
-                    for (uint j=0; j<space_size; j++){
+                    if (clusterList[uint(pointList[k].cluster)].total_credit_food>pointList[k].credit){
+                        for (uint j=0; j<space_size; j++){
                         clusterList[uint(pointList[k].cluster)].sup_position[j] = ((int256(clusterList[uint(pointList[k].cluster)].sup_position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit_food)
                                          - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit_food-pointList[k].credit);
+                        }
                     }
                     clusterList[uint(pointList[k].cluster)].total_credit_food-=pointList[k].credit;
 
@@ -151,8 +157,8 @@ contract ForagingPtManagement{
                     clusterList[info.minClusterIdx].sup_position = info.positiono;
                 }
                 pointList[k].cluster = int256(info.minClusterIdx);
-                if (clusterList[uint(pointList[k].cluster)].num_rep == 0){
-                        clusterList[uint(pointList[k].cluster)].verified=5; //cluster abandon due to all points have been reassigned to other clusters
+                if (clusterList[uint(pointList[k].cluster)].total_credit_food == 0){ //when there is no more supportive votes in the cluster, due to kmeans reclustering
+                        clusterList[uint(pointList[k].cluster)].verified=5; //cluster abandon due to supportive votes have been reassigned to other clusters
                     }
                 }
             }
@@ -234,47 +240,33 @@ contract ForagingPtManagement{
             }
             //if exists non-verified cluster that the new point belongs
             if (info.foundCluster==1 && info.minClusterStatus == 0 && clusterList[info.minClusterIdx].init_reporter != msg.sender){
-                clusterList[info.minClusterIdx].num_rep+=1;
-                clusterList[info.minClusterIdx].total_credit+=amount;
-                //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
-                if (category==1){
-                    clusterList[info.minClusterIdx].total_credit_food+=amount;
-                    clusterList[info.minClusterIdx].sup_position = info.positiono;
-                }
-
-                // clusterList[info.minClusterIdx].x = info.x;
-                // clusterList[info.minClusterIdx].y = info.y;
-                clusterList[info.minClusterIdx].position = info.position;
-
-                //ADD CORRESPONDING POINT
-                pointList.push(Point(position, amount, category, int256(info.minClusterIdx), msg.sender, realType));
-                balances[msg.sender] += amount;
-                report_statistics[0] += 1;
-                //Remove redundant reporters from the pointList
+                uint repexist = 0; //check if report from the same agent already exist in this cluster
                 for (uint k=0; k<pointList.length-1; k++){
-                    for (uint l=k+1; l<pointList.length; l++){
-                        if (pointList[k].cluster == int256(info.minClusterIdx) && pointList[l].cluster == int256(info.minClusterIdx) && pointList[k].sender == pointList[l].sender){
-                            payable(pointList[l].sender).transfer(pointList[l].credit);
-                            //update cluster average
-                            for (uint j=0; j<space_size; j++){
-                                    clusterList[info.minClusterIdx].position[j] = ((int256(clusterList[info.minClusterIdx].position[j])*int256(clusterList[info.minClusterIdx].total_credit)
-                                    - int256(pointList[l].position[j])*int256(pointList[l].credit)))/int256(clusterList[info.minClusterIdx].total_credit-pointList[l].credit);
-                            }
-                            clusterList[info.minClusterIdx].num_rep-=1;
-                            clusterList[info.minClusterIdx].total_credit-=pointList[l].credit;
-                            if (pointList[l].category==1){
-                                for (uint j=0; j<space_size; j++){
-                                    clusterList[info.minClusterIdx].sup_position[j] = ((int256(clusterList[info.minClusterIdx].sup_position[j])*int256(clusterList[info.minClusterIdx].total_credit_food)
-                                    - int256(pointList[l].position[j])*int256(pointList[l].credit)))/int256(clusterList[info.minClusterIdx].total_credit_food-pointList[l].credit);
-                                }
-                                clusterList[info.minClusterIdx].total_credit_food-=pointList[l].credit;
-                            }
-                            pointList[l].cluster=-1;
-                            balances[pointList[l].sender] -= pointList[l].credit;
-                            report_statistics[1] += 1; // report removed due to redundant verification
-                            report_statistics[0] -= 1;
-                         }
+                    if(pointList[k].cluster == int256(info.minClusterIdx) && pointList[k].sender==msg.sender){
+                        repexist=1;
                     }
+                }
+                if(repexist==0){
+                    clusterList[info.minClusterIdx].num_rep+=1;
+                    clusterList[info.minClusterIdx].total_credit+=amount;
+                    //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
+                    if (category==1){
+                        clusterList[info.minClusterIdx].total_credit_food+=amount;
+                        clusterList[info.minClusterIdx].sup_position = info.positiono;
+                    }
+
+                    // clusterList[info.minClusterIdx].x = info.x;
+                    // clusterList[info.minClusterIdx].y = info.y;
+                    clusterList[info.minClusterIdx].position = info.position;
+
+                    //ADD CORRESPONDING POINT
+                    pointList.push(Point(position, amount, category, int256(info.minClusterIdx), msg.sender, realType));
+                    balances[msg.sender] += amount;
+                    report_statistics[0] += 1;
+                }
+                else{
+                    payable(msg.sender).transfer(amount);
+                    report_statistics[1] += 1; // report removed due to redundant verification
                 }
             }
             else if (category==1 && info.foundCluster==0 && unverfied_clusters<max_unverified_cluster){
@@ -308,6 +300,7 @@ contract ForagingPtManagement{
         //If cluster receives enough samples, verified.
         uint256 total_non_food_credit = 0;
         uint256 bonus_credit = 0;
+        uint256 inflation_credit = 0;
         for(uint i=0; i<clusterList.length; i++){
             if (clusterList[i].verified==0 && clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=min_balance && clusterList[i].total_credit_food>(clusterList[i].total_credit-clusterList[i].total_credit_food)){
                 clusterList[i].verified=1; //cluster verified
@@ -316,12 +309,16 @@ contract ForagingPtManagement{
                 total_non_food_credit = clusterList[i].total_credit-clusterList[i].total_credit_food;
                 //Redistribute money
                 uint256 food_num =0;
+                uint256 non_food_num =0;
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==1){
                         food_num+=1;
                      }
+                    else{
+                        non_food_num+=1;
+                    }
                 }
-
+                inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==1){
                         //bonus_credit = total_non_food_credit*pointList[j].credit/clusterList[info.minClusterIdx].total_credit_food;
@@ -331,8 +328,11 @@ contract ForagingPtManagement{
                         else{
                             bonus_credit = 0;
                         }
-                        payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
+                        payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit+inflation_credit);
                      }
+                    else if(pointList[j].cluster == int256(i) && pointList[j].category ==0){
+                        payable(pointList[j].sender).transfer(inflation_credit);  //losing coalition, transfer only inflation credit
+                    }
                 }
                 c = 0;
                 curLength = pointList.length;
@@ -357,11 +357,16 @@ contract ForagingPtManagement{
                 //Redistribute money
                 //WVG wining side
                 uint256 non_food_num =0;
+                uint256 food_num=0;
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
                         non_food_num+=1;
                      }
+                    else{
+                        food_num+1;
+                    }
                 }
+                inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
                         // bonus_credit = clusterList[i].total_credit_food*pointList[j].credit/total_non_food_credit;
@@ -371,9 +376,11 @@ contract ForagingPtManagement{
                         else{
                             bonus_credit = 0;
                         }
-
                         payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
                      }
+                    else if(pointList[j].cluster == int256(i) && pointList[j].category ==1){
+                        payable(pointList[j].sender).transfer(inflation_credit); //losing coalition, transfer only inflation credit
+                    }
                 }
                 //remove points
                 c = 0;
@@ -401,7 +408,7 @@ contract ForagingPtManagement{
                 clusterList[i].verified=4; //cluster rejected due to most of reports that intended to verify it have been classified as outliers
             }
             //remove points that correspond to redundant or rejected clusters
-            if (clusterList[i].verified==3 || clusterList[i].verified==4){
+            if (clusterList[i].verified==3 || clusterList[i].verified==4 || clusterList[i].verified==5){
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && clusterList[i].verified==3){ //only return deposits for clusters that have been rejected due to maximum number of cluster reached and condition here
                         payable(pointList[j].sender).transfer(pointList[j].credit);
@@ -431,7 +438,7 @@ contract ForagingPtManagement{
             if (clusterList[i].verified==0){
                 for (uint k=0; k<pointList.length-1; k++){
                     for (uint l=k+1; l<pointList.length; l++){
-                        if (pointList[k].cluster == int256(i) && pointList[l].cluster == int256(i) && pointList[k].sender == pointList[l].sender){
+                        if (pointList[k].cluster == int256(i) && pointList[l].cluster == int256(i) && pointList[k].sender == pointList[l].sender && pointList[k].category == pointList[l].category){
                             payable(pointList[l].sender).transfer(pointList[l].credit);
                             clusterList[i].num_rep-=1;
                             clusterList[i].total_credit-=pointList[l].credit;

@@ -9,6 +9,7 @@ contract ForagingPtManagement{
     uint constant min_rep     = ${MINREP};     //Minimum number of reported points that make contract verified
     int256 constant radius    = ${RADIUS};
     uint constant min_balance = ${MINBALANCE}; //Minimum number of balance to confirm a cluster
+    uint constant inflation_reward = ${INFLATIONR}; //inflation reward R, R/#winner
     int256 constant max_unverified_cluster =  ${MAXUNVCLUSTER};
 
     address public minter;
@@ -299,6 +300,7 @@ contract ForagingPtManagement{
         //If cluster receives enough samples, verified.
         uint256 total_non_food_credit = 0;
         uint256 bonus_credit = 0;
+        uint256 inflation_credit = 0;
         for(uint i=0; i<clusterList.length; i++){
             if (clusterList[i].verified==0 && clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=min_balance && clusterList[i].total_credit_food>(clusterList[i].total_credit-clusterList[i].total_credit_food)){
                 clusterList[i].verified=1; //cluster verified
@@ -307,12 +309,16 @@ contract ForagingPtManagement{
                 total_non_food_credit = clusterList[i].total_credit-clusterList[i].total_credit_food;
                 //Redistribute money
                 uint256 food_num =0;
+                uint256 non_food_num =0;
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==1){
                         food_num+=1;
                      }
+                    else{
+                        non_food_num+=1;
+                    }
                 }
-
+                inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==1){
                         //bonus_credit = total_non_food_credit*pointList[j].credit/clusterList[info.minClusterIdx].total_credit_food;
@@ -322,8 +328,11 @@ contract ForagingPtManagement{
                         else{
                             bonus_credit = 0;
                         }
-                        payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
+                        payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit+inflation_credit);
                      }
+                    else if(pointList[j].cluster == int256(i) && pointList[j].category ==0){
+                        payable(pointList[j].sender).transfer(inflation_credit);  //losing coalition, transfer only inflation credit
+                    }
                 }
                 c = 0;
                 curLength = pointList.length;
@@ -348,11 +357,16 @@ contract ForagingPtManagement{
                 //Redistribute money
                 //WVG wining side
                 uint256 non_food_num =0;
+                uint256 food_num=0;
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
                         non_food_num+=1;
                      }
+                    else{
+                        food_num+1;
+                    }
                 }
+                inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
                 for (uint j=0; j<pointList.length; j++){
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
                         // bonus_credit = clusterList[i].total_credit_food*pointList[j].credit/total_non_food_credit;
@@ -362,9 +376,11 @@ contract ForagingPtManagement{
                         else{
                             bonus_credit = 0;
                         }
-
                         payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
                      }
+                    else if(pointList[j].cluster == int256(i) && pointList[j].category ==1){
+                        payable(pointList[j].sender).transfer(inflation_credit); //losing coalition, transfer only inflation credit
+                    }
                 }
                 //remove points
                 c = 0;
