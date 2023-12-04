@@ -19,8 +19,8 @@ from networkx.algorithms.shortest_paths.generic import shortest_path as get_main
 
 global tstart
 
-datadir = '/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/results/data'
-plotdir = '/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/results/plots/'
+datadir = '/home/eksander/geth-argos/FraudForaging3D/results/data'
+plotdir = '/home/eksander/geth-argos/FraudForaging3D/results/plots/'
 
 def tic():
     global tstart

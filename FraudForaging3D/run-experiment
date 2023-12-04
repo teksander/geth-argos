@@ -66,26 +66,14 @@ run() {
 	done
 }
 
-
 # DEFINE AND RUN EXPERIMENT
-EXP=long
-config "REPS" 5
-config "NOTES" "\"Longrun with 2mal and 2 fau\""
+EXP=short_R
+config "REPS" 8
+config "NOTES" "\"shortrun with varying R\""
 
-CFG="2byz-2fau"
-run    "${EXP}/${CFG}" ${1}
-wait
-
-# for R in $(seq 30 10 80); do 
-# 	CFG="2byz-R${R}"
-# 	config "R" $R
-# 	run    "${EXP}/${CFG}" ${1}
-# 	wait
-# done
-
-# for K in $(seq 1 1 6); do 
-# 	CFG="K=${K}"
-# 	config "MAXUNVCLUSTER" $K
-# 	run    "${EXP}/${CFG}" ${1}
-# 	wait
-# done
+for R in $(seq 80 -5 20); do 
+	CFG="R${R}"
+	config "R" $R
+	run    "${EXP}/${CFG}" ${1}
+	wait
+done
