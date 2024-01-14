@@ -138,12 +138,11 @@ def post_step():
     
 
 def is_experiment_finished():
-    
-    finish_flags = 0
-    for robot in allrobots:
-        finish_flags += int(robot.variables.get_attribute("stop"))
-    
-    if finish_flags >= 0.66*len(allrobots):
+
+
+    finish_flags = sum(int(robot.variables.get_attribute("stop")) for robot in allrobots)
+    if lp['environ']['SHORT'] == '1' and finish_flags >= 0.66*len(allrobots):
+        print("Experiment has finished")
         return True
 
     finished = time.time() - startTime > lp['generic']['time_limit']

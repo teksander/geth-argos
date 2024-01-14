@@ -35,12 +35,12 @@ export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
 export TPS=10
-export RABRANGE="0.3"
+export RABRANGE="0.2"
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"
 export NUMROBOTS=12
 
 export SIDE_W=0.01
-export SIDE_H=0.1
+export SIDE_H=0.3
 export COLOR_L=0.1
 
 export SIDE_L=1.25
@@ -96,7 +96,7 @@ export yV3=$(echo "scale=2; $yS3*$F" | bc)
 # export yC=$(echo "scale=2; $height - $COLOR_L/2" | bc)
 
 # [EXPERIMENT]
-export NUM_BYZ=0
+export NUM_BYZ=4
 export NUM_FAU=0
 export NUM_COL=0
 
@@ -122,8 +122,9 @@ export INFLATIONR=$(echo $TOTALASSETS/$MAXUNVCLUSTER/10 | bc)
 # [OTHER]
 export SEED=350
 export TIMELIMIT=60
+export SHORT=1
 export REPS=5
-export NOTES="Longrun with 2mal and 2 fau"
+export NOTES="shortrun with varying number of byzantine"
 
 
 

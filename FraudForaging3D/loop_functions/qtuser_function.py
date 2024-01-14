@@ -18,10 +18,33 @@ from controllers.controller_params import params as cp
 #######################################################################
 global robot, environment
 
+SIDE_W=0.01
+SIDE_H=0.3
+COLOR_L=0.1
+
+SIDE_L=1.25
+xL1=0.5625
+yL1=0.3247
+xL2=-0.5625
+yL2=0.3247
+xL3=0
+yL3=-0.649519
+
+SIDE_S=0.50
+xS1=0
+yS1=0.866025
+xS2=-0.75
+yS2=-0.433013
+xS3=0.75
+yS3=-0.433013
+
 def init():
 	pass
 
 def draw_in_world():
+	# environment.qt_draw.box([xS1,yS1,0.35], [], [SIDE_S, SIDE_W, 0.7], 'red')
+	# environment.qt_draw.box([xS2,yS2,0.35], [], [SIDE_S, SIDE_W, 0.7], 'green')
+	# environment.qt_draw.box([xS3,yS3,0.35], [], [SIDE_S, SIDE_W, 0.7], 'blue')
 	pass
 
 def draw_in_robot():

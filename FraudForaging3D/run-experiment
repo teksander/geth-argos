@@ -67,13 +67,14 @@ run() {
 }
 
 # DEFINE AND RUN EXPERIMENT
-EXP=short_R
-config "REPS" 8
-config "NOTES" "\"shortrun with varying R\""
+EXP=shortMal2
+config "REPS" 5
+config "SHORT" 1
+config "NOTES" "\"shortrun with varying number of byzantine\""
 
-for R in $(seq 80 -5 20); do 
-	CFG="R${R}"
-	config "R" $R
+for N in $(seq 0 1 4); do 
+	CFG="${N}byz"
+	config "NUM_BYZ" $N
 	run    "${EXP}/${CFG}" ${1}
 	wait
 done

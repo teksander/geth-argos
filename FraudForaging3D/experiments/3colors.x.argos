@@ -19,7 +19,7 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-        <epuck_range_and_bearing implementation="medium" range="${RABRANGE}"/>
+        <epuck_range_and_bearing implementation="medium" range="${RABRANGE}" show_rays="true"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />
@@ -57,7 +57,7 @@
 
 
 
-  <box id="S1" size="${SIDE_S},${SIDE_W},${SIDE_H}" movable="false">
+  <box id="S1" size="${SIDE_S},${SIDE_W},0.7" movable="false" >
     <body position="${xS1},${yS1},0" orientation="0,0,0" />
     <leds medium="resources">
     <led offset=" 0.04, -0.025,0.1" anchor="origin" color="red" />
@@ -74,7 +74,7 @@
     </leds>
   </box>
 
-  <box id="S2" size="${SIDE_S},${SIDE_W},${SIDE_H}" movable="false">
+  <box id="S2" size="${SIDE_S},${SIDE_W},0.7" movable="false">
     <body position="${xS2},${yS2},0" orientation="-60,0,0" />
     <leds medium="resources">
     <led offset=" 0.04, 0.025,0.1" anchor="origin" color="blue" />
@@ -91,7 +91,7 @@
     </leds>
   </box>
 
-  <box id="S3" size="${SIDE_S},${SIDE_W},${SIDE_H}" movable="false">
+  <box id="S3" size="${SIDE_S},${SIDE_W},0.7" movable="false">
     <body id="light_t" position="${xS3},${yS3},0" orientation="60,0,0" />
     <leds medium="resources">
     <led offset=" 0.04, 0.025,0.1" anchor="origin" color="green" />

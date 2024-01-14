@@ -308,41 +308,40 @@ def controlstep():
             # 	time.sleep(1)
 
             # check if any cluster avaiting verification on chain
-            if verify:
-                if len(all_clusters) > 0:
-                    candidate_cluster  = []
-                    unverified_clusters = 0
-                    for idx, cluster in enumerate(all_clusters):
-                        
-                        verified_by_me = False
-                        for point_rec in all_points:
-                            if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
-                                verified_by_me = True
+            if verify and len(all_clusters) > 0:
+                candidate_cluster  = []
+                unverified_clusters = 0
+                for idx, cluster in enumerate(all_clusters):
+                    
+                    verified_by_me = False
+                    for point_rec in all_points:
+                        if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
+                            verified_by_me = True
 
-                        if cluster['verified'] == 0:
-                            unverified_clusters += 1
+                    if cluster['verified'] == 0:
+                        unverified_clusters += 1
 
-                            if not verified_by_me and any([int(a) for a in cluster['position']]):
-                                candidate_cluster.append((cluster, idx))
+                        if not verified_by_me and any([int(a) for a in cluster['position']]):
+                            candidate_cluster.append((cluster, idx))
 
-                    # # this is for a test: idle and wait if no clusters to verify
-                    # if unverified_clusters == DEPOSIT_FACTOR and len(candidate_cluster) == 0:
-                    #     print("no candidates to verify and max cluster count reached")
-                    #     rgb.setAll('white')
-                    #     verify  = False
-                    #     explore = False
-                    #     clocks['sleep'].set(1)
-                        
-                    # randomly select a cluster to verify
-                    if verify and len(candidate_cluster) > 0:
-                        print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
-                        select_idx = random.randrange(len(candidate_cluster))
-                        cluster = candidate_cluster[select_idx][0]
-                        cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
-                        color_to_verify = [float(a)/DECIMAL_FACTOR for a in cluster['position']]
-                
-                        fsm.setState(Verify.DriveTo, message=f"Verify cluster idx {cluster_idx_to_verify}")
-                        explore = False
+                # # this is for a test: idle and wait if no clusters to verify
+                # if unverified_clusters == DEPOSIT_FACTOR and len(candidate_cluster) == 0:
+                #     print("no candidates to verify and max cluster count reached")
+                #     rgb.setAll('white')
+                #     verify  = False
+                #     explore = False
+                #     clocks['sleep'].set(1)
+                    
+                # randomly select a cluster to verify
+                if verify and len(candidate_cluster) > 0:
+                    print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
+                    select_idx = random.randrange(len(candidate_cluster))
+                    cluster = candidate_cluster[select_idx][0]
+                    cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
+                    color_to_verify = [float(a)/DECIMAL_FACTOR for a in cluster['position']]
+            
+                    fsm.setState(Verify.DriveTo, message=f"Verify cluster idx {cluster_idx_to_verify}")
+                    explore = False
 
             if explore:
                 fsm.setState(Scout.Discover, message=f"Try to discover color")

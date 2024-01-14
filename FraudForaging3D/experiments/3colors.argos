@@ -15,11 +15,11 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <python_controller id="blockchain" library="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/argos-python/build/libpy_controller_interface.so">
+    <python_controller id="blockchain" library="/home/eksander/geth-argos/argos-python/build/libpy_controller_interface.so">
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-        <epuck_range_and_bearing implementation="medium" range="0.3"/>
+        <epuck_range_and_bearing implementation="medium" range="0.2" show_rays="true"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />
@@ -29,35 +29,35 @@
         <epuck_range_and_bearing implementation="medium" medium="rab" show_rays="true"/>
         <colored_blob_omnidirectional_camera implementation="rot_z_only" medium="resources" show_rays="false"/>
       </sensors>
-      <params script="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/controllers/mainloop_fraud.py"
+      <params script="/home/eksander/geth-argos/FraudForaging3D/controllers/mainloop_fraud.py"
               timeRate="1" />
     </python_controller>
   </controllers>
 
-  <loop_functions library="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/argos-python/build/libpy_loop_function_interface.so"
+  <loop_functions library="/home/eksander/geth-argos/argos-python/build/libpy_loop_function_interface.so"
                   label="py_loop_function">
-    <params script="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/loop_functions/loop_function.py"/>
+    <params script="/home/eksander/geth-argos/FraudForaging3D/loop_functions/loop_function.py"/>
   </loop_functions>
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="2.50, 2.50, 1" center="0,0,0.5">
-    <floor id="f" source="image" path="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/experiments/floors/white.png" />
+    <floor id="f" source="image" path="/home/eksander/geth-argos/FraudForaging3D/experiments/floors/white.png" />
 
-  <box id="L1" size="1.25,0.01,0.1" movable="false">
+  <box id="L1" size="1.25,0.01,0.3" movable="false">
     <body position="0.5625,0.3247,0" orientation="-60,0,0" />
   </box>
-  <box id="L2" size="1.25,0.01,0.1" movable="false">
+  <box id="L2" size="1.25,0.01,0.3" movable="false">
     <body position="-0.5625,0.3247,0" orientation="60,0,0" />
   </box>
-  <box id="L3" size="1.25,0.01,0.1" movable="false">
+  <box id="L3" size="1.25,0.01,0.3" movable="false">
     <body position="0,-0.649519,0" orientation="0,0,0" />
   </box>
 
 
 
-  <box id="S1" size="0.50,0.01,0.1" movable="false">
+  <box id="S1" size="0.50,0.01,0.7" movable="false" >
     <body position="0,0.866025,0" orientation="0,0,0" />
     <leds medium="resources">
     <led offset=" 0.04, -0.025,0.1" anchor="origin" color="red" />
@@ -74,7 +74,7 @@
     </leds>
   </box>
 
-  <box id="S2" size="0.50,0.01,0.1" movable="false">
+  <box id="S2" size="0.50,0.01,0.7" movable="false">
     <body position="-0.75,-0.433013,0" orientation="-60,0,0" />
     <leds medium="resources">
     <led offset=" 0.04, 0.025,0.1" anchor="origin" color="blue" />
@@ -91,7 +91,7 @@
     </leds>
   </box>
 
-  <box id="S3" size="0.50,0.01,0.1" movable="false">
+  <box id="S3" size="0.50,0.01,0.7" movable="false">
     <body id="light_t" position="0.75,-0.433013,0" orientation="60,0,0" />
     <leds medium="resources">
     <led offset=" 0.04, 0.025,0.1" anchor="origin" color="green" />
@@ -162,9 +162,9 @@
   <!-- ****************** -->
   <visualization>
     <qt-opengl autoplay="true" >   
-      <user_functions library="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
+      <user_functions library="/home/eksander/geth-argos/argos-python/build/libpy_qtuser_function_interface.so"
                       label="py_qtuser_function" >
-      <params script="/home/ubuntu/blockchain_robots_temp_debug/geth-argos/FraudForaging3D/loop_functions/qtuser_function.py"/>
+      <params script="/home/eksander/geth-argos/FraudForaging3D/loop_functions/qtuser_function.py"/>
       </user_functions>
     <camera>
       <placements>
