@@ -82,7 +82,9 @@ contract ForagingPtManagement{
         //local variables for pointlist search
         uint c = 0;
         uint curLength = 0;
-
+        if(min_balance==0){
+            min_balance = ${MINBALANCE};
+        }
 
         int256[space_size] memory position_avg;
         //average of all supportive votes

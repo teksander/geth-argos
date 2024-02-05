@@ -82,7 +82,9 @@ contract ForagingPtManagement{
         //local variables for pointlist search
         uint c = 0;
         uint curLength = 0;
-
+        if(min_balance==0){
+            min_balance = 53333333333333333333;
+        }
 
         int256[space_size] memory position_avg;
         //average of all supportive votes
@@ -397,7 +399,7 @@ contract ForagingPtManagement{
                     }
                 }
                 inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
-                min_balance+=inflation_reward*2/3; //min balance inflation
+                min_balance+=(inflation_reward*2/3); //min balance inflation
                 for (uint j=0; j<pointList.length; j++){
                     remaining_inf_credit = inflation_credit; //amount of credit to be transferred back to robot wallet
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
