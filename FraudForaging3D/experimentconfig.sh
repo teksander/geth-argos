@@ -5,7 +5,7 @@ if [ $USER == "eksander" ]; then
 	export MAINFOLDER="$HOME/geth-argos"
 
 elif [ $USER == "ubuntu" ]; then
-	export MAINFOLDER="$HOME/blockchain_robots_temp_debug/geth-argos"
+	export MAINFOLDER="$HOME/blockchain_robot_td/geth-argos"
 fi
 
 export DOCKERFOLDER="$MAINFOLDER/argos-blockchain-sm"
@@ -35,7 +35,7 @@ export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
 export TPS=10
-export RABRANGE="0.2"
+export RABRANGE="10"
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"
 export NUMROBOTS=12
 
