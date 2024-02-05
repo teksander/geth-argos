@@ -35,7 +35,7 @@ export CONTAINERBASE=${SWARMNAME}_eth
 
 # [ARGOS]
 export TPS=10
-export RABRANGE="0.2"
+export RABRANGE="1"
 export CONTROLLER="${EXPERIMENTFOLDER}/controllers/mainloop_fraud.py"
 export NUMROBOTS=12
 
@@ -96,7 +96,7 @@ export yV3=$(echo "scale=2; $yS3*$F" | bc)
 # export yC=$(echo "scale=2; $height - $COLOR_L/2" | bc)
 
 # [EXPERIMENT]
-export NUM_BYZ=4
+export NUM_BYZ=2
 export NUM_FAU=0
 export NUM_COL=0
 
@@ -124,7 +124,7 @@ export SEED=350
 export TIMELIMIT=60
 export SHORT=1
 export REPS=5
-export NOTES="shortrun with varying number of byzantine"
+export NOTES="longrun with fixed number of byzantines"
 
 
 

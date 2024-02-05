@@ -19,7 +19,7 @@
       <actuators>
         <epuck_rgb_leds implementation="default" medium="leds" />
         <epuck_wheels implementation="default" />
-        <epuck_range_and_bearing implementation="medium" range="0.2" show_rays="true"/>
+        <epuck_range_and_bearing implementation="medium" range="1" show_rays="true"/>
       </actuators>
       <sensors>
         <positioning implementation="default" />

@@ -6,6 +6,7 @@
 import sys, os
 import socket
 import random
+import ast
 sys.path.insert(1, os.environ["EXPERIMENTFOLDER"])
 
 from controllers.colorguidedwalk import ColorWalkEngine
@@ -265,12 +266,26 @@ def controlstep():
             return
 
         # Transaction check every step
-        if txs['vote'].query(1):
+        if txs['vote'].query(2):
             txs['vote'] = Transaction(w3, None)
 
         elif txs['vote'].fail == True:
-            txs['vote'] = Transaction(w3, None)
-        
+            if txs['vote'].receipt['status'] == 0:
+                print_color(f"Tx status 0 at block {txs['vote'].receipt['blockNumber']}", color_rgb=[255,0,0])
+                print_color(f'Trying again !', color_rgb=[255,0,0])
+                tup = w3.sc.decode_function_input(txs['vote'].tx['input'])
+                tup1_str = str(tup[1])
+                tup1_dict = ast.literal_eval(tup1_str)
+                color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify = list(tup1_dict.values())
+                color_to_report = [a/DECIMAL_FACTOR for a in color_to_report]
+                vote_support = vote_support/1e18
+                voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
+                print_color("Verify vote: ", voteHash[0:8],
+                    "color: ", [int(a) for a in color_to_report],
+                    "support: ", vote_support,
+                    "vote: ", is_useful,
+                    color_rgb=[int(a) for a in color_to_report])
+
         #########################################################################################################
         #### Idle.Start
         #########################################################################################################
@@ -294,7 +309,7 @@ def controlstep():
             all_points   = tcp_sc.request('points')
 
             n_accepted = len([c for c in all_clusters if c['verified']==1])
-            if n_accepted >= 1:
+            if n_accepted >= 6:
                 robot.variables.set_attribute("stop", "1")
 
             # vote_support, current_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
@@ -518,7 +533,7 @@ def controlstep():
         elif fsm.query(Idle.RandomWalk):
             cwe.random_walk_engine(10, 10)
                  
-            if txs['vote'].hash == None or fsm.getCurrentTimer()>40:
+            if txs['vote'].hash == None:
 
                 txs['vote'] = Transaction(w3, None)
                 voteHash = None
@@ -540,7 +555,24 @@ def destroy():
             clusterlog.log(cluster)
         clusterlog.close()
 
-        header = ['HASH','MINED?', 'STATUS', 'BLOCK', 'NONCE', 'VALUE', ]
+        # header = ['HASH','MINED?', 'STATUS', 'BLOCK', 'NONCE', 'VALUE', ]
+        # txlog = Logger(logfolder+'tx.csv', header, ID=me.id, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
+
+        # txlog.start()
+        # for txHash in txList:
+        #     try:
+        #         tx = w3.eth.getTransaction(txHash)
+        #     except:
+        #         txlog.log(['Lost'])
+        #     else:
+        #         try:
+        #             txRecpt = w3.sc.eth.getTransactionReceipt(txHash)
+        #             txlog.log([txHash, 'Yes', txRecpt['status'], txRecpt['blockNumber'], tx['nonce'], tx['value']])
+        #         except:
+        #             txlog.log([txHash, 'No', 'No', 'No', tx['nonce'], tx['value']])
+        # txlog.close()
+
+        header = ['HASH','MINED?', 'STATUS', 'BLOCK', 'NONCE', 'VALUE', 'POSITION', 'CATEGORY', 'AMOUNT', 'REALTYPE', 'INTENTION']
         txlog = Logger(logfolder+'tx.csv', header, ID=me.id, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
 
         txlog.start()
@@ -552,11 +584,12 @@ def destroy():
             else:
                 try:
                     txRecpt = w3.eth.getTransactionReceipt(txHash)
-                    txlog.log([txHash, 'Yes', txRecpt['status'], txRecpt['blockNumber'], tx['nonce'], tx['value']])
+                    tup = ast.literal_eval(str(w3.sc.decode_function_input(tx['input'])[1]))
+                    txIns = [str(x).replace(', ', ',') for x in list(tup.values())]
+                    txlog.log([txHash, 'Yes', txRecpt['status'], txRecpt['blockNumber'], tx['nonce'], tx['value']]+txIns)
                 except:
-                    txlog.log([txHash, 'No', 'No', 'No', tx['nonce'], tx['value']])
+                    txlog.log([txHash, 'No', 'No', 'No', tx['nonce'], tx['value'],0,0,0,0,0])
         txlog.close()
-
 
     print('Killed robot ' + me.id)
 
