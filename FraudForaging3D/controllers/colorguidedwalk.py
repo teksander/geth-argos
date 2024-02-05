@@ -170,6 +170,7 @@ class ColorWalkEngine(object):
         if reading:
             tag_dt = reading.distance
             tag_id = reading.util
+
         return tag_id, tag_dt
         
     def get_closest_color(self, bgr_feature):
@@ -183,6 +184,7 @@ class ColorWalkEngine(object):
                 closest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], hsv_feature[0])
                 closest_color =  this_color
                 closest_color_idx = idx
+
         return closest_color, closest_color_idx
     
     def drive_to_closest_color(self, bgr_feature, duration=30):
