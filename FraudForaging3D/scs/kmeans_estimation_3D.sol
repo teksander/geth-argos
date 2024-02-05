@@ -8,7 +8,6 @@ contract ForagingPtManagement{
     uint constant max_life    = 3;
     uint constant min_rep     = 0;     //Minimum number of reported points that make contract verified
     int256 constant radius    = 6000000;
-    uint min_balance = 53333333333333333333; //Minimum number of balance to confirm a cluster
     uint constant inflation_reward = 8000000000000000000; //inflation reward R, R/#winner
     int256 constant max_unverified_cluster =  3;
 
@@ -70,6 +69,7 @@ contract ForagingPtManagement{
     Cluster[] clusterList;
     clusterInfo info = clusterInfo(position_zeros,position_zeros,1e10,0,0,0);
     int256 unverfied_clusters = 0;
+    uint256 public min_balance = 53333333333333333333; //Minimum number of balance to confirm a cluster
 
     // function reportNewPt(int256 x, int256 y, uint category, uint256 amount, uint256 realType, uint256 intention) public payable{
     function reportNewPt(int256[space_size] memory position, uint category, uint256 amount, uint256 realType, uint256 intention) public payable{
@@ -320,7 +320,7 @@ contract ForagingPtManagement{
                     }
                 }
                 inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
-                min_balance+=inflation_reward*2/3; //min balance inflation
+                //min_balance+=(inflation_reward*2/3); //min balance inflation
                 for (uint j=0; j<pointList.length; j++){
                     remaining_inf_credit = inflation_credit; //amount of credit to be transferred back to robot wallet
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==1){
@@ -333,8 +333,8 @@ contract ForagingPtManagement{
                         }
                         //search for open reports from the same robot, inflate their deposits
                         for (uint k=0; k<pointList.length; k++){
-                            if (pointList[k].sender == pointList[j].sender && pointList[k].cluster  != int256(i) && pointList[k].cluster >0 && clusterList[uint(pointList[k].cluster)].verified == 0){
-                                pointList[k].credit+=(inflation_credit/uint(max_unverified_cluster));
+                                if (pointList[k].sender == pointList[j].sender && pointList[k].cluster  != int256(i) && int(clusterList.length)>pointList[k].cluster && pointList[k].cluster >=0 && clusterList[uint(pointList[k].cluster)].verified == 0){
+                                pointList[k].credit+=inflation_credit/uint(max_unverified_cluster);
                                 clusterList[uint(pointList[k].cluster)].total_credit+=inflation_credit/uint(max_unverified_cluster);
                                 if(pointList[k].category ==1){
                                     clusterList[uint(pointList[k].cluster)].total_credit_food+=inflation_credit/uint(max_unverified_cluster);
@@ -342,13 +342,14 @@ contract ForagingPtManagement{
                                 remaining_inf_credit-=inflation_credit/uint(max_unverified_cluster);
                             }
                         }
+
                         payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit+remaining_inf_credit);
                      }
                     else if(pointList[j].cluster == int256(i) && pointList[j].category ==0){
                         //search for open reports from the same robot, inflate their deposits
                         for (uint k=0; k<pointList.length; k++){
-                            if (pointList[k].sender == pointList[j].sender && pointList[k].cluster  != int256(i) && pointList[k].cluster >0 && clusterList[uint(pointList[k].cluster)].verified == 0){
-                                pointList[k].credit+=(inflation_credit/uint(max_unverified_cluster));
+                                if (pointList[k].sender == pointList[j].sender && pointList[k].cluster  != int256(i) && int(clusterList.length)>pointList[k].cluster && pointList[k].cluster >=0 && clusterList[uint(pointList[k].cluster)].verified == 0){
+                                pointList[k].credit+=inflation_credit/uint(max_unverified_cluster);
                                 clusterList[uint(pointList[k].cluster)].total_credit+=inflation_credit/uint(max_unverified_cluster);
                                 if(pointList[k].category ==1){
                                     clusterList[uint(pointList[k].cluster)].total_credit_food+=inflation_credit/uint(max_unverified_cluster);
@@ -393,7 +394,7 @@ contract ForagingPtManagement{
                     }
                 }
                 inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
-                min_balance+=inflation_reward*2/3; //min balance inflation
+                //min_balance+=inflation_reward*2/3; //min balance inflation
                 for (uint j=0; j<pointList.length; j++){
                     remaining_inf_credit = inflation_credit; //amount of credit to be transferred back to robot wallet
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
@@ -406,8 +407,8 @@ contract ForagingPtManagement{
                         }
                         //search for open reports from the same robot, inflate their deposits
                         for (uint k=0; k<pointList.length; k++){
-                            if (pointList[k].sender == pointList[j].sender && pointList[k].cluster  != int256(i) && pointList[k].cluster >0 && clusterList[uint(pointList[k].cluster)].verified == 0){
-                                pointList[k].credit+=(inflation_credit/uint(max_unverified_cluster));
+                                if (pointList[k].sender == pointList[j].sender && pointList[k].cluster  != int256(i) && int(clusterList.length)>pointList[k].cluster && pointList[k].cluster >=0 && clusterList[uint(pointList[k].cluster)].verified == 0){
+                                pointList[k].credit+=inflation_credit/uint(max_unverified_cluster);
                                 clusterList[uint(pointList[k].cluster)].total_credit+=inflation_credit/uint(max_unverified_cluster);
                                 if(pointList[k].category ==1){
                                     clusterList[uint(pointList[k].cluster)].total_credit_food+=inflation_credit/uint(max_unverified_cluster);
@@ -420,8 +421,8 @@ contract ForagingPtManagement{
                     else if(pointList[j].cluster == int256(i) && pointList[j].category ==1){
                         //search for open reports from the same robot, inflate their deposits
                         for (uint k=0; k<pointList.length; k++){
-                            if (pointList[k].sender == pointList[j].sender && pointList[k].cluster  != int256(i) && pointList[k].cluster >0 && clusterList[uint(pointList[k].cluster)].verified == 0){
-                                pointList[k].credit+=(inflation_credit/uint(max_unverified_cluster));
+                                if (pointList[k].sender == pointList[j].sender && pointList[k].cluster  != int256(i) && int(clusterList.length)>pointList[k].cluster && pointList[k].cluster >=0 && clusterList[uint(pointList[k].cluster)].verified == 0){
+                                pointList[k].credit+=inflation_credit/uint(max_unverified_cluster);
                                 clusterList[uint(pointList[k].cluster)].total_credit+=inflation_credit/uint(max_unverified_cluster);
                                 if(pointList[k].category ==1){
                                     clusterList[uint(pointList[k].cluster)].total_credit_food+=inflation_credit/uint(max_unverified_cluster);
