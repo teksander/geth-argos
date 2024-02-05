@@ -52,7 +52,8 @@ contract ForagingPtManagement{
         uint minClusterStatus;
     }
 
-    int[4] report_statistics; 
+    int[4] report_statistics;
+    uint256 min_balance;
     // 0: number of recorded reports, 
     // 1: number of reports rejected due to duplicated verification, 
     // 2: number of reports rejected due to maximum number of clusters reached, 
@@ -62,14 +63,16 @@ contract ForagingPtManagement{
         report_statistics[1] = 0;
         report_statistics[2] = 0;
         report_statistics[3] = 0;
+        min_balance = 53333333333333333333;
     }
+
 
     int[space_size] position_zeros;
     Point[] pointList;
     Cluster[] clusterList;
     clusterInfo info = clusterInfo(position_zeros,position_zeros,1e10,0,0,0);
     int256 unverfied_clusters = 0;
-    uint256 public min_balance = 53333333333333333333; //Minimum number of balance to confirm a cluster
+    //uint256 public min_balance = 53333333333333333333; //Minimum number of balance to confirm a cluster
 
     // function reportNewPt(int256 x, int256 y, uint category, uint256 amount, uint256 realType, uint256 intention) public payable{
     function reportNewPt(int256[space_size] memory position, uint category, uint256 amount, uint256 realType, uint256 intention) public payable{
@@ -320,7 +323,7 @@ contract ForagingPtManagement{
                     }
                 }
                 inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
-                //min_balance+=(inflation_reward*2/3); //min balance inflation
+                min_balance+=(inflation_reward*2/3); //min balance inflation
                 for (uint j=0; j<pointList.length; j++){
                     remaining_inf_credit = inflation_credit; //amount of credit to be transferred back to robot wallet
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==1){
@@ -394,7 +397,7 @@ contract ForagingPtManagement{
                     }
                 }
                 inflation_credit = inflation_reward/(food_num+non_food_num); //inflation credit
-                //min_balance+=inflation_reward*2/3; //min balance inflation
+                min_balance+=inflation_reward*2/3; //min balance inflation
                 for (uint j=0; j<pointList.length; j++){
                     remaining_inf_credit = inflation_credit; //amount of credit to be transferred back to robot wallet
                     if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
