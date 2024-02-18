@@ -50,7 +50,10 @@ def draw_in_world():
 def draw_in_robot():
 
 	# Draw circle for visibility
-	environment.qt_draw.circle([0,0,0.01], [], 0.075, 'gray90', True)
+	if robot.variables.get_attribute("behaviour") == "honest":
+		environment.qt_draw.circle([0,0,0.01], [], 0.075, 'gray50', True)
+	else:
+		environment.qt_draw.circle([0,0,0.01], [], 0.075, 'red', True)
 
 	# Draw the rays seen by robots
 	readings = robot.colored_blob_omnidirectional_camera.get_readings()

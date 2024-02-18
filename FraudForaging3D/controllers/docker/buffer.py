@@ -85,6 +85,7 @@ def scHandle():
     n_rejected = len([c for c in allclusters if c['verified']==2])
     n_pending  = len([c for c in allclusters if c['verified']==0])
     scbalance  = sc.functions.balances(w3.eth.coinbase).call()
+    min_bal    = sc.functions.min_balance().call()
 
     logs['sc'].log([blockNumb, 
                     blockHash, 
@@ -97,7 +98,8 @@ def scHandle():
                     n_accepted, 
                     n_rejected, 
                     n_pending, 
-                    *rep_stats])
+                    *rep_stats,
+                    min_bal])
                     
     tcp_calls.setData({
         'balance': balance,
@@ -122,7 +124,7 @@ if __name__ == '__main__':
               'DIFF', 'TDIFF', 'SIZE', 'TXS', 'UNC', 'PENDING', 'QUEUED']
     logs['block'] = Logger(f'{logfolder}/block.csv', header, ID=robotID)
 
-    header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'SCBAL', 'PENDING', '#CLUSTERS', '#POINTS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
+    header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'SCBAL', 'PENDING', '#CLUSTERS', '#POINTS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4', 'MIN_BALANCE']
     logs['sc'] = Logger(f'{logfolder}/sc.csv', header, ID=robotID)
     # extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
     

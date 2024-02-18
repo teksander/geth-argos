@@ -39,9 +39,20 @@ echo "+-----------------------------------------------------------+"
 echo "Waiting web3 to respond..."
 
 ready=0
+attempt=0
 while [[ $ready != $NUMROBOTS ]]; do
+
+    ((attempt++))
+
     . test-tcp 4000 9899
+
     sleep 0.5
+
+    if [[ $attempt -eq 5 ]]; then
+        echo "No docker response"
+        return 1
+    fi
+    
 done
 
 echo "+-----------------------------------------------------------+"

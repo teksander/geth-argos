@@ -55,26 +55,72 @@ run() {
 
 	for REP in $(seq 1 ${REPS}); do
 
-		# Perform experiment
-		. starter -r -sz
+		max_attempts=5
+		success=false
+		for att in $(seq 1 ${max_attempts}); do
 
-		# Collect data
-		if [ $# -eq 1 ]; then
-		    bash collect-logs ${1}
-		fi
+			# Perform experiment
+			. starter -r -sz
 		
+			exit_status=$?  
+
+			if [ $exit_status -eq 0 ]; then
+				bash collect-logs ${1}
+				success=true
+				break
+			fi
+		done
+
+		if [ $success = false ]; then
+			echo "starter failed after $max_attempts attempts."
+			exit 1  
+        fi
+
 	done
 }
 
 # DEFINE AND RUN EXPERIMENT
-EXP=longMal
-config "REPS" 5
 config "NOTES" "\"longrun with fixed number of byzantines\""
+config "REPS" 5
 
-# for N in $(seq 0 1 4); do 
-N=2
-CFG="${N}byz"
-config "NUM_BYZ" $N
+CFG="inf"
+
+ATK="\"Safety"\"
+EXP="long_safety"
+config "ATTACK" $ATK
 run    "${EXP}/${CFG}" ${1}
 wait
-# done
+
+ATK="\"Liveness"\"
+EXP="long_liveness"
+config "ATTACK" $ATK
+run    "${EXP}/${CFG}" ${1}
+wait
+
+ATK="\"Combined"\"
+EXP="long_combined"
+config "ATTACK" $ATK
+run    "${EXP}/${CFG}" ${1}
+wait
+
+################ NO INFLATION ################
+config "INFLATIONR" 0
+CFG="noinf"
+
+ATK="\"Safety"\"
+EXP="long_safety"
+config "ATTACK" $ATK
+run    "${EXP}/${CFG}" ${1}
+wait
+
+ATK="\"Liveness"\"
+EXP="long_liveness"
+config "ATTACK" $ATK
+run    "${EXP}/${CFG}" ${1}
+wait
+
+ATK="\"Combined"\"
+EXP="long_combined"
+config "ATTACK" $ATK
+run    "${EXP}/${CFG}" ${1}
+wait

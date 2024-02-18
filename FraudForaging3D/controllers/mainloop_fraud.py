@@ -35,6 +35,7 @@ erbtFreq = 10
 gsFreq = 20
 rwSpeed = cp['scout_speed']
 navSpeed = cp['recruit_speed']
+stopCon = int(os.environ["STOP_CON"])
 
 num_rob = int(os.environ["NUMROBOTS"])
 num_byz = int(os.environ["NUM_BYZ"])
@@ -112,6 +113,7 @@ def init():
     robot.variables.set_attribute("id", robotID)
     robot.variables.set_attribute("state", "")
     robot.variables.set_attribute("stop", "0")
+    robot.variables.set_attribute("behaviour", behaviour)
 
     # /* Initialize Logging Files and Console Logging*/
     #######################################################################
@@ -240,12 +242,14 @@ def controlstep():
                     ).transact({'from': me.key, 'value':value})
                 
             except Exception as e:
+                print('Voting Error. Trying again.')
                 print(e)
-                print([int(DECIMAL_FACTOR * (a+random.random())) for a in color_to_report],
+                print([int(DECIMAL_FACTOR * a) for a in color_to_report],
                     int(is_useful),
                     int(value),
                     color_idx,  
                     int(cluster_idx))
+                voteHash = '0x0'
 
             txs['vote'] = Transaction(w3, voteHash)
             txList.append(voteHash)
@@ -269,7 +273,7 @@ def controlstep():
         if txs['vote'].query(2):
             txs['vote'] = Transaction(w3, None)
 
-        elif txs['vote'].fail == True:
+        elif txs['vote'].fail == True and txs['vote'].receipt:
             if txs['vote'].receipt['status'] == 0:
                 print_color(f"Tx status 0 at block {txs['vote'].receipt['blockNumber']}", color_rgb=[255,0,0])
                 print_color(f'Trying again !', color_rgb=[255,0,0])
@@ -285,6 +289,9 @@ def controlstep():
                     "support: ", vote_support,
                     "vote: ", is_useful,
                     color_rgb=[int(a) for a in color_to_report])
+
+        elif txs['vote'].fail == True and not txs['vote'].receipt:
+            txs['vote'] = Transaction(w3, None)
 
         #########################################################################################################
         #### Idle.Start
@@ -304,12 +311,13 @@ def controlstep():
             explore = True
             verify  = True
             
-            # query the Smart Contract 
+            # Query the Smart Contract 
+            # block        = tcp_sc.request('block')
             all_clusters = tcp_sc.request('clusters')
             all_points   = tcp_sc.request('points')
 
-            n_accepted = len([c for c in all_clusters if c['verified']==1])
-            if n_accepted >= 6:
+            n_accepted = len([c for c in all_clusters if c['verified']==1]) # or c['verified']==2
+            if n_accepted >= stopCon:
                 robot.variables.set_attribute("stop", "1")
 
             # vote_support, current_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
@@ -323,43 +331,53 @@ def controlstep():
             # 	time.sleep(1)
 
             # check if any cluster avaiting verification on chain
-            if verify and len(all_clusters) > 0:
-                candidate_cluster  = []
-                unverified_clusters = 0
-                for idx, cluster in enumerate(all_clusters):
-                    
-                    verified_by_me = False
-                    for point_rec in all_points:
-                        if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
-                            verified_by_me = True
 
-                    if cluster['verified'] == 0:
-                        unverified_clusters += 1
+            if isByz and os.environ["ATTACK"]=="Liveness": 
+                cwe.random_walk_engine(10, 10)
 
-                        if not verified_by_me and any([int(a) for a in cluster['position']]):
-                            candidate_cluster.append((cluster, idx))
+            elif isByz and os.environ["ATTACK"]=="Physical": 
 
-                # # this is for a test: idle and wait if no clusters to verify
-                # if unverified_clusters == DEPOSIT_FACTOR and len(candidate_cluster) == 0:
-                #     print("no candidates to verify and max cluster count reached")
-                #     rgb.setAll('white')
-                #     verify  = False
-                #     explore = False
-                #     clocks['sleep'].set(1)
-                    
-                # randomly select a cluster to verify
-                if verify and len(candidate_cluster) > 0:
-                    print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
-                    select_idx = random.randrange(len(candidate_cluster))
-                    cluster = candidate_cluster[select_idx][0]
-                    cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
-                    color_to_verify = [float(a)/DECIMAL_FACTOR for a in cluster['position']]
-            
-                    fsm.setState(Verify.DriveTo, message=f"Verify cluster idx {cluster_idx_to_verify}")
-                    explore = False
+                found_color_idx, found_color_name, found_color_bgr = cwe.discover_color(10)
 
-            if explore:
-                fsm.setState(Scout.Discover, message=f"Try to discover color")
+                if found_color_bgr != -1 and found_color_name == 'red':
+                    arrived, _ , _ = cwe.drive_to_closest_color(found_color_bgr, duration=150) 
+                    if arrived:
+                        fsm.setState(Idle.ToOtherColor, message="Staying here forever")
+                else:
+                    print('Did not find red')
+                    cwe.random_walk_engine(10, 10)
+
+            else:
+                if verify and len(all_clusters) > 0:
+                    candidate_cluster  = []
+                    unverified_clusters = 0
+                    for idx, cluster in enumerate(all_clusters):
+                        
+                        verified_by_me = False
+                        for point_rec in all_points:
+                            if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
+                                verified_by_me = True
+
+                        if cluster['verified'] == 0:
+                            unverified_clusters += 1
+
+                            if not verified_by_me and any([int(a) for a in cluster['position']]):
+                                candidate_cluster.append((cluster, idx))
+                        
+                    # randomly select a cluster to verify
+                    if verify and len(candidate_cluster) > 0:
+                        print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
+                        select_idx = random.randrange(len(candidate_cluster))
+                        cluster = candidate_cluster[select_idx][0]
+                        cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
+                        color_to_verify = [float(a)/DECIMAL_FACTOR for a in cluster['position']]
+                
+                        fsm.setState(Verify.DriveTo, message=f"Verify cluster idx {cluster_idx_to_verify}")
+                        explore = False
+
+                if explore:
+                    fsm.setState(Scout.Discover, message=f"Try to discover color")
+
 
         #########################################################################################################
         #### Scout.Discover
@@ -422,18 +440,20 @@ def controlstep():
                     is_useful = int(tag_id) == 2
                     if isByz:
                         is_useful = not is_useful
-                    if isCol:
-                        is_useful = color_name_to_report == 'blue' 
 
-                    logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
+                    # Added for Combined attack
+                    if isByz and int(tag_id) == 2 and os.environ["ATTACK"]=="Combined":
+                        pass
+                    else:
+                        logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
-                    voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
-                    print_color("Report vote: ", voteHash[0:8], 
-                                   "color: ", [int(a) for a in color_to_report], color_name_to_report, 
-                                   "support: ", vote_support, 
-                                   "tagid: ", tag_id, 
-                                   "vote: ", is_useful, 
-                                   color_bgr=[int(a) for a in color_to_report])		
+                        voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
+                        print_color("Report vote: ", voteHash[0:8], 
+                                    "color: ", [int(a) for a in color_to_report], color_name_to_report, 
+                                    "support: ", vote_support, 
+                                    "tagid: ", tag_id, 
+                                    "vote: ", is_useful, 
+                                    color_bgr=[int(a) for a in color_to_report])		
 
                     fsm.setState(Idle.RandomWalk, message="Wait for vote")
             
@@ -502,27 +522,30 @@ def controlstep():
                     if isCol:
                         is_useful = color_name_to_report == 'blue' 
 
-                    print(f"found color {found_color_name}, start repeat sampling...")
-                    repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
-                    if repeat_sampled_color[0]!=-1:
-                        for idx in range(3):
-                            color_to_report[idx] = repeat_sampled_color[idx]
-                        logs['color'].log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_rs'])
+                    if isByz and int(tag_id) == 2 and os.environ["ATTACK"]=="Combined":
+                        pass
                     else:
-                        print("repeat sampling failed, report one-time measure")
-                        for idx in range(3):
-                            color_to_report[idx] = found_color_bgr[idx]
-                        logs['color'].log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_f'])
-                    print("verified and report bgr color: ", color_to_report)
+                        print(f"found color {found_color_name}, start repeat sampling...")
+                        repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
+                        if repeat_sampled_color[0]!=-1:
+                            for idx in range(3):
+                                color_to_report[idx] = repeat_sampled_color[idx]
+                            logs['color'].log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_rs'])
+                        else:
+                            print("repeat sampling failed, report one-time measure")
+                            for idx in range(3):
+                                color_to_report[idx] = found_color_bgr[idx]
+                            logs['color'].log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_f'])
+                        print("verified and report bgr color: ", color_to_report)
 
-                    # logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
-                    voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
-                    print_color("Verify vote: ", voteHash[0:8], 
-                                "color: ", [int(a) for a in color_to_report], found_color_name, 
-                                "support: ", vote_support, 
-                                "tagid: ", tag_id, 
-                                "vote: ", is_useful, 
-                                color_rgb=[int(a) for a in color_to_report])
+                        # logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
+                        voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
+                        print_color("Verify vote: ", voteHash[0:8], 
+                                    "color: ", [int(a) for a in color_to_report], found_color_name, 
+                                    "support: ", vote_support, 
+                                    "tagid: ", tag_id, 
+                                    "vote: ", is_useful, 
+                                    color_rgb=[int(a) for a in color_to_report])
 
                     fsm.setState(Idle.RandomWalk, message="Wait for vote") 
 
@@ -547,7 +570,7 @@ def destroy():
         w3.geth.miner.stop()
 
         header = w3.sc.functions.getClusterKeys().call()
-        clusterlog= Logger(logfolder+'cluster.csv', header, ID=me.id)
+        clusterlog= Logger(logfolder+'cluster.csv', header, ID=me.id, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
 
         clusterlog.start()
         for cluster in w3.sc.functions.getClusters().call():
