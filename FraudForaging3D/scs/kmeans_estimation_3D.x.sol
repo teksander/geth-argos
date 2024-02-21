@@ -182,7 +182,7 @@ contract ForagingPtManagement{
         // int256 this_distance = 0;
 
         if (category==1 && clusterList.length == 0){
-            clusterList.push(Cluster(position, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention, position, 0, new address[](0), 0));
+            clusterList.push(Cluster(position, block.number, 0, 1, amount, amount, realType, msg.sender, intention, position, 0, new address[](0), 0));
             pointList.push(Point(position, amount, category, 0, msg.sender, realType));
             balances[msg.sender] += amount;
             report_statistics[0] += 1;
@@ -278,7 +278,7 @@ contract ForagingPtManagement{
             }
             else if (category==1 && info.foundCluster==0 && unverfied_clusters<max_unverified_cluster && amount>min_cluster_deposit){
                 //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster
-                clusterList.push(Cluster(position,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,position, 0, new address[](0), 0));
+                clusterList.push(Cluster(position, block.number, 0, 1, amount, amount, realType, msg.sender, intention,position, 0, new address[](0), 0));
                 pointList.push(Point(position,0, category, int256(clusterList.length-1), msg.sender, realType));
                 pointList[pointList.length-1].credit+=amount;
                 balances[msg.sender] += amount;
@@ -337,7 +337,7 @@ contract ForagingPtManagement{
             if (clusterList[i].verified==0 && clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=(min_balance*95/100) && clusterList[i].total_credit_food>(clusterList[i].total_credit-clusterList[i].total_credit_food)){
                 clusterList[i].verified=1; //cluster verified
                 clusterList[i].block_verified = block.number;
-                clusterList[i].life = curtime+max_life;
+                // clusterList[i].life = curtime+max_life;
                 total_non_food_credit = clusterList[i].total_credit-clusterList[i].total_credit_food;
                 //Redistribute money
                 uint256 food_num =0;
