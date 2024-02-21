@@ -99,7 +99,7 @@ export yV3=$(echo "scale=2; $yS3*$F" | bc)
 export NUM_BYZ=4
 export NUM_FAU=0
 export NUM_COL=0
-export ATTACK="Safety"
+export ATTACK="Combined"
 
 # [GETH]
 export BLOCKPERIOD=10
@@ -107,7 +107,7 @@ export STARTTOKENS="0x1236efcbcbb340000"
 
 # [SC]
 export DECIMAL_FACTOR=100000 # 1e5
-export MAXUNVCLUSTER=3
+export MAXUNVCLUSTER=1
 
 export DIMS=3
 export NUMPT=100
@@ -127,7 +127,7 @@ export SEED=350
 export TIMELIMIT=60
 export STOP_CON=5
 export SHORT=1
-export REPS=5
+export REPS=15
 export NOTES="longrun with fixed number of byzantines"
 
 
