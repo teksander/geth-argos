@@ -300,6 +300,8 @@ def controlstep():
         if fsm.query(Idle.Start):
             fsm.setState(Scout.Query, message="Start exploration")
 
+        elif fsm.query(Idle.Block):
+            pass
         #########################################################################################################
         #### Scout.Query
         #########################################################################################################
@@ -334,18 +336,6 @@ def controlstep():
 
             if isByz and os.environ["ATTACK"]=="Liveness": 
                 cwe.random_walk_engine(10, 10)
-
-            elif isByz and os.environ["ATTACK"]=="Physical": 
-
-                found_color_idx, found_color_name, found_color_bgr = cwe.discover_color(10)
-
-                if found_color_bgr != -1 and found_color_name == 'red':
-                    arrived, _ , _ = cwe.drive_to_closest_color(found_color_bgr, duration=150) 
-                    if arrived:
-                        fsm.setState(Idle.ToOtherColor, message="Staying here forever")
-                else:
-                    print('Did not find red')
-                    cwe.random_walk_engine(10, 10)
 
             else:
                 if verify and len(all_clusters) > 0:
@@ -415,47 +405,51 @@ def controlstep():
             
             arrived, _ , _ = cwe.drive_to_closest_color(color_to_report, duration=100) 
 
+
             if arrived:
-
-                vote_support, address_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
-                vote_support -= 1
-                vote_support /= DEPOSIT_FACTOR
-                tag_id, _ = cwe.check_apriltag()
+                if isByz and os.environ["ATTACK"]=="Physical" and color_name_to_report == 'red':
+                    fsm.setState(Idle.Block, message="Staying here forever")
                 
+                else:
+                    vote_support, address_balance = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
+                    vote_support -= 1
+                    vote_support /= DEPOSIT_FACTOR
+                    tag_id, _ = cwe.check_apriltag()
+                    
 
-                if tag_id != 0 and 0 < vote_support < address_balance:
+                    if tag_id != 0 and 0 < vote_support < address_balance:
 
-                    # two recently discovered colord are recorded in recent_colors
-                    recent_colors.append(color_name_to_report)
-                    recent_colors = recent_colors[-2:]
+                        # two recently discovered colord are recorded in recent_colors
+                        recent_colors.append(color_name_to_report)
+                        recent_colors = recent_colors[-2:]
 
-                    # repeat sampling of the color to report
-                    print("found color, start repeat sampling...")
-                    repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=3)
-                    if repeat_sampled_color[0] !=-1:
-                        color_to_report = repeat_sampled_color
-                    else:
-                        print("color repeat sampling failed, report one time measure")
+                        # repeat sampling of the color to report
+                        print("found color, start repeat sampling...")
+                        repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=3)
+                        if repeat_sampled_color[0] !=-1:
+                            color_to_report = repeat_sampled_color
+                        else:
+                            print("color repeat sampling failed, report one time measure")
 
-                    is_useful = int(tag_id) == 2
-                    if isByz:
-                        is_useful = not is_useful
+                        is_useful = int(tag_id) == 2
+                        if isByz:
+                            is_useful = not is_useful
 
-                    # Added for Combined attack
-                    if isByz and int(tag_id) == 2 and os.environ["ATTACK"]=="Combined":
-                        pass
-                    else:
-                        logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
+                        # Added for Combined attack
+                        if isByz and int(tag_id) == 2 and os.environ["ATTACK"]=="Combined":
+                            pass
+                        else:
+                            logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
-                        voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
-                        print_color("Report vote: ", voteHash[0:8], 
-                                    "color: ", [int(a) for a in color_to_report], color_name_to_report, 
-                                    "support: ", vote_support, 
-                                    "tagid: ", tag_id, 
-                                    "vote: ", is_useful, 
-                                    color_bgr=[int(a) for a in color_to_report])		
+                            voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
+                            print_color("Report vote: ", voteHash[0:8], 
+                                        "color: ", [int(a) for a in color_to_report], color_name_to_report, 
+                                        "support: ", vote_support, 
+                                        "tagid: ", tag_id, 
+                                        "vote: ", is_useful, 
+                                        color_bgr=[int(a) for a in color_to_report])		
 
-                    fsm.setState(Idle.RandomWalk, message="Wait for vote")
+                        fsm.setState(Idle.RandomWalk, message="Wait for vote")
             
             elif fsm.getCurrentTimer() > 100:
                 fsm.setState(Scout.Query, message="Did not arrive in 100s")
@@ -483,71 +477,75 @@ def controlstep():
             ok_to_vote = False
             if arrived:
 
-                tag_id,_ = cwe.check_apriltag()
-                found_color_idx, found_color_name, found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
-                vote_support, address_balance  = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
-                vote_support -= 1
-                vote_support /= DEPOSIT_FACTOR
+                if isByz and os.environ["ATTACK"]=="Physical" and color_name_to_verify == 'red':
+                    fsm.setState(Idle.Block, message="Staying here forever")
 
-                if vote_support >= address_balance:
-                    fsm.vars.attempts += 10
-                    print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}>{address_balance}")
-
-                elif vote_support < 0:
-                    fsm.vars.attempts += 10
-                    print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}<0")
-
-                elif found_color_idx != color_idx_to_verify:
-                    fsm.vars.attempts += 1
-                    print(f"Verify fail {fsm.vars.attempts}/10: found {found_color_name}!={color_name_to_verify}")
-
-                elif tag_id == 0:
-                    fsm.vars.attempts += 1
-                    print(f"Verify fail {fsm.vars.attempts}/10: no tag found")
-            
                 else:
-                    ok_to_vote = True
+                    tag_id,_ = cwe.check_apriltag()
+                    found_color_idx, found_color_name, found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
+                    vote_support, address_balance  = tcp_sc.request('balance'), tcp_sc.request('spendable_balance')
+                    vote_support -= 1
+                    vote_support /= DEPOSIT_FACTOR
 
-                if fsm.vars.attempts >= 10:
-                    fsm.setState(Scout.Query, message="Verification failed")
-                    ok_to_vote = False
-                else:
-                    cwe.rot.setPattern_duration(["ccw", "cw"][fsm.vars.attempts % 2], fsm.vars.attempts//2)
+                    if vote_support >= address_balance:
+                        fsm.vars.attempts += 10
+                        print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}>{address_balance}")
 
-                if ok_to_vote:
-                    
-                    is_useful = int(tag_id) == 2
-                    if isByz:
-                        is_useful = not is_useful
-                    if isCol:
-                        is_useful = color_name_to_report == 'blue' 
+                    elif vote_support < 0:
+                        fsm.vars.attempts += 10
+                        print(f"Verify fail {fsm.vars.attempts}/10: poor {vote_support}<0")
 
-                    if isByz and int(tag_id) == 2 and os.environ["ATTACK"]=="Combined":
-                        pass
+                    elif found_color_idx != color_idx_to_verify:
+                        fsm.vars.attempts += 1
+                        print(f"Verify fail {fsm.vars.attempts}/10: found {found_color_name}!={color_name_to_verify}")
+
+                    elif tag_id == 0:
+                        fsm.vars.attempts += 1
+                        print(f"Verify fail {fsm.vars.attempts}/10: no tag found")
+                
                     else:
-                        print(f"found color {found_color_name}, start repeat sampling...")
-                        repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
-                        if repeat_sampled_color[0]!=-1:
-                            for idx in range(3):
-                                color_to_report[idx] = repeat_sampled_color[idx]
-                            logs['color'].log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_rs'])
+                        ok_to_vote = True
+
+                    if fsm.vars.attempts >= 10:
+                        fsm.setState(Scout.Query, message="Verification failed")
+                        ok_to_vote = False
+                    else:
+                        cwe.rot.setPattern_duration(["ccw", "cw"][fsm.vars.attempts % 2], fsm.vars.attempts//2)
+
+                    if ok_to_vote:
+                        
+                        is_useful = int(tag_id) == 2
+                        if isByz:
+                            is_useful = not is_useful
+                        if isCol:
+                            is_useful = color_name_to_report == 'blue' 
+
+                        if isByz and int(tag_id) == 2 and os.environ["ATTACK"]=="Combined":
+                            pass
                         else:
-                            print("repeat sampling failed, report one-time measure")
-                            for idx in range(3):
-                                color_to_report[idx] = found_color_bgr[idx]
-                            logs['color'].log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_f'])
-                        print("verified and report bgr color: ", color_to_report)
+                            print(f"found color {found_color_name}, start repeat sampling...")
+                            repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
+                            if repeat_sampled_color[0]!=-1:
+                                for idx in range(3):
+                                    color_to_report[idx] = repeat_sampled_color[idx]
+                                logs['color'].log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_rs'])
+                            else:
+                                print("repeat sampling failed, report one-time measure")
+                                for idx in range(3):
+                                    color_to_report[idx] = found_color_bgr[idx]
+                                logs['color'].log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_f'])
+                            print("verified and report bgr color: ", color_to_report)
 
-                        # logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
-                        voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
-                        print_color("Verify vote: ", voteHash[0:8], 
-                                    "color: ", [int(a) for a in color_to_report], found_color_name, 
-                                    "support: ", vote_support, 
-                                    "tagid: ", tag_id, 
-                                    "vote: ", is_useful, 
-                                    color_rgb=[int(a) for a in color_to_report])
+                            # logs['color'].log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
+                            voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
+                            print_color("Verify vote: ", voteHash[0:8], 
+                                        "color: ", [int(a) for a in color_to_report], found_color_name, 
+                                        "support: ", vote_support, 
+                                        "tagid: ", tag_id, 
+                                        "vote: ", is_useful, 
+                                        color_rgb=[int(a) for a in color_to_report])
 
-                    fsm.setState(Idle.RandomWalk, message="Wait for vote") 
+                        fsm.setState(Idle.RandomWalk, message="Wait for vote") 
 
         #########################################################################################################
         #### Idle.RandomWalk
