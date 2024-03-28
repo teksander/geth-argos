@@ -81,46 +81,62 @@ run() {
 
 # DEFINE AND RUN EXPERIMENT
 config "NOTES" "\"longrun with fixed number of byzantines\""
-config "REPS" 15
+config "REPS" 10
+EXP="long_norec"
 
-CFG="inf"
 
-# ATK="\"Safety"\"
-# EXP="long_safety_K1"
-# config "ATTACK" $ATK
-# run    "${EXP}/${CFG}" ${1}
-# wait
+# ################ K=3, inf ################
+config "MAXUNVCLUSTER" 3
+# config "INFLATIONR" 0
 
-# ATK="\"Liveness"\"
-# EXP="long_liveness_K1"
-# config "ATTACK" $ATK
-# run    "${EXP}/${CFG}" ${1}
-# wait
-
-ATK="\"Combined"\"
-EXP="long_combined_K1"
-config "ATTACK" $ATK
+CFG="safety"
+config "ATTACK" "\"Safety"\"
 run    "${EXP}/${CFG}" ${1}
 wait
 
-# ################ NO INFLATION ################
-# config "INFLATIONR" 0
-# CFG="noinf"
+CFG="liveness"
+config "ATTACK" "\"Liveness"\"
+run    "${EXP}/${CFG}" ${1}
+wait
 
-# ATK="\"Safety"\"
-# EXP="long_safety"
-# config "ATTACK" $ATK
-# run    "${EXP}/${CFG}" ${1}
-# wait
+CFG="combined"
+config "ATTACK" "\"Combined"\"
+run    "${EXP}/${CFG}" ${1}
+wait
 
-# ATK="\"Liveness"\"
-# EXP="long_liveness"
-# config "ATTACK" $ATK
-# run    "${EXP}/${CFG}" ${1}
-# wait
+# ################ K=1, inf ################
+config "MAXUNVCLUSTER" 1
 
-# ATK="\"Combined"\"
-# EXP="long_combined"
-# config "ATTACK" $ATK
-# run    "${EXP}/${CFG}" ${1}
-# wait
+CFG="safety_K1"
+config "ATTACK" "\"Safety"\"
+run    "${EXP}/${CFG}" ${1}
+wait
+
+CFG="liveness_K1"
+config "ATTACK" "\"Liveness"\"
+run    "${EXP}/${CFG}" ${1}
+wait
+
+CFG="combined_K1"
+config "ATTACK" "\"Combined"\"
+run    "${EXP}/${CFG}" ${1}
+wait
+
+############### NO INFLATION ################
+config "MAXUNVCLUSTER" 3
+config "INFLATIONR" 0
+
+CFG="safety_noinf"
+config "ATTACK" "\"Safety"\"
+run    "${EXP}/${CFG}" ${1}
+wait
+
+CFG="liveness_noinf"
+config "ATTACK" "\"Liveness"\"
+run    "${EXP}/${CFG}" ${1}
+wait
+
+CFG="combined_noinf"
+config "ATTACK" "\"Combined"\"
+run    "${EXP}/${CFG}" ${1}
+wait
