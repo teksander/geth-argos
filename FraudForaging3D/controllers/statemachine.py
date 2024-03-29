@@ -4,7 +4,8 @@ import enum
 
 class Idle(enum.Enum):
     Start   = 1
-    RandomWalk = 6
+    RandomWalk = 7
+    Block = 8
 
 class Scout(enum.Enum):
     Query    = 2
@@ -44,6 +45,9 @@ class FiniteStateMachine(object):
 
     def getCurrentTimer(self):
         return time.time()-self._startTime
+    
+    def resetTimer(self):
+        self._startTime = time.time()
         
     def setState(self, state, message = ""):
 
