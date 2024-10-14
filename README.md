@@ -14,7 +14,7 @@ DATE: 15/02/2023
 
 
 # Installation guide
-This guide assumes a previously clean installation of Ubuntu20.04
+This guide assumes a previously clean installation of Ubuntu 20.04.6 LTS (Focal Fossa).
 
 ## ARGoS
 
