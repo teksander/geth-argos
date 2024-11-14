@@ -47,7 +47,7 @@ clocks['block'] = Timer(lp['generic']['block_period'])
 market   = Resource({"x":lp['market']['x'], "y":lp['market']['y'], "radius": lp['market']['r']})
 cache    = Resource({"x":lp['cache']['x'], "y":lp['cache']['y'], "radius": lp['cache']['r']})
 
-global geth_peer_count
+global peer_count
 previous_epoch_num = -1
 
 global robot
